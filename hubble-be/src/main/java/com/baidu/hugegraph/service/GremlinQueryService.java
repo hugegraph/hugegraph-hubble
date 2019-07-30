@@ -36,12 +36,12 @@ import org.springframework.stereotype.Service;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.entity.GremlinQuery;
 import com.baidu.hugegraph.entity.GremlinResult;
+import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.structure.graph.Edge;
 import com.baidu.hugegraph.structure.graph.Vertex;
 import com.baidu.hugegraph.structure.gremlin.Result;
 import com.baidu.hugegraph.structure.gremlin.ResultSet;
-import com.baidu.hugegraph.util.Ex;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
@@ -83,7 +83,10 @@ public class GremlinQueryService {
 
     public GremlinResult executeQuery(GremlinQuery query) {
         this.client = this.pool.get(query.getConnectionId());
-        Ex.check(client != null, "找不到连接通过id", query.getConnectionId());
+        if (client != null) {
+            throw new ExternalException("Could not find connection by id %s",
+                                        query.getConnectionId());
+        }
 
         String rawGremlin = StringUtils.stripEnd(query.getContent(), ";");
         // NOTE: Get execute plan used for pre handle, maybe affect performance
@@ -146,7 +149,7 @@ public class GremlinQueryService {
                                            ".limit(800000)", ids);
             ResultSet resultSet = client.gremlin().gremlin(gremlin).execute();
             // The edges count for per vertex
-            Map<Object, Integer> degrees = new HashMap<>();
+            Map<Object, Integer> degrees = new HashMap<>(resultSet.size());
             for (Iterator<Result> iterator = resultSet.iterator();
                  iterator.hasNext();) {
                 Edge edge = iterator.next().getEdge();
@@ -240,13 +243,13 @@ public class GremlinQueryService {
         String explain = gremlin + ".explain()";
         ResultSet resultSet = client.gremlin().gremlin(explain).execute();
         if (resultSet.data().size() != 1) {
-            throw new InternalException("生成执行计划失败");
+            throw new InternalException("Generate execution plan failed");
         }
         Map<String, Object> steps = (Map<String, Object>) resultSet.data()
                                                                    .get(0);
         List<String> finalSteps = (List<String>) steps.get("final");
         if (finalSteps.size() == 0) {
-            throw new InternalException("执行计划格式不正确");
+            throw new InternalException("Execution plan format is incorrect");
         }
         return new ExecutePlan(finalSteps);
     }

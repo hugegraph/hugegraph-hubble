@@ -46,7 +46,7 @@ public class GremlinQueryController extends BaseController {
 
     private void checkParamsValid(GremlinQuery query) {
         Ex.check(!StringUtils.isEmpty(query.getContent()),
-                 "Gremlin语句不能为null或空");
+                 "Gremlin sentence can't be null or empty");
     }
 
 }

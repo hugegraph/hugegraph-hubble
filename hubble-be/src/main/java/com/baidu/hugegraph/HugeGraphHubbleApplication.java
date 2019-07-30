@@ -27,10 +27,10 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 
 @SpringBootApplication
 @MapperScan("com.baidu.hugegraph.mapper")
-public class HugegraphSpaceApplication extends SpringBootServletInitializer {
+public class HugeGraphHubbleApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
-        SpringApplication.run(HugegraphSpaceApplication.class, args);
+        SpringApplication.run(HugeGraphHubbleApplication.class, args);
     }
 
     @Override

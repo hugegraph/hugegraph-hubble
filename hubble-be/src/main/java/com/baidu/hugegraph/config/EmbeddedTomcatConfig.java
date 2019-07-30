@@ -34,7 +34,10 @@ public class EmbeddedTomcatConfig implements WebServerFactoryCustomizer {
 
     @Override
     public void customize(WebServerFactory factory) {
-        ((TomcatServletWebServerFactory)factory).addContextCustomizers(
-                (TomcatContextCustomizer) context -> context.setCookieProcessor(new LegacyCookieProcessor()));
+        TomcatServletWebServerFactory tomcatFactory =
+                                      (TomcatServletWebServerFactory) factory;
+        tomcatFactory.addContextCustomizers(context -> {
+            context.setCookieProcessor(new LegacyCookieProcessor());
+        });
     }
 }

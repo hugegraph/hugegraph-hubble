@@ -69,13 +69,12 @@ public class GraphConnectionController extends BaseController {
                                                      required = false,
                                                      defaultValue = "10")
                                        long pageSize) {
-        if (!StringUtils.isEmpty(graphOrder)) {
-            Ex.check(graphOrder.equals("asc") || graphOrder.equals("desc"),
-                     "graph-connection.graph-order.invalid", graphOrder);
-        }
         Boolean graphOrderAsc = null;
         if (!StringUtils.isEmpty(graphOrder)) {
-            graphOrderAsc = graphOrder.equals("asc");
+            Ex.check(ORDER_ASC.equals(graphOrder) ||
+                     ORDER_DESC.equals(graphOrder),
+                     "graph-connection.graph-order.invalid", graphOrder);
+            graphOrderAsc = ORDER_ASC.equals(graphOrder);
         }
         return this.service.list(content, graphOrderAsc, pageNo, pageSize);
     }
@@ -99,14 +98,14 @@ public class GraphConnectionController extends BaseController {
         // Make sure the new entity doesn't conflict with exists
         this.checkEntityUnique(newEntity, true);
         // Do connect test, failure will throw an exception
-//        HugeClient client = HugeClientUtil.tryConnect(newEntity);
+        HugeClient client = HugeClientUtil.tryConnect(newEntity);
         newEntity.setCreateTime(LocalDateTime.now());
 
         int rows = this.service.save(newEntity);
         if (rows != 1) {
             throw new InternalException("entity.insert.failed", newEntity);
         }
-//        this.pool.put(newEntity, client);
+        this.pool.put(newEntity, client);
         return newEntity;
     }
 
@@ -124,13 +123,13 @@ public class GraphConnectionController extends BaseController {
         GraphConnection entity = this.mergeEntity(oldEntity, newEntity);
         // Make sure the updated connection doesn't conflict with exists
         this.checkEntityUnique(entity, false);
-//        HugeClient client = HugeClientUtil.tryConnect(entity);
+        HugeClient client = HugeClientUtil.tryConnect(entity);
 
         int rows = this.service.update(entity);
         if (rows != 1) {
             throw new InternalException("entity.update.failed", entity);
         }
-//        this.pool.put(entity, client);
+        this.pool.put(entity, client);
         return entity;
     }
 

@@ -12,7 +12,7 @@
     <artifactId>hubble-be</artifactId>
 
     <properties>
-        <release.name>${artifactId}</release.name>
+        <release.name>${project.artifactId}</release.name>
         <final.name>${release.name}-${project.version}</final.name>
         <assembly.dir>${project.basedir}/assembly</assembly.dir>
         <assembly.descriptor.dir>${assembly.dir}/descriptor</assembly.descriptor.dir>
@@ -85,7 +85,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.baidu.com.baidu.hugegraph.HugegraphSpaceApplication</mainClass>
+                    <mainClass>com.baidu.com.baidu.hugegraph.HugeGraphHubbleApplication</mainClass>
                 </configuration>
             </plugin>
 
@@ -96,7 +96,7 @@
             <!--                <version>2.4</version>-->
             <!--                <executions>-->
             <!--                    <execution>-->
-            <!--                        <id>assembly-hugegraph-space</id>-->
+            <!--                        <id>assembly-hugegraph-hubble</id>-->
             <!--                        <phase>package</phase>-->
             <!--                        <goals>-->
             <!--                            <goal>single</goal>-->

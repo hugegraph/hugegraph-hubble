@@ -63,13 +63,12 @@ public class GremlinCollectionController extends BaseController {
                                                        required = false,
                                                        defaultValue = "10")
                                          long pageSize) {
-        if (!StringUtils.isEmpty(nameOrder)) {
-            Ex.check(nameOrder.equals("asc") || nameOrder.equals("desc"),
-                     "gremlin-collection.name-order.invalid", nameOrder);
-        }
         Boolean nameOrderAsc = null;
         if (!StringUtils.isEmpty(nameOrder)) {
-            nameOrderAsc = nameOrder.equals("asc");
+            Ex.check(ORDER_ASC.equals(nameOrder) ||
+                     ORDER_DESC.equals(nameOrder),
+                     "graph-connection.name-order.invalid", nameOrder);
+            nameOrderAsc = ORDER_ASC.equals(nameOrder);
         }
         return this.service.list(content, nameOrderAsc, pageNo, pageSize);
     }
