@@ -39,7 +39,7 @@ public final class HugeClientPool
 
     @PreDestroy
     public void destroy() {
-        log.info("Destroy client pool");
+        log.info("Destroy HugeClient pool");
         for (HugeClient client : this.values()) {
             client.close();
         }

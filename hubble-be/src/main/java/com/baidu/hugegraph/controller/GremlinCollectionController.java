@@ -67,7 +67,7 @@ public class GremlinCollectionController extends BaseController {
         if (!StringUtils.isEmpty(nameOrder)) {
             Ex.check(ORDER_ASC.equals(nameOrder) ||
                      ORDER_DESC.equals(nameOrder),
-                     "graph-connection.name-order.invalid", nameOrder);
+                     "gremlin-collection.name-order.invalid", nameOrder);
             nameOrderAsc = ORDER_ASC.equals(nameOrder);
         }
         return this.service.list(content, nameOrderAsc, pageNo, pageSize);
@@ -141,6 +141,9 @@ public class GremlinCollectionController extends BaseController {
                  "gremlin-collection.name.unmatch-regex", name);
 
         this.checkParamsNotEmpty("content", newEntity.getContent(), creating);
+
+        Ex.check(newEntity.getCreateTime() == null,
+                 "common.param.must-be-null", "createTime");
     }
 
     private void checkEntityUnique(GremlinCollection newEntity,
@@ -152,8 +155,7 @@ public class GremlinCollectionController extends BaseController {
             Ex.check(oldEntity == null, "gremlin-collection.exist.name", name);
         } else {
             Ex.check(oldEntity != null,
-                     "gremlin-collection.not-exist.name", name);
-            Ex.check(oldEntity.getId().equals(newEntity.getId()),
+                     () -> oldEntity.getId().equals(newEntity.getId()),
                      "gremlin-collection.exist.name", name);
         }
     }

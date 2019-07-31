@@ -55,7 +55,7 @@ public class ExecuteHistory implements Identifiable, Mergeable {
     @MergeProperty
     private ExecuteStatus status;
     @MergeProperty
-    private Integer duration;
+    private Long duration;
     @MergeProperty(useNew = false)
     private LocalDateTime createTime;
 }

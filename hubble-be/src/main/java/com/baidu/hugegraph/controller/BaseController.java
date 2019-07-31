@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.controller;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.baidu.hugegraph.common.Identifiable;
@@ -47,6 +49,11 @@ public abstract class BaseController {
             Ex.check(value == null || !value.isEmpty(),
                      "common.param.cannot-be-empty", name);
         }
+    }
+
+    public void checkParamsNotEmpty(String name, List<?> values) {
+        Ex.check(values != null && !values.isEmpty(),
+                 "common.param.cannot-be-null-and-empty", name);
     }
 
     public <T extends Mergeable> T mergeEntity(T oldEntity, T newEntity) {

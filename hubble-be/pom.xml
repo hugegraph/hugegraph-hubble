@@ -60,6 +60,11 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>2.7.0</version>
+        </dependency>
 
         <dependency>
             <groupId>io.springfox</groupId>
@@ -75,7 +80,7 @@
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
             <artifactId>hugegraph-client</artifactId>
-            <version>1.7.2</version>
+            <version>1.7.4</version>
         </dependency>
     </dependencies>
 
@@ -85,7 +90,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.baidu.com.baidu.hugegraph.HugeGraphHubbleApplication</mainClass>
+                    <mainClass>com.baidu.hugegraph.HugeGraphHubbleApplication</mainClass>
                 </configuration>
             </plugin>
 

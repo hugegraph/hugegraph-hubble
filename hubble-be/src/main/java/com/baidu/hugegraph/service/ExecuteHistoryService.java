@@ -49,6 +49,10 @@ public class ExecuteHistoryService {
         return this.mapper.selectPage(new Page<>(current, pageSize), query);
     }
 
+    public List<ExecuteHistory> listBatch(List<Integer> ids) {
+        return this.mapper.selectBatchIds(ids);
+    }
+
     public ExecuteHistory get(int id) {
         return this.mapper.selectById(id);
     }

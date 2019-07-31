@@ -20,20 +20,19 @@
 package com.baidu.hugegraph.controller;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.hugegraph.entity.ExecuteHistory;
-import com.baidu.hugegraph.entity.enums.ExecuteStatus;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.service.ExecuteHistoryService;
@@ -48,15 +47,22 @@ public class ExecuteHistoryController extends BaseController {
     private ExecuteHistoryService service;
 
     @GetMapping
-    public IPage<ExecuteHistory> list(@RequestParam(name = "pageNo",
-                                                    required = false,
-                                                    defaultValue = "1")
-                                      long pageNo,
-                                      @RequestParam(name = "pageSize",
-                                                    required = false,
-                                                    defaultValue = "10")
-                                      long pageSize) {
+    public IPage<ExecuteHistory> listAll(@RequestParam(name = "pageNo",
+                                                       required = false,
+                                                       defaultValue = "1")
+                                         long pageNo,
+                                         @RequestParam(name = "pageSize",
+                                                       required = false,
+                                                       defaultValue = "10")
+                                         long pageSize) {
         return this.service.list(pageNo, pageSize);
+    }
+
+    @GetMapping("batch")
+    public List<ExecuteHistory> listBatch(@RequestParam("ids")
+                                          List<Integer> ids) {
+        this.checkParamsNotEmpty("ids", ids);
+        return this.service.listBatch(ids);
     }
 
     @GetMapping("{id}")
@@ -66,38 +72,13 @@ public class ExecuteHistoryController extends BaseController {
 
     @PostMapping
     public ExecuteHistory create(@RequestBody ExecuteHistory newEntity) {
-        this.checkParamsValid(newEntity, true);
+        this.checkParamsValid(newEntity);
         newEntity.setCreateTime(LocalDateTime.now());
-        if (newEntity.getStatus() == null) {
-            newEntity.setStatus(ExecuteStatus.RUNNING);
-        }
-        if (newEntity.getDuration() == null) {
-            newEntity.setDuration(0);
-        }
         int rows = this.service.save(newEntity);
         if (rows != 1) {
             throw new InternalException("entity.insert.failed", newEntity);
         }
         return newEntity;
-    }
-
-    @PutMapping("{id}")
-    public ExecuteHistory update(@PathVariable("id") int id,
-                                 @RequestBody ExecuteHistory newEntity) {
-        this.checkIdWhenUpdate(id, newEntity);
-        this.checkParamsValid(newEntity, false);
-
-        ExecuteHistory oldEntity = this.service.get(id);
-        if (oldEntity == null) {
-            throw new ExternalException("execute-history.not-exist.id", id);
-        }
-
-        ExecuteHistory entity = this.mergeEntity(oldEntity, newEntity);
-        int rows = this.service.update(entity);
-        if (rows != 1) {
-            throw new InternalException("entity.update.failed", entity);
-        }
-        return entity;
     }
 
     @DeleteMapping("{id}")
@@ -113,22 +94,16 @@ public class ExecuteHistoryController extends BaseController {
         return oldEntity;
     }
 
-    private void checkParamsValid(ExecuteHistory newEntity, boolean creating) {
-        if (creating) {
-            Ex.check(newEntity.getId() == null,
-                     "common.param.must-be-null", "id");
-            Ex.check(newEntity.getType() != null,
-                     "common.param.cannot-be-null", "type");
-            /*
-             * NOTE: the param execute status and duration will be setted to
-             * RUNNING and 0 respectively if user doesn't pass when creating
-             */
-        } else {
-            Ex.check(newEntity.getType() == null,
-                     "common.param.must-be-null", "type");
-            Ex.check(newEntity.getDuration() != null,
-                     "common.param.cannot-be-null", "duration");
-        }
-        this.checkParamsNotEmpty("content", newEntity.getContent(), creating);
+    private void checkParamsValid(ExecuteHistory newEntity) {
+        Ex.check(newEntity.getId() == null, "common.param.must-be-null", "id");
+        Ex.check(newEntity.getType() != null,
+                 "common.param.cannot-be-null", "type");
+        this.checkParamsNotEmpty("content", newEntity.getContent(), true);
+        Ex.check(newEntity.getStatus() != null,
+                 "common.param.cannot-be-null", "status");
+        Ex.check(newEntity.getDuration() != null,
+                 "common.param.cannot-be-null", "duration");
+        Ex.check(newEntity.getCreateTime() == null,
+                 "common.param.must-be-null", "createTime");
     }
 }

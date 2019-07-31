@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `execute_history` (
     `execute_type` TINYINT NOT NULL,
     `content` VARCHAR(65535) NOT NULL,
     `execute_status` TINYINT NOT NULL,
-    `duration` INT NOT NULL,
+    `duration` LONG NOT NULL,
     `create_time` DATETIME(6) NOT NULL,
     PRIMARY KEY (`id`)
 );

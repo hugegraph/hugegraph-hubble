@@ -74,7 +74,6 @@ public final class HugeClientUtil {
             ResultSet rs = client.gremlin().gremlin("g.V().limit(1)").execute();
             rs.iterator().forEachRemaining(Result::getObject);
         } catch (Exception e) {
-            // TODO: Further subdivision may be needed
             client.close();
             throw e;
         }

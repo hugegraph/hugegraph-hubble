@@ -17,25 +17,37 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity.enums;
+package com.baidu.hugegraph.entity;
 
-import com.baomidou.mybatisplus.core.enums.IEnum;
+import java.util.List;
 
-public enum ExecuteStatus implements IEnum<Byte> {
+import com.baidu.hugegraph.structure.constant.Direction;
 
-    SUCCESS(1),
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    FAILED(2);
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class AdjacentQuery {
 
-    private byte code;
+    private Integer connectionId;
+    private Object vertexId;
+    private String edgeLabel;
+    private Direction direction;
+    private List<Term> terms;
 
-    ExecuteStatus(int code) {
-        assert code < 256;
-        this.code = (byte) code;
-    }
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class Term {
 
-    @Override
-    public Byte getValue() {
-        return this.code;
+        private String key;
+        private String operator;
+        private Object value;
     }
 }

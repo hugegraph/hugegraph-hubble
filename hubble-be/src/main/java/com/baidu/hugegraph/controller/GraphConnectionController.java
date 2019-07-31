@@ -176,6 +176,9 @@ public class GraphConnectionController extends BaseController {
                  !StringUtils.isEmpty(newEntity.getPassword()),
                  "graph-connection.username-and-password.invalid",
                  newEntity.getUsername(), newEntity.getPassword());
+
+        Ex.check(newEntity.getCreateTime() == null,
+                 "common.param.must-be-null", "createTime");
     }
 
     private void checkEntityUnique(GraphConnection newEntity,
