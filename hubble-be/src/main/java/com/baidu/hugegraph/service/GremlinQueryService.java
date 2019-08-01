@@ -243,13 +243,13 @@ public class GremlinQueryService {
         String explain = gremlin + ".explain()";
         ResultSet resultSet = client.gremlin().gremlin(explain).execute();
         if (resultSet.data().size() != 1) {
-            throw new InternalException("Generate execution plan failed");
+            throw new InternalException("Failed to generate execution plan");
         }
         Map<String, Object> steps = (Map<String, Object>) resultSet.data()
                                                                    .get(0);
         List<String> finalSteps = (List<String>) steps.get("final");
         if (finalSteps.size() == 0) {
-            throw new InternalException("Execution plan format is incorrect");
+            throw new InternalException("Incorrect execution plan format");
         }
         return new ExecutePlan(finalSteps);
     }
