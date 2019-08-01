@@ -165,7 +165,7 @@ public class GraphConnectionController extends BaseController {
                  "common.param.cannot-be-null", "port");
         Ex.check(port != null, () -> 0 < port && port <= 65535,
                  "graph-connection.port.must-be-in-range", "[1, 65535]", port);
-        
+
         Ex.check(newEntity.getCreateTime() == null,
                  "common.param.must-be-null", "create_time");
     }
