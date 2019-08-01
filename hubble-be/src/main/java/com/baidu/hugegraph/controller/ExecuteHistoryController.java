@@ -49,11 +49,11 @@ public class ExecuteHistoryController extends BaseController {
     private ExecuteHistoryService service;
 
     @GetMapping
-    public IPage<ExecuteHistory> listAll(@RequestParam(name = "pageNo",
+    public IPage<ExecuteHistory> listAll(@RequestParam(name = "page_no",
                                                        required = false,
                                                        defaultValue = "1")
                                          long pageNo,
-                                         @RequestParam(name = "pageSize",
+                                         @RequestParam(name = "page_size",
                                                        required = false,
                                                        defaultValue = "10")
                                          long pageSize) {

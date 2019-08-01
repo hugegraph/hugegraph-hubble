@@ -27,6 +27,7 @@ import com.baidu.hugegraph.common.Mergeable;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,11 +43,18 @@ public class GremlinCollection implements Identifiable, Mergeable {
 
     @TableId(type = IdType.AUTO)
     @MergeProperty(useNew = false)
+    @JsonProperty("id")
     private Integer id;
+
     @MergeProperty
+    @JsonProperty("name")
     private String name;
+
     @MergeProperty
+    @JsonProperty("content")
     private String content;
+
     @MergeProperty(useNew = false)
+    @JsonProperty("create_time")
     private LocalDateTime createTime;
 }

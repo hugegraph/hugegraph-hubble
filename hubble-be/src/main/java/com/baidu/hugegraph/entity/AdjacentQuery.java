@@ -22,6 +22,7 @@ package com.baidu.hugegraph.entity;
 import java.util.List;
 
 import com.baidu.hugegraph.structure.constant.Direction;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,20 +35,34 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AdjacentQuery {
 
+    @JsonProperty("connection_id")
     private Integer connectionId;
+
+    @JsonProperty("vertex_id")
     private Object vertexId;
+
+    @JsonProperty("edge_label")
     private String edgeLabel;
+
+    @JsonProperty("direction")
     private Direction direction;
-    private List<Term> terms;
+
+    @JsonProperty("conditions")
+    private List<Condition> conditions;
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class Term {
+    public static class Condition {
 
+        @JsonProperty("key")
         private String key;
+
+        @JsonProperty("operator")
         private String operator;
+
+        @JsonProperty("value")
         private Object value;
     }
 }

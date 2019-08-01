@@ -30,6 +30,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,17 +46,28 @@ public class ExecuteHistory implements Identifiable, Mergeable {
 
     @TableId(type = IdType.AUTO)
     @MergeProperty(useNew = false)
+    @JsonProperty("id")
     private Integer id;
+
     @TableField(value = "execute_type")
     @MergeProperty
+    @JsonProperty("type")
     private ExecuteType type;
+
     @MergeProperty
+    @JsonProperty("content")
     private String content;
+
     @TableField(value = "execute_status")
     @MergeProperty
+    @JsonProperty("status")
     private ExecuteStatus status;
+
     @MergeProperty
+    @JsonProperty("duration")
     private Long duration;
+
     @MergeProperty(useNew = false)
+    @JsonProperty("create_time")
     private LocalDateTime createTime;
 }

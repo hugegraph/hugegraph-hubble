@@ -79,7 +79,7 @@ public class ExceptionAdvisor {
                        .build();
     }
 
-    private String handleMessage(String messageKey, Object[] args) {
+    private String handleMessage(String message, Object[] args) {
         String[] strArgs = null;
         if (args != null && args.length > 0) {
             strArgs = new String[args.length];
@@ -87,10 +87,10 @@ public class ExceptionAdvisor {
                 strArgs[i] = args[i].toString();
             }
         }
-        String msg = messageKey;
+        String msg = message;
         try {
-            msg = this.messageSourceHandler.getMessage(messageKey, strArgs);
-        } catch (Exception e) {
+            msg = this.messageSourceHandler.getMessage(message, strArgs);
+        } catch (Throwable e) {
             log.error(e.getMessage(), e);
         }
         return msg;

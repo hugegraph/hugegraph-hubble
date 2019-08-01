@@ -30,9 +30,13 @@ public final class Constant {
 
     public static final Charset CHARSET = UTF_8;
 
-    public static final String PARAM_LANGUAGE = "lang";
     public static final Set<String> LANGUAGES = ImmutableSet.of(
             "en_US",
             "zh_CN"
     );
+
+    public static final String CONTROLLER_PACKAGE =
+                               "com.baidu.hugegraph.controller";
+
+    public static final String COOKIE_USER = "user";
 }

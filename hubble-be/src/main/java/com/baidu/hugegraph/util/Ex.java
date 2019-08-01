@@ -24,7 +24,7 @@ import java.util.concurrent.Callable;
 import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.exception.ParameterizedException;
 
-public final class Ex  {
+public final class Ex {
 
     public static void check(boolean expression, String message,
                              Object... args) {
@@ -33,14 +33,18 @@ public final class Ex  {
         }
     }
 
-    public static void check(boolean condition, Callable<Boolean> callable,
+    public static void check(boolean condition, Callable<Boolean> predicate,
                              String message, Object... args) {
         try {
-            if (!condition || callable.call()) {
+            /*
+             * The condition is a prerequisite, only make predication when
+             * condition is true
+             */
+            if (!condition || predicate.call()) {
                 return;
             }
         } catch (Exception e) {
-            throw new InternalException("Execute callable error");
+            throw new InternalException("execute.predication.error", e);
         }
         throw new ParameterizedException(message, args);
     }
@@ -52,14 +56,18 @@ public final class Ex  {
         }
     }
 
-    public static void check(boolean condition, Callable<Boolean> callable,
+    public static void check(boolean condition, Callable<Boolean> predicate,
                              String message, Throwable cause, Object... args) {
         try {
-            if (!condition || callable.call()) {
+            /*
+             * The condition is a prerequisite, only make predication when
+             * condition is true
+             */
+            if (!condition || predicate.call()) {
                 return;
             }
         } catch (Exception e) {
-            throw new InternalException("Execute callable error");
+            throw new InternalException("execute.predication.error", e);
         }
         throw new ParameterizedException(message, cause, args);
     }

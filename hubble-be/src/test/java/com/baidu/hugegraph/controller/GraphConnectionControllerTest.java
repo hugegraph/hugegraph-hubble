@@ -55,8 +55,8 @@ public class GraphConnectionControllerTest {
 
     @Test
     public void testCreate() throws Exception {
-        String json = "{\"name\": \"conn1\", \"graph\" : \"testGraph1\", " +
-                      "\"host\" : \"127.0.0.1\", \"port\" : 8}";
+        String json = "{\"name\": \"conn1\", \"graph\" : \"hugegraph\", " +
+                      "\"host\" : \"127.0.0.1\", \"port\" : 8080}";
         mockMvc.perform(post(url).contentType(MediaType.APPLICATION_JSON)
                                  .content(json))
                .andExpect(status().isOk())
@@ -78,6 +78,5 @@ public class GraphConnectionControllerTest {
                .andExpect(status().isOk())
                .andExpect(jsonPath("status").value(200))
                .andDo(print());
-        //               .andExpect(content().string(equalTo("[]")));
     }
 }

@@ -34,12 +34,15 @@ public final class EntityUtil {
         try {
             entity = (T) clazz.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new InternalException("Failed to new instance of class %s",
+            throw new InternalException("reflect.new-instance.failed",
                                         clazz.getName());
         }
-
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
+            // NOTE: Skip jacoco injected filed
+            if (field.getName().startsWith("$")) {
+                continue;
+            }
             field.setAccessible(true);
             MergeProperty property = field.getAnnotation(MergeProperty.class);
             try {
@@ -55,9 +58,8 @@ public final class EntityUtil {
                     field.set(entity, oldFieldValue);
                 }
             } catch (IllegalAccessException e) {
-                throw new InternalException(
-                          "Failed to access field %s of class %s",
-                          field.getName(), clazz.getName());
+                throw new InternalException("reflect.access-field.failed",
+                                            field.getName(), clazz.getName());
             }
         }
         return entity;

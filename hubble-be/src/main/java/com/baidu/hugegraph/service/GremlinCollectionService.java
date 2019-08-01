@@ -38,10 +38,8 @@ public class GremlinCollectionService {
     @Autowired
     private GremlinCollectionMapper mapper;
 
-    public IPage<GremlinCollection> list(String content,
-                                         Boolean nameOrderAsc,
-                                         long current,
-                                         long pageSize) {
+    public IPage<GremlinCollection> list(String content, Boolean nameOrderAsc,
+                                         long current, long pageSize) {
         QueryWrapper<GremlinCollection> query = Wrappers.query();
         if (!StringUtils.isEmpty(content)) {
             query.like("name", content).or().like("content", content);

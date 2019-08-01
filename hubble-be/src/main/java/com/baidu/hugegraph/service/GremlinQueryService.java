@@ -140,7 +140,7 @@ public class GremlinQueryService {
     }
 
     @SuppressWarnings("unchecked")
-    @Cacheable(value = "explain", key = "#query.content")
+    @Cacheable(value = "GREMLIN_QUERY_EXPLAIN", key = "#query.content")
     public ExecutePlan explain(GremlinQuery query) {
         this.checkClientAvailable(query.getConnectionId());
 
@@ -181,12 +181,12 @@ public class GremlinQueryService {
             sb.append(")");
         }
         // properties
-        for (AdjacentQuery.Term term : query.getTerms()) {
+        for (AdjacentQuery.Condition condition : query.getConditions()) {
             // key
-            sb.append(".has('").append(term.getKey()).append("', ");
+            sb.append(".has('").append(condition.getKey()).append("', ");
             // value
-            sb.append(term.getOperator()).append("(")
-              .append(this.escape(term.getValue())).append(")");
+            sb.append(condition.getOperator()).append("(")
+              .append(this.escape(condition.getValue())).append(")");
         }
         sb.append(")");
         // limit
@@ -204,18 +204,20 @@ public class GremlinQueryService {
             return null;
         }
         GremlinResult.GraphView graphView = new GremlinResult.GraphView();
-        List<Vertex> vertices = new ArrayList<>();
-        List<Edge> edges = new ArrayList<>();
+        List<Vertex> vertices;
+        List<Edge> edges;
         switch (resultType) {
             case VERTEX:
-                edges = this.edgesOfVertex(typedData);
+                vertices = (List<Vertex>) (Object) typedData;
+                edges = this.edgesOfVertex(vertices);
                 break;
             case EDGE:
-                vertices = this.verticesOfEdge(typedData);
+                edges = (List<Edge>) (Object) typedData;
+                vertices = this.verticesOfEdge(edges);
                 break;
             case PATH:
-                vertices = this.verticesOfPath(typedData);
-                edges = this.edgesOfVertex((List<Object>) (Object) vertices);
+                vertices = this.verticesOfPath((List<Path>) (Object) typedData);
+                edges = this.edgesOfVertex(vertices);
                 break;
             default:
                 throw new InternalException("common.unknown.enum.type",
@@ -226,15 +228,11 @@ public class GremlinQueryService {
         return graphView;
     }
 
-    private List<Edge> edgesOfVertex(List<Object> objects) {
-        Set<Object> vertexIds = new HashSet<>(objects.size());
-        for (Object object : objects) {
-            assert object instanceof Vertex : object;
-            Vertex vertex = (Vertex) object;
-            vertexIds.add(vertex.id());
-        }
+    private List<Edge> edgesOfVertex(List<Vertex> vertices) {
+        Set<Object> vertexIds = vertices.stream().map(Vertex::id)
+                                        .collect(Collectors.toSet());
 
-        List<Edge> edges = new ArrayList<>(objects.size() * 2);
+        List<Edge> edges = new ArrayList<>(vertexIds.size());
         Iterables.partition(vertexIds, BATCH_QUERY_IDS).forEach(batch -> {
             List<String> escapedIds = batch.stream().map(this::escapeId)
                                            .collect(Collectors.toList());
@@ -275,23 +273,19 @@ public class GremlinQueryService {
         return edges;
     }
 
-    private List<Vertex> verticesOfEdge(List<Object> objects) {
-        Set<Object> vertexIds = new HashSet<>(objects.size());
-        for (Object object : objects) {
-            assert object instanceof Edge : object;
-            Edge edge = (Edge) object;
+    private List<Vertex> verticesOfEdge(List<Edge> edges) {
+        Set<Object> vertexIds = new HashSet<>(edges.size() * 2);
+        edges.forEach(edge -> {
             vertexIds.add(edge.sourceId());
             vertexIds.add(edge.targetId());
-        }
+        });
         return this.getVertices(vertexIds);
     }
 
-    private List<Vertex> verticesOfPath(List<Object> objects) {
-        Set<Object> vertexIds = new HashSet<>(objects.size());
+    private List<Vertex> verticesOfPath(List<Path> paths) {
+        Set<Object> vertexIds = new HashSet<>(paths.size() * 3);
         // The path node can be an vertex, or an edge.
-        for (Object object : objects) {
-            assert object instanceof Path : object;
-            Path path = (Path) object;
+        for (Path path : paths) {
             for (Object elem : path.objects()) {
                 if (elem instanceof Vertex) {
                     Vertex vertex = (Vertex) elem;

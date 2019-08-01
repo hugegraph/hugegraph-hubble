@@ -54,14 +54,14 @@ public class GremlinCollectionController extends BaseController {
     public IPage<GremlinCollection> list(@RequestParam(name = "content",
                                                        required = false)
                                          String content,
-                                         @RequestParam(name = "nameOrder",
+                                         @RequestParam(name = "name_order",
                                                        required = false)
                                          String nameOrder,
-                                         @RequestParam(name = "pageNo",
+                                         @RequestParam(name = "page_no",
                                                        required = false,
                                                        defaultValue = "1")
                                          long pageNo,
-                                         @RequestParam(name = "pageSize",
+                                         @RequestParam(name = "page_size",
                                                        required = false,
                                                        defaultValue = "10")
                                          long pageSize) {

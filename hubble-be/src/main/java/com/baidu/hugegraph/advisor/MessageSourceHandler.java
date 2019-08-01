@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.WebUtils;
 
+import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.entity.UserInfo;
 import com.baidu.hugegraph.service.UserInfoService;
 
@@ -63,12 +64,10 @@ public class MessageSourceHandler {
     }
 
     private UserInfo getUserInfo() {
-        Cookie cookie = WebUtils.getCookie(this.request, "user");
+        Cookie cookie = WebUtils.getCookie(this.request, Constant.COOKIE_USER);
         if (cookie == null || cookie.getValue() == null) {
             return null;
         }
-//        String json = URLUtil.decode(cookie.getValue());
-//        return UserInfo.read(json);
         String username = cookie.getValue();
         return this.service.getByName(username);
     }

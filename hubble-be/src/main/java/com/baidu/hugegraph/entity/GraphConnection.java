@@ -43,21 +43,34 @@ public class GraphConnection implements Identifiable, Mergeable {
 
     @TableId(type = IdType.AUTO)
     @MergeProperty(useNew = false)
+    @JsonProperty("id")
     private Integer id;
+
     @MergeProperty
+    @JsonProperty("name")
     private String name;
+
     @MergeProperty
+    @JsonProperty("graph")
     private String graph;
+
     @MergeProperty
+    @JsonProperty("host")
     private String host;
+
     @MergeProperty
+    @JsonProperty("port")
     private Integer port;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+
     @MergeProperty
+    @JsonProperty(value = "username", access = JsonProperty.Access.WRITE_ONLY)
     private String username;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+
     @MergeProperty
+    @JsonProperty(value = "password", access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+
     @MergeProperty(useNew = false)
+    @JsonProperty("create_time")
     private LocalDateTime createTime;
 }

@@ -43,7 +43,7 @@ public class CacheConfig {
 
     public enum Caches {
 
-        explain;
+        GREMLIN_QUERY_EXPLAIN;
 
         private int maxSize = DEFAULT_MAXSIZE;
         private int ttl = DEFAULT_TTL;

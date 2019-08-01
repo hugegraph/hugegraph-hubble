@@ -19,11 +19,9 @@
 
 package com.baidu.hugegraph.entity;
 
-import org.springframework.stereotype.Component;
-
-import com.baidu.hugegraph.util.JsonUtil;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,19 +32,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Component
 public class UserInfo {
 
     @TableId(type = IdType.AUTO)
+    @JsonProperty("id")
     private Integer id;
+
+    @JsonProperty("username")
     private String username;
+
+    @JsonProperty("locale")
     private String locale;
-
-    public String write() {
-        return JsonUtil.toJson(this);
-    }
-
-    public static UserInfo read(String value) {
-        return value != null ? JsonUtil.fromJson(value, UserInfo.class) : null;
-    }
 }

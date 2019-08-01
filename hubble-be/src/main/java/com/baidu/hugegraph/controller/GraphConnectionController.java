@@ -60,14 +60,14 @@ public class GraphConnectionController extends BaseController {
     public IPage<GraphConnection> list(@RequestParam(name = "content",
                                                      required = false)
                                        String content,
-                                       @RequestParam(name = "graphOrder",
+                                       @RequestParam(name = "graph_order",
                                                      required = false)
                                        String graphOrder,
-                                       @RequestParam(name = "pageNo",
+                                       @RequestParam(name = "page_no",
                                                      required = false,
                                                      defaultValue = "1")
                                        long pageNo,
-                                       @RequestParam(name = "pageSize",
+                                       @RequestParam(name = "page_size",
                                                      required = false,
                                                      defaultValue = "10")
                                        long pageSize) {
@@ -168,9 +168,8 @@ public class GraphConnectionController extends BaseController {
         Integer port = newEntity.getPort();
         Ex.check(creating, () -> port != null,
                  "common.param.cannot-be-null", "port");
-        Ex.check(port != null, () -> 1 <= port && port <= 65535,
-                 "graph-connection.port.must-be-in-range",
-                 "[1, 65535]", port);
+        Ex.check(port != null, () -> 0 < port && port <= 65535,
+                 "graph-connection.port.must-be-in-range", "(0, 65535]", port);
 
         Ex.check(StringUtils.isEmpty(newEntity.getUsername()) &&
                  StringUtils.isEmpty(newEntity.getPassword()) ||

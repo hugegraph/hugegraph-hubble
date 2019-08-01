@@ -22,6 +22,8 @@ package com.baidu.hugegraph.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.baidu.hugegraph.common.Constant;
+
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -30,7 +32,6 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
-//@EnableSwagger2
 public class SwaggerConfig {
 
     @Bean
@@ -40,13 +41,13 @@ public class SwaggerConfig {
                      .apiInfo(this.apiInfo())
                      .select()
                      .apis(RequestHandlerSelectors.basePackage(
-                           "com.baidu.hugegraph.controller"))
+                           Constant.CONTROLLER_PACKAGE))
                      .paths(PathSelectors.any())
                      .build();
     }
 
     private ApiInfo apiInfo() {
-        return new ApiInfoBuilder().title("hugegraph-hubble restful api docs")
+        return new ApiInfoBuilder().title("hugegraph-hubble RESTFul API docs")
                                    .version("1.1")
                                    .description("API descriptions")
                                    .build();

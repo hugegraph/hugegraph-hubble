@@ -44,10 +44,8 @@ public class GraphConnectionService {
         return this.mapper.selectList(null);
     }
 
-    public IPage<GraphConnection> list(String content,
-                                       Boolean graphOrderAsc,
-                                       long current,
-                                       long pageSize) {
+    public IPage<GraphConnection> list(String content, Boolean graphOrderAsc,
+                                       long current, long pageSize) {
         QueryWrapper<GraphConnection> query = Wrappers.query();
         if (!StringUtils.isEmpty(content)) {
             query.like("name", content).or().like("graph", content);

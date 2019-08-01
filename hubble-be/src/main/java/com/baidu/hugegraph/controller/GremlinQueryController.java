@@ -73,18 +73,19 @@ public class GremlinQueryController extends BaseController {
     private void checkParamsValid(AdjacentQuery query) {
         Ex.check(query.getVertexId() != null,
                  "common.param.cannot-be-null", "vertexId");
-        if (query.getTerms() != null && !query.getTerms().isEmpty()) {
-            for (AdjacentQuery.Term term : query.getTerms()) {
-                Ex.check(!StringUtils.isEmpty(term.getKey()),
-                         "common.param.cannot-be-null-and-empty", "term.key");
-                Ex.check(!StringUtils.isEmpty(term.getOperator()),
+        if (query.getConditions() != null && !query.getConditions().isEmpty()) {
+            for (AdjacentQuery.Condition condition : query.getConditions()) {
+                Ex.check(!StringUtils.isEmpty(condition.getKey()),
                          "common.param.cannot-be-null-and-empty",
-                         "term.operator");
-                Ex.check(TERM_OPERATORS.contains(term.getOperator()),
-                         "common.param.should-belong-to", "term.operator",
+                         "condition.key");
+                Ex.check(!StringUtils.isEmpty(condition.getOperator()),
+                         "common.param.cannot-be-null-and-empty",
+                         "condition.operator");
+                Ex.check(TERM_OPERATORS.contains(condition.getOperator()),
+                         "common.param.should-belong-to", "condition.operator",
                          TERM_OPERATORS);
-                Ex.check(term.getValue() != null,
-                         "common.param.cannot-be-null", "term.value");
+                Ex.check(condition.getValue() != null,
+                         "common.param.cannot-be-null", "condition.value");
             }
         }
     }

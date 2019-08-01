@@ -36,11 +36,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class GremlinResult {
 
-    @JsonProperty
+    @JsonProperty("type")
     private Type type;
-    @JsonProperty
+    @JsonProperty("data")
     private List<Object> data;
-    @JsonProperty
+    @JsonProperty("graph_view")
     private GraphView graphView;
 
     @Data
@@ -49,9 +49,9 @@ public class GremlinResult {
     @Builder
     public static class GraphView {
 
-        @JsonProperty
+        @JsonProperty("vertices")
         private List<Vertex> vertices;
-        @JsonProperty
+        @JsonProperty("edges")
         private List<Edge> edges;
     }
 

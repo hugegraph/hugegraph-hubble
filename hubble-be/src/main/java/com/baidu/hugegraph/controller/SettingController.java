@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.controller;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.entity.UserInfo;
+import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.service.UserInfoService;
 import com.baidu.hugegraph.util.E;
 
@@ -40,28 +42,39 @@ public class SettingController {
     @Autowired
     private UserInfoService service;
 
-    /**
-     * TODO: To be improved
-     */
-    @GetMapping("common")
-    public UserInfo common(@RequestParam(value = "lang",
+    @GetMapping("config")
+    public UserInfo config(@RequestParam(value = "locale",
                                          defaultValue = "en_US")
-                           String lang,
+                           String locale,
+                           HttpServletRequest request,
                            HttpServletResponse response) {
-        E.checkArgument(lang != null, "The param lang can't be null");
-        E.checkArgument(Constant.LANGUAGES.contains(lang),
+        E.checkArgument(locale != null, "The param lang can't be null");
+        E.checkArgument(Constant.LANGUAGES.contains(locale),
                         "The acceptable languages are %s, but got %s",
-                        Constant.LANGUAGES, lang);
+                        Constant.LANGUAGES, locale);
 
-        UserInfo userInfo = UserInfo.builder()
-                                    .username("anonymous")
-                                    .locale(lang)
-                                    .build();
-        int rows = this.service.update(userInfo);
-        if (rows != 1) {
-            throw new RuntimeException("Save failed");
+        String username = "anonymous";
+        UserInfo userInfo = this.service.getByName(username);
+        if (userInfo == null) {
+            userInfo = UserInfo.builder()
+                               .username(username)
+                               .locale(locale)
+                               .build();
+            int rows = this.service.save(userInfo);
+            if (rows == 0) {
+                throw new InternalException("entity.insert.failed");
+            }
+        } else {
+            userInfo.setLocale(locale);
+            int rows = this.service.update(userInfo);
+            if (rows == 0) {
+                throw new InternalException("entity.update.failed");
+            }
         }
-        Cookie cookie = new Cookie("user", userInfo.getUsername());
+
+        Cookie cookie = new Cookie(Constant.COOKIE_USER, userInfo.getUsername());
+        cookie.setPath(request.getContextPath());
+        cookie.setMaxAge(3 * 24 * 60 * 60);
         response.addCookie(cookie);
         return userInfo;
     }
