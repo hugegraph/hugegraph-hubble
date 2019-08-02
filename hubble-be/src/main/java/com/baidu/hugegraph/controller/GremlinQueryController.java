@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.hugegraph.entity.AdjacentQuery;
-import com.baidu.hugegraph.entity.ExecutePlan;
 import com.baidu.hugegraph.entity.GremlinQuery;
 import com.baidu.hugegraph.entity.GremlinResult;
 import com.baidu.hugegraph.service.GremlinQueryService;
@@ -51,11 +50,7 @@ public class GremlinQueryController extends BaseController {
     @PostMapping
     public GremlinResult execute(@RequestBody GremlinQuery query) {
         this.checkParamsValid(query);
-        // Get execute plan used for pre handle
-        ExecutePlan plan = this.service.explain(query);
-        String gremlin = plan.optimize(query.getContent());
-        query.setContent(gremlin);
-        return this.service.executeQuery(query, plan);
+        return this.service.executeQuery(query);
     }
 
     @PutMapping
@@ -71,8 +66,10 @@ public class GremlinQueryController extends BaseController {
     }
 
     private void checkParamsValid(AdjacentQuery query) {
+        Ex.check(query.getConnectionId() != null,
+                 "common.param.cannot-be-null", "connection_id");
         Ex.check(query.getVertexId() != null,
-                 "common.param.cannot-be-null", "vertexId");
+                 "common.param.cannot-be-null", "vertex_id");
         if (query.getConditions() != null && !query.getConditions().isEmpty()) {
             for (AdjacentQuery.Condition condition : query.getConditions()) {
                 Ex.check(!StringUtils.isEmpty(condition.getKey()),

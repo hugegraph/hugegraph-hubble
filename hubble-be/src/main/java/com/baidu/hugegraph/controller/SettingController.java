@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.controller;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -74,7 +76,7 @@ public class SettingController {
 
         Cookie cookie = new Cookie(Constant.COOKIE_USER, userInfo.getUsername());
         cookie.setPath(request.getContextPath());
-        cookie.setMaxAge(3 * 24 * 60 * 60);
+        cookie.setMaxAge((int) TimeUnit.SECONDS.convert(3, TimeUnit.DAYS));
         response.addCookie(cookie);
         return userInfo;
     }

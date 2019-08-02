@@ -106,6 +106,6 @@ public class ExecuteHistoryController extends BaseController {
         Ex.check(newEntity.getDuration() != null,
                  "common.param.cannot-be-null", "duration");
         Ex.check(newEntity.getCreateTime() == null,
-                 "common.param.must-be-null", "createTime");
+                 "common.param.must-be-null", "create_time");
     }
 }

@@ -179,7 +179,7 @@ public class GraphConnectionController extends BaseController {
                  newEntity.getUsername(), newEntity.getPassword());
 
         Ex.check(newEntity.getCreateTime() == null,
-                 "common.param.must-be-null", "createTime");
+                 "common.param.must-be-null", "create_time");
     }
 
     private void checkEntityUnique(GraphConnection newEntity,

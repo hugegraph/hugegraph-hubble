@@ -50,6 +50,10 @@ public class GraphConnectionService {
         if (!StringUtils.isEmpty(content)) {
             query.like("name", content).or().like("graph", content);
         }
+        /*
+         * The results will order by create_time when graph_order is null,
+         * otherwise order by graph firstly then by create_time.
+         */
         if (graphOrderAsc != null) {
             if (graphOrderAsc) {
                 query.orderByAsc("graph");

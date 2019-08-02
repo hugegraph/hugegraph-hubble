@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.entity;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.baidu.hugegraph.structure.graph.Edge;
@@ -36,8 +37,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class GremlinResult {
 
-    @JsonProperty("type")
-    private Type type;
     @JsonProperty("data")
     private List<Object> data;
     @JsonProperty("graph_view")
@@ -50,19 +49,8 @@ public class GremlinResult {
     public static class GraphView {
 
         @JsonProperty("vertices")
-        private List<Vertex> vertices;
+        private Collection<Vertex> vertices;
         @JsonProperty("edges")
-        private List<Edge> edges;
-    }
-
-    public enum Type {
-
-        SINGLE,
-
-        VERTEX,
-
-        EDGE,
-
-        PATH;
+        private Collection<Edge> edges;
     }
 }

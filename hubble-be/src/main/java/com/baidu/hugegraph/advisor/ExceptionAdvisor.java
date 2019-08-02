@@ -87,12 +87,11 @@ public class ExceptionAdvisor {
                 strArgs[i] = args[i].toString();
             }
         }
-        String msg = message;
         try {
-            msg = this.messageSourceHandler.getMessage(message, strArgs);
+            message = this.messageSourceHandler.getMessage(message, strArgs);
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
         }
-        return msg;
+        return message;
     }
 }

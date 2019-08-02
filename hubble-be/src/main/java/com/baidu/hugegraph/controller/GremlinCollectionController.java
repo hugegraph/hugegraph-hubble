@@ -144,7 +144,7 @@ public class GremlinCollectionController extends BaseController {
         this.checkParamsNotEmpty("content", newEntity.getContent(), creating);
 
         Ex.check(newEntity.getCreateTime() == null,
-                 "common.param.must-be-null", "createTime");
+                 "common.param.must-be-null", "create_time");
     }
 
     private void checkEntityUnique(GremlinCollection newEntity,
