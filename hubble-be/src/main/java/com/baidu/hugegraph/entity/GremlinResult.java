@@ -37,6 +37,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class GremlinResult {
 
+    @JsonProperty("type")
+    private Type type;
     @JsonProperty("data")
     private List<Object> data;
     @JsonProperty("graph_view")

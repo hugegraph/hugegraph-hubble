@@ -76,6 +76,7 @@ public class GremlinQueryService {
         GraphView graphView = !resultType.isGraph() ? GraphView.EMPTY :
                               this.buildGraphView(resultSet, client);
         return GremlinResult.builder()
+                            .type(resultType)
                             .data(resultSet.data())
                             .graphView(graphView)
                             .build();
