@@ -21,7 +21,7 @@
             <filtered>false</filtered>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}</directory>
+            <directory>${top.level.dir}</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
                 <include>README*</include>
@@ -39,9 +39,9 @@
     </fileSets>
 
     <dependencySets>
-        <!-- Code jars -->
+        <!-- code jars -->
         <dependencySet>
-            <outputDirectory>/lib</outputDirectory>
+            <outputDirectory>lib</outputDirectory>
             <unpack>false</unpack>
             <scope>runtime</scope>
             <useProjectArtifact>false</useProjectArtifact>
@@ -50,5 +50,4 @@
             </includes>
         </dependencySet>
     </dependencySets>
-
 </assembly>

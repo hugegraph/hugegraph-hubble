@@ -19,24 +19,39 @@
 
 package com.baidu.hugegraph.config;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import org.apache.tomcat.util.http.LegacyCookieProcessor;
-import org.springframework.boot.web.embedded.tomcat.TomcatContextCustomizer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
-import org.springframework.boot.web.server.WebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.stereotype.Component;
+
+import com.baidu.hugegraph.exception.ExternalException;
+import com.baidu.hugegraph.options.HubbleOptions;
 
 /**
  * Reference http://www.zizhixiaoshe.com/article/invalidcookie.html
  */
 @Component
-public class EmbeddedTomcatConfig implements WebServerFactoryCustomizer {
+public class TomcatServletConfig
+       implements WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
+
+    @Autowired
+    private HugeConfig config;
 
     @Override
-    public void customize(WebServerFactory factory) {
-        TomcatServletWebServerFactory tomcatFactory =
-                                      (TomcatServletWebServerFactory) factory;
-        tomcatFactory.addContextCustomizers(context -> {
+    public void customize(TomcatServletWebServerFactory factory) {
+        // Use customized server port
+        String host = this.config.get(HubbleOptions.SERVER_HOST);
+        try {
+            factory.setAddress(InetAddress.getByName(host));
+        } catch (UnknownHostException e) {
+            throw new ExternalException(String.format("Unknown host %s", host));
+        }
+        factory.setPort(this.config.get(HubbleOptions.SERVER_PORT));
+        factory.addContextCustomizers(context -> {
             context.setCookieProcessor(new LegacyCookieProcessor());
         });
     }

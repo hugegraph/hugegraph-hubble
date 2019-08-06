@@ -37,6 +37,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class GremlinResult {
 
+    @JsonProperty("type")
+    private Type type;
     @JsonProperty("data")
     private List<Object> data;
     @JsonProperty("graph_view")
@@ -52,5 +54,18 @@ public class GremlinResult {
         private Collection<Vertex> vertices;
         @JsonProperty("edges")
         private Collection<Edge> edges;
+    }
+
+    public enum Type {
+
+        EMPTY,
+
+        GENERAL,
+
+        VERTEX,
+
+        EDGE,
+
+        PATH
     }
 }

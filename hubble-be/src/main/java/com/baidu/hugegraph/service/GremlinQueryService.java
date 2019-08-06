@@ -32,13 +32,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.entity.AdjacentQuery;
 import com.baidu.hugegraph.entity.GraphConnection;
 import com.baidu.hugegraph.entity.GremlinQuery;
 import com.baidu.hugegraph.entity.GremlinResult;
 import com.baidu.hugegraph.entity.GremlinResult.GraphView;
+import com.baidu.hugegraph.entity.GremlinResult.Type;
 import com.baidu.hugegraph.exception.ExternalException;
+import com.baidu.hugegraph.options.HubbleOptions;
 import com.baidu.hugegraph.structure.constant.Direction;
 import com.baidu.hugegraph.structure.graph.Edge;
 import com.baidu.hugegraph.structure.graph.Path;
@@ -55,11 +58,8 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class GremlinQueryService {
 
-    private static final int BATCH_QUERY_IDS = 500;
-    private static final int MAX_EDGES_PER_VERTEX = 100;
-    private static final int SHOW_LIMIT_EDGE_TOTAL = 500;
-    private static final int LIMIT = 255;
-
+    @Autowired
+    private HugeConfig config;
     @Autowired
     private GraphConnectionService connService;
     @Autowired
@@ -90,9 +90,11 @@ public class GremlinQueryService {
         log.debug("gremlin ==> {}", gremlin);
         // Execute gremlin query
         ResultSet resultSet = this.client.gremlin().gremlin(gremlin).execute();
+        Type resultType = this.parseResultType(resultSet);
         // Build the graph view
         GraphView graphView = this.buildGraphView(resultSet);
         return GremlinResult.builder()
+                            .type(resultType)
                             .data(resultSet.data())
                             .graphView(graphView)
                             .build();
@@ -118,6 +120,7 @@ public class GremlinQueryService {
         }
         GraphView graphView = new GraphView(vertices, edges);
         return GremlinResult.builder()
+                            .type(Type.PATH)
                             .data(resultSet.data())
                             .graphView(graphView)
                             .build();
@@ -126,42 +129,32 @@ public class GremlinQueryService {
     private String optimize(String content) {
         // Remove the trailing redundant semicolon
         String gremlin = StringUtils.stripEnd(content, ";");
-        return GremlinUtil.optimizeLimit(gremlin, LIMIT);
+        int limit = this.config.get(HubbleOptions.GREMLIN_SUFFIX_LIMIT);
+        return GremlinUtil.optimizeLimit(gremlin, limit);
     }
 
-    private String buildGremlinQuery(AdjacentQuery query) {
-        StringBuilder sb = new StringBuilder("g.V(");
-        // vertex id
-        sb.append(GremlinUtil.escapeId(query.getVertexId())).append(")");
-        // direction
-        String direction = query.getDirection() != null ?
-                           query.getDirection().name() :
-                           Direction.BOTH.name();
-        sb.append(".toE(").append(direction);
-        // edge label
-        if (query.getEdgeLabel() != null) {
-            sb.append(", '").append(query.getEdgeLabel()).append("')");
-        } else {
-            sb.append(")");
-        }
-        if (query.getConditions() != null) {
-            // properties
-            for (AdjacentQuery.Condition condition : query.getConditions()) {
-                // key
-                sb.append(".has('").append(condition.getKey()).append("', ");
-                // value
-                sb.append(condition.getOperator()).append("(")
-                  .append(GremlinUtil.escape(condition.getValue())).append(")");
+    private Type parseResultType(ResultSet resultSet) {
+        Iterator<Result> iter = resultSet.iterator();
+        if (iter.hasNext()) {
+            Result result = iter.next();
+            Object object = result.getObject();
+            if (object instanceof Vertex) {
+                return Type.VERTEX;
+            } else if (object instanceof Edge) {
+                return Type.EDGE;
+            } else if (object instanceof Path) {
+                return Type.PATH;
+            } else {
+                return Type.GENERAL;
             }
-            sb.append(")");
+        } else {
+            return Type.EMPTY;
         }
-        // limit
-        sb.append(".limit(").append(MAX_EDGES_PER_VERTEX).append(")");
-        // other vertex
-        sb.append(".otherV().path()");
-        return sb.toString();
     }
 
+    /**
+     * TODO: reduce the number of requests
+     */
     private GraphView buildGraphView(ResultSet resultSet) {
         GraphView graphView = new GraphView();
         if (resultSet.data() == null || resultSet.data().isEmpty()) {
@@ -209,10 +202,50 @@ public class GremlinQueryService {
         return graphView;
     }
 
+    private String buildGremlinQuery(AdjacentQuery query) {
+        int degreeLimit = this.config.get(
+                          HubbleOptions.GREMLIN_VERTEX_DEGREE_LIMIT);
+        StringBuilder sb = new StringBuilder("g.V(");
+        // vertex id
+        sb.append(GremlinUtil.escapeId(query.getVertexId())).append(")");
+        // direction
+        String direction = query.getDirection() != null ?
+                           query.getDirection().name() :
+                           Direction.BOTH.name();
+        sb.append(".toE(").append(direction);
+        // edge label
+        if (query.getEdgeLabel() != null) {
+            sb.append(", '").append(query.getEdgeLabel()).append("')");
+        } else {
+            sb.append(")");
+        }
+        if (query.getConditions() != null) {
+            // properties
+            for (AdjacentQuery.Condition condition : query.getConditions()) {
+                // key
+                sb.append(".has('").append(condition.getKey()).append("', ");
+                // value
+                sb.append(condition.getOperator()).append("(")
+                  .append(GremlinUtil.escape(condition.getValue())).append(")");
+            }
+            sb.append(")");
+        }
+        // limit
+        sb.append(".limit(").append(degreeLimit).append(")");
+        // other vertex
+        sb.append(".otherV().path()");
+        return sb.toString();
+    }
+
     private Map<String, Edge> edgesOfVertex(Map<Object, Vertex> vertices) {
+        int edgeLimit = this.config.get(HubbleOptions.GREMLIN_EDGES_TOTAL_LIMIT);
+        int batchSize = this.config.get(HubbleOptions.GREMLIN_BATCH_QUERY_IDS);
+        int degreeLimit = this.config.get(
+                          HubbleOptions.GREMLIN_VERTEX_DEGREE_LIMIT);
+
         Set<Object> vertexIds = vertices.keySet();
         Map<String, Edge> edges = new HashMap<>(vertexIds.size());
-        Iterables.partition(vertexIds, BATCH_QUERY_IDS).forEach(batch -> {
+        Iterables.partition(vertexIds, batchSize).forEach(batch -> {
             List<String> escapedIds = batch.stream()
                                            .map(GremlinUtil::escapeId)
                                            .collect(Collectors.toList());
@@ -235,17 +268,17 @@ public class GremlinQueryService {
 
                 int degree = degrees.computeIfAbsent(source, k -> 0);
                 degrees.put(source, ++degree);
-                if (degree >= MAX_EDGES_PER_VERTEX) {
+                if (degree >= degreeLimit) {
                     break;
                 }
                 degree = degrees.computeIfAbsent(target, k -> 0);
                 degrees.put(target, ++degree);
-                if (degree >= MAX_EDGES_PER_VERTEX) {
+                if (degree >= degreeLimit) {
                     break;
                 }
 
                 edges.put(edge.id(), edge);
-                if (edges.size() >= SHOW_LIMIT_EDGE_TOTAL) {
+                if (edges.size() >= edgeLimit) {
                     break;
                 }
             }
@@ -254,6 +287,8 @@ public class GremlinQueryService {
     }
 
     private Map<Object, Vertex> verticesOfEdge(Map<String, Edge> edges) {
+        int batchSize = this.config.get(HubbleOptions.GREMLIN_BATCH_QUERY_IDS);
+
         Set<Object> vertexIds = new HashSet<>(edges.size() * 2);
         edges.values().forEach(edge -> {
             vertexIds.add(edge.sourceId());
@@ -261,7 +296,7 @@ public class GremlinQueryService {
         });
 
         Map<Object, Vertex> vertices = new HashMap<>(vertexIds.size());
-        Iterables.partition(vertexIds, BATCH_QUERY_IDS).forEach(batch -> {
+        Iterables.partition(vertexIds, batchSize).forEach(batch -> {
             List<Vertex> results = this.client.traverser().vertices(batch);
             results.forEach(vertex -> vertices.put(vertex.id(), vertex));
         });

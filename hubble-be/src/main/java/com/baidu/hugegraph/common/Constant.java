@@ -35,6 +35,9 @@ public final class Constant {
             "zh_CN"
     );
 
+    public static final String MODULE_NAME = "hubble-be";
+    public static final String CONFIG_FILE = "hugegraph-hubble.properties";
+
     public static final String CONTROLLER_PACKAGE =
                                "com.baidu.hugegraph.controller";
 

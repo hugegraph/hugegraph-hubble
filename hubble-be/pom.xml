@@ -12,12 +12,6 @@
     <artifactId>hubble-be</artifactId>
 
     <properties>
-        <release.name>${project.artifactId}</release.name>
-        <final.name>${release.name}-${project.version}</final.name>
-        <assembly.dir>${project.basedir}/assembly</assembly.dir>
-        <assembly.descriptor.dir>${assembly.dir}/descriptor</assembly.descriptor.dir>
-        <assembly.static.dir>${assembly.dir}/static</assembly.static.dir>
-        <shell-executable>bash</shell-executable>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
     </properties>
@@ -81,6 +75,20 @@
             <groupId>com.baidu.hugegraph</groupId>
             <artifactId>hugegraph-client</artifactId>
             <version>1.7.4</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-slf4j-impl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
@@ -98,13 +106,29 @@
 
     <build>
         <plugins>
+            <!--
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.baidu.hugegraph.HugeGraphHubbleApplication</mainClass>
+                    <mainClass>com.baidu.hugegraph.HugeGraphHubble</mainClass>
                 </configuration>
             </plugin>
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>com.baidu.hugegraph.HugeGraphHubble</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -130,74 +154,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!--            <plugin>-->
-            <!--                <groupId>org.apache.maven.plugins</groupId>-->
-            <!--                <artifactId>maven-assembly-plugin</artifactId>-->
-            <!--                <version>2.4</version>-->
-            <!--                <executions>-->
-            <!--                    <execution>-->
-            <!--                        <id>assembly-hugegraph-hubble</id>-->
-            <!--                        <phase>package</phase>-->
-            <!--                        <goals>-->
-            <!--                            <goal>single</goal>-->
-            <!--                        </goals>-->
-            <!--                        <configuration>-->
-            <!--                            <attach>false</attach>-->
-            <!--                            <appendAssemblyId>false</appendAssemblyId>-->
-            <!--                            <outputDirectory>${project.basedir}</outputDirectory>-->
-            <!--                            <descriptor>${assembly.descriptor.dir}/assembly.xml</descriptor>-->
-            <!--                            <finalName>${final.name}</finalName>-->
-            <!--                        </configuration>-->
-            <!--                    </execution>-->
-            <!--                </executions>-->
-            <!--            </plugin>-->
-            <!--            <plugin>-->
-            <!--                <artifactId>maven-antrun-plugin</artifactId>-->
-            <!--                <executions>-->
-            <!--                    <execution>-->
-            <!--                        <phase>package</phase>-->
-            <!--                        <goals>-->
-            <!--                            <goal>run</goal>-->
-            <!--                        </goals>-->
-            <!--                        <configuration>-->
-            <!--                            <tasks>-->
-            <!--                                <echo file="${project.basedir}/dist.sh">-->
-            <!--                                    tar -zcvf \-->
-            <!--                                    ${project.basedir}/${final.name}.tar.gz ${final.name} || exit 1-->
-            <!--                                    rm -f ${project.basedir}/dist.sh-->
-            <!--                                    echo -n "hubble tar.gz available at: "-->
-            <!--                                    echo "${project.basedir}/${final.name}.tar.gz"-->
-            <!--                                </echo>-->
-            <!--                                <exec executable="${shell-executable}"-->
-            <!--                                      dir="${project.basedir}" failonerror="true">-->
-            <!--                                    <arg line="./dist.sh"/>-->
-            <!--                                </exec>-->
-            <!--                            </tasks>-->
-            <!--                        </configuration>-->
-            <!--                    </execution>-->
-            <!--                </executions>-->
-            <!--            </plugin>-->
-            <!--            <plugin>-->
-            <!--                <artifactId>maven-clean-plugin</artifactId>-->
-            <!--                <version>3.0.0</version>-->
-            <!--                <configuration>-->
-            <!--                    <filesets>-->
-            <!--                        <fileset>-->
-            <!--                            <directory>${project.basedir}</directory>-->
-            <!--                            <includes>-->
-            <!--                                <include>*.tar.gz</include>-->
-            <!--                                <include>${final.name}/**</include>-->
-            <!--                            </includes>-->
-            <!--                            <followSymlinks>false</followSymlinks>-->
-            <!--                        </fileset>-->
-            <!--                        <fileset>-->
-            <!--                            <directory>${final.name}</directory>-->
-            <!--                        </fileset>-->
-            <!--                    </filesets>-->
-            <!--                </configuration>-->
-            <!--            </plugin>-->
         </plugins>
     </build>
-
 </project>
