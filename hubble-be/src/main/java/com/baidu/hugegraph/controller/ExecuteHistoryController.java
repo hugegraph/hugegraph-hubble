@@ -43,8 +43,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 @RequestMapping("execute-histories")
 public class ExecuteHistoryController extends BaseController {
 
-    private static final int LIMIT = 500;
-
     @Autowired
     private ExecuteHistoryService service;
 

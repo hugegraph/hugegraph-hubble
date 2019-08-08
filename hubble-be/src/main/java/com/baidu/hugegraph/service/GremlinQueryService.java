@@ -135,26 +135,22 @@ public class GremlinQueryService {
 
     private Type parseResultType(ResultSet resultSet) {
         Iterator<Result> iter = resultSet.iterator();
-        if (iter.hasNext()) {
-            Result result = iter.next();
-            Object object = result.getObject();
-            if (object instanceof Vertex) {
-                return Type.VERTEX;
-            } else if (object instanceof Edge) {
-                return Type.EDGE;
-            } else if (object instanceof Path) {
-                return Type.PATH;
-            } else {
-                return Type.GENERAL;
-            }
-        } else {
+        if (!iter.hasNext()) {
             return Type.EMPTY;
+        }
+        Result result = iter.next();
+        Object object = result.getObject();
+        if (object instanceof Vertex) {
+            return Type.VERTEX;
+        } else if (object instanceof Edge) {
+            return Type.EDGE;
+        } else if (object instanceof Path) {
+            return Type.PATH;
+        } else {
+            return Type.GENERAL;
         }
     }
 
-    /**
-     * TODO: reduce the number of requests
-     */
     private GraphView buildGraphView(ResultSet resultSet) {
         GraphView graphView = new GraphView();
         if (resultSet.data() == null || resultSet.data().isEmpty()) {
@@ -190,6 +186,7 @@ public class GremlinQueryService {
             if (vertices.isEmpty()) {
                 vertices = this.verticesOfEdge(edges);
             } else {
+                // TODO: reduce the number of requests
                 vertices.putAll(this.verticesOfEdge(edges));
             }
         } else {
