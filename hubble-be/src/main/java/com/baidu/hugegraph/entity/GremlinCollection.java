@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.entity;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import com.baidu.hugegraph.annotation.MergeProperty;
 import com.baidu.hugegraph.common.Identifiable;
@@ -56,5 +56,5 @@ public class GremlinCollection implements Identifiable, Mergeable {
 
     @MergeProperty(useNew = false)
     @JsonProperty("create_time")
-    private LocalDateTime createTime;
+    private Date createTime;
 }

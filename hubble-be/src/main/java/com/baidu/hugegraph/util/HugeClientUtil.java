@@ -32,19 +32,22 @@ import com.baidu.hugegraph.structure.gremlin.ResultSet;
 public final class HugeClientUtil {
 
     public static HugeClient tryConnect(GraphConnection connection) {
+        String graph = connection.getGraph();
+        String host = connection.getHost();
+        Integer port = connection.getPort();
+        String username = connection.getUsername();
+        String password = connection.getPassword();
+
         String url = UriComponentsBuilder.newInstance()
                                          .scheme("http")
-                                         .host(connection.getHost())
-                                         .port(connection.getPort())
+                                         .host(host).port(port)
                                          .toUriString();
         HugeClient client;
         try {
-            if (connection.getUsername() != null) {
-                client = new HugeClient(url, connection.getGraph(),
-                                        connection.getUsername(),
-                                        connection.getPassword());
+            if (username != null) {
+                client = new HugeClient(url, graph, username, password);
             } else {
-                client = new HugeClient(url, connection.getGraph());
+                client = new HugeClient(url, graph);
             }
         } catch (IllegalStateException e) {
             String message = e.getMessage();
@@ -61,11 +64,14 @@ public final class HugeClientUtil {
             throw e;
         } catch (ClientException e) {
             Throwable cause = e.getCause();
-            if (cause != null && cause.getMessage() != null &&
-                cause.getMessage().contains("Connection refused")) {
-                throw new ExternalException("service.unavailable",
-                                            connection.getHost(),
-                                            connection.getPort());
+            if (cause == null || cause.getMessage() == null) {
+                throw e;
+            }
+            String message = cause.getMessage();
+            if (message.contains("Connection refused")) {
+                throw new ExternalException("service.unavailable", host, port);
+            } else if (message.contains("java.net.UnknownHostException")) {
+                throw new ExternalException("service.unknown-host", host);
             }
             throw e;
         }
@@ -73,6 +79,13 @@ public final class HugeClientUtil {
         try {
             ResultSet rs = client.gremlin().gremlin("g.V().limit(1)").execute();
             rs.iterator().forEachRemaining(Result::getObject);
+        } catch (ServerException e) {
+            String message = e.message();
+            if (message != null && message.contains("Could not rebind [g]")) {
+                throw new ExternalException("graph-connection.graph.unexist",
+                                            graph, host, port);
+            }
+            throw e;
         } catch (Exception e) {
             client.close();
             throw e;

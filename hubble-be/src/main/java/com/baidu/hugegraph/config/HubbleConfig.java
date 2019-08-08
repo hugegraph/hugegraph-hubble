@@ -39,13 +39,15 @@ public class HubbleConfig {
     @Bean
     public HugeConfig hugeConfig() {
         String[] args = this.arguments.getSourceArgs();
-        if (args.length != 1) {
+        if (args.length > 1) {
             throw new ExternalException(
-                      "HugeGraphHubble must specify a config file");
+                      "HugeGraphHubble accept up to one param as config file");
+        } else if (args.length == 0) {
+            args = new String[]{Constant.CONFIG_FILE};
         }
+
         // Register hubble config options
         OptionSpace.register(Constant.MODULE_NAME, HubbleOptions.instance());
-
         String conf = args[0];
         try {
             String path = HubbleConfig.class.getClassLoader()

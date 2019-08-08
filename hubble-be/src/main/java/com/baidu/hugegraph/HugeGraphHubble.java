@@ -25,16 +25,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
-import com.baidu.hugegraph.common.Constant;
-
 @SpringBootApplication
 @MapperScan("com.baidu.hugegraph.mapper")
 public class HugeGraphHubble extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
-        if (args == null) {
-            args = new String[]{Constant.CONFIG_FILE};
-        }
         SpringApplication.run(HugeGraphHubble.class, args);
     }
 

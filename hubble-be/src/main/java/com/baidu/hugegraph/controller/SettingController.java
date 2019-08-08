@@ -46,7 +46,7 @@ public class SettingController {
 
     @GetMapping("config")
     public UserInfo config(@RequestParam(value = "locale",
-                                         defaultValue = "en_US")
+                                         defaultValue = "zh_CN")
                            String locale,
                            HttpServletRequest request,
                            HttpServletResponse response) {

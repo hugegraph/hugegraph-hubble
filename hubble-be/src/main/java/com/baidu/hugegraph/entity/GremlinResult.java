@@ -50,6 +50,8 @@ public class GremlinResult {
     @Builder
     public static class GraphView {
 
+        public static final GraphView EMPTY = new GraphView();
+
         @JsonProperty("vertices")
         private Collection<Vertex> vertices;
         @JsonProperty("edges")
@@ -66,6 +68,18 @@ public class GremlinResult {
 
         EDGE,
 
-        PATH
+        PATH;
+
+        public boolean isEmpty() {
+            return this == EMPTY;
+        }
+
+        public boolean isGeneral() {
+            return this == GENERAL;
+        }
+
+        public boolean isGraph() {
+            return this == VERTEX || this == EDGE || this == PATH;
+        }
     }
 }
