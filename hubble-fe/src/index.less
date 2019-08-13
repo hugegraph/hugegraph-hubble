@@ -1,3 +1,9 @@
+@import '~@baidu/one-ui/src/index.less';
+
+* {
+  box-sizing: border-box;
+}
+
 html,
 body,
 img {
@@ -6,7 +12,7 @@ img {
 }
 
 body {
-  background: #000;
+  background: #f2f2f2;
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -20,6 +26,10 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  &.dark {
+    background: #000;
+  }
 }
 
 code {
