@@ -35,15 +35,15 @@ build/
 .vscode/
 
 # dependencies
-/node_modules
-/.pnp
+/hubble-fe/node_modules
+/hubble-fe/.pnp
 .pnp.js
 
 # testing
-/coverage
+/hubble-fe/coverage
 
 # production
-/build
+/hubble-fe/build
 
 # misc
 .DS_Store
