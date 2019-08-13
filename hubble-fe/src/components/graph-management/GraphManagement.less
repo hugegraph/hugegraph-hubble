@@ -1,0 +1,164 @@
+@background-light: #fff;
+@font-color-light: #000;
+
+@background-dark: #1b1b1b;
+@font-color-grey: #6f7173;
+
+.graph-management {
+  width: 1080px;
+  margin: 16px auto;
+}
+
+.graph-management-header {
+  display: flex;
+
+  & > span {
+    margin-right: auto;
+    display: block;
+    font-size: 12px;
+    line-height: 32px;
+  }
+
+  &.dark > span {
+    color: @font-color-grey;
+  }
+}
+
+.graph-management-list {
+  display: flex;
+  width: 100%;
+  height: 100px;
+  margin: 16px 0;
+  background: @background-light;
+  border-radius: 3px;
+
+  &:nth-last-child(2) {
+    margin-bottom: 24px;
+  }
+
+  &.dark {
+    background: @background-dark;
+  }
+
+  & > div {
+    width: 25%;
+    height: 100%;
+    padding: 16px;
+  }
+
+  &-data-config {
+    margin-top: 16px;
+    border-radius: 3px;
+
+    &.dark {
+      background: @background-dark;
+      color: #fff;
+    }
+  }
+
+  &-create-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    & > div {
+      margin-top: 4px;
+    }
+
+    & > div > div {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+
+      &:first-child {
+        margin-top: 0;
+      }
+
+      &:nth-child(-n + 4) > span::before {
+        content: '*';
+        color: #fb4b53;
+      }
+
+      & > span {
+        display: block;
+        font-size: 14px;
+        line-height: 20px;
+        margin-right: 14px;
+      }
+    }
+  }
+
+  &-title {
+    font-size: 12px;
+    line-height: 17px;
+
+    &.dark {
+      color: @font-color-grey;
+    }
+  }
+
+  &-data {
+    margin-top: 16px;
+    font-size: 16px;
+
+    &.dark {
+      color: #fff;
+    }
+  }
+
+  &-manipulation {
+    display: flex;
+    align-items: center;
+  }
+
+  &-empty {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 1080px;
+    height: 580px;
+    margin: 16px auto;
+    background: @background-light;
+    border-radius: 3px;
+    font-size: 14px;
+
+    & > div {
+      margin: 8px 0 24px;
+    }
+
+    &.dark {
+      background: @background-dark;
+    }
+  }
+
+  &-highlight {
+    background: transparent;
+    color: #2b65ff;
+  }
+}
+
+.graph-data-delete-confirm {
+  font-size: 14px;
+  color: #333;
+  letter-spacing: 0;
+  line-height: 22px;
+}
+
+// overrides
+
+.new-fc-one-pagination.new-fc-one-pagination-medium {
+  display: flex;
+  justify-content: center;
+}
+
+.new-fc-one-input-error.new-fc-one-input-error-right {
+  position: absolute;
+  width: 100%;
+  line-height: 32px;
+}
+
+.new-fc-one-modal-footer > button.new-fc-one-btn-primary {
+  background: #2b65ff;
+}
