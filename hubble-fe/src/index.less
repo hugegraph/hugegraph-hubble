@@ -1,3 +1,9 @@
+@import '~@baidu/one-ui/src/index.less';
+
+* {
+  box-sizing: border-box;
+}
+
 html,
 body,
 img {
@@ -6,7 +12,7 @@ img {
 }
 
 body {
-  background: #000;
+  background: #f2f2f2;
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -20,6 +26,10 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  &.dark {
+    background: #000;
+  }
 }
 
 code {
@@ -30,4 +40,39 @@ code {
     Consolas,
     'Courier New',
     monospace;
+}
+
+/* overrides (global) */
+
+//primary button background colors
+.new-fc-one-btn-primary {
+  background: #2b65ff;
+
+  &:hover {
+    background: #527dff;
+  }
+
+  &:active {
+    background: #184bcc;
+  }
+
+  &-disabled {
+    background: #ccc;
+
+    &:hover,
+    &:active {
+      background: #ccc;
+    }
+  }
+}
+
+// Modal titles
+.new-fc-one-modal-title {
+  font-family:
+    'PingFangSC-Medium',
+    'Microsoft YaHei',
+    '微软雅黑',
+    Arial,
+    sans-serif;
+  font-size: 16px;
 }
