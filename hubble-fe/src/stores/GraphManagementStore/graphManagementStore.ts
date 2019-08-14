@@ -226,7 +226,7 @@ export class GraphManagementStore {
     searchWords?: string
   ) {
     const url =
-      `${baseUrl}/graph-connections?pageNo=${this.graphDataPageConfig.pageNumber}&pageSize=${this.graphDataPageConfig.pageSize}` +
+      `${baseUrl}/graph-connections?page_no=${this.graphDataPageConfig.pageNumber}&page_size=${this.graphDataPageConfig.pageSize}` +
       (typeof searchWords !== 'undefined' && searchWords !== ''
         ? `&content=${this.searchWords}`
         : '');
