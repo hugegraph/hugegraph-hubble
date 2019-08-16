@@ -17,16 +17,12 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity;
+package com.baidu.hugegraph.entity.schema;
 
-import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
-import com.baidu.hugegraph.annotation.MergeProperty;
-import com.baidu.hugegraph.common.Identifiable;
-import com.baidu.hugegraph.common.Mergeable;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baidu.hugegraph.structure.constant.IdStrategy;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -38,23 +34,31 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@TableName("gremlin_collection")
-public class GremlinCollection implements Identifiable, Mergeable {
+public class VertexLabelEntity implements SchemaLabelEntity {
 
-    @TableId(type = IdType.AUTO)
-    @MergeProperty(useNew = false)
-    @JsonProperty("id")
-    private Integer id;
-
-    @MergeProperty
     @JsonProperty("name")
     private String name;
 
-    @MergeProperty
-    @JsonProperty("content")
-    private String content;
+    @JsonProperty("id_strategy")
+    private IdStrategy idStrategy;
 
-    @MergeProperty(useNew = false)
-    @JsonProperty("create_time")
-    private Date createTime;
+    @JsonProperty("properties")
+    private Set<AttachedProperty> properties;
+
+    @JsonProperty("primary_keys")
+    private List<String> primaryKeys;
+
+    @JsonProperty("property_indexes")
+    private List<PropertyIndex> propertyIndexes;
+
+    @JsonProperty("open_label_index")
+    private boolean openLabelIndex;
+
+    @JsonProperty("style")
+    private SchemaStyle style;
+
+    @Override
+    public boolean isVertexLabel() {
+        return true;
+    }
 }

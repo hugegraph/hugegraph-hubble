@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.controller;
+package com.baidu.hugegraph.controller.query;
 
 import java.util.Date;
 import java.util.List;
@@ -32,10 +32,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.baidu.hugegraph.entity.ExecuteHistory;
+import com.baidu.hugegraph.controller.BaseController;
+import com.baidu.hugegraph.entity.query.ExecuteHistory;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.InternalException;
-import com.baidu.hugegraph.service.ExecuteHistoryService;
+import com.baidu.hugegraph.service.query.ExecuteHistoryService;
 import com.baidu.hugegraph.util.Ex;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -50,11 +51,11 @@ public class ExecuteHistoryController extends BaseController {
     public IPage<ExecuteHistory> listAll(@RequestParam(name = "page_no",
                                                        required = false,
                                                        defaultValue = "1")
-                                         long pageNo,
+                                         int pageNo,
                                          @RequestParam(name = "page_size",
                                                        required = false,
                                                        defaultValue = "10")
-                                         long pageSize) {
+                                         int pageSize) {
         return this.service.list(pageNo, pageSize);
     }
 

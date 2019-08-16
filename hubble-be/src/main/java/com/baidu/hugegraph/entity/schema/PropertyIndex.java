@@ -17,13 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity;
+package com.baidu.hugegraph.entity.schema;
 
-import java.util.Collection;
 import java.util.List;
 
-import com.baidu.hugegraph.structure.graph.Edge;
-import com.baidu.hugegraph.structure.graph.Vertex;
+import com.baidu.hugegraph.structure.constant.IndexType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -35,51 +33,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GremlinResult {
+public class PropertyIndex {
+
+    @JsonProperty("name")
+    private String name;
 
     @JsonProperty("type")
-    private Type type;
-    @JsonProperty("data")
-    private List<Object> data;
-    @JsonProperty("graph_view")
-    private GraphView graphView;
+    private IndexType type;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class GraphView {
-
-        public static final GraphView EMPTY = new GraphView();
-
-        @JsonProperty("vertices")
-        private Collection<Vertex> vertices;
-        @JsonProperty("edges")
-        private Collection<Edge> edges;
-    }
-
-    public enum Type {
-
-        EMPTY,
-
-        GENERAL,
-
-        VERTEX,
-
-        EDGE,
-
-        PATH;
-
-        public boolean isEmpty() {
-            return this == EMPTY;
-        }
-
-        public boolean isGeneral() {
-            return this == GENERAL;
-        }
-
-        public boolean isGraph() {
-            return this == VERTEX || this == EDGE || this == PATH;
-        }
-    }
+    @JsonProperty("fields")
+    private List<String> fields;
 }

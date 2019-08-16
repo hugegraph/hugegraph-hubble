@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.service;
+package com.baidu.hugegraph.service.query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,12 +34,13 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.entity.AdjacentQuery;
-import com.baidu.hugegraph.entity.GremlinQuery;
-import com.baidu.hugegraph.entity.GremlinResult;
-import com.baidu.hugegraph.entity.GremlinResult.GraphView;
-import com.baidu.hugegraph.entity.GremlinResult.Type;
+import com.baidu.hugegraph.entity.query.AdjacentQuery;
+import com.baidu.hugegraph.entity.query.GremlinQuery;
+import com.baidu.hugegraph.entity.query.GremlinResult;
+import com.baidu.hugegraph.entity.query.GremlinResult.GraphView;
+import com.baidu.hugegraph.entity.query.GremlinResult.Type;
 import com.baidu.hugegraph.options.HubbleOptions;
+import com.baidu.hugegraph.service.HugeClientPoolService;
 import com.baidu.hugegraph.structure.constant.Direction;
 import com.baidu.hugegraph.structure.graph.Edge;
 import com.baidu.hugegraph.structure.graph.Path;

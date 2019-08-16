@@ -65,11 +65,11 @@ public class GraphConnectionController extends BaseController {
                                        @RequestParam(name = "page_no",
                                                      required = false,
                                                      defaultValue = "1")
-                                       long pageNo,
+                                       int pageNo,
                                        @RequestParam(name = "page_size",
                                                      required = false,
                                                      defaultValue = "10")
-                                       long pageSize) {
+                                       int pageSize) {
         return this.connService.list(content, pageNo, pageSize);
     }
 

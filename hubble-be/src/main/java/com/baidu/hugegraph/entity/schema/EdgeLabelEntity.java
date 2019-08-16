@@ -17,11 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity;
+package com.baidu.hugegraph.entity.schema;
 
 import java.util.List;
+import java.util.Set;
 
-import com.baidu.hugegraph.structure.constant.Direction;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -33,36 +33,37 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AdjacentQuery {
+public class EdgeLabelEntity implements SchemaLabelEntity {
 
-    @JsonProperty("connection_id")
-    private Integer connectionId;
+    @JsonProperty("name")
+    private String name;
 
-    @JsonProperty("vertex_id")
-    private Object vertexId;
+    @JsonProperty("source_label")
+    private String sourceLabel;
 
-    @JsonProperty("edge_label")
-    private String edgeLabel;
+    @JsonProperty("target_label")
+    private String targetLabel;
 
-    @JsonProperty("direction")
-    private Direction direction;
+    @JsonProperty("link_multi_times")
+    private boolean linkMultiTimes;
 
-    @JsonProperty("conditions")
-    private List<Condition> conditions;
+    @JsonProperty("properties")
+    private Set<AttachedProperty> properties;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class Condition {
+    @JsonProperty("sort_keys")
+    private List<String> sortKeys;
 
-        @JsonProperty("key")
-        private String key;
+    @JsonProperty("property_indexes")
+    private List<PropertyIndex> propertyIndexes;
 
-        @JsonProperty("operator")
-        private String operator;
+    @JsonProperty("open_label_index")
+    private boolean openLabelIndex;
 
-        @JsonProperty("value")
-        private Object value;
+    @JsonProperty("style")
+    private SchemaStyle style;
+
+    @Override
+    public boolean isVertexLabel() {
+        return false;
     }
 }

@@ -17,15 +17,21 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.exception;
+package com.baidu.hugegraph.controller.schema;
 
-public class InternalException extends ParameterizedException {
+import java.util.regex.Pattern;
 
-    public InternalException(String message, Object... args) {
-        super(message, args);
-    }
+import org.springframework.beans.factory.annotation.Autowired;
 
-    public InternalException(String message, Throwable cause, Object... args) {
-        super(message, cause, args);
-    }
+import com.baidu.hugegraph.controller.BaseController;
+import com.baidu.hugegraph.service.schema.SchemaService;
+
+public class SchemaController extends BaseController {
+
+    protected static final Pattern NAME_PATTERN = Pattern.compile(
+            "^[A-Za-z0-9_]{0,128}$"
+    );
+
+    @Autowired
+    protected SchemaService service;
 }

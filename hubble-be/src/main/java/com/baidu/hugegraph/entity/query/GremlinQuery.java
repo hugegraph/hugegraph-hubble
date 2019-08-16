@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity;
+package com.baidu.hugegraph.entity.query;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

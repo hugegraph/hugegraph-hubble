@@ -17,57 +17,44 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.service;
+package com.baidu.hugegraph.service.query;
+
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
-import com.baidu.hugegraph.common.Constant;
-import com.baidu.hugegraph.entity.GremlinCollection;
-import com.baidu.hugegraph.mapper.GremlinCollectionMapper;
+import com.baidu.hugegraph.entity.query.ExecuteHistory;
+import com.baidu.hugegraph.mapper.ExecuteHistoryMapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 @Service
-public class GremlinCollectionService {
+public class ExecuteHistoryService {
 
     @Autowired
-    private GremlinCollectionMapper mapper;
+    private ExecuteHistoryMapper mapper;
 
-    public IPage<GremlinCollection> list(String content, Boolean nameOrderAsc,
-                                         long current, long pageSize) {
-        QueryWrapper<GremlinCollection> query = Wrappers.query();
-        if (!StringUtils.isEmpty(content)) {
-            String value = content;
-            if (Constant.LIKE_WILDCARDS.contains(content)) {
-                value = "\\" + content;
-            }
-            query.like("name", value).or().like("content", value);
-        }
-        if (nameOrderAsc != null) {
-            if (nameOrderAsc) {
-                query.orderByAsc("name");
-            } else {
-                query.orderByDesc("name");
-            }
-        }
+    public List<ExecuteHistory> listAll() {
+        return this.mapper.selectList(null);
+    }
+
+    public IPage<ExecuteHistory> list(long current, long pageSize) {
+        QueryWrapper<ExecuteHistory> query = Wrappers.query();
         query.orderByDesc("create_time");
         return this.mapper.selectPage(new Page<>(current, pageSize), query);
     }
 
-    public GremlinCollection get(int id) {
-        return this.mapper.selectById(id);
+    public List<ExecuteHistory> listBatch(List<Integer> ids) {
+        return this.mapper.selectBatchIds(ids);
     }
 
-    public GremlinCollection getByName(String name) {
-        QueryWrapper<GremlinCollection> query = Wrappers.query();
-        query.eq("name", name);
-        return this.mapper.selectOne(query);
+    public ExecuteHistory get(int id) {
+        return this.mapper.selectById(id);
     }
 
     public int count() {
@@ -75,13 +62,13 @@ public class GremlinCollectionService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public int save(GremlinCollection collection) {
-        return this.mapper.insert(collection);
+    public int save(ExecuteHistory history) {
+        return this.mapper.insert(history);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public int update(GremlinCollection collection) {
-        return this.mapper.updateById(collection);
+    public int update(ExecuteHistory history) {
+        return this.mapper.updateById(history);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)

@@ -69,6 +69,12 @@ public class ExceptionAdvisor {
                        .build();
     }
 
+//    @ResponseStatus(value = HttpStatus.OK, reason = "CUSTOM MESSAGE HERE")
+//    @ExceptionHandler(HttpMessageNotReadableException.class)
+//    public void handleException() {
+//        //Handle Exception Here...
+//    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.OK)
     public Response exceptionHandler(Exception e) {
