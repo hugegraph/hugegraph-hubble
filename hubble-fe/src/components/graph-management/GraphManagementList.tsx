@@ -100,6 +100,12 @@ const GraphManagementListItem = observer(
     const graphManagementStore = useContext(GraphManagementStoreContext);
     const [isEditing, setEditingState] = useState(false);
 
+    const handleCancel = useCallback(() => {
+      graphManagementStore.resetGraphDataConfig('edit');
+      graphManagementStore.changeSelectedEditIndex(null);
+      setEditingState(false);
+    }, [graphManagementStore]);
+
     const handleSave = useCallback(async () => {
       graphManagementStore.switchValidateStatus(true);
 
@@ -116,6 +122,7 @@ const GraphManagementListItem = observer(
         });
 
         graphManagementStore.fetchGraphDataList();
+        handleCancel();
       }
 
       if (graphManagementStore.requestStatus.upgradeGraphData === 'failed') {
@@ -124,13 +131,7 @@ const GraphManagementListItem = observer(
           size: 'medium'
         });
       }
-    }, [graphManagementStore, id]);
-
-    const handleCancel = useCallback(() => {
-      graphManagementStore.resetGraphDataConfig('edit');
-      graphManagementStore.changeSelectedEditIndex(null);
-      setEditingState(false);
-    }, [graphManagementStore]);
+    }, [graphManagementStore, handleCancel, id]);
 
     const handleDropdownClick = useCallback(
       (index: number) => (e: { key: string; item: object }) => {

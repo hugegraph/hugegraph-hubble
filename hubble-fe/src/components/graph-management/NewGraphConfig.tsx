@@ -24,6 +24,13 @@ const NewGraphConfig: React.FC = observer(() => {
     [graphManagementStore]
   );
 
+  const handleCancel = useCallback(() => {
+    graphManagementStore.switchCreateNewGraph(false);
+    graphManagementStore.resetGraphDataConfig('new');
+    graphManagementStore.switchValidateStatus(false);
+    graphManagementStore.resetValidateErrorMessage();
+  }, [graphManagementStore]);
+
   const handleCreate = useCallback(async () => {
     graphManagementStore.switchValidateStatus(true);
 
@@ -40,6 +47,7 @@ const NewGraphConfig: React.FC = observer(() => {
       });
 
       graphManagementStore.fetchGraphDataList();
+      handleCancel();
     }
 
     if (graphManagementStore.requestStatus.AddGraphData === 'failed') {
@@ -48,14 +56,7 @@ const NewGraphConfig: React.FC = observer(() => {
         size: 'medium'
       });
     }
-  }, [graphManagementStore]);
-
-  const handleCancel = useCallback(() => {
-    graphManagementStore.switchCreateNewGraph(false);
-    graphManagementStore.resetGraphDataConfig('new');
-    graphManagementStore.switchValidateStatus(false);
-    graphManagementStore.resetValidateErrorMessage();
-  }, [graphManagementStore]);
+  }, [graphManagementStore, handleCancel]);
 
   return (
     <Embedded
