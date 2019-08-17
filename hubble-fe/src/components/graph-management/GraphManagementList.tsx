@@ -380,6 +380,7 @@ const GraphManagementListItem = observer(
             options={dropdownList}
             title="更多"
             size="medium"
+            trigger={['click']}
             width={78}
             onHandleMenuClick={handleDropdownClick(index)}
             disabled={
