@@ -36,8 +36,7 @@ const GraphManagementEmptyList: React.FC = observer(() => {
               type="primary"
               size="large"
               style={{
-                width: 112,
-                backgroundColor: '#2b65ff'
+                width: 112
               }}
               onClick={handleLayoutSwitch(true)}
             >

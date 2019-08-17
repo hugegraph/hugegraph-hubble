@@ -307,7 +307,7 @@ const GraphManagementListItem = observer(
                 <Button
                   type="primary"
                   size="medium"
-                  style={{ width: 78, backgroundColor: '#2b65ff' }}
+                  style={{ width: 78 }}
                   onClick={handleSave}
                 >
                   保存

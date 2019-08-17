@@ -185,7 +185,7 @@ const NewGraphConfig: React.FC = observer(() => {
               <Button
                 type="primary"
                 size="medium"
-                style={{ width: 78, backgroundColor: '#2b65ff' }}
+                style={{ width: 78 }}
                 onClick={handleCreate}
               >
                 创建

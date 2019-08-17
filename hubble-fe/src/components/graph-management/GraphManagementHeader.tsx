@@ -54,7 +54,7 @@ const GraphManagementHeader: React.FC = observer(() => {
       <Button
         type="primary"
         size="medium"
-        style={buttonStyles}
+        style={styles}
         onClick={handleLayoutSwitch(true)}
         disabled={graphManagementStore.selectedEditIndex !== null}
       >
