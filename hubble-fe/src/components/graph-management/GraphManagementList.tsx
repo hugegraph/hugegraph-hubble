@@ -333,36 +333,46 @@ const GraphManagementListItem = observer(
         <div className="graph-management-list-item">
           <div className="graph-management-list-title">图ID</div>
           <div className="graph-management-list-data">
-            <Highlighter
-              highlightClassName="graph-management-list-highlight"
-              searchWords={[graphManagementStore.searchWords]}
-              autoEscape={true}
-              textToHighlight={name}
-            />
+            <span title={name}>
+              <Highlighter
+                highlightClassName="graph-management-list-highlight"
+                searchWords={[graphManagementStore.isSearched.value]}
+                autoEscape={true}
+                textToHighlight={name}
+              />
+            </span>
           </div>
         </div>
         <div className="graph-management-list-item">
           <div className="graph-management-list-title">图名称</div>
           <div className="graph-management-list-data">
-            <Highlighter
-              highlightClassName="graph-management-list-highlight"
-              searchWords={[graphManagementStore.searchWords]}
-              autoEscape={true}
-              textToHighlight={graph}
-            />
+            <span title={graph}>
+              <Highlighter
+                highlightClassName="graph-management-list-highlight"
+                searchWords={[graphManagementStore.isSearched.value]}
+                autoEscape={true}
+                textToHighlight={graph}
+              />
+            </span>
           </div>
         </div>
         <div className="graph-management-list-item">
           <div className="graph-management-list-title">主机名</div>
-          <div className="graph-management-list-data">{host}</div>
+          <div className="graph-management-list-data" title={host}>
+            {host}
+          </div>
         </div>
         <div className="graph-management-list-item">
           <div className="graph-management-list-title">端口号</div>
-          <div className="graph-management-list-data">{port}</div>
+          <div className="graph-management-list-data" title={port}>
+            {port}
+          </div>
         </div>
         <div className="graph-management-list-item">
           <div className="graph-management-list-title">创建时间</div>
-          <div className="graph-management-list-data">{create_time}</div>
+          <div className="graph-management-list-data" title={create_time}>
+            {create_time}
+          </div>
         </div>
         <div className="graph-management-list-manipulation">
           <Button
