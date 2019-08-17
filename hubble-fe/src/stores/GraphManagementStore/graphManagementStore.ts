@@ -171,38 +171,48 @@ export class GraphManagementStore {
 
   @action
   validate(type: 'new' | 'edit') {
-    const reg = /^[A-Za-z]\w{0,47}$/;
+    const nameReg = /^[A-Za-z]\w{0,47}$/;
+    const hostReg = /((\d{1,3}\.){3}\d{1,3}|([\w!~*'()-]+\.)*[\w!~*'()-]+)$/;
+    const portReg = /^([1-9]|[1-9]\d{1}|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
     const dataName = type + 'GraphData';
     let readyToSubmit = true;
 
     this.resetValidateErrorMessage();
 
-    if (!reg.test(this[dataName].name)) {
-      this.validateErrorMessage.name = '不符合输入要求';
+    if (!nameReg.test(this[dataName].name)) {
+      this[dataName].name.length === 0
+        ? (this.validateErrorMessage.name = '必填项')
+        : (this.validateErrorMessage.name = '不符合输入要求');
       readyToSubmit = false;
     }
 
-    if (!reg.test(this[dataName].graph)) {
-      this.validateErrorMessage.graph = '不符合输入要求';
+    if (!nameReg.test(this[dataName].graph)) {
+      this[dataName].graph.length === 0
+        ? (this.validateErrorMessage.graph = '必填项')
+        : (this.validateErrorMessage.graph = '不符合输入要求');
       readyToSubmit = false;
     }
 
-    if (this[dataName].host.length === 0) {
-      this.validateErrorMessage.host = '必填项';
+    if (!hostReg.test(this[dataName].host)) {
+      this[dataName].host.length === 0
+        ? (this.validateErrorMessage.host = '必填项')
+        : (this.validateErrorMessage.host = '请输入字母、数字或特殊字符');
       readyToSubmit = false;
     }
 
-    if (this[dataName].port.length === 0) {
-      this.validateErrorMessage.port = '必填项';
+    if (!portReg.test(this[dataName].port)) {
+      this[dataName].port.length === 0
+        ? (this.validateErrorMessage.port = '必填项')
+        : (this.validateErrorMessage.port = '请输入范围在 1-65535 的数字');
       readyToSubmit = false;
     }
 
     if (
-      (dataName === 'newGraphData' &&
-        (this[dataName].username.length !== 0 &&
-          this[dataName].password.length === 0)) ||
-      (this[dataName].username.length === 0 &&
-        this[dataName].password.length !== 0)
+      dataName === 'newGraphData' &&
+      ((this[dataName].username.length !== 0 &&
+        this[dataName].password.length === 0) ||
+        (this[dataName].username.length === 0 &&
+          this[dataName].password.length !== 0))
     ) {
       this.validateErrorMessage.usernameAndPassword =
         '必须同时填写用户名和密码';
