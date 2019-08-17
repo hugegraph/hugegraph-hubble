@@ -135,7 +135,7 @@ const GraphManagementListItem = observer(
 
     const handleDropdownClick = useCallback(
       (index: number) => (e: { key: string; item: object }) => {
-        const { name, host, port } = graphManagementStore.graphData[index];
+        const { name } = graphManagementStore.graphData[index];
 
         if (e.key === 'edit') {
           setEditingState(true);
@@ -148,7 +148,7 @@ const GraphManagementListItem = observer(
             title: '删除图',
             content: (
               <div className="graph-data-delete-confirm">
-                {`确认删除 ${name} ${host}:${port} 吗？`}
+                {`确认删除 ${name} 吗？`}
                 <br />
                 删除后该图所有配置均不可恢复
               </div>
