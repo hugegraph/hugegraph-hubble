@@ -251,7 +251,7 @@ const GraphManagementListItem = observer(
               <span>端口号：</span>
               <Input
                 {...isRequiredInputProps}
-                placeholder="请输出端口号"
+                placeholder="请输入端口号"
                 errorMessage={
                   graphManagementStore.isValidated &&
                   graphManagementStore.validateErrorMessage.port !== ''
