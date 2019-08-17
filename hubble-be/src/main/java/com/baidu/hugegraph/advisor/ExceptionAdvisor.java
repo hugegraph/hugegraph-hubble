@@ -40,7 +40,7 @@ public class ExceptionAdvisor {
     private MessageSourceHandler messageSourceHandler;
 
     @ExceptionHandler(ExternalException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.OK)
     public Response exceptionHandler(ExternalException e) {
         String message = this.handleMessage(e.getMessage(), e.args());
         return Response.builder()
@@ -50,7 +50,7 @@ public class ExceptionAdvisor {
     }
 
     @ExceptionHandler(InternalException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.OK)
     public Response exceptionHandler(InternalException e) {
         String message = this.handleMessage(e.getMessage(), e.args());
         return Response.builder()
@@ -60,7 +60,7 @@ public class ExceptionAdvisor {
     }
 
     @ExceptionHandler(ParameterizedException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.OK)
     public Response exceptionHandler(ParameterizedException e) {
         String message = this.handleMessage(e.getMessage(), e.args());
         return Response.builder()
@@ -70,7 +70,7 @@ public class ExceptionAdvisor {
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.OK)
     public Response exceptionHandler(Exception e) {
         String message = this.handleMessage(e.getMessage(), null);
         return Response.builder()

@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.controller;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +73,7 @@ public class ExecuteHistoryController extends BaseController {
     @PostMapping
     public ExecuteHistory create(@RequestBody ExecuteHistory newEntity) {
         this.checkParamsValid(newEntity);
-        newEntity.setCreateTime(LocalDateTime.now());
+        newEntity.setCreateTime(new Date());
         int rows = this.service.save(newEntity);
         if (rows != 1) {
             throw new InternalException("entity.insert.failed", newEntity);

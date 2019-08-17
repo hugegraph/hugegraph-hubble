@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.entity;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import com.baidu.hugegraph.annotation.MergeProperty;
 import com.baidu.hugegraph.common.Identifiable;
@@ -63,7 +63,7 @@ public class GraphConnection implements Identifiable, Mergeable {
     private Integer port;
 
     @MergeProperty
-    @JsonProperty(value = "username", access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty("username")
     private String username;
 
     @MergeProperty
@@ -72,5 +72,5 @@ public class GraphConnection implements Identifiable, Mergeable {
 
     @MergeProperty(useNew = false)
     @JsonProperty("create_time")
-    private LocalDateTime createTime;
+    private Date createTime;
 }

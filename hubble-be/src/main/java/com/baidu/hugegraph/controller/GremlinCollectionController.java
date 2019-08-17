@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.controller;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +90,7 @@ public class GremlinCollectionController extends BaseController {
                                         LIMIT);
         }
 
-        newEntity.setCreateTime(LocalDateTime.now());
+        newEntity.setCreateTime(new Date());
         int rows = this.service.save(newEntity);
         if (rows != 1) {
             throw new InternalException("entity.insert.failed", newEntity);

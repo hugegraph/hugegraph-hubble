@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.unit;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import org.junit.Test;
 
@@ -33,12 +33,12 @@ public class EntityUtilTest {
     public void testMerge() throws InterruptedException {
         GraphConnection oldEntity;
         GraphConnection newEntity;
-        LocalDateTime dateTime = LocalDateTime.now();
+        Date dateTime = new Date();
         oldEntity = new GraphConnection(1, "conn1", "graph1", "host1", 8001,
                                         "", "", dateTime);
         Thread.sleep(10);
         newEntity = new GraphConnection(2, "conn2", "graph2", "host2", 8002,
-                                        "u", "p", LocalDateTime.now());
+                                        "u", "p", new Date());
 
         GraphConnection entity = EntityUtil.merge(oldEntity, newEntity);
         Assert.assertEquals(oldEntity.getId(), entity.getId());

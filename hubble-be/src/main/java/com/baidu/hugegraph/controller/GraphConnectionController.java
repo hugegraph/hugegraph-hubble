@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.controller;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -50,6 +50,9 @@ public class GraphConnectionController extends BaseController {
 
     private static final String NAME_REGEX = "^[A-Za-z][A-Za-z0-9_]{0,47}$";
     private static final String GRAPH_REGEX = NAME_REGEX;
+    private static final String HOST_REGEX =
+                                "(([0-9]{1,3}\\.){3}[0-9]{1,3}" + "|" +
+                                "([0-9A-Za-z_!~*'()-]+\\.)*[0-9A-Za-z_!~*'()-]+)$";
 
     @Autowired
     private GraphConnectionService connService;
@@ -101,7 +104,7 @@ public class GraphConnectionController extends BaseController {
         this.checkEntityUnique(newEntity, true);
         // Do connect test, failure will throw an exception
         HugeClient client = HugeClientUtil.tryConnect(newEntity);
-        newEntity.setCreateTime(LocalDateTime.now());
+        newEntity.setCreateTime(new Date());
 
         int rows = this.connService.save(newEntity);
         if (rows != 1) {
@@ -163,21 +166,17 @@ public class GraphConnectionController extends BaseController {
         Ex.check(graph != null, () -> graph.matches(GRAPH_REGEX),
                  "graph-connection.graph.unmatch-regex", graph);
 
-        this.checkParamsNotEmpty("host", newEntity.getHost(), creating);
+        String host = newEntity.getHost();
+        this.checkParamsNotEmpty("host", host, creating);
+        Ex.check(host != null, () -> host.matches(HOST_REGEX),
+                 "graph-connection.host.unmatch-regex", host);
 
         Integer port = newEntity.getPort();
         Ex.check(creating, () -> port != null,
                  "common.param.cannot-be-null", "port");
         Ex.check(port != null, () -> 0 < port && port <= 65535,
-                 "graph-connection.port.must-be-in-range", "(0, 65535]", port);
-
-        Ex.check(StringUtils.isEmpty(newEntity.getUsername()) &&
-                 StringUtils.isEmpty(newEntity.getPassword()) ||
-                 !StringUtils.isEmpty(newEntity.getUsername()) &&
-                 !StringUtils.isEmpty(newEntity.getPassword()),
-                 "graph-connection.username-and-password.invalid",
-                 newEntity.getUsername(), newEntity.getPassword());
-
+                 "graph-connection.port.must-be-in-range", "[1, 65535]", port);
+        
         Ex.check(newEntity.getCreateTime() == null,
                  "common.param.must-be-null", "create_time");
     }
