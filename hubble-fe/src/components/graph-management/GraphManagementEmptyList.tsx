@@ -22,7 +22,7 @@ const GraphManagementEmptyList: React.FC = observer(() => {
   ) {
     return (
       <div className="graph-management-list-empty">
-        {graphManagementStore.isSearched &&
+        {graphManagementStore.isSearched.status &&
         graphManagementStore.requestStatus.fetchGraphData === 'success' ? (
           <>
             <img src={EmptyIcon} alt="无匹配结果" />

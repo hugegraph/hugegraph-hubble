@@ -29,11 +29,10 @@ const GraphManagementHeader: React.FC = observer(() => {
     graphManagementStore.fetchGraphDataList(graphManagementStore.searchWords);
   }, [graphManagementStore]);
 
-  const buttonStyles =
-    graphManagementStore.showCreateNewGraph ||
-    graphManagementStore.selectedEditIndex !== null
-      ? styles
-      : { ...styles, backgroundColor: '#2b65ff' };
+  const handleClearSearch = useCallback(() => {
+    graphManagementStore.mutateSearchWords('');
+    graphManagementStore.fetchGraphDataList();
+  }, [graphManagementStore]);
 
   return (
     <div className="graph-management-header">
@@ -45,6 +44,7 @@ const GraphManagementHeader: React.FC = observer(() => {
         value={graphManagementStore.searchWords}
         onChange={handleSearchChange}
         onSearch={handleSearch}
+        onClearClick={handleClearSearch}
         isShowDropDown={false}
         disabled={
           graphManagementStore.showCreateNewGraph ||

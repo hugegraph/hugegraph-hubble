@@ -55,7 +55,10 @@ export class GraphManagementStore {
   @observable errorMessage = '';
 
   // searched results rather than initial fetched result
-  @observable isSearched = false;
+  @observable.shallow isSearched = {
+    status: false,
+    value: ''
+  };
 
   // is clicekd submit or save to validate
   @observable isValidated = false;
@@ -243,7 +246,11 @@ export class GraphManagementStore {
       }
 
       if (this.searchWords !== '') {
-        this.isSearched = true;
+        this.isSearched.status = true;
+        this.isSearched.value = this.searchWords;
+      } else {
+        this.isSearched.status = false;
+        this.isSearched.value = '';
       }
 
       this.graphData = result.data.data.records;
