@@ -56,7 +56,10 @@ const GraphManagementHeader: React.FC = observer(() => {
         size="medium"
         style={styles}
         onClick={handleLayoutSwitch(true)}
-        disabled={graphManagementStore.selectedEditIndex !== null}
+        disabled={
+          graphManagementStore.showCreateNewGraph ||
+          graphManagementStore.selectedEditIndex !== null
+        }
       >
         创建图
       </Button>
