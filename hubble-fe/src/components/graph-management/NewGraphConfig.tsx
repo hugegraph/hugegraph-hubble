@@ -126,7 +126,7 @@ const NewGraphConfig: React.FC = observer(() => {
             <span>端口号：</span>
             <Input
               {...isRequiredInputProps}
-              placeholder="请输出端口号"
+              placeholder="请输入端口号"
               errorMessage={
                 graphManagementStore.isValidated &&
                 graphManagementStore.validateErrorMessage.port !== ''
@@ -144,7 +144,7 @@ const NewGraphConfig: React.FC = observer(() => {
             <span>用户名：</span>
             <Input
               {...commonInputProps}
-              placeholder="不输入则无需填写"
+              placeholder="未设置则无需填写"
               errorMessage={
                 graphManagementStore.isValidated &&
                 graphManagementStore.validateErrorMessage
@@ -164,7 +164,7 @@ const NewGraphConfig: React.FC = observer(() => {
             <span>密码：</span>
             <Input
               {...commonInputProps}
-              placeholder="不输入则无需填写"
+              placeholder="未设置则无需填写"
               errorMessage={
                 graphManagementStore.isValidated &&
                 graphManagementStore.validateErrorMessage
