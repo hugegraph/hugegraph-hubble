@@ -54,7 +54,7 @@ public class HubbleOptions extends OptionHolder {
                     "server.port",
                     "The port of hugegraph-hubble server.",
                     rangeInt(1, 65535),
-                    8081
+                    8088
             );
 
     public static final ConfigOption<Integer> GREMLIN_SUFFIX_LIMIT =
@@ -88,5 +88,4 @@ public class HubbleOptions extends OptionHolder {
                     rangeInt(1, 1000),
                     500
             );
-
 }

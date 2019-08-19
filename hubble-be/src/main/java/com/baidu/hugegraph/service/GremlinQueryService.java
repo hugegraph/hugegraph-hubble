@@ -212,8 +212,8 @@ public class GremlinQueryService {
                 // value
                 sb.append(condition.getOperator()).append("(")
                   .append(GremlinUtil.escape(condition.getValue())).append(")");
+                sb.append(")");
             }
-            sb.append(")");
         }
         // limit
         sb.append(".limit(").append(degreeLimit).append(")");

@@ -39,22 +39,22 @@ public class ExceptionAdvisor {
     @Autowired
     private MessageSourceHandler messageSourceHandler;
 
-    @ExceptionHandler(ExternalException.class)
-    @ResponseStatus(HttpStatus.OK)
-    public Response exceptionHandler(ExternalException e) {
-        String message = this.handleMessage(e.getMessage(), e.args());
-        return Response.builder()
-                       .status(HttpStatus.BAD_REQUEST.value())
-                       .message(message)
-                       .build();
-    }
-
     @ExceptionHandler(InternalException.class)
     @ResponseStatus(HttpStatus.OK)
     public Response exceptionHandler(InternalException e) {
         String message = this.handleMessage(e.getMessage(), e.args());
         return Response.builder()
                        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                       .message(message)
+                       .build();
+    }
+
+    @ExceptionHandler(ExternalException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public Response exceptionHandler(ExternalException e) {
+        String message = this.handleMessage(e.getMessage(), e.args());
+        return Response.builder()
+                       .status(HttpStatus.BAD_REQUEST.value())
                        .message(message)
                        .build();
     }
@@ -84,7 +84,11 @@ public class ExceptionAdvisor {
         if (args != null && args.length > 0) {
             strArgs = new String[args.length];
             for (int i = 0; i < args.length; i++) {
-                strArgs[i] = args[i].toString();
+                if (args[i] != null) {
+                    strArgs[i] = args[i].toString();
+                } else {
+                    strArgs[i] = "?";
+                }
             }
         }
         try {

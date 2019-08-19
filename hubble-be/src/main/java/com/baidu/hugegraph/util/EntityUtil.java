@@ -39,7 +39,7 @@ public final class EntityUtil {
         }
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
-            // NOTE: Skip jacoco injected filed
+            // NOTE: Skip jacoco injected field
             if (field.getName().startsWith("$")) {
                 continue;
             }
