@@ -22,7 +22,6 @@ package com.baidu.hugegraph.controller;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,9 +62,6 @@ public class GraphConnectionController extends BaseController {
     public IPage<GraphConnection> list(@RequestParam(name = "content",
                                                      required = false)
                                        String content,
-                                       @RequestParam(name = "graph_order",
-                                                     required = false)
-                                       String graphOrder,
                                        @RequestParam(name = "page_no",
                                                      required = false,
                                                      defaultValue = "1")
@@ -74,14 +70,7 @@ public class GraphConnectionController extends BaseController {
                                                      required = false,
                                                      defaultValue = "10")
                                        long pageSize) {
-        Boolean graphOrderAsc = null;
-        if (!StringUtils.isEmpty(graphOrder)) {
-            Ex.check(ORDER_ASC.equals(graphOrder) ||
-                     ORDER_DESC.equals(graphOrder),
-                     "graph-connection.graph-order.invalid", graphOrder);
-            graphOrderAsc = ORDER_ASC.equals(graphOrder);
-        }
-        return this.connService.list(content, graphOrderAsc, pageNo, pageSize);
+        return this.connService.list(content, pageNo, pageSize);
     }
 
     @GetMapping("{id}")

@@ -42,4 +42,8 @@ public final class Constant {
                                "com.baidu.hugegraph.controller";
 
     public static final String COOKIE_USER = "user";
+
+    public static final Set<String> LIKE_WILDCARDS = ImmutableSet.of(
+            "%", "_", "^", "[", "]"
+    );
 }

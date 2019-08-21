@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.entity.GraphConnection;
 import com.baidu.hugegraph.mapper.GraphConnectionMapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -44,25 +45,20 @@ public class GraphConnectionService {
         return this.mapper.selectList(null);
     }
 
-    public IPage<GraphConnection> list(String content, Boolean graphOrderAsc,
-                                       long current, long pageSize) {
-        QueryWrapper<GraphConnection> query = Wrappers.query();
+    public IPage<GraphConnection> list(String content, long current,
+                                       long pageSize) {
+        IPage<GraphConnection> page = new Page<>(current, pageSize);
         if (!StringUtils.isEmpty(content)) {
-            query.like("name", content).or().like("graph", content);
-        }
-        /*
-         * The results will order by create_time when graph_order is null,
-         * otherwise order by graph firstly then by create_time.
-         */
-        if (graphOrderAsc != null) {
-            if (graphOrderAsc) {
-                query.orderByAsc("graph");
-            } else {
-                query.orderByDesc("graph");
+            String value = content;
+            if (Constant.LIKE_WILDCARDS.contains(content)) {
+                value = "\\" + content;
             }
+            return this.mapper.selectByContentInPage(page, value);
+        } else {
+            QueryWrapper<GraphConnection> query = Wrappers.query();
+            query.orderByDesc("create_time");
+            return this.mapper.selectPage(page, query);
         }
-        query.orderByDesc("create_time");
-        return this.mapper.selectPage(new Page<>(current, pageSize), query);
     }
 
     public GraphConnection get(int id) {

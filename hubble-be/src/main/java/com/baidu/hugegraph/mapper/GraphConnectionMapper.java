@@ -20,12 +20,21 @@
 package com.baidu.hugegraph.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import com.baidu.hugegraph.entity.GraphConnection;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 
 @Mapper
 @Component
 public interface GraphConnectionMapper extends BaseMapper<GraphConnection> {
+
+    /**
+     * NOTE: Page must be the first param, otherwise throw exception
+     */
+    IPage<GraphConnection> selectByContentInPage(IPage<GraphConnection> page,
+                                                 @Param("content")
+                                                 String content);
 }

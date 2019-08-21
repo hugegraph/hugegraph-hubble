@@ -70,7 +70,8 @@ public final class HugeClientUtil {
             String message = cause.getMessage();
             if (message.contains("Connection refused")) {
                 throw new ExternalException("service.unavailable", host, port);
-            } else if (message.contains("java.net.UnknownHostException")) {
+            } else if (message.contains("java.net.UnknownHostException") ||
+                       message.contains("Host name may not be null")) {
                 throw new ExternalException("service.unknown-host", host);
             }
             throw e;
