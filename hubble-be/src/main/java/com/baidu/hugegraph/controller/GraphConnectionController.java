@@ -21,6 +21,7 @@ package com.baidu.hugegraph.controller;
 
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.entity.GraphConnection;
 import com.baidu.hugegraph.exception.ExternalException;
@@ -47,11 +49,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 @RequestMapping("graph-connections")
 public class GraphConnectionController extends BaseController {
 
-    private static final String NAME_REGEX = "^[A-Za-z][A-Za-z0-9_]{0,47}$";
-    private static final String GRAPH_REGEX = NAME_REGEX;
-    private static final String HOST_REGEX =
-                                "(([0-9]{1,3}\\.){3}[0-9]{1,3}" + "|" +
-                                "([0-9A-Za-z_!~*'()-]+\\.)*[0-9A-Za-z_!~*'()-]+)$";
+    private static final Pattern GRAPH_PATTERN = Pattern.compile(
+            "^[A-Za-z][A-Za-z0-9_]{0,47}$"
+    );
+    private static final Pattern HOST_PATTERN = Pattern.compile(
+            "(([0-9]{1,3}\\.){3}[0-9]{1,3}|" +
+            "([0-9A-Za-z_!~*'()-]+\\.)*[0-9A-Za-z_!~*'()-]+)$"
+    );
 
     @Autowired
     private GraphConnectionService connService;
@@ -65,11 +69,11 @@ public class GraphConnectionController extends BaseController {
                                        @RequestParam(name = "page_no",
                                                      required = false,
                                                      defaultValue = "1")
-                                       long pageNo,
+                                       int pageNo,
                                        @RequestParam(name = "page_size",
                                                      required = false,
                                                      defaultValue = "10")
-                                       long pageSize) {
+                                       int pageSize) {
         return this.connService.list(content, pageNo, pageSize);
     }
 
@@ -147,17 +151,18 @@ public class GraphConnectionController extends BaseController {
 
         String name = newEntity.getName();
         this.checkParamsNotEmpty("name", name, creating);
-        Ex.check(name != null, () -> name.matches(NAME_REGEX),
+        Ex.check(name != null, () -> Constant.NAME_PATTERN.matcher(name)
+                                                          .matches(),
                  "graph-connection.name.unmatch-regex", name);
 
         String graph = newEntity.getGraph();
         this.checkParamsNotEmpty("graph", graph, creating);
-        Ex.check(graph != null, () -> graph.matches(GRAPH_REGEX),
+        Ex.check(graph != null, () -> GRAPH_PATTERN.matcher(graph).matches(),
                  "graph-connection.graph.unmatch-regex", graph);
 
         String host = newEntity.getHost();
         this.checkParamsNotEmpty("host", host, creating);
-        Ex.check(host != null, () -> host.matches(HOST_REGEX),
+        Ex.check(host != null, () -> HOST_PATTERN.matcher(host).matches(),
                  "graph-connection.host.unmatch-regex", host);
 
         Integer port = newEntity.getPort();

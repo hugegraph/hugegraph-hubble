@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.service;
+package com.baidu.hugegraph.service.query;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,9 +25,9 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import com.baidu.hugegraph.common.Constant;
-import com.baidu.hugegraph.entity.GremlinCollection;
-import com.baidu.hugegraph.mapper.GremlinCollectionMapper;
+import com.baidu.hugegraph.entity.query.GremlinCollection;
+import com.baidu.hugegraph.mapper.query.GremlinCollectionMapper;
+import com.baidu.hugegraph.util.SQLUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -39,25 +39,46 @@ public class GremlinCollectionService {
     @Autowired
     private GremlinCollectionMapper mapper;
 
-    public IPage<GremlinCollection> list(String content, Boolean nameOrderAsc,
+    public IPage<GremlinCollection> list(String content,
+                                         Boolean nameOrderAsc,
+                                         Boolean timeOrderAsc,
                                          long current, long pageSize) {
         QueryWrapper<GremlinCollection> query = Wrappers.query();
+        IPage<GremlinCollection> page = new Page<>(current, pageSize);
         if (!StringUtils.isEmpty(content)) {
-            String value = content;
-            if (Constant.LIKE_WILDCARDS.contains(content)) {
-                value = "\\" + content;
-            }
-            query.like("name", value).or().like("content", value);
-        }
-        if (nameOrderAsc != null) {
-            if (nameOrderAsc) {
-                query.orderByAsc("name");
+            // Select by content
+            String value = SQLUtil.escapeLike(content);
+            if (nameOrderAsc != null) {
+                // order by name
+                assert timeOrderAsc == null;
+                query.like("name", value).or().like("content", value);
+                query.orderBy(true, nameOrderAsc, "name");
+                return this.mapper.selectPage(page, query);
+            } else if (timeOrderAsc != null) {
+                // order by time
+                assert nameOrderAsc == null;
+                query.like("name", value).or().like("content", value);
+                query.orderBy(true, timeOrderAsc, "create_time");
+                return this.mapper.selectPage(page, query);
             } else {
-                query.orderByDesc("name");
+                // order by relativity
+                assert nameOrderAsc == null && timeOrderAsc == null;
+                return this.mapper.selectByContentInPage(page, content);
+            }
+        } else {
+            // Select all
+            if (nameOrderAsc != null) {
+                // order by name
+                assert timeOrderAsc == null;
+                query.orderBy(true, nameOrderAsc, "name");
+                return this.mapper.selectPage(page, query);
+            } else {
+                // order by time
+                boolean isAsc = timeOrderAsc != null && timeOrderAsc;
+                query.orderBy(true, isAsc, "create_time");
+                return this.mapper.selectPage(page, query);
             }
         }
-        query.orderByDesc("create_time");
-        return this.mapper.selectPage(new Page<>(current, pageSize), query);
     }
 
     public GremlinCollection get(int id) {

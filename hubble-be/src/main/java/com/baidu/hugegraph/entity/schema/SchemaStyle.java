@@ -17,15 +17,32 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.mapper;
+package com.baidu.hugegraph.entity.schema;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import com.baidu.hugegraph.entity.GremlinCollection;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Mapper
-@Component
-public interface GremlinCollectionMapper extends BaseMapper<GremlinCollection>  {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class SchemaStyle {
+
+    @JsonProperty("icon")
+    private String icon;
+
+    @JsonProperty("color")
+    private String color;
+
+    public String getIcon() {
+        return this.icon != null ? this.icon : "#ED5736";
+    }
+
+    public String getColor() {
+        return this.color != null ? this.color : "";
+    }
 }

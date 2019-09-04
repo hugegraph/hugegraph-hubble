@@ -17,14 +17,12 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity;
+package com.baidu.hugegraph.entity.query;
 
-import java.util.Collection;
 import java.util.List;
 
-import com.baidu.hugegraph.structure.graph.Edge;
-import com.baidu.hugegraph.structure.graph.Vertex;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableList;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,51 +33,28 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GremlinResult {
+public class TableView {
 
-    @JsonProperty("type")
-    private Type type;
-    @JsonProperty("data")
-    private List<Object> data;
-    @JsonProperty("graph_view")
-    private GraphView graphView;
+    public static final TableView EMPTY = new TableView();
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class GraphView {
+    public static final List<String> GENERAL_HEADER = ImmutableList.of(
+            "result"
+    );
 
-        public static final GraphView EMPTY = new GraphView();
+    public static final List<String> VERTEX_HEADER = ImmutableList.of(
+            "id", "label", "properties"
+    );
 
-        @JsonProperty("vertices")
-        private Collection<Vertex> vertices;
-        @JsonProperty("edges")
-        private Collection<Edge> edges;
-    }
+    public static final List<String> EDGE_HEADER = ImmutableList.of(
+            "id", "label", "source", "target", "properties"
+    );
 
-    public enum Type {
+    public static final List<String> PATH_HEADER = ImmutableList.of(
+            "path"
+    );
 
-        EMPTY,
-
-        GENERAL,
-
-        VERTEX,
-
-        EDGE,
-
-        PATH;
-
-        public boolean isEmpty() {
-            return this == EMPTY;
-        }
-
-        public boolean isGeneral() {
-            return this == GENERAL;
-        }
-
-        public boolean isGraph() {
-            return this == VERTEX || this == EDGE || this == PATH;
-        }
-    }
+    @JsonProperty("header")
+    private List<String> header;
+    @JsonProperty("rows")
+    private List<Object> rows;
 }

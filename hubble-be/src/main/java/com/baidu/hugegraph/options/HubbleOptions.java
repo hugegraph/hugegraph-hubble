@@ -85,7 +85,31 @@ public class HubbleOptions extends OptionHolder {
             new ConfigOption<>(
                     "gremlin.batch_query_ids",
                     "The ids count for every batch.",
-                    rangeInt(1, 1000),
+                    rangeInt(1, 500),
+                    100
+            );
+
+    public static final ConfigOption<Integer> EXECUTE_HISTORY_SHOW_LIMIT =
+            new ConfigOption<>(
+                    "execute-history.show_limit",
+                    "The show limit of execute histories.",
+                    rangeInt(0, 10000),
                     500
+            );
+
+    public static final ConfigOption<Integer> INDEXLABEL_CREATE_TIMEOUT =
+            new ConfigOption<>(
+                    "indexlabel.create.timeout",
+                    "The timeout in seconds for waiting to create index label.",
+                    rangeInt(-1, Integer.MAX_VALUE),
+                    30
+            );
+
+    public static final ConfigOption<Integer> INDEXLABEL_REMOVE_TIMEOUT =
+            new ConfigOption<>(
+                    "indexlabel.remove.timeout",
+                    "The timeout in seconds for waiting to remove index label.",
+                    rangeInt(-1, Integer.MAX_VALUE),
+                    30
             );
 }

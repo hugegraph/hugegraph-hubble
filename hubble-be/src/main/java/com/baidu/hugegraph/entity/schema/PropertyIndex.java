@@ -17,15 +17,33 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.exception;
+package com.baidu.hugegraph.entity.schema;
 
-public class InternalException extends ParameterizedException {
+import java.util.List;
 
-    public InternalException(String message, Object... args) {
-        super(message, args);
-    }
+import com.baidu.hugegraph.structure.constant.IndexType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    public InternalException(String message, Throwable cause, Object... args) {
-        super(message, cause, args);
-    }
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class PropertyIndex {
+
+    @JsonProperty("owner")
+    private String owner;
+
+    @JsonProperty("name")
+    private String name;
+
+    @JsonProperty("type")
+    private IndexType type;
+
+    @JsonProperty("fields")
+    private List<String> fields;
 }

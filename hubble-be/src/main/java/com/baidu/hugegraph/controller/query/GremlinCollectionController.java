@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.controller;
+package com.baidu.hugegraph.controller.query;
 
 import java.util.Date;
 
@@ -33,22 +33,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.baidu.hugegraph.entity.GremlinCollection;
+import com.baidu.hugegraph.common.Constant;
+import com.baidu.hugegraph.entity.query.GremlinCollection;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.InternalException;
-import com.baidu.hugegraph.service.GremlinCollectionService;
+import com.baidu.hugegraph.service.query.GremlinCollectionService;
 import com.baidu.hugegraph.util.Ex;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 @RestController
 @RequestMapping("gremlin-collections")
-public class GremlinCollectionController extends BaseController {
+public class GremlinCollectionController extends GremlinController {
 
-    private static final String NAME_REGEX = "[A-Za-z0-9_]{1,50}";
     private static final int LIMIT = 100;
 
+    private final GremlinCollectionService service;
+
     @Autowired
-    private GremlinCollectionService service;
+    public GremlinCollectionController(GremlinCollectionService service) {
+        this.service = service;
+    }
 
     @GetMapping
     public IPage<GremlinCollection> list(@RequestParam(name = "content",
@@ -57,22 +61,34 @@ public class GremlinCollectionController extends BaseController {
                                          @RequestParam(name = "name_order",
                                                        required = false)
                                          String nameOrder,
+                                         @RequestParam(name = "time_order",
+                                                       required = false)
+                                         String timeOrder,
                                          @RequestParam(name = "page_no",
                                                        required = false,
                                                        defaultValue = "1")
-                                         long pageNo,
+                                         int pageNo,
                                          @RequestParam(name = "page_size",
                                                        required = false,
                                                        defaultValue = "10")
-                                         long pageSize) {
+                                         int pageSize) {
+        Ex.check(nameOrder == null || timeOrder == null,
+                 "common.name-time-order.conflict");
         Boolean nameOrderAsc = null;
         if (!StringUtils.isEmpty(nameOrder)) {
-            Ex.check(ORDER_ASC.equals(nameOrder) ||
-                     ORDER_DESC.equals(nameOrder),
-                     "gremlin-collection.name-order.invalid", nameOrder);
+            Ex.check(ORDER_ASC.equals(nameOrder) || ORDER_DESC.equals(nameOrder),
+                     "common.name-order.invalid", nameOrder);
             nameOrderAsc = ORDER_ASC.equals(nameOrder);
         }
-        return this.service.list(content, nameOrderAsc, pageNo, pageSize);
+
+        Boolean timeOrderAsc = null;
+        if (!StringUtils.isEmpty(timeOrder)) {
+            Ex.check(ORDER_ASC.equals(timeOrder) || ORDER_DESC.equals(timeOrder),
+                     "common.time-order.invalid", timeOrder);
+            timeOrderAsc = ORDER_ASC.equals(timeOrder);
+        }
+        return this.service.list(content, nameOrderAsc, timeOrderAsc,
+                                 pageNo, pageSize);
     }
 
     @GetMapping("{id}")
@@ -84,16 +100,15 @@ public class GremlinCollectionController extends BaseController {
     public GremlinCollection create(@RequestBody GremlinCollection newEntity) {
         this.checkParamsValid(newEntity, true);
         this.checkEntityUnique(newEntity, true);
-        // TODO: multi thread may lead rows exceed LIMIT
-        if (this.service.count() >= LIMIT) {
-            throw new ExternalException("gremlin-collection.reached-limit",
-                                        LIMIT);
-        }
-
-        newEntity.setCreateTime(new Date());
-        int rows = this.service.save(newEntity);
-        if (rows != 1) {
-            throw new InternalException("entity.insert.failed", newEntity);
+        // The service is an singleton object
+        synchronized(this.service) {
+            Ex.check(this.service.count() < LIMIT,
+                     "gremlin-collection.reached-limit", LIMIT);
+            newEntity.setCreateTime(new Date());
+            int rows = this.service.save(newEntity);
+            if (rows != 1) {
+                throw new InternalException("entity.insert.failed", newEntity);
+            }
         }
         return newEntity;
     }
@@ -138,10 +153,15 @@ public class GremlinCollectionController extends BaseController {
 
         String name = newEntity.getName();
         this.checkParamsNotEmpty("name", name, creating);
-        Ex.check(name != null, () -> name.matches(NAME_REGEX),
+        Ex.check(name != null, () -> Constant.NAME_PATTERN.matcher(name)
+                                                          .matches(),
                  "gremlin-collection.name.unmatch-regex", name);
 
-        this.checkParamsNotEmpty("content", newEntity.getContent(), creating);
+        String content = newEntity.getContent();
+        this.checkParamsNotEmpty("content", content, creating);
+        Ex.check(CONTENT_PATTERN.matcher(content).find(),
+                 "gremlin-collection.content.invalid", content);
+        checkContentLength(content);
 
         Ex.check(newEntity.getCreateTime() == null,
                  "common.param.must-be-null", "create_time");

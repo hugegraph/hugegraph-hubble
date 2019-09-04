@@ -17,9 +17,9 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity;
+package com.baidu.hugegraph.entity.query;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,11 +30,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GremlinQuery {
+public class TypedResult {
 
-    @JsonProperty("connection_id")
-    private Integer connectionId;
+    private GremlinResult.Type type;
 
-    @JsonProperty("content")
-    private String content;
+    private List<Object> data;
 }

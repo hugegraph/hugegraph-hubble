@@ -17,11 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity;
+package com.baidu.hugegraph.entity.schema;
 
 import java.util.List;
+import java.util.Set;
 
-import com.baidu.hugegraph.structure.constant.Direction;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -33,36 +33,25 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AdjacentQuery {
+public class LabelUpdateEntity implements Typifiable {
 
-    @JsonProperty("connection_id")
-    private Integer connectionId;
+    @JsonProperty("append_properties")
+    private Set<Property> appendProperties;
 
-    @JsonProperty("vertex_id")
-    private Object vertexId;
+    @JsonProperty("append_property_indexes")
+    private List<PropertyIndex> appendPropertyIndexes;
 
-    @JsonProperty("edge_label")
-    private String edgeLabel;
+    @JsonProperty("remove_property_indexes")
+    private List<String> removePropertyIndexes;
 
-    @JsonProperty("direction")
-    private Direction direction;
+    @JsonProperty("style")
+    private SchemaStyle style = new SchemaStyle();
 
-    @JsonProperty("conditions")
-    private List<Condition> conditions;
+    private transient String name;
+    private transient SchemaType type;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class Condition {
-
-        @JsonProperty("key")
-        private String key;
-
-        @JsonProperty("operator")
-        private String operator;
-
-        @JsonProperty("value")
-        private Object value;
+    @Override
+    public SchemaType getType() {
+        return this.type;
     }
 }

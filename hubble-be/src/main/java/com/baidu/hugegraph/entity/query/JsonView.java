@@ -17,15 +17,25 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.exception;
+package com.baidu.hugegraph.entity.query;
 
-public class InternalException extends ParameterizedException {
+import java.util.List;
 
-    public InternalException(String message, Object... args) {
-        super(message, args);
-    }
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    public InternalException(String message, Throwable cause, Object... args) {
-        super(message, cause, args);
-    }
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class JsonView {
+
+    public static final JsonView EMPTY = new JsonView();
+
+    @JsonProperty("data")
+    private List<Object> data;
 }

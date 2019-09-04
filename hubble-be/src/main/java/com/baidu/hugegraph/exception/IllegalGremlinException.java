@@ -19,13 +19,22 @@
 
 package com.baidu.hugegraph.exception;
 
-public class InternalException extends ParameterizedException {
+public class IllegalGremlinException extends RuntimeException {
 
-    public InternalException(String message, Object... args) {
-        super(message, args);
+    private final Object[] args;
+
+    public IllegalGremlinException(String message, Object... args) {
+        super(message);
+        this.args = args;
     }
 
-    public InternalException(String message, Throwable cause, Object... args) {
-        super(message, cause, args);
+    public IllegalGremlinException(String message, Throwable cause,
+                                   Object... args) {
+        super(message, cause);
+        this.args = args;
+    }
+
+    public Object[] args() {
+        return this.args;
     }
 }

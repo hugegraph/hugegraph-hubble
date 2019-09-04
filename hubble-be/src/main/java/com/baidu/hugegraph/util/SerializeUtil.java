@@ -17,15 +17,22 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.exception;
+package com.baidu.hugegraph.util;
 
-public class InternalException extends ParameterizedException {
+import java.io.IOException;
 
-    public InternalException(String message, Object... args) {
-        super(message, args);
-    }
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 
-    public InternalException(String message, Throwable cause, Object... args) {
-        super(message, cause, args);
+public final class SerializeUtil {
+
+    public static class DurationSerializer extends JsonSerializer<Long> {
+
+        @Override
+        public void serialize(Long value, JsonGenerator generator,
+                              SerializerProvider provider) throws IOException {
+            generator.writeString(TimeUtil.readableTime(value));
+        }
     }
 }

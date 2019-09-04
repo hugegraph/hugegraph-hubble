@@ -17,15 +17,23 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.exception;
+package com.baidu.hugegraph.controller.query;
 
-public class InternalException extends ParameterizedException {
+import java.util.regex.Pattern;
 
-    public InternalException(String message, Object... args) {
-        super(message, args);
-    }
+import com.baidu.hugegraph.controller.BaseController;
+import com.baidu.hugegraph.util.Ex;
 
-    public InternalException(String message, Throwable cause, Object... args) {
-        super(message, cause, args);
+public abstract class GremlinController extends BaseController {
+
+    public static final Pattern CONTENT_PATTERN = Pattern.compile(
+            "[A-Za-z0-9]+"
+    );
+
+    public static final int CONTENT_LENGTH_LIMIT = 10000;
+
+    public static void checkContentLength(String content) {
+        Ex.check(content.length() <= CONTENT_LENGTH_LIMIT,
+                 "gremlin.statement.exceed-limit", CONTENT_LENGTH_LIMIT);
     }
 }

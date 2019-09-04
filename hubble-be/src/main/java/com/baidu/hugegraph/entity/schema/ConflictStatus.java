@@ -17,15 +17,17 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.mapper;
+package com.baidu.hugegraph.entity.schema;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.springframework.stereotype.Component;
+public enum ConflictStatus {
 
-import com.baidu.hugegraph.entity.ExecuteHistory;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+    PASSED,
 
-@Mapper
-@Component
-public interface ExecuteHistoryMapper extends BaseMapper<ExecuteHistory> {
+    EXISTED,
+
+    DUPNAME;
+
+    public boolean isConflicted() {
+        return this == DUPNAME;
+    }
 }

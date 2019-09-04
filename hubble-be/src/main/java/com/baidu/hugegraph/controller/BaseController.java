@@ -21,7 +21,7 @@ package com.baidu.hugegraph.controller;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StringUtils;
 
 import com.baidu.hugegraph.common.Identifiable;
 import com.baidu.hugegraph.common.Mergeable;
@@ -36,7 +36,7 @@ public abstract class BaseController {
     public void checkIdWhenUpdate(int id, Identifiable newEntity) {
         Ex.check(newEntity.getId() != null, () -> id == newEntity.getId(),
                  "common.param.path-id-should-same-as-body",
-                 id, newEntity);
+                 id, newEntity.getId());
     }
 
     public void checkParamsNotEmpty(String name, String value,

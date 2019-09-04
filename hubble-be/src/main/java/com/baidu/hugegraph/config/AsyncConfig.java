@@ -17,15 +17,24 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.exception;
+package com.baidu.hugegraph.config;
 
-public class InternalException extends ParameterizedException {
+import java.util.concurrent.Executor;
 
-    public InternalException(String message, Object... args) {
-        super(message, args);
-    }
+import org.springframework.scheduling.annotation.AsyncConfigurer;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-    public InternalException(String message, Throwable cause, Object... args) {
-        super(message, cause, args);
+@EnableAsync
+public class AsyncConfig implements AsyncConfigurer {
+
+    @Override
+    public Executor getAsyncExecutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setCorePoolSize(2);
+        taskExecutor.setMaxPoolSize(4);
+        taskExecutor.setQueueCapacity(16);
+        taskExecutor.initialize();
+        return taskExecutor;
     }
 }

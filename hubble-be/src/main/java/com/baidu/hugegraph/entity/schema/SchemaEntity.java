@@ -17,15 +17,13 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.exception;
+package com.baidu.hugegraph.entity.schema;
 
-public class InternalException extends ParameterizedException {
+import java.util.Date;
 
-    public InternalException(String message, Object... args) {
-        super(message, args);
-    }
+public interface SchemaEntity extends Typifiable {
 
-    public InternalException(String message, Throwable cause, Object... args) {
-        super(message, cause, args);
-    }
+    String getName();
+
+    Date getCreateTime();
 }

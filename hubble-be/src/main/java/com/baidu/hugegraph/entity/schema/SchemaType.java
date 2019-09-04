@@ -17,15 +17,33 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.exception;
+package com.baidu.hugegraph.entity.schema;
 
-public class InternalException extends ParameterizedException {
+public enum SchemaType {
 
-    public InternalException(String message, Object... args) {
-        super(message, args);
+    PROPERTY_KEY("property key"),
+
+    VERTEX_LABEL("vertex label"),
+
+    EDGE_LABEL("edge label"),
+
+    PROPERTY_INDEX("property index");
+
+    private String name;
+
+    SchemaType(String name) {
+        this.name = name;
     }
 
-    public InternalException(String message, Throwable cause, Object... args) {
-        super(message, cause, args);
+    public String string() {
+        return this.name;
+    }
+
+    public boolean isVertexLabel() {
+        return this == VERTEX_LABEL;
+    }
+
+    public boolean isEdgeLabel() {
+        return this == EDGE_LABEL;
     }
 }

@@ -17,7 +17,17 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.common;
+package com.baidu.hugegraph.entity.query;
+
+import java.util.Date;
+
+import com.baidu.hugegraph.annotation.MergeProperty;
+import com.baidu.hugegraph.common.Identifiable;
+import com.baidu.hugegraph.common.Mergeable;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,10 +38,23 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Response {
+@TableName("gremlin_collection")
+public class GremlinCollection implements Identifiable, Mergeable {
 
-    private int status;
-    private Object data;
-    private String message;
-    private Throwable cause;
+    @TableId(type = IdType.AUTO)
+    @MergeProperty(useNew = false)
+    @JsonProperty("id")
+    private Integer id;
+
+    @MergeProperty
+    @JsonProperty("name")
+    private String name;
+
+    @MergeProperty
+    @JsonProperty("content")
+    private String content;
+
+    @MergeProperty(useNew = false)
+    @JsonProperty("create_time")
+    private Date createTime;
 }

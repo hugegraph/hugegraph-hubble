@@ -17,7 +17,14 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.common;
+package com.baidu.hugegraph.entity.schema;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import com.baidu.hugegraph.structure.constant.IdStrategy;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,10 +35,34 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Response {
+public class VertexLabelEntity implements SchemaLabelEntity {
 
-    private int status;
-    private Object data;
-    private String message;
-    private Throwable cause;
+    @JsonProperty("name")
+    private String name;
+
+    @JsonProperty("id_strategy")
+    private IdStrategy idStrategy;
+
+    @JsonProperty("properties")
+    private Set<Property> properties;
+
+    @JsonProperty("primary_keys")
+    private List<String> primaryKeys;
+
+    @JsonProperty("property_indexes")
+    private List<PropertyIndex> propertyIndexes;
+
+    @JsonProperty("open_label_index")
+    private boolean openLabelIndex;
+
+    @JsonProperty("style")
+    private SchemaStyle style = new SchemaStyle();
+
+    @JsonProperty("create_time")
+    private Date createTime;
+
+    @Override
+    public SchemaType getType() {
+        return SchemaType.VERTEX_LABEL;
+    }
 }

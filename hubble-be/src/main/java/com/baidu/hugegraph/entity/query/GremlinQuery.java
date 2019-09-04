@@ -17,15 +17,24 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.exception;
+package com.baidu.hugegraph.entity.query;
 
-public class InternalException extends ParameterizedException {
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    public InternalException(String message, Object... args) {
-        super(message, args);
-    }
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    public InternalException(String message, Throwable cause, Object... args) {
-        super(message, cause, args);
-    }
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class GremlinQuery {
+
+    @JsonProperty("connection_id")
+    private Integer connectionId;
+
+    @JsonProperty("content")
+    private String content;
 }

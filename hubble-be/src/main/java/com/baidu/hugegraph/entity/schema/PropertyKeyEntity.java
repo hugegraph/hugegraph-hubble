@@ -17,15 +17,41 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.exception;
+package com.baidu.hugegraph.entity.schema;
 
-public class InternalException extends ParameterizedException {
+import java.util.Date;
 
-    public InternalException(String message, Object... args) {
-        super(message, args);
-    }
+import com.baidu.hugegraph.structure.constant.Cardinality;
+import com.baidu.hugegraph.structure.constant.DataType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    public InternalException(String message, Throwable cause, Object... args) {
-        super(message, cause, args);
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class PropertyKeyEntity implements SchemaEntity {
+
+    @JsonProperty("name")
+    private String name;
+
+    @JsonProperty("data_type")
+    private DataType dataType;
+
+    @JsonProperty("cardinality")
+    private Cardinality cardinality;
+
+    // TODO: add aggregateType
+
+    @JsonProperty("create_time")
+    private Date createTime;
+
+    @Override
+    public SchemaType getType() {
+        return SchemaType.PROPERTY_KEY;
     }
 }

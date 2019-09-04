@@ -17,15 +17,16 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.exception;
+package com.baidu.hugegraph.util;
 
-public class InternalException extends ParameterizedException {
+import com.baidu.hugegraph.common.Constant;
 
-    public InternalException(String message, Object... args) {
-        super(message, args);
-    }
+public final class SQLUtil {
 
-    public InternalException(String message, Throwable cause, Object... args) {
-        super(message, cause, args);
+    public static String escapeLike(String text) {
+        if (Constant.LIKE_WILDCARDS.contains(text)) {
+            return "\\" + text;
+        }
+        return text;
     }
 }

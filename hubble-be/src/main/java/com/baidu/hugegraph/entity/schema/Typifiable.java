@@ -17,15 +17,12 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.exception;
+package com.baidu.hugegraph.entity.schema;
 
-public class InternalException extends ParameterizedException {
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-    public InternalException(String message, Object... args) {
-        super(message, args);
-    }
+public interface Typifiable {
 
-    public InternalException(String message, Throwable cause, Object... args) {
-        super(message, cause, args);
-    }
+    @JsonIgnore
+    SchemaType getType();
 }

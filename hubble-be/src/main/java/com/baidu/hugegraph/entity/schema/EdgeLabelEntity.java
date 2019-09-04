@@ -17,19 +17,12 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity;
+package com.baidu.hugegraph.entity.schema;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
-import com.baidu.hugegraph.annotation.MergeProperty;
-import com.baidu.hugegraph.common.Identifiable;
-import com.baidu.hugegraph.common.Mergeable;
-import com.baidu.hugegraph.entity.enums.ExecuteStatus;
-import com.baidu.hugegraph.entity.enums.ExecuteType;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -41,33 +34,40 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@TableName("execute_history")
-public class ExecuteHistory implements Identifiable, Mergeable {
+public class EdgeLabelEntity implements SchemaLabelEntity {
 
-    @TableId(type = IdType.AUTO)
-    @MergeProperty(useNew = false)
-    @JsonProperty("id")
-    private Integer id;
+    @JsonProperty("name")
+    private String name;
 
-    @TableField(value = "execute_type")
-    @MergeProperty
-    @JsonProperty("type")
-    private ExecuteType type;
+    @JsonProperty("source_label")
+    private String sourceLabel;
 
-    @MergeProperty
-    @JsonProperty("content")
-    private String content;
+    @JsonProperty("target_label")
+    private String targetLabel;
 
-    @TableField(value = "execute_status")
-    @MergeProperty
-    @JsonProperty("status")
-    private ExecuteStatus status;
+    @JsonProperty("link_multi_times")
+    private boolean linkMultiTimes;
 
-    @MergeProperty
-    @JsonProperty("duration")
-    private Long duration;
+    @JsonProperty("properties")
+    private Set<Property> properties;
 
-    @MergeProperty(useNew = false)
+    @JsonProperty("sort_keys")
+    private List<String> sortKeys;
+
+    @JsonProperty("property_indexes")
+    private List<PropertyIndex> propertyIndexes;
+
+    @JsonProperty("open_label_index")
+    private boolean openLabelIndex;
+
+    @JsonProperty("style")
+    private SchemaStyle style = new SchemaStyle();
+
     @JsonProperty("create_time")
     private Date createTime;
+
+    @Override
+    public SchemaType getType() {
+        return SchemaType.EDGE_LABEL;
+    }
 }

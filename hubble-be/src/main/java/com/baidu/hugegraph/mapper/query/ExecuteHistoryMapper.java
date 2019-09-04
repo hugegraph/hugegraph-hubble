@@ -17,35 +17,22 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.mapper;
+package com.baidu.hugegraph.mapper.query;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
-import com.baidu.hugegraph.entity.GraphConnection;
+import com.baidu.hugegraph.entity.query.ExecuteHistory;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 
 @Mapper
 @Component
-public interface GraphConnectionMapper extends BaseMapper<GraphConnection> {
+public interface ExecuteHistoryMapper extends BaseMapper<ExecuteHistory> {
 
-    /**
-     * NOTE: Page must be the first param, otherwise throw exception
-     */
-    @Select("SELECT * FROM `graph_connection` " +
-            "WHERE `name` LIKE '%${content}%' OR `graph` LIKE '%${content}%'" +
-            "ORDER BY " +
-            "   CASE " +
-            "       WHEN `name` LIKE '%${content}%' AND " +
-            "            `graph` LIKE '%${content}%' THEN 0 " +
-            "       WHEN `name` LIKE '%${content}%' THEN 1 " +
-            "       WHEN `graph` LIKE '%${content}%' THEN 2 " +
-            "   END ASC, " +
-            "   `create_time` DESC")
-    IPage<GraphConnection> selectByContentInPage(IPage<GraphConnection> page,
-                                                 @Param("content")
-                                                 String content);
+    @Delete("DELETE FROM `execute_history` WHERE `id` IN (" +
+            "SELECT `id` FROM `execute_history` ORDER BY `create_time` DESC " +
+            "LIMIT ${limit} OFFSET ${limit})")
+    void deleteExceedLimit(@Param("limit") int limit);
 }

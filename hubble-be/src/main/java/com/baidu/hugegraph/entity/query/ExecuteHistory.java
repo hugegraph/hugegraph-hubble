@@ -17,17 +17,22 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity;
+package com.baidu.hugegraph.entity.query;
 
 import java.util.Date;
 
 import com.baidu.hugegraph.annotation.MergeProperty;
 import com.baidu.hugegraph.common.Identifiable;
 import com.baidu.hugegraph.common.Mergeable;
+import com.baidu.hugegraph.entity.enums.ExecuteStatus;
+import com.baidu.hugegraph.entity.enums.ExecuteType;
+import com.baidu.hugegraph.util.SerializeUtil;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,21 +43,32 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@TableName("gremlin_collection")
-public class GremlinCollection implements Identifiable, Mergeable {
+@TableName("execute_history")
+public class ExecuteHistory implements Identifiable, Mergeable {
 
     @TableId(type = IdType.AUTO)
     @MergeProperty(useNew = false)
     @JsonProperty("id")
     private Integer id;
 
+    @TableField(value = "execute_type")
     @MergeProperty
-    @JsonProperty("name")
-    private String name;
+    @JsonProperty("type")
+    private ExecuteType type;
 
     @MergeProperty
     @JsonProperty("content")
     private String content;
+
+    @TableField(value = "execute_status")
+    @MergeProperty
+    @JsonProperty("status")
+    private ExecuteStatus status;
+
+    @MergeProperty
+    @JsonProperty("duration")
+    @JsonSerialize(using = SerializeUtil.DurationSerializer.class)
+    private Long duration;
 
     @MergeProperty(useNew = false)
     @JsonProperty("create_time")

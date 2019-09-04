@@ -17,31 +17,28 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.controller;
+package com.baidu.hugegraph.controller.query;
 
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.baidu.hugegraph.entity.ExecuteHistory;
+import com.baidu.hugegraph.entity.query.ExecuteHistory;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.InternalException;
-import com.baidu.hugegraph.service.ExecuteHistoryService;
+import com.baidu.hugegraph.service.query.ExecuteHistoryService;
 import com.baidu.hugegraph.util.Ex;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 @RestController
 @RequestMapping("execute-histories")
-public class ExecuteHistoryController extends BaseController {
+public class ExecuteHistoryController extends GremlinController {
 
     @Autowired
     private ExecuteHistoryService service;
@@ -50,11 +47,11 @@ public class ExecuteHistoryController extends BaseController {
     public IPage<ExecuteHistory> listAll(@RequestParam(name = "page_no",
                                                        required = false,
                                                        defaultValue = "1")
-                                         long pageNo,
+                                         int pageNo,
                                          @RequestParam(name = "page_size",
                                                        required = false,
                                                        defaultValue = "10")
-                                         long pageSize) {
+                                         int pageSize) {
         return this.service.list(pageNo, pageSize);
     }
 
@@ -68,17 +65,6 @@ public class ExecuteHistoryController extends BaseController {
     @GetMapping("{id}")
     public ExecuteHistory get(@PathVariable("id") int id) {
         return this.service.get(id);
-    }
-
-    @PostMapping
-    public ExecuteHistory create(@RequestBody ExecuteHistory newEntity) {
-        this.checkParamsValid(newEntity);
-        newEntity.setCreateTime(new Date());
-        int rows = this.service.save(newEntity);
-        if (rows != 1) {
-            throw new InternalException("entity.insert.failed", newEntity);
-        }
-        return newEntity;
     }
 
     @DeleteMapping("{id}")
@@ -103,7 +89,7 @@ public class ExecuteHistoryController extends BaseController {
                  "common.param.cannot-be-null", "status");
         Ex.check(newEntity.getDuration() != null,
                  "common.param.cannot-be-null", "duration");
-        Ex.check(newEntity.getCreateTime() == null,
-                 "common.param.must-be-null", "create_time");
+        Ex.check(newEntity.getCreateTime() != null,
+                 "common.param.cannot-be-null", "create_time");
     }
 }
