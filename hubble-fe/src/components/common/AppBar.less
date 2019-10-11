@@ -1,12 +1,14 @@
 @active-color: #2b65ff;
 
 .navigator {
+  position: fixed;
   display: flex;
   width: 100%;
   height: 60px;
   padding: 0 16px 0 21px;
   background: #121212;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  z-index: 99;
 }
 
 .navigator-logo {
@@ -15,6 +17,7 @@
   margin: 14px 0 15px;
   background: url(../../assets/imgs/logo.png);
   background-size: cover;
+  cursor: pointer;
 }
 
 .navigator-items {
