@@ -9,6 +9,7 @@ import {
   Modal,
   Message
 } from '@baidu/one-ui';
+import { useLocation } from 'wouter';
 import Highlighter from 'react-highlight-words';
 import { GraphManagementStoreContext } from '../../stores';
 
@@ -98,6 +99,7 @@ const GraphManagementList: React.FC = observer(() => {
 const GraphManagementListItem = observer(
   ({ id, name, graph, host, port, create_time, index }) => {
     const graphManagementStore = useContext(GraphManagementStoreContext);
+    const [_, setLocation] = useLocation();
     const [isEditing, setEditingState] = useState(false);
 
     const handleCancel = useCallback(() => {
@@ -181,6 +183,10 @@ const GraphManagementListItem = observer(
       },
       [graphManagementStore, id]
     );
+
+    const handleVisit = useCallback(() => {
+      setLocation(`/graph-management/${id}/data-analyze`);
+    }, [id, setLocation]);
 
     return isEditing ? (
       <Embedded
@@ -386,6 +392,7 @@ const GraphManagementListItem = observer(
               (graphManagementStore.selectedEditIndex !== null &&
                 graphManagementStore.selectedEditIndex !== index)
             }
+            onClick={handleVisit}
           >
             访问
           </Button>
