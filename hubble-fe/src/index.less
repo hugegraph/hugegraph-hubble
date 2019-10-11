@@ -42,6 +42,12 @@ code {
     monospace;
 }
 
+// safari compatible
+img[src=''],
+img:not([src]) {
+  opacity: 0;
+}
+
 /* overrides (global) */
 
 //primary button background colors
