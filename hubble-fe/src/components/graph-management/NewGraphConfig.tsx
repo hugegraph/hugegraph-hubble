@@ -17,13 +17,6 @@ const isRequiredInputProps = {
 const NewGraphConfig: React.FC = observer(() => {
   const graphManagementStore = useContext(GraphManagementStoreContext);
 
-  const handleLayoutSwitch = useCallback(
-    (flag: boolean) => () => {
-      graphManagementStore.switchCreateNewGraph(flag);
-    },
-    [graphManagementStore]
-  );
-
   const handleCancel = useCallback(() => {
     graphManagementStore.switchCreateNewGraph(false);
     graphManagementStore.resetGraphDataConfig('new');
@@ -64,7 +57,7 @@ const NewGraphConfig: React.FC = observer(() => {
     <Embedded
       title="创建图"
       className="graph-management-list-data-config"
-      onClose={handleLayoutSwitch(false)}
+      onClose={handleCancel}
       visible={graphManagementStore.showCreateNewGraph}
     >
       <div className="graph-management-list-create-content">
