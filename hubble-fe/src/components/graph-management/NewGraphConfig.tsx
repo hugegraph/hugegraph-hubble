@@ -5,7 +5,7 @@ import { GraphManagementStoreContext } from '../../stores';
 
 const commonInputProps = {
   size: 'medium',
-  width: 419
+  width: 420
 };
 
 const isRequiredInputProps = {
@@ -43,7 +43,8 @@ const NewGraphConfig: React.FC = observer(() => {
     if (graphManagementStore.requestStatus.AddGraphData === 'success') {
       Message.success({
         content: '创建成功',
-        size: 'medium'
+        size: 'medium',
+        showCloseIcon: false
       });
 
       graphManagementStore.fetchGraphDataList();
@@ -53,7 +54,8 @@ const NewGraphConfig: React.FC = observer(() => {
     if (graphManagementStore.requestStatus.AddGraphData === 'failed') {
       Message.error({
         content: graphManagementStore.errorMessage,
-        size: 'medium'
+        size: 'medium',
+        showCloseIcon: false
       });
     }
   }, [graphManagementStore, handleCancel]);
@@ -182,7 +184,7 @@ const NewGraphConfig: React.FC = observer(() => {
             />
           </div>
           <div>
-            <div style={{ width: 419 }}>
+            <div style={{ width: 420 }}>
               <Button
                 type="primary"
                 size="medium"

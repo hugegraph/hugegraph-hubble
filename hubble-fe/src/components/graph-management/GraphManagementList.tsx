@@ -25,7 +25,7 @@ const dropdownList = [
 
 const commonInputProps = {
   size: 'medium',
-  width: 419
+  width: 420
 };
 
 const isRequiredInputProps = {
@@ -118,7 +118,8 @@ const GraphManagementListItem = observer(
       if (graphManagementStore.requestStatus.upgradeGraphData === 'success') {
         Message.success({
           content: '保存成功',
-          size: 'medium'
+          size: 'medium',
+          showCloseIcon: false
         });
 
         graphManagementStore.fetchGraphDataList();
@@ -128,7 +129,8 @@ const GraphManagementListItem = observer(
       if (graphManagementStore.requestStatus.upgradeGraphData === 'failed') {
         Message.error({
           content: graphManagementStore.errorMessage,
-          size: 'medium'
+          size: 'medium',
+          showCloseIcon: false
         });
       }
     }, [graphManagementStore, handleCancel, id]);
@@ -169,7 +171,8 @@ const GraphManagementListItem = observer(
               ) {
                 Message.error({
                   content: graphManagementStore.errorMessage,
-                  size: 'medium'
+                  size: 'medium',
+                  showCloseIcon: false
                 });
               }
             }
@@ -304,7 +307,7 @@ const GraphManagementListItem = observer(
               />
             </div>
             <div>
-              <div style={{ width: 419 }}>
+              <div style={{ width: 420 }}>
                 <Button
                   type="primary"
                   size="medium"
