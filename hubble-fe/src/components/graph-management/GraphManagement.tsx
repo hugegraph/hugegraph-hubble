@@ -14,6 +14,10 @@ const GraphManagement: React.FC = observer(() => {
 
   useEffect(() => {
     graphManagementStore.fetchGraphDataList();
+
+    return () => {
+      graphManagementStore.dispose();
+    };
   }, [graphManagementStore]);
 
   return (

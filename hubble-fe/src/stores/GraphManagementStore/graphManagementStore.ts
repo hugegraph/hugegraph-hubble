@@ -105,6 +105,35 @@ export class GraphManagementStore {
   };
 
   @action
+  dispose() {
+    this.showCreateNewGraph = false;
+    this.showDeleteModal = false;
+    this.selectedEditIndex = null;
+    this.searchWords = '';
+    this.errorMessage = '';
+    this.isSearched = {
+      status: false,
+      value: ''
+    };
+    this.isValidated = false;
+    this.requestStatus = {
+      fetchGraphData: 'standby',
+      AddGraphData: 'standby',
+      upgradeGraphData: 'standby',
+      deleteGraphData: 'standby'
+    };
+    this.graphData = [];
+    this.graphDataPageConfig = {
+      pageNumber: 1,
+      pageSize: 10,
+      pageTotal: 0
+    };
+    this.resetGraphDataConfig('new');
+    this.resetGraphDataConfig('edit');
+    this.resetValidateErrorMessage();
+  }
+
+  @action
   switchCreateNewGraph(flag: boolean) {
     this.showCreateNewGraph = flag;
   }
