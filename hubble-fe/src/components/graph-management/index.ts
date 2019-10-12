@@ -1,3 +1,4 @@
 import GraphManagement from './GraphManagement';
+import { DataAnalyze } from './data-analyze';
 
-export { GraphManagement };
+export { GraphManagement, DataAnalyze };
