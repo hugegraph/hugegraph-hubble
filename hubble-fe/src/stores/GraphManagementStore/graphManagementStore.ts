@@ -169,6 +169,15 @@ export class GraphManagementStore {
   }
 
   @action
+  swtichIsSearchedStatus(isSearched: boolean) {
+    this.isSearched.status = isSearched;
+
+    isSearched
+      ? (this.isSearched.value = this.searchWords)
+      : (this.isSearched.value = '');
+  }
+
+  @action
   fillInGraphDataConfig(index: number) {
     this.editGraphData.id = String(this.graphData[index].id);
     this.editGraphData.name = this.graphData[index].name;
@@ -264,12 +273,11 @@ export class GraphManagementStore {
   }
 
   fetchGraphDataList = flow(function* fetchGraphDataList(
-    this: GraphManagementStore,
-    searchWords?: string
+    this: GraphManagementStore
   ) {
     const url =
       `${baseUrl}/graph-connections?page_no=${this.graphDataPageConfig.pageNumber}&page_size=${this.graphDataPageConfig.pageSize}` +
-      (typeof searchWords !== 'undefined' && searchWords !== ''
+      (this.isSearched.status && this.searchWords !== ''
         ? `&content=${this.searchWords}`
         : '');
 
@@ -280,16 +288,8 @@ export class GraphManagementStore {
         GraphData
       >(url);
 
-      if (result.status !== 200) {
+      if (result.data.status !== 200) {
         throw new Error(result.data.message);
-      }
-
-      if (this.searchWords !== '') {
-        this.isSearched.status = true;
-        this.isSearched.value = this.searchWords;
-      } else {
-        this.isSearched.status = false;
-        this.isSearched.value = '';
       }
 
       this.graphData = result.data.data.records;
@@ -360,6 +360,15 @@ export class GraphManagementStore {
 
       if (result.data.status !== 200) {
         throw new Error(result.data.message);
+      }
+
+      // if current pageNumber has no data after delete, set the pageNumber to the previous
+      if (
+        this.graphData.length === 1 &&
+        this.graphDataPageConfig.pageNumber > 1
+      ) {
+        this.graphDataPageConfig.pageNumber =
+          this.graphDataPageConfig.pageNumber - 1;
       }
 
       this.requestStatus.deleteGraphData = 'success';

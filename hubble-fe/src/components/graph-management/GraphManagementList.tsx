@@ -42,6 +42,7 @@ const GraphManagementList: React.FC = observer(() => {
   const handlePageChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       graphManagementStore.mutatePageNumber(Number(e.target.value));
+      graphManagementStore.fetchGraphDataList();
     },
     [graphManagementStore]
   );
@@ -105,6 +106,8 @@ const GraphManagementListItem = observer(
     const handleCancel = useCallback(() => {
       graphManagementStore.resetGraphDataConfig('edit');
       graphManagementStore.changeSelectedEditIndex(null);
+      graphManagementStore.switchValidateStatus(false);
+      graphManagementStore.resetValidateErrorMessage();
       setEditingState(false);
     }, [graphManagementStore]);
 
@@ -192,10 +195,7 @@ const GraphManagementListItem = observer(
       <Embedded
         title="编辑图"
         className="graph-management-list-data-config"
-        onClose={() => {
-          setEditingState(false);
-          graphManagementStore.changeSelectedEditIndex(null);
-        }}
+        onClose={handleCancel}
         visible={isEditing}
       >
         <div className="graph-management-list-create-content">
