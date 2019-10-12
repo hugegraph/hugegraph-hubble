@@ -26,11 +26,15 @@ const GraphManagementHeader: React.FC = observer(() => {
   );
 
   const handleSearch = useCallback(() => {
-    graphManagementStore.fetchGraphDataList(graphManagementStore.searchWords);
+    graphManagementStore.mutatePageNumber(1);
+    graphManagementStore.swtichIsSearchedStatus(true);
+    graphManagementStore.fetchGraphDataList();
   }, [graphManagementStore]);
 
   const handleClearSearch = useCallback(() => {
     graphManagementStore.mutateSearchWords('');
+    graphManagementStore.mutatePageNumber(1);
+    graphManagementStore.swtichIsSearchedStatus(false);
     graphManagementStore.fetchGraphDataList();
   }, [graphManagementStore]);
 
