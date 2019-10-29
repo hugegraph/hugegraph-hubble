@@ -5,12 +5,12 @@ import Highlighter from 'react-highlight-words';
 import { Table, Input, Button, Message } from '@baidu/one-ui';
 import TooltipTrigger from 'react-popper-tooltip';
 
+import Favorite from './common/Favorite';
 import { DataAnalyzeStoreContext } from '../../../stores';
 import {
   ExecutionLogs,
   FavoriteQuery
 } from '../../../stores/GraphManagementStore/dataAnalyzeStore';
-import { Favorite } from './QueryAndAlgorithmLibrary';
 import ArrowIcon from '../../../assets/imgs/ic_arrow_16.svg';
 import EmptyIcon from '../../../assets/imgs/ic_sousuo_empty.svg';
 
