@@ -242,31 +242,6 @@ export class DataAnalyzeStore {
     }
   };
 
-  @computed get TableFormatGraphData() {
-    return {
-      columnsConfigs: this.originalGraphData.data.table_view.header.map(
-        title => ({
-          title,
-          dataIndex: title
-          // width:
-          //   String(100 / this.originalGraphData.data.table_view.header.length) +
-          //   '%'
-        })
-      ),
-      data: this.originalGraphData.data.table_view.rows.map(item => {
-        const convertedItem: Record<string, any> = {};
-
-        for (const [key, value] of Object.entries(item)) {
-          typeof value !== 'object'
-            ? (convertedItem[key] = value)
-            : (convertedItem[key] = JSON.stringify(value));
-        }
-
-        return convertedItem;
-      })
-    };
-  }
-
   @computed get graphNodes(): GraphNode[] {
     return this.graphData.data.graph_view.vertices;
   }
