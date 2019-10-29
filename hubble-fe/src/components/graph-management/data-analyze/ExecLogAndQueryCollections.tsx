@@ -2,10 +2,11 @@ import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { observer } from 'mobx-react';
 import classnames from 'classnames';
 import Highlighter from 'react-highlight-words';
-import { Table, Popover, Input, Button, Message } from '@baidu/one-ui';
+import { Table, Input, Button, Message } from '@baidu/one-ui';
+import TooltipTrigger from 'react-popper-tooltip';
 
 import { DataAnalyzeStoreContext } from '../../../stores';
-import dataAnalyzeStore, {
+import {
   ExecutionLogs,
   FavoriteQuery
 } from '../../../stores/GraphManagementStore/dataAnalyzeStore';
@@ -100,31 +101,55 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
       render(_: string, rowData: ExecutionLogs, index: number) {
         return (
           <div>
-            <Popover
-              placement="left"
-              content={
-                <Favorite
-                  isPop={isFavoritePop}
-                  handlePop={switchFavoritePop}
-                  queryStatement={rowData.content}
-                />
-              }
-              visible={
+            <TooltipTrigger
+              tooltipShown={
                 currentPopInTable === 'execLogs' &&
                 isFavoritePop &&
                 currentFavoritePop === index
               }
+              placement="left"
+              tooltip={({
+                arrowRef,
+                tooltipRef,
+                getArrowProps,
+                getTooltipProps,
+                placement
+              }) => (
+                <div
+                  {...getTooltipProps({
+                    ref: tooltipRef,
+                    className: 'tooltips'
+                  })}
+                >
+                  <div
+                    {...getArrowProps({
+                      ref: arrowRef,
+                      className: 'tooltip-arrow',
+                      'data-placement': placement
+                    })}
+                  />
+                  <Favorite
+                    handlePop={switchFavoritePop}
+                    queryStatement={rowData.content}
+                  />
+                </div>
+              )}
             >
-              <span
-                className="exec-log-manipulation"
-                onClick={() => {
-                  switchFavoritePop(true);
-                  setCurrentFavoritePop(index);
-                }}
-              >
-                收藏
-              </span>
-            </Popover>
+              {({ getTriggerProps, triggerRef }) => (
+                <span
+                  {...getTriggerProps({
+                    ref: triggerRef,
+                    className: 'exec-log-manipulation',
+                    onClick: () => {
+                      switchFavoritePop(true);
+                      setCurrentFavoritePop(index);
+                    }
+                  })}
+                >
+                  收藏
+                </span>
+              )}
+            </TooltipTrigger>
             <span
               className="exec-log-manipulation"
               onClick={loadStatements(rowData.content)}
@@ -186,57 +211,109 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
             >
               加载语句
             </span>
-            <Popover
+            <TooltipTrigger
               placement="left"
-              content={
-                <Favorite
-                  isPop={isFavoritePop}
-                  handlePop={switchFavoritePop}
-                  isEdit={true}
-                  id={rowData.id}
-                  name={rowData.name}
-                  queryStatement={rowData.content}
-                />
-              }
-              visible={
+              tooltipShown={
                 currentPopInTable === 'favoriteQueries' &&
                 isFavoritePop &&
                 currentFavoritePop === index
               }
+              tooltip={({
+                arrowRef,
+                tooltipRef,
+                getArrowProps,
+                getTooltipProps,
+                placement
+              }) => (
+                <div
+                  {...getTooltipProps({
+                    ref: tooltipRef,
+                    className: 'tooltips'
+                  })}
+                >
+                  <div
+                    {...getArrowProps({
+                      ref: arrowRef,
+                      className: 'tooltip-arrow',
+                      'data-placement': placement
+                    })}
+                  />
+                  <Favorite
+                    handlePop={switchFavoritePop}
+                    isEdit={true}
+                    id={rowData.id}
+                    name={rowData.name}
+                    queryStatement={rowData.content}
+                  />
+                </div>
+              )}
             >
-              <span
-                className="exec-log-manipulation"
-                onClick={() => {
-                  setCurrentPopInTable('favoriteQueries');
-                  switchFavoritePop(true);
-                  setCurrentFavoritePop(index);
-                }}
-              >
-                修改名称
-              </span>
-            </Popover>
-            <Popover
+              {({ getTriggerProps, triggerRef }) => (
+                <span
+                  {...getTriggerProps({
+                    ref: triggerRef,
+                    className: 'exec-log-manipulation',
+                    onClick: () => {
+                      setCurrentPopInTable('favoriteQueries');
+                      switchFavoritePop(true);
+                      setCurrentFavoritePop(index);
+                    }
+                  })}
+                >
+                  修改名称
+                </span>
+              )}
+            </TooltipTrigger>
+            <TooltipTrigger
               placement="left"
-              content={
-                <DeleteConfirm id={rowData.id} handlePop={switchFavoritePop} />
-              }
-              visible={
+              tooltipShown={
                 currentPopInTable === 'deleteQueries' &&
                 isFavoritePop &&
                 currentFavoritePop === index
               }
+              tooltip={({
+                arrowRef,
+                tooltipRef,
+                getArrowProps,
+                getTooltipProps,
+                placement
+              }) => (
+                <div
+                  {...getTooltipProps({
+                    ref: tooltipRef,
+                    className: 'tooltips'
+                  })}
+                >
+                  <div
+                    {...getArrowProps({
+                      ref: arrowRef,
+                      className: 'tooltip-arrow',
+                      'data-placement': placement
+                    })}
+                  />
+                  <DeleteConfirm
+                    id={rowData.id}
+                    handlePop={switchFavoritePop}
+                  />
+                </div>
+              )}
             >
-              <span
-                className="exec-log-manipulation"
-                onClick={() => {
-                  setCurrentPopInTable('deleteQueries');
-                  switchFavoritePop(true);
-                  setCurrentFavoritePop(index);
-                }}
-              >
-                删除
-              </span>
-            </Popover>
+              {({ getTriggerProps, triggerRef }) => (
+                <span
+                  {...getTriggerProps({
+                    ref: triggerRef,
+                    className: 'exec-log-manipulation',
+                    onClick: () => {
+                      setCurrentPopInTable('deleteQueries');
+                      switchFavoritePop(true);
+                      setCurrentFavoritePop(index);
+                    }
+                  })}
+                >
+                  删除
+                </span>
+              )}
+            </TooltipTrigger>
           </div>
         );
       }

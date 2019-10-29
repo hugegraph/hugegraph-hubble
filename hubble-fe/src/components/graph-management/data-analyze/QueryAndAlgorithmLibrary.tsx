@@ -9,8 +9,11 @@ import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import CodeMirror from 'codemirror';
 import classnames from 'classnames';
-import { Button, Popover, Input, Tooltip, Message, Alert } from '@baidu/one-ui';
+import { Button, Tooltip, Alert } from '@baidu/one-ui';
+import TooltipTrigger from 'react-popper-tooltip';
+
 import 'codemirror/lib/codemirror.css';
+import 'react-popper-tooltip/dist/styles.css';
 import 'codemirror/addon/display/placeholder';
 
 import { DataAnalyzeStoreContext } from '../../../stores';
@@ -205,29 +208,54 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
               </Button>
             </Tooltip>
             {dataAnalyzeStore.codeEditorText.length !== 0 ? (
-              <Popover
-                placement="bottomLeft"
-                content={
-                  <Favorite
-                    isPop={isFavoritePop}
-                    handlePop={switchFavoritePop}
-                  />
-                }
-                visible={isFavoritePop}
+              <TooltipTrigger
+                tooltipShown={isFavoritePop}
+                placement="bottom-start"
+                tooltip={({
+                  arrowRef,
+                  tooltipRef,
+                  getArrowProps,
+                  getTooltipProps,
+                  placement
+                }) => (
+                  <div
+                    {...getTooltipProps({
+                      ref: tooltipRef,
+                      className: 'tooltips'
+                    })}
+                  >
+                    <div
+                      {...getArrowProps({
+                        ref: arrowRef,
+                        className: 'tooltip-arrow',
+                        'data-placement': placement
+                      })}
+                    />
+                    <Favorite handlePop={switchFavoritePop} />
+                  </div>
+                )}
               >
-                <Button
-                  style={styles.primaryButton}
-                  disabled={
-                    dataAnalyzeStore.codeEditorText.length === 0 ||
-                    !codeRegexp.test(dataAnalyzeStore.codeEditorText)
-                  }
-                  onClick={() => {
-                    switchFavoritePop(true);
-                  }}
-                >
-                  收藏
-                </Button>
-              </Popover>
+                {({ getTriggerProps, triggerRef }) => (
+                  <div
+                    {...getTriggerProps({
+                      ref: triggerRef
+                    })}
+                  >
+                    <Button
+                      style={styles.primaryButton}
+                      disabled={
+                        dataAnalyzeStore.codeEditorText.length === 0 ||
+                        !codeRegexp.test(dataAnalyzeStore.codeEditorText)
+                      }
+                      onClick={() => {
+                        switchFavoritePop(true);
+                      }}
+                    >
+                      收藏
+                    </Button>
+                  </div>
+                )}
+              </TooltipTrigger>
             ) : (
               <Tooltip
                 placement="bottom"
