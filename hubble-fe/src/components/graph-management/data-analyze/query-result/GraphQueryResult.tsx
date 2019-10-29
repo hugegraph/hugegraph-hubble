@@ -371,12 +371,6 @@ const GraphQueryResult: React.FC<GraphQueryResult> = observer(
         d3.select(this).style('display', 'none');
       });
 
-      const zoomHandler = d3.zoom().on('zoom', () => {
-        d3.selectAll('g').attr('transform', d3.event.transform);
-      });
-
-      zoomHandler(d3.select('svg'));
-
       function ticked() {
         links
           .attr('x1', function(d: any) {
