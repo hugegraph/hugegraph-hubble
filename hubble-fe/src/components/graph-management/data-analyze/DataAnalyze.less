@@ -706,6 +706,36 @@
       display: flex;
     }
   }
+
+  .query-reuslt-loading-bg {
+    width: 144px;
+    height: 144px;
+    position: relative;
+    margin-bottom: 10px;
+  }
+
+  .query-result-loading-back {
+    position: absolute;
+    left: 22px;
+    top: 20px;
+  }
+
+  .query-result-loading-front {
+    position: absolute;
+    left: 57.1px;
+    top: 52.1px;
+    animation: loading-rotate 2s linear infinite;
+  }
+
+  @keyframes loading-rotate {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
 }
 
 /* override */
