@@ -2,20 +2,13 @@ import React, { useState, useContext } from 'react';
 import { observer } from 'mobx-react';
 import classnames from 'classnames';
 
-import { DataAnalyzeStoreContext } from '../../../stores';
 import QueryAndAlgorithmLibrary from './QueryAndAlgorithmLibrary';
-import QueryResult from './QueryResult';
+import { QueryResult } from './query-result';
 import FullScreenQueryResult from './FullScreenQueryResult';
 import ExecLogAndQueryCollections from './ExecLogAndQueryCollections';
 
 export interface DataAnalyzeContentProps {
   isExpand: boolean;
-}
-
-export interface QueryResultProps {
-  sidebarIndex: number;
-  isFullScreen: boolean;
-  handleSetSidebarIndex: (index: number) => void;
 }
 
 const DataAnalyzeContent: React.FC<DataAnalyzeContentProps> = observer(
