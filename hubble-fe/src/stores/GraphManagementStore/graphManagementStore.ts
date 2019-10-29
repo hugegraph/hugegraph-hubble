@@ -70,7 +70,7 @@ export class GraphManagementStore {
     deleteGraphData: 'standby'
   };
 
-  @observable validateErrorMessage: { [index: string]: string } = {
+  @observable validateErrorMessage: Record<string, string> = {
     name: '',
     graph: '',
     host: '',
@@ -155,15 +155,15 @@ export class GraphManagementStore {
 
   @action
   mutateGraphDataConfig(key: string, type: 'new' | 'edit') {
-    return (eventTarget: EventTarget) => {
+    return (eventTarget: HTMLInputElement) => {
       this.isValidated = false;
 
       if (type === 'new') {
-        this.newGraphData[key] = (eventTarget as HTMLInputElement).value;
+        this.newGraphData[key] = eventTarget.value;
       }
 
       if (type === 'edit') {
-        this.editGraphData[key] = (eventTarget as HTMLInputElement).value;
+        this.editGraphData[key] = eventTarget.value;
       }
     };
   }
