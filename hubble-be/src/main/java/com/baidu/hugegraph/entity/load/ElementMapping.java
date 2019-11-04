@@ -17,63 +17,37 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity.query;
+package com.baidu.hugegraph.entity.load;
 
+import java.util.Map;
+import java.util.Set;
+
+import com.baidu.hugegraph.annotation.MergeProperty;
+import com.baidu.hugegraph.common.Mergeable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class GremlinResult {
+public abstract class ElementMapping implements Mergeable {
 
-    @JsonProperty("type")
-    private Type type;
+    @MergeProperty(useNew = false)
+    @JsonProperty("label")
+    private String label;
 
-    @JsonProperty("json_view")
-    private JsonView jsonView;
+    @MergeProperty
+    @JsonProperty("field_mapping")
+    private Map<String, String> mappingFields;
 
-    @JsonProperty("table_view")
-    private TableView tableView;
+    @MergeProperty
+    @JsonProperty("value_mapping")
+    private Map<String, Map<String, Object>> mappingValues;
 
-    @JsonProperty("graph_view")
-    private GraphView graphView;
-
-    public enum Type {
-
-        EMPTY,
-
-        GENERAL,
-
-        VERTEX,
-
-        EDGE,
-
-        PATH;
-
-        public boolean isEmpty() {
-            return this == EMPTY;
-        }
-
-        public boolean isGeneral() {
-            return this == GENERAL;
-        }
-
-        public boolean isVertex() {
-            return this == VERTEX;
-        }
-
-        public boolean isEdge() {
-            return this == EDGE;
-        }
-
-        public boolean isGraph() {
-            return this == VERTEX || this == EDGE || this == PATH;
-        }
-    }
+    @MergeProperty
+    @JsonProperty("null_values")
+    private Set<Object> nullValues;
 }

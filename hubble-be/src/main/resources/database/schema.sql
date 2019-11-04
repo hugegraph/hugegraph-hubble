@@ -44,3 +44,17 @@ CREATE TABLE IF NOT EXISTS `gremlin_collection` (
     UNIQUE (`conn_id`, `name`)
 );
 CREATE INDEX IF NOT EXISTS `gremlin_collection_conn_id` ON `gremlin_collection`(`conn_id`);
+
+CREATE TABLE IF NOT EXISTS `file_mapping` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `conn_id` INT NOT NULL,
+    `name` VARCHAR(64) NOT NULL,
+    `path` VARCHAR(256) NOT NULL,
+    `file_setting` VARCHAR(65535) NOT NULL,
+    `vertex_mappings` VARCHAR(65535) NOT NULL,
+    `edge_mappings` VARCHAR(65535) NOT NULL,
+    `load_parameter` VARCHAR(65535) NOT NULL,
+    `last_access_time` DATETIME(6) NOT NULL,
+    PRIMARY KEY (`id`)
+);
+CREATE INDEX IF NOT EXISTS `file_mapping_conn_id` ON `file_mapping`(`conn_id`);

@@ -17,36 +17,24 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.advisor;
+package com.baidu.hugegraph.service.load;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.baidu.hugegraph.config.HugeConfig;
-import com.baidu.hugegraph.license.LicenseVerifier;
-import com.baidu.hugegraph.license.ServerInfo;
 import com.baidu.hugegraph.options.HubbleOptions;
+import com.baidu.hugegraph.util.Bytes;
 
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-@Component
-public class CustomApplicationRunner implements ApplicationRunner {
+@Service
+public class LoadDataService {
 
     @Autowired
     private HugeConfig config;
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        String serverId = this.config.get(HubbleOptions.SERVER_ID);
-        ServerInfo serverInfo = new ServerInfo(serverId);
-        log.info("The server info has been inited");
-        this.installLicense(serverInfo, "9662b261c388fc5923ace0ebe2a34b02");
-    }
-
-    private void installLicense(ServerInfo serverInfo, String md5) {
-        LicenseVerifier.instance().install(serverInfo, md5);
-    }
+    @Autowired
+    private FileMappingService fileMappingService;
 }

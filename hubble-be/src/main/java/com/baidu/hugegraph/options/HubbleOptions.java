@@ -158,19 +158,27 @@ public class HubbleOptions extends OptionHolder {
                     500
             );
 
-    public static final ConfigOption<Integer> INDEXLABEL_REBUILD_TIMEOUT =
+    public static final ConfigOption<String> UPLOAD_FILE_LOCATION =
             new ConfigOption<>(
-                    "indexlabel.rebuild.timeout",
-                    "The timeout in seconds for waiting to create index label.",
-                    rangeInt(-1, Integer.MAX_VALUE),
-                    30
+                    "upload_file.location",
+                    "The location of uploaded files.",
+                    disallowEmpty(),
+                    "./upload-files"
             );
 
-    public static final ConfigOption<Integer> INDEXLABEL_REMOVE_TIMEOUT =
+    public static final ConfigOption<Integer> UPLOAD_SINGLE_FILE_SIZE_LIMIT =
             new ConfigOption<>(
-                    "indexlabel.remove.timeout",
-                    "The timeout in seconds for waiting to remove index label.",
-                    rangeInt(-1, Integer.MAX_VALUE),
-                    30
+                    "upload_single_file.size.limit",
+                    "The single file size(MB) limit.",
+                    positiveInt(),
+                    1024
+            );
+
+    public static final ConfigOption<Integer> UPLOAD_TOTAL_FILE_SIZE_LIMIT =
+            new ConfigOption<>(
+                    "upload_total_file.size.limit",
+                    "The total file size(MB) limit.",
+                    positiveInt(),
+                    10240
             );
 }

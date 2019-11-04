@@ -17,8 +17,13 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity.query;
+package com.baidu.hugegraph.entity.load;
 
+import java.util.List;
+
+import com.baidu.hugegraph.annotation.MergeProperty;
+import com.baidu.hugegraph.common.Constant;
+import com.baidu.hugegraph.common.Mergeable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -30,50 +35,39 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GremlinResult {
+public class FileSetting implements Mergeable {
 
-    @JsonProperty("type")
-    private Type type;
+    @MergeProperty
+    @JsonProperty("has_header")
+    private boolean hasHeader;
 
-    @JsonProperty("json_view")
-    private JsonView jsonView;
+    @JsonProperty("column_names")
+    private List<String> columnNames;
 
-    @JsonProperty("table_view")
-    private TableView tableView;
+    @JsonProperty("column_values")
+    private List<String> columnValues;
 
-    @JsonProperty("graph_view")
-    private GraphView graphView;
+    @MergeProperty
+    @JsonProperty("format")
+    private String format = "TEXT";
 
-    public enum Type {
+    @MergeProperty
+    @JsonProperty("delimiter")
+    private String delimiter = ",";
 
-        EMPTY,
+    @MergeProperty
+    @JsonProperty("charset")
+    private String charset = Constant.CHARSET.name();
 
-        GENERAL,
+    @MergeProperty
+    @JsonProperty("date_format")
+    private String dateFormat = "yyyy-MM-dd HH:mm:ss";
 
-        VERTEX,
+    @MergeProperty
+    @JsonProperty("time_zone")
+    private String timeZone = "GMT+8";
 
-        EDGE,
-
-        PATH;
-
-        public boolean isEmpty() {
-            return this == EMPTY;
-        }
-
-        public boolean isGeneral() {
-            return this == GENERAL;
-        }
-
-        public boolean isVertex() {
-            return this == VERTEX;
-        }
-
-        public boolean isEdge() {
-            return this == EDGE;
-        }
-
-        public boolean isGraph() {
-            return this == VERTEX || this == EDGE || this == PATH;
-        }
-    }
+    @MergeProperty
+    @JsonProperty("skipped_line")
+    private String skippedLine = "(^#|^//).*|";
 }

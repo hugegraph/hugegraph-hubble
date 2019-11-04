@@ -17,8 +17,10 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity.query;
+package com.baidu.hugegraph.entity.load;
 
+import com.baidu.hugegraph.annotation.MergeProperty;
+import com.baidu.hugegraph.common.Mergeable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -30,50 +32,29 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GremlinResult {
+public class LoadParameter implements Mergeable {
 
-    @JsonProperty("type")
-    private Type type;
+    @MergeProperty
+    @JsonProperty("check_vertex")
+    private boolean checkVertex = false;
 
-    @JsonProperty("json_view")
-    private JsonView jsonView;
+    @MergeProperty
+    @JsonProperty("insert_timeout")
+    private int insertTimeout = 60;
 
-    @JsonProperty("table_view")
-    private TableView tableView;
+    @MergeProperty
+    @JsonProperty("max_parse_errors")
+    private int maxParseErrors = 1;
 
-    @JsonProperty("graph_view")
-    private GraphView graphView;
+    @MergeProperty
+    @JsonProperty("max_insert_errors")
+    private int maxInsertErrors = 500;
 
-    public enum Type {
+    @MergeProperty
+    @JsonProperty("retry_times")
+    private int retryTimes = 3;
 
-        EMPTY,
-
-        GENERAL,
-
-        VERTEX,
-
-        EDGE,
-
-        PATH;
-
-        public boolean isEmpty() {
-            return this == EMPTY;
-        }
-
-        public boolean isGeneral() {
-            return this == GENERAL;
-        }
-
-        public boolean isVertex() {
-            return this == VERTEX;
-        }
-
-        public boolean isEdge() {
-            return this == EDGE;
-        }
-
-        public boolean isGraph() {
-            return this == VERTEX || this == EDGE || this == PATH;
-        }
-    }
+    @MergeProperty
+    @JsonProperty("retry_interval")
+    private int retryInterval = 10;
 }

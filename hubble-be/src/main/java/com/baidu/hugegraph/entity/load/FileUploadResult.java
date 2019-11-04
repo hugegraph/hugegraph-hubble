@@ -17,9 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity.query;
+package com.baidu.hugegraph.entity.load;
 
+import com.baidu.hugegraph.util.SerializeUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,50 +32,32 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GremlinResult {
+public class FileUploadResult {
 
-    @JsonProperty("type")
-    private Type type;
+    @JsonProperty("id")
+    private Integer id;
 
-    @JsonProperty("json_view")
-    private JsonView jsonView;
+    @JsonProperty("name")
+    private String name;
 
-    @JsonProperty("table_view")
-    private TableView tableView;
+    @JsonProperty("size")
+    @JsonSerialize(using = SerializeUtil.SizeSerializer.class)
+    private Long size;
 
-    @JsonProperty("graph_view")
-    private GraphView graphView;
+    @JsonProperty("status")
+    private Status status;
 
-    public enum Type {
+    @JsonProperty("cause")
+    private String cause;
 
-        EMPTY,
+    public enum Status {
 
-        GENERAL,
+        LOADING,
 
-        VERTEX,
+        SUCCESS,
 
-        EDGE,
+        FAILURE,
 
-        PATH;
-
-        public boolean isEmpty() {
-            return this == EMPTY;
-        }
-
-        public boolean isGeneral() {
-            return this == GENERAL;
-        }
-
-        public boolean isVertex() {
-            return this == VERTEX;
-        }
-
-        public boolean isEdge() {
-            return this == EDGE;
-        }
-
-        public boolean isGraph() {
-            return this == VERTEX || this == EDGE || this == PATH;
-        }
+        SUSPEND;
     }
 }
