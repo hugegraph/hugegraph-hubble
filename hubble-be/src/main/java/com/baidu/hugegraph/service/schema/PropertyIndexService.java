@@ -24,16 +24,19 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
 import com.baidu.hugegraph.entity.schema.ConflictStatus;
 import com.baidu.hugegraph.entity.schema.PropertyIndex;
+import com.baidu.hugegraph.entity.schema.SchemaConflict;
 import com.baidu.hugegraph.entity.schema.SchemaType;
+import com.baidu.hugegraph.exception.ServerException;
 import com.baidu.hugegraph.structure.constant.HugeType;
 import com.baidu.hugegraph.structure.schema.IndexLabel;
 import com.baidu.hugegraph.util.PageUtil;
@@ -45,23 +48,8 @@ import lombok.extern.log4j.Log4j2;
 @Service
 public class PropertyIndexService extends SchemaService {
 
-    public List<PropertyIndex> list(List<String> names, int connId) {
-        HugeClient client = this.client(connId);
-        List<IndexLabel> indexLabels;
-        if (CollectionUtils.isEmpty(names)) {
-            indexLabels = client.schema().getIndexLabels();
-        } else {
-            indexLabels = client.schema().getIndexLabels(names);
-        }
-        List<PropertyIndex> results = new ArrayList<>(indexLabels.size());
-        indexLabels.forEach(indexLabel -> {
-            results.add(convert(indexLabel));
-        });
-        return results;
-    }
-
-    public IPage<PropertyIndex> listPropertyIndex(int connId, HugeType type,
-                                                  int pageNo, int pageSize) {
+    public IPage<PropertyIndex> list(int connId, HugeType type,
+                                     int pageNo, int pageSize) {
         HugeClient client = this.client(connId);
         List<IndexLabel> indexLabels = client.schema().getIndexLabels();
 
@@ -92,14 +80,13 @@ public class PropertyIndexService extends SchemaService {
      *               | softwareByPriveAndName | price name
      * --------------+------------------------+---------------------------------
      */
-    public IPage<PropertyIndex> listPropertyIndex(int connId, HugeType type,
-                                                  String content,
-                                                  int pageNo, int pageSize) {
+    public IPage<PropertyIndex> list(int connId, HugeType type, String content,
+                                     int pageNo, int pageSize) {
         HugeClient client = this.client(connId);
         List<IndexLabel> indexLabels = client.schema().getIndexLabels();
 
         Map<String, List<PropertyIndex>> matchedResults = new HashMap<>();
-        Map<String, List<PropertyIndex>> unMatchedResults = new HashMap<>();
+        Map<String, List<PropertyIndex>> unMatchResults = new HashMap<>();
         for (IndexLabel indexLabel : indexLabels) {
             if (!indexLabel.baseType().equals(type)) {
                 continue;
@@ -112,10 +99,10 @@ public class PropertyIndexService extends SchemaService {
                 groupedIndexes = matchedResults.computeIfAbsent(baseValue,
                                                 k -> new ArrayList<>());
             } else {
-                groupedIndexes = unMatchedResults.computeIfAbsent(baseValue,
-                                                  k -> new ArrayList<>());
+                groupedIndexes = unMatchResults.computeIfAbsent(baseValue,
+                                                k -> new ArrayList<>());
             }
-            match = indexLabel.name().contains(content) ||
+            match = match || indexLabel.name().contains(content) ||
                     indexLabel.indexFields().stream()
                               .anyMatch(f -> f.contains(content));
             if (match) {
@@ -123,7 +110,7 @@ public class PropertyIndexService extends SchemaService {
             }
         }
 
-        // Sort results by relevance
+        // Sort matched results by relevance
         if (!StringUtils.isEmpty(content)) {
             for (Map.Entry<String, List<PropertyIndex>> entry :
                  matchedResults.entrySet()) {
@@ -157,8 +144,21 @@ public class PropertyIndexService extends SchemaService {
         }
         List<PropertyIndex> all = new ArrayList<>();
         matchedResults.values().forEach(all::addAll);
-        unMatchedResults.values().forEach(all::addAll);
+        unMatchResults.values().forEach(all::addAll);
         return PageUtil.page(all, pageNo, pageSize);
+    }
+
+    private PropertyIndex get(String name, int connId) {
+        HugeClient client = this.client(connId);
+        try {
+            IndexLabel indexLabel = client.schema().getIndexLabel(name);
+            return convert(indexLabel);
+        } catch (ServerException e) {
+            if (e.status() == Constant.STATUS_NOT_FOUND) {
+                return null;
+            }
+            throw e;
+        }
     }
 
     public void atomicAddBatch(List<IndexLabel> indexLabels,
@@ -191,31 +191,68 @@ public class PropertyIndexService extends SchemaService {
             oldIndexLabels.put(il.name(), il);
         });
 
-        ConflictDetail detail = new ConflictDetail();
+        ConflictDetail detail = new ConflictDetail(SchemaType.PROPERTY_INDEX);
         for (IndexLabel newIndexLabel : indexLabels) {
             String name = newIndexLabel.name();
             IndexLabel oldIndexLabel = oldIndexLabels.get(name);
+
+            PropertyIndex entity = convert(newIndexLabel);
+            ConflictStatus status;
             if (oldIndexLabel == null) {
-                detail.put(SchemaType.PROPERTY_INDEX, name,
-                           ConflictStatus.PASSED);
+                status = ConflictStatus.PASSED;
             } else if (isEqual(newIndexLabel, oldIndexLabel)) {
-                detail.put(SchemaType.PROPERTY_INDEX, name,
-                           ConflictStatus.EXISTED);
+                status = ConflictStatus.EXISTED;
             } else {
-                detail.put(SchemaType.PROPERTY_INDEX, name,
-                           ConflictStatus.DUPNAME);
+                status = ConflictStatus.DUPNAME;
             }
+            detail.add(entity, status);
         }
         return detail;
+    }
+
+    public ConflictStatus checkConflict(PropertyIndex entity, int connId) {
+        HugeClient client = this.client(connId);
+        String name = entity.getName();
+        IndexLabel newIndexLabel = convert(entity, client);
+        IndexLabel oldIndexLabel = convert(this.get(name, connId), client);
+        if (oldIndexLabel == null) {
+            return ConflictStatus.PASSED;
+        } else if (isEqual(newIndexLabel, oldIndexLabel)) {
+            return ConflictStatus.EXISTED;
+        } else {
+            return ConflictStatus.DUPNAME;
+        }
+    }
+
+    public List<IndexLabel> filter(ConflictDetail detail, HugeClient client) {
+        return detail.getPropertyIndexConflicts().stream()
+                     .filter(c -> c.getStatus() == ConflictStatus.PASSED)
+                     .map(SchemaConflict::getEntity)
+                     .map(e -> convert(e, client))
+                     .collect(Collectors.toList());
     }
 
     public static PropertyIndex convert(IndexLabel indexLabel) {
         return PropertyIndex.builder()
                             .owner(indexLabel.baseValue())
+                            .ownerType(SchemaType.convert(indexLabel.baseType()))
                             .name(indexLabel.name())
                             .type(indexLabel.indexType())
                             .fields(indexLabel.indexFields())
                             .build();
+    }
+
+    public static IndexLabel convert(PropertyIndex entity, HugeClient client) {
+        if (entity == null) {
+            return null;
+        }
+        boolean isVertex = entity.getOwnerType().isVertexLabel();
+        String[] fields = toStringArray(entity.getFields());
+        return client.schema().indexLabel(entity.getName())
+                     .on(isVertex, entity.getOwner())
+                     .indexType(entity.getType())
+                     .by(fields)
+                     .build();
     }
 
     private static boolean isEqual(IndexLabel oldSchema, IndexLabel newSchema) {

@@ -33,10 +33,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PropertyIndex {
+public class PropertyIndex implements SchemaEntity {
 
     @JsonProperty("owner")
     private String owner;
+
+    @JsonProperty("owner_type")
+    private SchemaType ownerType;
 
     @JsonProperty("name")
     private String name;
@@ -46,4 +49,9 @@ public class PropertyIndex {
 
     @JsonProperty("fields")
     private List<String> fields;
+
+    @Override
+    public SchemaType getSchemaType() {
+        return SchemaType.PROPERTY_INDEX;
+    }
 }

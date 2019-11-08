@@ -24,5 +24,5 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public interface Typifiable {
 
     @JsonIgnore
-    SchemaType getType();
+    SchemaType getSchemaType();
 }

@@ -19,104 +19,84 @@
 
 package com.baidu.hugegraph.entity.schema;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
 
+import com.baidu.hugegraph.structure.SchemaElement;
 import com.baidu.hugegraph.structure.schema.IndexLabel;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class ConflictDetail {
 
-    @JsonProperty("propertykeys")
-    private Map<String, ConflictStatus> propertyKeyStatuses;
+    @JsonProperty("type")
+    private SchemaType type;
 
-    @JsonProperty("vertexlabels")
-    private Map<String, ConflictStatus> vertexLabelStatuses;
+    @JsonProperty("propertykey_conflicts")
+    private List<SchemaConflict<PropertyKeyEntity>> propertyKeyConflicts;
 
-    @JsonProperty("edgelabels")
-    private Map<String, ConflictStatus> edgeLabelStatuses;
+    @JsonProperty("propertyindex_conflicts")
+    private List<SchemaConflict<PropertyIndex>> propertyIndexConflicts;
 
-    @JsonProperty("propertyindexes")
-    private Map<String, ConflictStatus> propertyIndexStatuses;
+    @JsonProperty("vertexlabel_conflicts")
+    private List<SchemaConflict<VertexLabelEntity>> vertexLabelConflicts;
 
-    public ConflictDetail() {
-        this.propertyKeyStatuses = new HashMap<>();
-        this.vertexLabelStatuses = new HashMap<>();
-        this.edgeLabelStatuses = new HashMap<>();
-        this.propertyIndexStatuses = new HashMap<>();
+    @JsonProperty("edgelabel_conflicts")
+    private List<SchemaConflict<EdgeLabelEntity>> edgeLabelConflicts;
+
+    @JsonCreator
+    public ConflictDetail(SchemaType type) {
+        this.type = type;
+        this.propertyKeyConflicts = new ArrayList<>();
+        this.propertyIndexConflicts = new ArrayList<>();
+        this.vertexLabelConflicts = new ArrayList<>();
+        this.edgeLabelConflicts = new ArrayList<>();
     }
 
-    public void put(SchemaType type, String name, ConflictStatus status) {
-        switch (type) {
-            case PROPERTY_KEY:
-                this.propertyKeyStatuses.put(name, status);
-                break;
-            case VERTEX_LABEL:
-                this.vertexLabelStatuses.put(name, status);
-                break;
-            case EDGE_LABEL:
-                this.edgeLabelStatuses.put(name, status);
-                break;
-            case PROPERTY_INDEX:
-                this.propertyIndexStatuses.put(name, status);
-                break;
-            default:
-                throw new AssertionError(String.format(
-                          "Unknown schema type '%s'", type));
-        }
+    public void add(PropertyKeyEntity entity, ConflictStatus status) {
+        this.propertyKeyConflicts.add(new SchemaConflict<>(entity, status));
+    }
+
+    public void add(PropertyIndex entity, ConflictStatus status) {
+        this.propertyIndexConflicts.add(new SchemaConflict<>(entity, status));
+    }
+
+    public void add(VertexLabelEntity entity, ConflictStatus status) {
+        this.vertexLabelConflicts.add(new SchemaConflict<>(entity, status));
+    }
+
+    public void add(EdgeLabelEntity entity, ConflictStatus status) {
+        this.edgeLabelConflicts.add(new SchemaConflict<>(entity, status));
     }
 
     public void merge(ConflictDetail other) {
-        this.propertyKeyStatuses.putAll(other.propertyKeyStatuses);
-        this.vertexLabelStatuses.putAll(other.vertexLabelStatuses);
-        this.edgeLabelStatuses.putAll(other.edgeLabelStatuses);
-        this.propertyIndexStatuses.putAll(other.propertyIndexStatuses);
-    }
-
-    public List<String> filter(SchemaType type) {
-        Map<String, ConflictStatus> statuses;
-        switch (type) {
-            case PROPERTY_KEY:
-                statuses = this.propertyKeyStatuses;
-                break;
-            case VERTEX_LABEL:
-                statuses = this.vertexLabelStatuses;
-                break;
-            case EDGE_LABEL:
-                statuses = this.edgeLabelStatuses;
-                break;
-            case PROPERTY_INDEX:
-                statuses = this.propertyIndexStatuses;
-                break;
-            default:
-                throw new AssertionError(String.format(
-                          "Unknown schema type '%s'", type));
-        }
-
-        return statuses.entrySet().stream().filter(e -> {
-            return e.getValue() == ConflictStatus.PASSED;
-        }).map(Map.Entry::getKey).collect(Collectors.toList());
+        this.propertyKeyConflicts.addAll(other.propertyKeyConflicts);
+        this.propertyIndexConflicts.addAll(other.propertyIndexConflicts);
+        this.vertexLabelConflicts.addAll(other.vertexLabelConflicts);
+        this.edgeLabelConflicts.addAll(other.edgeLabelConflicts);
     }
 
     public boolean anyPropertyKeyConflict(Set<String> properties) {
         if (CollectionUtils.isEmpty(properties)) {
             return false;
         }
-        return properties.stream().anyMatch(name -> {
-            ConflictStatus status = this.propertyKeyStatuses.get(name);
-            return status != null && status.isConflicted();
+        return this.propertyKeyConflicts.stream().anyMatch(conflict -> {
+            String name = conflict.getEntity().getName();
+            return conflict.getStatus().isConflicted() &&
+                   properties.contains(name);
         });
     }
 
@@ -124,9 +104,11 @@ public class ConflictDetail {
         if (CollectionUtils.isEmpty(indexLabels)) {
             return false;
         }
-        return indexLabels.stream().anyMatch(il -> {
-            ConflictStatus status = this.propertyIndexStatuses.get(il.name());
-            return status != null && status.isConflicted();
+        Set<String> names = indexLabels.stream().map(SchemaElement::name)
+                                       .collect(Collectors.toSet());
+        return this.propertyIndexConflicts.stream().anyMatch(conflict -> {
+            String name = conflict.getEntity().getName();
+            return conflict.getStatus().isConflicted() && names.contains(name);
         });
     }
 
@@ -134,30 +116,31 @@ public class ConflictDetail {
         if (CollectionUtils.isEmpty(vertexLabels)) {
             return false;
         }
-        return vertexLabels.stream().anyMatch(name -> {
-            ConflictStatus status = this.vertexLabelStatuses.get(name);
-            return status != null && status.isConflicted();
+        return this.vertexLabelConflicts.stream().anyMatch(conflict -> {
+            String name = conflict.getEntity().getName();
+            return conflict.getStatus().isConflicted() &&
+                   vertexLabels.contains(name);
         });
     }
 
     public boolean hasConflict() {
-        for (ConflictStatus status : this.propertyKeyStatuses.values()) {
-            if (status.isConflicted()) {
+        for (SchemaConflict<?> conflict : this.propertyKeyConflicts) {
+            if (conflict.getStatus().isConflicted()) {
                 return true;
             }
         }
-        for (ConflictStatus status : this.vertexLabelStatuses.values()) {
-            if (status.isConflicted()) {
+        for (SchemaConflict<?> conflict : this.propertyIndexConflicts) {
+            if (conflict.getStatus().isConflicted()) {
                 return true;
             }
         }
-        for (ConflictStatus status : this.edgeLabelStatuses.values()) {
-            if (status.isConflicted()) {
+        for (SchemaConflict<?> conflict : this.vertexLabelConflicts) {
+            if (conflict.getStatus().isConflicted()) {
                 return true;
             }
         }
-        for (ConflictStatus status : this.propertyIndexStatuses.values()) {
-            if (status.isConflicted()) {
+        for (SchemaConflict<?> conflict : this.edgeLabelConflicts) {
+            if (conflict.getStatus().isConflicted()) {
                 return true;
             }
         }

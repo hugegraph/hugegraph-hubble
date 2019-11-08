@@ -48,7 +48,8 @@ public class TomcatServletConfig
         try {
             factory.setAddress(InetAddress.getByName(host));
         } catch (UnknownHostException e) {
-            throw new ExternalException(String.format("Unknown host %s", host));
+            throw new ExternalException(String.format("Unknown host %s", host),
+                                        e);
         }
         factory.setPort(this.config.get(HubbleOptions.SERVER_PORT));
         factory.addContextCustomizers(context -> {

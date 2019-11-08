@@ -19,8 +19,10 @@
 
 package com.baidu.hugegraph.entity.schema;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -51,7 +53,16 @@ public class LabelUpdateEntity implements Typifiable {
     private transient SchemaType type;
 
     @Override
-    public SchemaType getType() {
+    public SchemaType getSchemaType() {
         return this.type;
+    }
+
+    public List<String> getAppendPropertyIndexNames() {
+        if (this.appendPropertyIndexes == null) {
+            return Collections.emptyList();
+        }
+        return this.appendPropertyIndexes.stream()
+                                         .map(PropertyIndex::getName)
+                                         .collect(Collectors.toList());
     }
 }

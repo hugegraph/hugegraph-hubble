@@ -19,11 +19,7 @@
 
 package com.baidu.hugegraph.entity.schema;
 
-import java.util.Date;
-
 public interface SchemaEntity extends Typifiable {
 
     String getName();
-
-    Date getCreateTime();
 }

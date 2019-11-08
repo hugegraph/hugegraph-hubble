@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
+import com.baidu.hugegraph.entity.schema.ConflictStatus;
 import com.baidu.hugegraph.entity.schema.LabelUpdateEntity;
 import com.baidu.hugegraph.entity.schema.VertexLabelEntity;
 import com.baidu.hugegraph.service.schema.PropertyKeyService;
@@ -114,31 +115,36 @@ public class VertexLabelController extends SchemaController {
     @PostMapping
     public void create(@RequestBody VertexLabelEntity entity,
                        @RequestParam("conn_id") int connId) {
-        this.checkParamsValid(entity, connId);
+        this.checkParamsValid(entity, connId, true);
         this.checkEntityUnique(entity, connId, true);
         entity.setCreateTime(new Date());
         this.vlService.add(entity, connId);
     }
 
-    @PostMapping("check_conflict")
-    public ConflictDetail checkConflict(@RequestBody List<String> names,
-                                        @RequestParam("reused_conn_id")
-                                        int reusedConnId,
-                                        @RequestParam("conn_id") int connId) {
+    @PostMapping("check_conflicts")
+    public ConflictDetail checkConflicts(@RequestBody List<String> names,
+                                         @RequestParam("reused_conn_id")
+                                         int reusedConnId,
+                                         @RequestParam("conn_id") int connId) {
         Ex.check(connId != reusedConnId, "schema.conn.cannot-reuse-self");
         Ex.check(!CollectionUtils.isEmpty(names),
                  "common.param.cannot-be-empty", "names");
         return this.vlService.checkConflict(names, reusedConnId, connId);
     }
 
+    @PostMapping("check_conflict")
+    public ConflictStatus checkConflict(@RequestBody VertexLabelEntity entity,
+                                        @RequestParam("conn_id") int connId) {
+//        this.checkParamsValid(entity, connId, false);
+        return this.vlService.checkConflict(entity, connId);
+    }
+
     @PostMapping("reuse")
-    public void reuse(@RequestBody List<String> names,
-                      @RequestParam("reused_conn_id") int reusedConnId,
+    public void reuse(@RequestBody ConflictDetail detail,
                       @RequestParam("conn_id") int connId) {
-        Ex.check(connId != reusedConnId, "schema.conn.cannot-reuse-self");
-        Ex.check(!CollectionUtils.isEmpty(names),
-                 "common.param.cannot-be-empty", "names");
-        this.vlService.reuse(names, reusedConnId, connId);
+//        Ex.check(!CollectionUtils.isEmpty(names),
+//                 "common.param.cannot-be-empty", "names");
+        this.vlService.reuse(detail, connId);
     }
 
     @PutMapping("{name}")
@@ -181,11 +187,14 @@ public class VertexLabelController extends SchemaController {
         }
     }
 
-    private void checkParamsValid(VertexLabelEntity entity, int connId) {
+    private void checkParamsValid(VertexLabelEntity entity, int connId,
+                                  boolean checkCreateTime) {
         String name = entity.getName();
         Ex.check(name != null, "common.param.cannot-be-null", "name");
         Ex.check(NAME_PATTERN.matcher(name).matches(),
                  "schema.vertexlabel.unmatch-regex", name);
+        Ex.check(checkCreateTime, () -> entity.getCreateTime() == null,
+                 "common.param.must-be-null", "create_time");
         // Check properties
         checkProperties(this.pkService, entity.getProperties(), false, connId);
         // Check primary keys

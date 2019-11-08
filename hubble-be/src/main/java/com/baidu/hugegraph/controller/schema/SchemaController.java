@@ -29,11 +29,12 @@ import java.util.regex.Pattern;
 import org.springframework.util.StringUtils;
 
 import com.baidu.hugegraph.controller.BaseController;
-import com.baidu.hugegraph.entity.schema.Property;
 import com.baidu.hugegraph.entity.schema.LabelUpdateEntity;
+import com.baidu.hugegraph.entity.schema.Property;
 import com.baidu.hugegraph.entity.schema.PropertyIndex;
 import com.baidu.hugegraph.entity.schema.SchemaEntity;
 import com.baidu.hugegraph.entity.schema.SchemaLabelEntity;
+import com.baidu.hugegraph.entity.schema.Timefiable;
 import com.baidu.hugegraph.service.schema.PropertyKeyService;
 import com.baidu.hugegraph.util.Ex;
 import com.baidu.hugegraph.util.PageUtil;
@@ -44,9 +45,6 @@ public class SchemaController extends BaseController {
     protected static final Pattern NAME_PATTERN = Pattern.compile(
             "^[A-Za-z0-9_]{0,128}$"
     );
-
-    protected static final String EXISTED_EXCEPTION =
-              "class com.baidu.hugegraph.exception.ExistedException";
 
     public <T extends SchemaEntity> IPage<T> listInPage(
                                              Function<Integer, List<T>> fetcher,
@@ -78,8 +76,10 @@ public class SchemaController extends BaseController {
     public <T extends SchemaEntity> void sortByCreateTime(List<T> entities,
                                                           boolean asc) {
         Comparator<T> dateAscComparator = (o1, o2) -> {
-            Date t1 = o1.getCreateTime();
-            Date t2 = o2.getCreateTime();
+            assert o1 instanceof Timefiable;
+            assert o2 instanceof Timefiable;
+            Date t1 = ((Timefiable) o1).getCreateTime();
+            Date t2 = ((Timefiable) o2).getCreateTime();
             if (t1 == null && t2 == null) {
                 return 0;
             } else if (t1 == null) {
@@ -106,14 +106,15 @@ public class SchemaController extends BaseController {
     public static void checkProperties(PropertyKeyService service,
                                        Set<Property> properties,
                                        boolean mustNullable, int connId) {
-        if (properties != null) {
-            for (Property property : properties) {
-                String pkName = property.getName();
-                Ex.check(service.exist(pkName, connId),
-                         "schema.propertykey.not-exist", pkName);
-                Ex.check(mustNullable, property::isNullable,
-                         "schema.propertykey.should-be-nullable");
-            }
+        if (properties == null) {
+            return;
+        }
+        for (Property property : properties) {
+            String pkName = property.getName();
+            Ex.check(service.exist(pkName, connId),
+                     "schema.propertykey.not-exist", pkName);
+            Ex.check(mustNullable, property::isNullable,
+                     "schema.propertykey.should-be-nullable");
         }
     }
 
@@ -126,7 +127,7 @@ public class SchemaController extends BaseController {
                          "common.param.must-be-null", "property_index.owner");
                 Ex.check(propertyIndex.getName() != null,
                          "common.param.cannot-be-null", "property_index.name");
-                Ex.check(propertyIndex.getType() != null,
+                Ex.check(propertyIndex.getSchemaType() != null,
                          "common.param.cannot-be-null", "property_index.type");
                 Ex.check(propertyIndex.getFields() != null,
                          "common.param.cannot-be-null", "property_index.fields");

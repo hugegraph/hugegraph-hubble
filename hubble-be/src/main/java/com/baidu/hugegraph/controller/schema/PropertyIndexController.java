@@ -20,15 +20,20 @@
 package com.baidu.hugegraph.controller.schema;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.hugegraph.entity.schema.ConflictStatus;
 import com.baidu.hugegraph.entity.schema.PropertyIndex;
 import com.baidu.hugegraph.service.schema.PropertyIndexService;
 import com.baidu.hugegraph.structure.constant.HugeType;
+import com.baidu.hugegraph.util.Ex;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 @RestController
@@ -56,11 +61,31 @@ public class PropertyIndexController extends SchemaController {
         HugeType type = isVertexLabel ? HugeType.VERTEX_LABEL :
                                         HugeType.EDGE_LABEL;
         if (StringUtils.isEmpty(content)) {
-            return this.service.listPropertyIndex(connId, type,
-                                                  pageNo, pageSize);
+            return this.service.list(connId, type, pageNo, pageSize);
         } else {
-            return this.service.listPropertyIndex(connId, type, content,
-                                                  pageNo, pageSize);
+            return this.service.list(connId, type, content, pageNo, pageSize);
         }
+    }
+
+    @PostMapping("check_conflict")
+    public ConflictStatus checkConflict(@RequestBody PropertyIndex entity,
+                                        @RequestParam("conn_id") int connId) {
+        this.checkParamsValid(entity);
+        return this.service.checkConflict(entity, connId);
+    }
+
+    private void checkParamsValid(PropertyIndex entity) {
+        String name = entity.getName();
+        Ex.check(name != null, "common.param.cannot-be-null", "name");
+        Ex.check(NAME_PATTERN.matcher(name).matches(),
+                 "schema.propertykey.unmatch-regex", name);
+        Ex.check(entity.getOwner() != null,
+                 "common.param.cannot-be-null", "owner");
+        Ex.check(entity.getOwnerType() != null,
+                 "common.param.cannot-be-null", "owner_type");
+        Ex.check(entity.getType() != null,
+                 "common.param.cannot-be-null", "type");
+        Ex.check(!CollectionUtils.isEmpty(entity.getFields()),
+                 "common.param.cannot-be-null", "fields");
     }
 }

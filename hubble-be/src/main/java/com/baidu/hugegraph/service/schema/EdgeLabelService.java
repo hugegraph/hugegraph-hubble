@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ import com.baidu.hugegraph.entity.schema.EdgeLabelEntity;
 import com.baidu.hugegraph.entity.schema.LabelUpdateEntity;
 import com.baidu.hugegraph.entity.schema.Property;
 import com.baidu.hugegraph.entity.schema.PropertyIndex;
+import com.baidu.hugegraph.entity.schema.SchemaConflict;
 import com.baidu.hugegraph.entity.schema.SchemaType;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.ServerException;
@@ -115,27 +117,53 @@ public class EdgeLabelService extends SchemaService {
     }
 
     public void update(LabelUpdateEntity entity, int connId) {
-        HugeClient client = this.client(connId);
         entity.setType(SchemaType.EDGE_LABEL);
+        HugeClient client = this.client(connId);
         EdgeLabel edgeLabel = convert(entity, client);
+
+        // All existed indexlabels
+        List<IndexLabel> existedIndexLabels = client.schema().getIndexLabels();
+        List<String> existedIndexLabelNames = collectNames(existedIndexLabels);
+
+        List<String> addedIndexLabelNames = entity.getAppendPropertyIndexNames();
+        List<IndexLabel> addedIndexLabels = collectIndexLabels(
+                                            addedIndexLabelNames, client);
+
+        List<String> removedIndexLabelNames = entity.getRemovePropertyIndexes();
+        List<IndexLabel> removedIndexLabels = collectIndexLabels(
+                                              removedIndexLabelNames, client);
+
+        for (String name : addedIndexLabelNames) {
+            if (existedIndexLabelNames.contains(name)) {
+                throw new ExternalException(
+                          "schema.edgelabel.update.append-index-existed",
+                          entity.getName(), name);
+            }
+        }
+        for (String name : removedIndexLabelNames) {
+            if (!existedIndexLabelNames.contains(name)) {
+                throw new ExternalException(
+                          "schema.edgelabel.update.remove-index-unexisted",
+                          entity.getName(), name);
+            }
+        }
+
+        // NOTE: property can append but doesn't support eliminate now
         client.schema().appendEdgeLabel(edgeLabel);
 
-        List<IndexLabel> addedIndexLabels = collectIndexLabels(entity, client);
         try {
             this.piService.atomicAddBatch(addedIndexLabels, client);
         } catch (Exception e) {
-            client.schema().eliminateEdgeLabel(edgeLabel);
+            // client.schema().eliminateEdgeLabel(edgeLabel);
             throw new ExternalException("schema.edgelabel.update.failed", e,
                                         entity.getName());
         }
 
-        List<IndexLabel> removedIndexLabels;
-        removedIndexLabels = convert(entity.getRemovePropertyIndexes(), client);
         try {
             this.piService.atomicRemoveBatch(removedIndexLabels, client);
         } catch (Exception e) {
-            this.piService.removeBatch(collectNames(addedIndexLabels), client);
-            client.schema().eliminateEdgeLabel(edgeLabel);
+            this.piService.removeBatch(addedIndexLabelNames, client);
+            // client.schema().eliminateEdgeLabel(edgeLabel);
             throw new ExternalException("schema.edgelabel.update.failed", e,
                                         entity.getName());
         }
@@ -150,9 +178,9 @@ public class EdgeLabelService extends SchemaService {
         return this.get(name, connId) != null;
     }
 
-    public ConflictDetail checkConflict(List<String> names,
-                                        int reusedConnId, int connId) {
-        ConflictDetail detail = new ConflictDetail();
+    public ConflictDetail checkConflicts(List<String> names, int reusedConnId,
+                                         int connId) {
+        ConflictDetail detail = new ConflictDetail(SchemaType.EDGE_LABEL);
         if (names.isEmpty()) {
             return detail;
         }
@@ -162,10 +190,21 @@ public class EdgeLabelService extends SchemaService {
         HugeClient targetClient = this.client(connId);
 
         List<EdgeLabel> reusedEdgeLabels = reusedSchema.getEdgeLabels(names);
-        Map<String, EdgeLabel> oldEdgeLabels = new HashMap<>();
+        Map<String, EdgeLabel> originEdgeLabels = new HashMap<>();
         targetClient.schema().getEdgeLabels().forEach(el -> {
-            oldEdgeLabels.put(el.name(), el);
+            originEdgeLabels.put(el.name(), el);
         });
+
+        Set<String> pkNames = new HashSet<>();
+        reusedEdgeLabels.forEach(vl -> pkNames.addAll(vl.properties()));
+        detail.merge(this.pkService.checkConflict(new ArrayList<>(pkNames), reusedConnId, connId));
+
+        // Collect all index labels to avoid multi get
+        Map<String, List<IndexLabel>> relatedIndexLabels;
+        relatedIndexLabels = collectReleatedIndexLabels(names, SchemaType.EDGE_LABEL, reusedClient);
+        for (List<IndexLabel> reusedIndexLabels : relatedIndexLabels.values()) {
+            detail.merge(this.piService.checkConflict(reusedIndexLabels, connId));
+        }
 
         // Collect all linked vertex labels to avoid multi get
         Set<String> vlNames = new HashSet<>();
@@ -177,30 +216,20 @@ public class EdgeLabelService extends SchemaService {
          * Get vertex label conflict detail(contains property keys and
          * index labels conflict detail of linked vertex labels)
          */
-        assert !vlNames.isEmpty();
-        detail.merge(this.vlService.checkConflict(new ArrayList<>(vlNames),
-                                                  reusedConnId, connId));
-        detail.merge(checkPropertyKeyConflict(this.pkService, reusedEdgeLabels,
-                                              reusedConnId, connId));
-
-        // Collect all index labels to avoid multi get
-        Map<String, List<IndexLabel>> relatedIndexLabels;
-        relatedIndexLabels = collectReleatedIndexLabels(names, false,
-                                                        reusedClient);
-        detail.merge(checkPropertyIndexConflict(this.piService,
-                                                relatedIndexLabels.values(),
-                                                connId));
+        detail.merge(this.vlService.checkConflict(new ArrayList<>(vlNames), reusedConnId, connId));
 
         for (EdgeLabel reusedEdgeLabel : reusedEdgeLabels) {
             String name = reusedEdgeLabel.name();
+            EdgeLabelEntity entity = convert(reusedEdgeLabel, relatedIndexLabels.get(name));
+
             // Firstly determine if any properties are conflicted
             if (detail.anyPropertyKeyConflict(reusedEdgeLabel.properties())) {
-                detail.put(SchemaType.EDGE_LABEL, name, ConflictStatus.DUPNAME);
+                detail.add(entity, ConflictStatus.DUPNAME);
                 continue;
             }
             // Then determine if any property indexes are conflicted
             if (detail.anyPropertyIndexConflict(relatedIndexLabels.get(name))) {
-                detail.put(SchemaType.EDGE_LABEL, name, ConflictStatus.DUPNAME);
+                detail.add(entity, ConflictStatus.DUPNAME);
                 continue;
             }
             // Then determine if source/target vertex labels are conflicted
@@ -208,78 +237,92 @@ public class EdgeLabelService extends SchemaService {
             linkedVertexLabels = ImmutableList.of(reusedEdgeLabel.sourceLabel(),
                                                   reusedEdgeLabel.targetLabel());
             if (detail.anyVertexLabelConflict(linkedVertexLabels)) {
-                detail.put(SchemaType.EDGE_LABEL, name, ConflictStatus.DUPNAME);
+                detail.add(entity, ConflictStatus.DUPNAME);
                 continue;
             }
             // Then check conflict of edge label itself
-            EdgeLabel oldEdgeLabel = oldEdgeLabels.get(name);
-            if (oldEdgeLabel == null) {
-                detail.put(SchemaType.EDGE_LABEL, name, ConflictStatus.PASSED);
-            } else if (isEqual(reusedEdgeLabel, oldEdgeLabel)) {
-                detail.put(SchemaType.EDGE_LABEL, name, ConflictStatus.EXISTED);
+            EdgeLabel originEdgeLabel = originEdgeLabels.get(name);
+            ConflictStatus status;
+            if (originEdgeLabel == null) {
+                status = ConflictStatus.PASSED;
+            } else if (equals(reusedEdgeLabel, originEdgeLabel)) {
+                status = ConflictStatus.EXISTED;
             } else {
-                detail.put(SchemaType.EDGE_LABEL, name, ConflictStatus.DUPNAME);
+                status = ConflictStatus.DUPNAME;
             }
+            detail.add(entity, status);
         }
         return detail;
     }
 
-    public void reuse(List<String> names, int reusedConnId, int connId) {
-        ConflictDetail detail = this.checkConflict(names, reusedConnId, connId);
+    public ConflictStatus checkConflict(EdgeLabelEntity entity, int connId) {
+        HugeClient client = this.client(connId);
+        String name = entity.getName();
+        EdgeLabel reusedEdgeLabel = convert(entity, client);
+        EdgeLabel originEdgeLabel = convert(this.get(name, connId), client);
+        if (originEdgeLabel == null) {
+            return ConflictStatus.PASSED;
+        } else if (equals(reusedEdgeLabel, originEdgeLabel)) {
+            return ConflictStatus.EXISTED;
+        } else {
+            return ConflictStatus.DUPNAME;
+        }
+    }
+
+    public void reuse(ConflictDetail detail, int connId) {
         Ex.check(!detail.hasConflict(), "schema.cannot-reuse-conflict");
+        HugeClient client = this.client(connId);
 
-        HugeClient reusedClient = this.client(reusedConnId);
-        SchemaManager reusedSchema = reusedClient.schema();
-        HugeClient targetClient = this.client(connId);
-
-        List<PropertyKey> propertyKeys = null;
-        List<String> pkNames = detail.filter(SchemaType.PROPERTY_KEY);
-        if (!pkNames.isEmpty()) {
-            propertyKeys = reusedSchema.getPropertyKeys(pkNames);
+        List<PropertyKey> propertyKeys = this.pkService.filter(detail, client);
+        if (!propertyKeys.isEmpty()) {
             try {
-                this.pkService.atomicAddBatch(propertyKeys, targetClient);
+                this.pkService.atomicAddBatch(propertyKeys, client);
             } catch (Exception e) {
-                throw new ExternalException("schema.propertykey.reuse.failed");
+                throw new ExternalException("schema.propertykey.reuse.failed", e);
             }
         }
 
-        List<VertexLabel> vertexLabels = null;
-        List<String> vlNames = detail.filter(SchemaType.VERTEX_LABEL);
-        if (!vlNames.isEmpty()) {
-            vertexLabels = reusedSchema.getVertexLabels(vlNames);
+        List<VertexLabel> vertexLabels = this.vlService.filter(detail, client);
+        if (!vertexLabels.isEmpty()) {
             try {
-                this.vlService.atomicAddBatch(vertexLabels, targetClient);
+                this.vlService.atomicAddBatch(vertexLabels, client);
             } catch (Exception e) {
-                this.pkService.removeBatch(propertyKeys, targetClient);
-                throw new ExternalException("schema.vertexlabel.reuse.failed");
+                this.pkService.removeBatch(propertyKeys, client);
+                throw new ExternalException("schema.vertexlabel.reuse.failed", e);
             }
         }
 
-        List<EdgeLabel> edgeLabels = null;
-        List<String> elNames = detail.filter(SchemaType.EDGE_LABEL);
-        if (!elNames.isEmpty()) {
-            edgeLabels = reusedSchema.getEdgeLabels(elNames);
+        List<EdgeLabel> edgeLabels = this.filter(detail, client);
+        if (!edgeLabels.isEmpty()) {
             try {
-                this.atomicAddBatch(edgeLabels, targetClient);
+                this.atomicAddBatch(edgeLabels, client);
             } catch (Exception e) {
-                this.vlService.removeBatch(vertexLabels, targetClient);
-                this.pkService.removeBatch(propertyKeys, targetClient);
-                throw new ExternalException("schema.edgelabel.reuse.failed");
+                this.vlService.removeBatch(vertexLabels, client);
+                this.pkService.removeBatch(propertyKeys, client);
+                throw new ExternalException("schema.edgelabel.reuse.failed", e);
             }
         }
 
-        List<String> ilNames = detail.filter(SchemaType.PROPERTY_INDEX);
-        if (!ilNames.isEmpty()) {
-            List<IndexLabel> indexLabels = reusedSchema.getIndexLabels(ilNames);
+        List<IndexLabel> indexLabels = this.piService.filter(detail, client);
+        if (!indexLabels.isEmpty()) {
             try {
-                this.piService.atomicAddBatch(indexLabels, targetClient);
+                this.piService.atomicAddBatch(indexLabels, client);
             } catch (Exception e) {
-                this.removeBatch(edgeLabels, targetClient);
-                this.vlService.removeBatch(vertexLabels, targetClient);
-                this.pkService.removeBatch(propertyKeys, targetClient);
-                throw new ExternalException("schema.propertyindex.reuse.failed");
+                this.removeBatch(edgeLabels, client);
+                this.vlService.removeBatch(vertexLabels, client);
+                this.pkService.removeBatch(propertyKeys, client);
+                throw new ExternalException("schema.propertyindex.reuse.failed",
+                                            e);
             }
         }
+    }
+
+    public List<EdgeLabel> filter(ConflictDetail detail, HugeClient client) {
+        return detail.getEdgeLabelConflicts().stream()
+                     .filter(c -> c.getStatus() == ConflictStatus.PASSED)
+                     .map(SchemaConflict::getEntity)
+                     .map(e -> convert(e, client))
+                     .collect(Collectors.toList());
     }
 
     public void atomicAddBatch(List<EdgeLabel> edgeLabels, HugeClient client)
@@ -298,6 +341,9 @@ public class EdgeLabelService extends SchemaService {
 
     private static EdgeLabelEntity convert(EdgeLabel edgeLabel,
                                            List<IndexLabel> indexLabels) {
+        if (edgeLabel == null) {
+            return null;
+        }
         Set<Property> properties = collectProperties(edgeLabel);
         List<PropertyIndex> propertyIndexes = collectPropertyIndexes(edgeLabel,
                                                                      indexLabels);
@@ -318,6 +364,9 @@ public class EdgeLabelService extends SchemaService {
 
     private static EdgeLabel convert(EdgeLabelEntity entity,
                                      HugeClient client) {
+        if (entity == null) {
+            return null;
+        }
         Frequency frequency = entity.isLinkMultiTimes() ? Frequency.MULTIPLE :
                                                           Frequency.SINGLE;
         return client.schema().edgeLabel(entity.getName())
@@ -336,6 +385,9 @@ public class EdgeLabelService extends SchemaService {
 
     private static EdgeLabel convert(LabelUpdateEntity entity,
                                      HugeClient client) {
+        if (entity == null) {
+            return null;
+        }
         Set<String> properties = new HashSet<>();
         if (entity.getAppendProperties() != null) {
             entity.getAppendProperties().forEach(p -> {
@@ -350,7 +402,7 @@ public class EdgeLabelService extends SchemaService {
                      .build();
     }
 
-    private static boolean isEqual(EdgeLabel oldSchema, EdgeLabel newSchema) {
+    private static boolean equals(EdgeLabel oldSchema, EdgeLabel newSchema) {
         return oldSchema.name().equals(newSchema.name()) &&
                oldSchema.sourceLabel().equals(newSchema.sourceLabel()) &&
                oldSchema.targetLabel().equals(newSchema.targetLabel()) &&

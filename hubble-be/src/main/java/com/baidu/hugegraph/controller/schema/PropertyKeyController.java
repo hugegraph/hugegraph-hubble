@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
+import com.baidu.hugegraph.entity.schema.ConflictStatus;
 import com.baidu.hugegraph.entity.schema.PropertyKeyEntity;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.service.schema.PropertyKeyService;
@@ -80,13 +81,13 @@ public class PropertyKeyController extends SchemaController {
     @PostMapping
     public void create(@RequestBody PropertyKeyEntity entity,
                        @RequestParam("conn_id") int connId) {
-        this.checkParamsValid(entity);
+        this.checkParamsValid(entity, true);
         this.checkEntityUnique(entity, connId);
         entity.setCreateTime(new Date());
         this.service.add(entity, connId);
     }
 
-    @PostMapping("check_conflict")
+    @PostMapping("check_conflicts")
     public ConflictDetail checkConflict(@RequestBody List<String> names,
                                         @RequestParam("reused_conn_id")
                                         int reusedConnId,
@@ -97,14 +98,19 @@ public class PropertyKeyController extends SchemaController {
         return this.service.checkConflict(names, reusedConnId, connId);
     }
 
+    @PostMapping("check_conflict")
+    public ConflictStatus checkConflict(@RequestBody PropertyKeyEntity entity,
+                                        @RequestParam("conn_id") int connId) {
+        this.checkParamsValid(entity, false);
+        return this.service.checkConflict(entity, connId);
+    }
+
     @PostMapping("reuse")
-    public void reuse(@RequestBody List<String> names,
-                      @RequestParam("reused_conn_id") int reusedConnId,
+    public void reuse(@RequestBody ConflictDetail detail,
                       @RequestParam("conn_id") int connId) {
-        Ex.check(connId != reusedConnId, "schema.conn.cannot-reuse-self");
-        Ex.check(!CollectionUtils.isEmpty(names),
-                 "common.param.cannot-be-empty", "names");
-        this.service.reuse(names, reusedConnId, connId);
+//        Ex.check(!CollectionUtils.isEmpty(detail.getPropertyKeyConflicts()),
+//                 "common.param.cannot-be-empty", "names");
+        this.service.reuse(detail, connId);
     }
 
     @PostMapping("check_using")
@@ -145,7 +151,8 @@ public class PropertyKeyController extends SchemaController {
         }
     }
 
-    private void checkParamsValid(PropertyKeyEntity entity) {
+    private void checkParamsValid(PropertyKeyEntity entity,
+                                  boolean checkCreateTime) {
         String name = entity.getName();
         Ex.check(name != null, "common.param.cannot-be-null", "name");
         Ex.check(NAME_PATTERN.matcher(name).matches(),
@@ -154,7 +161,7 @@ public class PropertyKeyController extends SchemaController {
                  "common.param.cannot-be-null", "data_type");
         Ex.check(entity.getCardinality() != null,
                  "common.param.cannot-be-null", "cardinality");
-        Ex.check(entity.getCreateTime() == null,
+        Ex.check(checkCreateTime, () -> entity.getCreateTime() == null,
                  "common.param.must-be-null", "create_time");
     }
 

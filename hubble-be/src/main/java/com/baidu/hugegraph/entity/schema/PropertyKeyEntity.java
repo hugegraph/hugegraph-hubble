@@ -34,7 +34,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PropertyKeyEntity implements SchemaEntity {
+public class PropertyKeyEntity implements SchemaEntity, Timefiable {
 
     @JsonProperty("name")
     private String name;
@@ -51,7 +51,7 @@ public class PropertyKeyEntity implements SchemaEntity {
     private Date createTime;
 
     @Override
-    public SchemaType getType() {
+    public SchemaType getSchemaType() {
         return SchemaType.PROPERTY_KEY;
     }
 }

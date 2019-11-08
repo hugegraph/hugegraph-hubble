@@ -19,6 +19,9 @@
 
 package com.baidu.hugegraph.entity.schema;
 
+import com.baidu.hugegraph.exception.InternalException;
+import com.baidu.hugegraph.structure.constant.HugeType;
+
 public enum SchemaType {
 
     PROPERTY_KEY("property key"),
@@ -39,11 +42,35 @@ public enum SchemaType {
         return this.name;
     }
 
+    public boolean isPropertyKey() {
+        return this == PROPERTY_KEY;
+    }
+
     public boolean isVertexLabel() {
         return this == VERTEX_LABEL;
     }
 
     public boolean isEdgeLabel() {
         return this == EDGE_LABEL;
+    }
+
+    public boolean isPropertyIndex() {
+        return this == PROPERTY_INDEX;
+    }
+
+    public static SchemaType convert(HugeType type) {
+        switch (type) {
+            case PROPERTY_KEY:
+                return PROPERTY_KEY;
+            case VERTEX_LABEL:
+                return VERTEX_LABEL;
+            case EDGE_LABEL:
+                return EDGE_LABEL;
+            case INDEX_LABEL:
+                return PROPERTY_INDEX;
+            default:
+                throw new InternalException(
+                          "Can't convert HugeType '%s' to SchemaType", type);
+        }
     }
 }

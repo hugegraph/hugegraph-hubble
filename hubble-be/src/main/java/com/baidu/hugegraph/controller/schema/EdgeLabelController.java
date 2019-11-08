@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
+import com.baidu.hugegraph.entity.schema.ConflictStatus;
 import com.baidu.hugegraph.entity.schema.EdgeLabelEntity;
 import com.baidu.hugegraph.entity.schema.LabelUpdateEntity;
 import com.baidu.hugegraph.service.schema.EdgeLabelService;
@@ -94,13 +95,13 @@ public class EdgeLabelController extends SchemaController {
     @PostMapping
     public void create(@RequestBody EdgeLabelEntity entity,
                        @RequestParam("conn_id") int connId) {
-        this.checkParamsValid(entity, connId);
+        this.checkParamsValid(entity, connId, true);
         this.checkEntityUnique(entity, connId, true);
         entity.setCreateTime(new Date());
         this.elService.add(entity, connId);
     }
 
-    @PostMapping("check_conflict")
+    @PostMapping("check_conflicts")
     public ConflictDetail checkConflict(@RequestBody List<String> names,
                                         @RequestParam("reused_conn_id")
                                         int reusedConnId,
@@ -108,17 +109,22 @@ public class EdgeLabelController extends SchemaController {
         Ex.check(connId != reusedConnId, "schema.conn.cannot-reuse-self");
         Ex.check(!CollectionUtils.isEmpty(names),
                  "common.param.cannot-be-empty", "names");
-        return this.elService.checkConflict(names, reusedConnId, connId);
+        return this.elService.checkConflicts(names, reusedConnId, connId);
+    }
+
+    @PostMapping("check_conflict")
+    public ConflictStatus checkConflict(@RequestBody EdgeLabelEntity entity,
+                                        @RequestParam("conn_id") int connId) {
+//        this.checkParamsValid(entity, connId, false);
+        return this.elService.checkConflict(entity, connId);
     }
 
     @PostMapping("reuse")
-    public void reuse(@RequestBody List<String> names,
-                      @RequestParam("reused_conn_id") int reusedConnId,
+    public void reuse(@RequestBody ConflictDetail detail,
                       @RequestParam("conn_id") int connId) {
-        Ex.check(connId != reusedConnId, "schema.conn.cannot-reuse-self");
-        Ex.check(!CollectionUtils.isEmpty(names),
-                 "common.param.cannot-be-empty", "names");
-        this.elService.reuse(names, reusedConnId, connId);
+//        Ex.check(!CollectionUtils.isEmpty(names),
+//                 "common.param.cannot-be-empty", "names");
+        this.elService.reuse(detail, connId);
     }
 
     @PutMapping("{name}")
@@ -148,11 +154,14 @@ public class EdgeLabelController extends SchemaController {
         }
     }
 
-    private void checkParamsValid(EdgeLabelEntity entity, int connId) {
+    private void checkParamsValid(EdgeLabelEntity entity, int connId,
+                                  boolean checkCreateTime) {
         String name = entity.getName();
         Ex.check(name != null, "common.param.cannot-be-null", "name");
         Ex.check(NAME_PATTERN.matcher(name).matches(),
                  "schema.edgelabel.unmatch-regex", name);
+        Ex.check(checkCreateTime, () -> entity.getCreateTime() == null,
+                 "common.param.must-be-null", "create_time");
         // Check source label and target label
         checkRelation(entity, connId);
         // Check properties

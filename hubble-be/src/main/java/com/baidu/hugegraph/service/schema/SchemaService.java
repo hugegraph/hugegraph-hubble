@@ -38,8 +38,6 @@ import org.springframework.util.CollectionUtils;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.driver.SchemaManager;
-import com.baidu.hugegraph.entity.schema.ConflictDetail;
-import com.baidu.hugegraph.entity.schema.LabelUpdateEntity;
 import com.baidu.hugegraph.entity.schema.Property;
 import com.baidu.hugegraph.entity.schema.PropertyIndex;
 import com.baidu.hugegraph.entity.schema.SchemaLabelEntity;
@@ -94,10 +92,15 @@ public class SchemaService {
                                       SchemaLabel schemaLabel,
                                       List<IndexLabel> indexLabels) {
         List<PropertyIndex> propertyIndexes = new ArrayList<>();
+        if (indexLabels == null) {
+            return propertyIndexes;
+        }
         for (IndexLabel indexLabel : indexLabels) {
             if (indexLabel.baseValue().equals(schemaLabel.name())) {
+                SchemaType schemaType = SchemaType.convert(indexLabel.baseType());
                 PropertyIndex propertyIndex;
                 propertyIndex = new PropertyIndex(indexLabel.baseValue(),
+                                                  schemaType,
                                                   indexLabel.name(),
                                                   indexLabel.indexType(),
                                                   indexLabel.indexFields());
@@ -107,8 +110,8 @@ public class SchemaService {
         return propertyIndexes;
     }
 
-    public static List<IndexLabel> convert(List<String> names,
-                                           HugeClient client) {
+    public static List<IndexLabel> collectIndexLabels(List<String> names,
+                                                      HugeClient client) {
         if (CollectionUtils.isEmpty(names)) {
             return Collections.emptyList();
         } else {
@@ -119,24 +122,12 @@ public class SchemaService {
     public static List<IndexLabel> collectIndexLabels(SchemaLabelEntity entity,
                                                       HugeClient client) {
         List<PropertyIndex> propertyIndexes = entity.getPropertyIndexes();
-        boolean isVertex = entity.getType().isVertexLabel();
-        return convert(propertyIndexes, client, isVertex, entity.getName());
-    }
-
-    public static List<IndexLabel> collectIndexLabels(LabelUpdateEntity entity,
-                                                      HugeClient client) {
-        List<PropertyIndex> propertyIndexes = entity.getAppendPropertyIndexes();
-        boolean isVertex = entity.getType().isVertexLabel();
-        return convert(propertyIndexes, client, isVertex, entity.getName());
-    }
-
-    private static List<IndexLabel> convert(List<PropertyIndex> propertyIndexes,
-                                            HugeClient client,
-                                            boolean isVertex, String baseValue) {
         if (CollectionUtils.isEmpty(propertyIndexes)) {
             return Collections.emptyList();
         }
 
+        boolean isVertex = entity.getSchemaType().isVertexLabel();
+        String baseValue = entity.getName();
         SchemaManager schema = client.schema();
         List<IndexLabel> indexLabels = new ArrayList<>(propertyIndexes.size());
         for (PropertyIndex index : propertyIndexes) {
@@ -153,9 +144,10 @@ public class SchemaService {
 
     public static Map<String, List<IndexLabel>> collectReleatedIndexLabels(
                                                 List<String> names,
-                                                boolean isVertex,
+                                                SchemaType schemaType,
                                                 HugeClient client) {
-        HugeType type = isVertex ? HugeType.VERTEX_LABEL : HugeType.EDGE_LABEL;
+        HugeType type = schemaType.isVertexLabel() ? HugeType.VERTEX_LABEL :
+                        HugeType.EDGE_LABEL;
         Map<String, List<IndexLabel>> results = new HashMap<>();
         List<IndexLabel> allIndexLabels = client.schema().getIndexLabels();
         for (IndexLabel indexLabel : allIndexLabels) {
@@ -172,32 +164,6 @@ public class SchemaService {
             }
         }
         return results;
-    }
-
-    public static <T extends SchemaLabel>
-           ConflictDetail checkPropertyKeyConflict(PropertyKeyService service,
-                                                   List<T> schemas,
-                                                   int reusedConnId,
-                                                   int connId) {
-        ConflictDetail detail = new ConflictDetail();
-        Set<String> pkNames = new HashSet<>();
-        schemas.forEach(vl -> pkNames.addAll(vl.properties()));
-        if (!pkNames.isEmpty()) {
-            detail.merge(service.checkConflict(new ArrayList<>(pkNames),
-                                               reusedConnId, connId));
-        }
-        return detail;
-    }
-
-    public static ConflictDetail checkPropertyIndexConflict(
-                                 PropertyIndexService service,
-                                 Collection<List<IndexLabel>> schemas,
-                                 int connId) {
-        ConflictDetail detail = new ConflictDetail();
-        for (List<IndexLabel> indexLabels : schemas) {
-            detail.merge(service.checkConflict(indexLabels, connId));
-        }
-        return detail;
     }
 
     public static <T extends SchemaElement>

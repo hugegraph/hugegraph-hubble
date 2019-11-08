@@ -35,7 +35,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VertexLabelEntity implements SchemaLabelEntity {
+public class VertexLabelEntity implements SchemaLabelEntity, Timefiable {
 
     @JsonProperty("name")
     private String name;
@@ -62,7 +62,7 @@ public class VertexLabelEntity implements SchemaLabelEntity {
     private Date createTime;
 
     @Override
-    public SchemaType getType() {
+    public SchemaType getSchemaType() {
         return SchemaType.VERTEX_LABEL;
     }
 }

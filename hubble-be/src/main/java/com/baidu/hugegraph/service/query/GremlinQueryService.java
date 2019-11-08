@@ -166,23 +166,23 @@ public class GremlinQueryService {
             String exception = e.exception();
             log.error("Gremlin execute failed: {}", exception);
             if (ILLEGAL_GREMLIN_EXCEPTIONS.contains(exception)) {
-                throw new IllegalGremlinException("gremlin.illegal-statemnt",
+                throw new IllegalGremlinException("gremlin.illegal-statemnt", e,
                                                   e.message());
             }
-            throw new ExternalException("gremlin.execute.failed", e.message());
+            throw new ExternalException("gremlin.execute.failed", e, e.message());
         } catch (ClientException e) {
             Throwable cause = e.getCause();
             if (cause != null) {
                 String message = cause.getMessage();
                 if (message != null && message.startsWith(TIMEOUT_EXCEPTION)) {
-                    throw new InternalException("gremlin.execute.timeout",
+                    throw new InternalException("gremlin.execute.timeout", e,
                                                 message);
                 }
             }
             throw e;
         } catch (Exception e) {
             log.error("Gremlin execute failed", e);
-            throw new ExternalException("gremlin.execute.failed",
+            throw new ExternalException("gremlin.execute.failed", e,
                                         e.getMessage());
         }
     }
