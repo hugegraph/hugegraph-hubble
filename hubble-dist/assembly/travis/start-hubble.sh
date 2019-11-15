@@ -5,6 +5,8 @@ set -e
 
 HOME_PATH=`dirname $0`
 HOME_PATH=`cd ${HOME_PATH}/.. && pwd`
+cd ${HOME_PATH}
+
 BIN_PATH=${HOME_PATH}/bin
 CONF_PATH=${HOME_PATH}/conf
 LIB_PATH=${HOME_PATH}/lib
@@ -14,13 +16,17 @@ PID_FILE=${BIN_PATH}/pid
 . ${BIN_PATH}/common_functions
 
 print_usage() {
-    echo "  usage: start-hugegraph-hubble [options]"
+    echo "  usage: start-hubble [options]"
     echo "  options: "
     echo "  -d,--debug      Start program in debug mode"
     echo "  -h,--help       Display help information"
 }
 
 java_env_check
+
+if [[ ! -d ${LOG_PATH} ]]; then
+    mkdir ${LOG_PATH}
+fi
 
 class_path="."
 for jar in `ls ${LIB_PATH}/*.jar`; do
@@ -51,10 +57,24 @@ if [[ -f ${PID_FILE} ]] ; then
     fi
 fi
 
+agent_opts="-javaagent:${LIB_PATH}/jacocoagent.jar=includes=*,port=36320,destfile=jacoco-it.exec,output=tcpserver"
 main_class="com.baidu.hugegraph.HugeGraphHubble"
 args=${CONF_PATH}/hugegraph-hubble.properties
 log=${LOG_PATH}/hugegraph-hubble.log
-echo "starting HugeGraphHubble, logging to ${log}"
 
-nohup nice -n 0 java -server ${java_opts} -cp ${class_path} ${main_class} ${args} > ${log} 2>&1 < /dev/null &
-echo $! > ${PID_FILE}
+echo "starting HugeGraphHubble..."
+nohup nice -n 0 java -server ${java_opts} ${agent_opts} -cp ${class_path} ${main_class} ${args} > ${log} 2>&1 < /dev/null &
+pid=$!
+echo pid > ${PID_FILE}
+
+# wait hubble start
+timeout_s=30
+server_host=`read_property ${CONF_PATH}/hugegraph-hubble.properties server.host`
+server_port=`read_property ${CONF_PATH}/hugegraph-hubble.properties server.port`
+server_url="http://${server_host}:${server_port}/api/v1.1/graph-connections"
+
+wait_for_startup ${server_url} ${timeout_s} || {
+    echo "logging to ${log}." >&2
+    exit 1
+}
+cat ${log}
