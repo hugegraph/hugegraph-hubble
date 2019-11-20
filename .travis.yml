@@ -22,9 +22,9 @@ install:
 
 before_script:
   - $TRAVIS_DIR/download-hugegraph.sh $SERVER_VERSION
-  - $TRAVIS_DIR/hugegraph-server1/install-hugegraph.sh | grep -v "Downloading\|Downloaded"
-  - $TRAVIS_DIR/hugegraph-server2/install-hugegraph.sh | grep -v "Downloading\|Downloaded"
-  - $TRAVIS_DIR/install-hugegraph-hubble.sh | grep -v "Downloading\|Downloaded"
+  - $TRAVIS_DIR/hugegraph-server1/start-hugegraph.sh
+  - $TRAVIS_DIR/hugegraph-server2/start-hugegraph.sh
+  - $TRAVIS_DIR/start-hugegraph-hubble.sh
   - jps
 
 script:

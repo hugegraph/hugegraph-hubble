@@ -38,7 +38,7 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --help|-help|-h)
         print_usage
-        exit
+        exit 1
         ;;
         --debug|-d)
         java_opts="$java_opts -Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y"
@@ -51,7 +51,7 @@ if [[ -f ${PID_FILE} ]] ; then
     pid=`cat ${PID_FILE}`
     if kill -0 ${pid} > /dev/null 2>&1; then
         echo "HugeGraphHubble is running as process ${pid}, please stop it first!"
-        exit
+        exit 1
     else
         rm ${PID_FILE}
     fi
@@ -71,10 +71,10 @@ echo pid > ${PID_FILE}
 timeout_s=30
 server_host=`read_property ${CONF_PATH}/hugegraph-hubble.properties server.host`
 server_port=`read_property ${CONF_PATH}/hugegraph-hubble.properties server.port`
-server_url="http://${server_host}:${server_port}/api/v1.1/graph-connections"
+started_tip="Started HugeGraphHubble in"
 
-wait_for_startup ${server_url} ${timeout_s} || {
-    echo "logging to ${log}." >&2
+wait_for_startup ${log} ${started_tip} ${timeout_s} || {
+    cat ${log}
     exit 1
 }
-cat ${log}
+echo "logging to ${log}."

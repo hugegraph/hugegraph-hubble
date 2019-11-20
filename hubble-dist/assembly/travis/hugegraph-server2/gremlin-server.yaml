@@ -11,6 +11,12 @@ channelizer: org.apache.tinkerpop.gremlin.server.channel.HttpChannelizer
 graphs: {
   hugegraph3: conf/hugegraph3.properties
 }
+authentication: {
+  authenticator: com.baidu.hugegraph.auth.StandardAuthenticator,
+  config: {
+    tokens: conf/rest-server.properties
+  }
+}
 scriptEngines: {
   gremlin-groovy: {
     plugins: {
