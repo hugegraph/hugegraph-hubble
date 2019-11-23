@@ -23,7 +23,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import com.baidu.hugegraph.util.CommonUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableSet;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -69,5 +72,32 @@ public class EdgeLabelEntity implements SchemaLabelEntity, Timefiable {
     @Override
     public SchemaType getSchemaType() {
         return SchemaType.EDGE_LABEL;
+    }
+
+    @JsonIgnore
+    public Set<String> getLinkLabels() {
+        return ImmutableSet.of(this.sourceLabel, this.targetLabel);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof EdgeLabelEntity)) {
+            return false;
+        }
+        EdgeLabelEntity other = (EdgeLabelEntity) object;
+        return this.name.equals(other.name) &&
+               this.sourceLabel.equals(other.sourceLabel) &&
+               this.targetLabel.equals(other.targetLabel) &&
+               this.linkMultiTimes == other.linkMultiTimes &&
+               CommonUtil.equalCollection(this.properties, other.properties) &&
+               CommonUtil.equalCollection(this.sortKeys, other.sortKeys) &&
+               CommonUtil.equalCollection(this.propertyIndexes,
+                                          other.propertyIndexes) &&
+               this.openLabelIndex == other.openLabelIndex;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.name.hashCode();
     }
 }

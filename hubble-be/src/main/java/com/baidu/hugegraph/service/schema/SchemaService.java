@@ -23,10 +23,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -38,14 +36,17 @@ import org.springframework.util.CollectionUtils;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.driver.SchemaManager;
+import com.baidu.hugegraph.entity.schema.ConflictDetail;
+import com.baidu.hugegraph.entity.schema.ConflictStatus;
 import com.baidu.hugegraph.entity.schema.Property;
 import com.baidu.hugegraph.entity.schema.PropertyIndex;
+import com.baidu.hugegraph.entity.schema.SchemaConflict;
+import com.baidu.hugegraph.entity.schema.SchemaEntity;
 import com.baidu.hugegraph.entity.schema.SchemaLabelEntity;
 import com.baidu.hugegraph.entity.schema.SchemaStyle;
 import com.baidu.hugegraph.entity.schema.SchemaType;
 import com.baidu.hugegraph.service.HugeClientPoolService;
 import com.baidu.hugegraph.structure.SchemaElement;
-import com.baidu.hugegraph.structure.constant.HugeType;
 import com.baidu.hugegraph.structure.schema.IndexLabel;
 import com.baidu.hugegraph.structure.schema.SchemaLabel;
 
@@ -142,28 +143,65 @@ public class SchemaService {
         return indexLabels;
     }
 
-    public static Map<String, List<IndexLabel>> collectReleatedIndexLabels(
-                                                List<String> names,
-                                                SchemaType schemaType,
-                                                HugeClient client) {
-        HugeType type = schemaType.isVertexLabel() ? HugeType.VERTEX_LABEL :
-                        HugeType.EDGE_LABEL;
-        Map<String, List<IndexLabel>> results = new HashMap<>();
-        List<IndexLabel> allIndexLabels = client.schema().getIndexLabels();
-        for (IndexLabel indexLabel : allIndexLabels) {
-            if (indexLabel.baseType() != type) {
+    public static List<IndexLabel> convertIndexLabels(List<PropertyIndex> entities,
+                                                      HugeClient client,
+                                                      boolean isVertex,
+                                                      String baseValue) {
+        if (CollectionUtils.isEmpty(entities)) {
+            return Collections.emptyList();
+        }
+        List<IndexLabel> indexLabels = new ArrayList<>(entities.size());
+        SchemaManager schema = client.schema();
+        for (PropertyIndex index : entities) {
+            String[] fields = toStringArray(index.getFields());
+            IndexLabel indexLabel = schema.indexLabel(index.getName())
+                                          .on(isVertex, baseValue)
+                                          .indexType(index.getType())
+                                          .by(fields)
+                                          .build();
+            indexLabels.add(indexLabel);
+        }
+        return indexLabels;
+    }
+
+    public static <T extends SchemaEntity>
+           void compareWithEachOther(ConflictDetail detail, SchemaType type) {
+        List<SchemaConflict<T>> conflicts = detail.getConflicts(type);
+        for (int i = 0; i < conflicts.size(); i++) {
+            SchemaConflict<T> conflict = conflicts.get(i);
+            if (conflict.getStatus().isConflicted()) {
                 continue;
             }
-            for (String name : names) {
-                if (name.equals(indexLabel.baseValue())) {
-                    List<IndexLabel> indexLabels = results.computeIfAbsent(
-                                                   name, k -> new ArrayList<>());
-                    indexLabels.add(indexLabel);
-                    break;
-                }
+            ConflictStatus status = compareWithOthers(i, conflicts);
+            conflict.setStatus(status);
+        }
+    }
+
+    public static <T extends SchemaEntity>
+           ConflictStatus compareWithOthers(int currentIdx,
+                                            List<SchemaConflict<T>> conflicts) {
+        SchemaConflict<T> current = conflicts.get(currentIdx);
+        T currentEntity = current.getEntity();
+        // May changed
+        ConflictStatus status = current.getStatus();
+        for (int i = 0; i < conflicts.size(); i++) {
+            if (currentIdx == i) {
+                continue;
+            }
+            SchemaConflict<T> other = conflicts.get(i);
+            T otherEntity = other.getEntity();
+            if (!currentEntity.getName().equals(otherEntity.getName())) {
+                continue;
+            }
+
+            if (currentEntity.equals(otherEntity)) {
+                status = ConflictStatus.EXISTED;
+            } else {
+                status = ConflictStatus.DUPNAME;
+                break;
             }
         }
-        return results;
+        return status;
     }
 
     public static <T extends SchemaElement>

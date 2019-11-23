@@ -17,20 +17,18 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity.schema;
+package com.baidu.hugegraph.util;
 
-public interface SchemaEntity extends Typifiable {
+import java.util.Collection;
 
-    String getName();
+import org.apache.commons.collections.CollectionUtils;
 
-    static ConflictStatus compare(SchemaEntity reusedEntity,
-                                  SchemaEntity originEntity) {
-        if (originEntity == null) {
-            return ConflictStatus.PASSED;
-        } else if (reusedEntity.equals(originEntity)) {
-            return ConflictStatus.EXISTED;
-        } else {
-            return ConflictStatus.DUPNAME;
+public final class CommonUtil {
+
+    public static boolean equalCollection(Collection<?> c1, Collection<?> c2) {
+        if (c1 != null && c2 == null || c1 == null && c2 != null) {
+            return false;
         }
+        return c1 == null || CollectionUtils.isEqualCollection(c1, c2);
     }
 }

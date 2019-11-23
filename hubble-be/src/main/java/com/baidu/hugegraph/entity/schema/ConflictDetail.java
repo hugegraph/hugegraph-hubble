@@ -20,14 +20,11 @@
 package com.baidu.hugegraph.entity.schema;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
 
-import com.baidu.hugegraph.structure.SchemaElement;
-import com.baidu.hugegraph.structure.schema.IndexLabel;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -46,100 +43,101 @@ public class ConflictDetail {
     private SchemaType type;
 
     @JsonProperty("propertykey_conflicts")
-    private List<SchemaConflict<PropertyKeyEntity>> propertyKeyConflicts;
+    private List<SchemaConflict<PropertyKeyEntity>> pkConflicts;
 
     @JsonProperty("propertyindex_conflicts")
-    private List<SchemaConflict<PropertyIndex>> propertyIndexConflicts;
+    private List<SchemaConflict<PropertyIndex>> piConflicts;
 
     @JsonProperty("vertexlabel_conflicts")
-    private List<SchemaConflict<VertexLabelEntity>> vertexLabelConflicts;
+    private List<SchemaConflict<VertexLabelEntity>> vlConflicts;
 
     @JsonProperty("edgelabel_conflicts")
-    private List<SchemaConflict<EdgeLabelEntity>> edgeLabelConflicts;
+    private List<SchemaConflict<EdgeLabelEntity>> elConflicts;
 
     @JsonCreator
     public ConflictDetail(SchemaType type) {
         this.type = type;
-        this.propertyKeyConflicts = new ArrayList<>();
-        this.propertyIndexConflicts = new ArrayList<>();
-        this.vertexLabelConflicts = new ArrayList<>();
-        this.edgeLabelConflicts = new ArrayList<>();
+        this.pkConflicts = new ArrayList<>();
+        this.piConflicts = new ArrayList<>();
+        this.vlConflicts = new ArrayList<>();
+        this.elConflicts = new ArrayList<>();
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends SchemaEntity> List<SchemaConflict<T>> getConflicts(
+                                                            SchemaType type) {
+        switch (type) {
+            case PROPERTY_KEY:
+                return (List<SchemaConflict<T>>) (Object) this.pkConflicts;
+            case PROPERTY_INDEX:
+                return (List<SchemaConflict<T>>) (Object) this.piConflicts;
+            case VERTEX_LABEL:
+                return (List<SchemaConflict<T>>) (Object) this.vlConflicts;
+            case EDGE_LABEL:
+                return (List<SchemaConflict<T>>) (Object) this.elConflicts;
+            default:
+                throw new AssertionError(String.format(
+                          "Unknown schema type '%s'", type));
+        }
     }
 
     public void add(PropertyKeyEntity entity, ConflictStatus status) {
-        this.propertyKeyConflicts.add(new SchemaConflict<>(entity, status));
+        this.pkConflicts.add(new SchemaConflict<>(entity, status));
     }
 
     public void add(PropertyIndex entity, ConflictStatus status) {
-        this.propertyIndexConflicts.add(new SchemaConflict<>(entity, status));
+        this.piConflicts.add(new SchemaConflict<>(entity, status));
     }
 
     public void add(VertexLabelEntity entity, ConflictStatus status) {
-        this.vertexLabelConflicts.add(new SchemaConflict<>(entity, status));
+        this.vlConflicts.add(new SchemaConflict<>(entity, status));
     }
 
     public void add(EdgeLabelEntity entity, ConflictStatus status) {
-        this.edgeLabelConflicts.add(new SchemaConflict<>(entity, status));
+        this.elConflicts.add(new SchemaConflict<>(entity, status));
     }
 
-    public void merge(ConflictDetail other) {
-        this.propertyKeyConflicts.addAll(other.propertyKeyConflicts);
-        this.propertyIndexConflicts.addAll(other.propertyIndexConflicts);
-        this.vertexLabelConflicts.addAll(other.vertexLabelConflicts);
-        this.edgeLabelConflicts.addAll(other.edgeLabelConflicts);
+    public boolean anyPropertyKeyConflict(Collection<String> names) {
+        return this.anyConflict(this.pkConflicts, names);
     }
 
-    public boolean anyPropertyKeyConflict(Set<String> properties) {
-        if (CollectionUtils.isEmpty(properties)) {
+    public boolean anyPropertyIndexConflict(Collection<String> names) {
+        return this.anyConflict(this.piConflicts, names);
+    }
+
+    public boolean anyVertexLabelConflict(Collection<String> names) {
+        return this.anyConflict(this.vlConflicts, names);
+    }
+
+    private <T extends SchemaEntity> boolean anyConflict(
+                                             List<SchemaConflict<T>> conflicts,
+                                             Collection<String> names) {
+        if (CollectionUtils.isEmpty(names)) {
             return false;
         }
-        return this.propertyKeyConflicts.stream().anyMatch(conflict -> {
-            String name = conflict.getEntity().getName();
-            return conflict.getStatus().isConflicted() &&
-                   properties.contains(name);
-        });
-    }
-
-    public boolean anyPropertyIndexConflict(List<IndexLabel> indexLabels) {
-        if (CollectionUtils.isEmpty(indexLabels)) {
-            return false;
-        }
-        Set<String> names = indexLabels.stream().map(SchemaElement::name)
-                                       .collect(Collectors.toSet());
-        return this.propertyIndexConflicts.stream().anyMatch(conflict -> {
+        return conflicts.stream().anyMatch(conflict -> {
             String name = conflict.getEntity().getName();
             return conflict.getStatus().isConflicted() && names.contains(name);
         });
     }
 
-    public boolean anyVertexLabelConflict(List<String> vertexLabels) {
-        if (CollectionUtils.isEmpty(vertexLabels)) {
-            return false;
-        }
-        return this.vertexLabelConflicts.stream().anyMatch(conflict -> {
-            String name = conflict.getEntity().getName();
-            return conflict.getStatus().isConflicted() &&
-                   vertexLabels.contains(name);
-        });
-    }
-
     public boolean hasConflict() {
-        for (SchemaConflict<?> conflict : this.propertyKeyConflicts) {
+        for (SchemaConflict<?> conflict : this.pkConflicts) {
             if (conflict.getStatus().isConflicted()) {
                 return true;
             }
         }
-        for (SchemaConflict<?> conflict : this.propertyIndexConflicts) {
+        for (SchemaConflict<?> conflict : this.piConflicts) {
             if (conflict.getStatus().isConflicted()) {
                 return true;
             }
         }
-        for (SchemaConflict<?> conflict : this.vertexLabelConflicts) {
+        for (SchemaConflict<?> conflict : this.vlConflicts) {
             if (conflict.getStatus().isConflicted()) {
                 return true;
             }
         }
-        for (SchemaConflict<?> conflict : this.edgeLabelConflicts) {
+        for (SchemaConflict<?> conflict : this.elConflicts) {
             if (conflict.getStatus().isConflicted()) {
                 return true;
             }

@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
-import com.baidu.hugegraph.entity.schema.ConflictStatus;
+import com.baidu.hugegraph.entity.schema.MultiSchemaEntity;
 import com.baidu.hugegraph.entity.schema.PropertyKeyEntity;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.service.schema.PropertyKeyService;
@@ -87,22 +87,32 @@ public class PropertyKeyController extends SchemaController {
         this.service.add(entity, connId);
     }
 
-    @PostMapping("check_conflicts")
-    public ConflictDetail checkConflict(@RequestBody List<String> names,
-                                        @RequestParam("reused_conn_id")
-                                        int reusedConnId,
-                                        @RequestParam("conn_id") int connId) {
-        Ex.check(connId != reusedConnId, "schema.conn.cannot-reuse-self");
-        Ex.check(!CollectionUtils.isEmpty(names),
-                 "common.param.cannot-be-empty", "names");
-        return this.service.checkConflict(names, reusedConnId, connId);
+    @PostMapping("check_conflict")
+    public ConflictDetail checkConflict(
+                          @RequestBody List<PropertyKeyEntity> entities,
+                          @RequestParam("conn_id") int connId) {
+        Ex.check(!CollectionUtils.isEmpty(entities),
+                 "common.param.cannot-be-empty", "entities");
+        entities.forEach(entity -> this.checkParamsValid(entity, false));
+        MultiSchemaEntity multiEntity = MultiSchemaEntity.builder()
+                                                         .pkEntities(entities)
+                                                         .build();
+        return this.service.checkConflict(multiEntity, connId, false);
     }
 
-    @PostMapping("check_conflict")
-    public ConflictStatus checkConflict(@RequestBody PropertyKeyEntity entity,
-                                        @RequestParam("conn_id") int connId) {
-        this.checkParamsValid(entity, false);
-        return this.service.checkConflict(entity, connId);
+    @PostMapping("recheck_conflict")
+    public ConflictDetail recheckConflict(
+                          @RequestBody MultiSchemaEntity multiEntity,
+                          @RequestParam("conn_id") int connId) {
+        Ex.check(!CollectionUtils.isEmpty(multiEntity.getPkEntities()),
+                 "common.param.cannot-be-empty", "propertykeys");
+        Ex.check(CollectionUtils.isEmpty(multiEntity.getPiEntities()),
+                 "common.param.cannot-be-empty", "propertyindexes");
+        Ex.check(CollectionUtils.isEmpty(multiEntity.getVlEntities()),
+                 "common.param.cannot-be-empty", "vertexlabels");
+        Ex.check(CollectionUtils.isEmpty(multiEntity.getElEntities()),
+                 "common.param.cannot-be-empty", "edgelabels");
+        return this.service.checkConflict(multiEntity, connId, true);
     }
 
     @PostMapping("reuse")

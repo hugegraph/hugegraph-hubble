@@ -22,6 +22,7 @@ package com.baidu.hugegraph.entity.schema;
 import java.util.List;
 
 import com.baidu.hugegraph.structure.constant.IndexType;
+import com.baidu.hugegraph.util.CommonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -53,5 +54,22 @@ public class PropertyIndex implements SchemaEntity {
     @Override
     public SchemaType getSchemaType() {
         return SchemaType.PROPERTY_INDEX;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof PropertyIndex)) {
+            return false;
+        }
+        PropertyIndex other = (PropertyIndex) object;
+        return this.owner.equals(other.owner) &&
+               this.name.equals(other.name) &&
+               this.type == other.type &&
+               CommonUtil.equalCollection(this.fields, other.fields);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.name.hashCode();
     }
 }

@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.service.schema;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -33,8 +34,10 @@ import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
 import com.baidu.hugegraph.entity.schema.ConflictStatus;
+import com.baidu.hugegraph.entity.schema.MultiSchemaEntity;
 import com.baidu.hugegraph.entity.schema.PropertyKeyEntity;
 import com.baidu.hugegraph.entity.schema.SchemaConflict;
+import com.baidu.hugegraph.entity.schema.SchemaEntity;
 import com.baidu.hugegraph.entity.schema.SchemaType;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.ServerException;
@@ -53,13 +56,22 @@ public class PropertyKeyService extends SchemaService {
         return this.list(Collections.emptyList(), connId);
     }
 
-    public List<PropertyKeyEntity> list(List<String> names, int connId) {
+    public List<PropertyKeyEntity> list(Collection<String> names, int connId) {
+        return this.list(names, connId, true);
+    }
+
+    public List<PropertyKeyEntity> list(Collection<String> names, int connId,
+                                        boolean emptyAsAll) {
         HugeClient client = this.client(connId);
         List<PropertyKey> propertyKeys;
         if (CollectionUtils.isEmpty(names)) {
-            propertyKeys = client.schema().getPropertyKeys();
+            if (emptyAsAll) {
+                propertyKeys = client.schema().getPropertyKeys();
+            } else {
+                propertyKeys = new ArrayList<>();
+            }
         } else {
-            propertyKeys = client.schema().getPropertyKeys(names);
+            propertyKeys = client.schema().getPropertyKeys(new ArrayList<>(names));
         }
         List<PropertyKeyEntity> results = new ArrayList<>(propertyKeys.size());
         propertyKeys.forEach(propertyKey -> {
@@ -118,53 +130,38 @@ public class PropertyKeyService extends SchemaService {
         return false;
     }
 
-    public ConflictDetail checkConflict(List<String> names, int reusedConnId,
-                                        int connId) {
+    public ConflictDetail checkConflict(MultiSchemaEntity multiEntity,
+                                        int connId, boolean compareEachOther) {
         ConflictDetail detail = new ConflictDetail(SchemaType.PROPERTY_KEY);
-        if (names.isEmpty()) {
+        if (CollectionUtils.isEmpty(multiEntity.getPkEntities())) {
             return detail;
         }
 
-        HugeClient reusedClient = this.client(reusedConnId);
-        HugeClient targetClient = this.client(connId);
-
-        // Collect reused and origin propertykeys
-        List<PropertyKey> reusedPropertyKeys = reusedClient.schema()
-                                                           .getPropertyKeys(names);
-        Map<String, PropertyKey> originPropertyKeys = new HashMap<>();
-        targetClient.schema().getPropertyKeys().forEach(pk -> {
-            originPropertyKeys.put(pk.name(), pk);
-        });
-
-        for (PropertyKey reusedPropertyKey : reusedPropertyKeys) {
-            String name = reusedPropertyKey.name();
-            PropertyKey originPropertyKey = originPropertyKeys.get(name);
-
-            PropertyKeyEntity entity = convert(reusedPropertyKey);
-            ConflictStatus status;
-            if (originPropertyKey == null) {
-                status = ConflictStatus.PASSED;
-            } else if (equals(reusedPropertyKey, originPropertyKey)) {
-                status = ConflictStatus.EXISTED;
-            } else {
-                status = ConflictStatus.DUPNAME;
-            }
-            detail.add(entity, status);
-        }
+        this.checkConflict(multiEntity.getPkEntities(), detail,
+                           connId, compareEachOther);
         return detail;
     }
 
-    public ConflictStatus checkConflict(PropertyKeyEntity entity, int connId) {
-        HugeClient client = this.client(connId);
-        String name = entity.getName();
-        PropertyKey reusedPropertyKey = convert(entity, client);
-        PropertyKey originPropertyKey = convert(this.get(name, connId), client);
-        if (originPropertyKey == null) {
-            return ConflictStatus.PASSED;
-        } else if (equals(reusedPropertyKey, originPropertyKey)) {
-            return ConflictStatus.EXISTED;
-        } else {
-            return ConflictStatus.DUPNAME;
+    public void checkConflict(List<PropertyKeyEntity> entities,
+                              ConflictDetail detail, int connId,
+                              boolean compareEachOther) {
+        if (CollectionUtils.isEmpty(entities)) {
+            return;
+        }
+
+        Map<String, PropertyKeyEntity> originEntities = new HashMap<>();
+        for (PropertyKeyEntity entity : this.list(connId)) {
+            originEntities.put(entity.getName(), entity);
+        }
+        // Compare reused entity with origin in target graph
+        for (PropertyKeyEntity entity : entities) {
+            PropertyKeyEntity originEntity = originEntities.get(entity.getName());
+            ConflictStatus status = SchemaEntity.compare(entity, originEntity);
+            detail.add(entity, status);
+        }
+        // Compare resued entities with each other
+        if (compareEachOther) {
+            compareWithEachOther(detail, SchemaType.PROPERTY_KEY);
         }
     }
 
@@ -185,7 +182,7 @@ public class PropertyKeyService extends SchemaService {
     }
 
     public List<PropertyKey> filter(ConflictDetail detail, HugeClient client) {
-        return detail.getPropertyKeyConflicts().stream()
+        return detail.getPkConflicts().stream()
                      .filter(c -> c.getStatus() == ConflictStatus.PASSED)
                      .map(SchemaConflict::getEntity)
                      .map(e -> convert(e, client))
@@ -229,11 +226,5 @@ public class PropertyKeyService extends SchemaService {
                      .cardinality(entity.getCardinality())
                      .userdata(USER_KEY_CREATE_TIME, entity.getCreateTime())
                      .build();
-    }
-
-    private static boolean equals(PropertyKey oldSchema, PropertyKey newSchema) {
-        return oldSchema.name().equals(newSchema.name()) &&
-               oldSchema.dataType().equals(newSchema.dataType()) &&
-               oldSchema.cardinality().equals(newSchema.cardinality());
     }
 }

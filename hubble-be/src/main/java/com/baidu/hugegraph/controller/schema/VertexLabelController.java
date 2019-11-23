@@ -21,6 +21,7 @@ package com.baidu.hugegraph.controller.schema;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,9 +41,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
-import com.baidu.hugegraph.entity.schema.ConflictStatus;
 import com.baidu.hugegraph.entity.schema.LabelUpdateEntity;
+import com.baidu.hugegraph.entity.schema.MultiSchemaEntity;
+import com.baidu.hugegraph.entity.schema.PropertyIndex;
+import com.baidu.hugegraph.entity.schema.PropertyKeyEntity;
+import com.baidu.hugegraph.entity.schema.SchemaType;
 import com.baidu.hugegraph.entity.schema.VertexLabelEntity;
+import com.baidu.hugegraph.service.schema.PropertyIndexService;
 import com.baidu.hugegraph.service.schema.PropertyKeyService;
 import com.baidu.hugegraph.service.schema.VertexLabelService;
 import com.baidu.hugegraph.structure.constant.IdStrategy;
@@ -62,6 +67,8 @@ public class VertexLabelController extends SchemaController {
 
     @Autowired
     private PropertyKeyService pkService;
+    @Autowired
+    private PropertyIndexService piService;
     @Autowired
     private VertexLabelService vlService;
 
@@ -121,22 +128,42 @@ public class VertexLabelController extends SchemaController {
         this.vlService.add(entity, connId);
     }
 
-    @PostMapping("check_conflicts")
-    public ConflictDetail checkConflicts(@RequestBody List<String> names,
-                                         @RequestParam("reused_conn_id")
-                                         int reusedConnId,
-                                         @RequestParam("conn_id") int connId) {
+    @PostMapping("check_conflict")
+    public ConflictDetail checkConflicts(
+                          @RequestBody List<VertexLabelEntity> entities,
+                          @RequestParam("reused_conn_id") int reusedConnId,
+                          @RequestParam("conn_id") int connId) {
+        Ex.check(!CollectionUtils.isEmpty(entities),
+                 "common.param.cannot-be-empty", "entities");
         Ex.check(connId != reusedConnId, "schema.conn.cannot-reuse-self");
-        Ex.check(!CollectionUtils.isEmpty(names),
-                 "common.param.cannot-be-empty", "names");
-        return this.vlService.checkConflict(names, reusedConnId, connId);
+
+        Set<String> pkNames = new HashSet<>();
+        Set<String> piNames = new HashSet<>();
+        for (VertexLabelEntity entity : entities) {
+            pkNames.addAll(entity.getPropNames());
+            piNames.addAll(entity.getIndexProps());
+        }
+        List<PropertyKeyEntity> pkEntities;
+        pkEntities = this.pkService.list(pkNames, reusedConnId, false);
+        List<PropertyIndex> piEntities;
+        piEntities = this.piService.list(piNames, reusedConnId, false);
+        MultiSchemaEntity multiEntity = MultiSchemaEntity.builder()
+                                                         .pkEntities(pkEntities)
+                                                         .piEntities(piEntities)
+                                                         .vlEntities(entities)
+                                                         .build();
+        return this.vlService.checkConflict(multiEntity, connId, false);
     }
 
-    @PostMapping("check_conflict")
-    public ConflictStatus checkConflict(@RequestBody VertexLabelEntity entity,
-                                        @RequestParam("conn_id") int connId) {
-//        this.checkParamsValid(entity, connId, false);
-        return this.vlService.checkConflict(entity, connId);
+    @PostMapping("recheck_conflict")
+    public ConflictDetail recheckConflicts(
+                          @RequestBody MultiSchemaEntity multiSchemaEntity,
+                          @RequestParam("conn_id") int connId) {
+        Ex.check(!CollectionUtils.isEmpty(multiSchemaEntity.getVlEntities()),
+                 "common.param.cannot-be-empty", "vertexlabels");
+        Ex.check(CollectionUtils.isEmpty(multiSchemaEntity.getElEntities()),
+                 "common.param.cannot-be-empty", "edgelabels");
+        return this.vlService.checkConflict(multiSchemaEntity, connId, true);
     }
 
     @PostMapping("reuse")
@@ -154,6 +181,7 @@ public class VertexLabelController extends SchemaController {
         Ex.check(!StringUtils.isEmpty(name),
                  "common.param.cannot-be-null-and-empty", name);
         entity.setName(name);
+        entity.setType(SchemaType.VERTEX_LABEL);
 
         VertexLabelEntity oldEntity = this.vlService.get(name, connId);
         Ex.check(oldEntity != null, "schema.vertexlabel.not-exist", name);

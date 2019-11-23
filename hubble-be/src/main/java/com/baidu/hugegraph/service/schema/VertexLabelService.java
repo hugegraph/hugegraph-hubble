@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.service.schema;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,9 +38,11 @@ import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
 import com.baidu.hugegraph.entity.schema.ConflictStatus;
 import com.baidu.hugegraph.entity.schema.LabelUpdateEntity;
+import com.baidu.hugegraph.entity.schema.MultiSchemaEntity;
 import com.baidu.hugegraph.entity.schema.Property;
 import com.baidu.hugegraph.entity.schema.PropertyIndex;
 import com.baidu.hugegraph.entity.schema.SchemaConflict;
+import com.baidu.hugegraph.entity.schema.SchemaEntity;
 import com.baidu.hugegraph.entity.schema.SchemaType;
 import com.baidu.hugegraph.entity.schema.VertexLabelEntity;
 import com.baidu.hugegraph.exception.ExternalException;
@@ -65,13 +68,22 @@ public class VertexLabelService extends SchemaService {
         return this.list(Collections.emptyList(), connId);
     }
 
-    public List<VertexLabelEntity> list(List<String> names, int connId) {
+    public List<VertexLabelEntity> list(Collection<String> names, int connId) {
+        return this.list(names, connId, true);
+    }
+
+    public List<VertexLabelEntity> list(Collection<String> names, int connId,
+                                        boolean emptyAsAll) {
         HugeClient client = this.client(connId);
         List<VertexLabel> vertexLabels;
         if (CollectionUtils.isEmpty(names)) {
-            vertexLabels = client.schema().getVertexLabels();
+            if (emptyAsAll) {
+                vertexLabels = client.schema().getVertexLabels();
+            } else {
+                vertexLabels = new ArrayList<>();
+            }
         } else {
-            vertexLabels = client.schema().getVertexLabels(names);
+            vertexLabels = client.schema().getVertexLabels(new ArrayList<>(names));
         }
         List<IndexLabel> indexLabels = client.schema().getIndexLabels();
 
@@ -125,7 +137,6 @@ public class VertexLabelService extends SchemaService {
     }
 
     public void update(LabelUpdateEntity entity, int connId) {
-        entity.setType(SchemaType.VERTEX_LABEL);
         HugeClient client = this.client(connId);
         VertexLabel vertexLabel = convert(entity, client);
 
@@ -134,25 +145,30 @@ public class VertexLabelService extends SchemaService {
         List<String> existedIndexLabelNames = collectNames(existedIndexLabels);
 
         List<String> addedIndexLabelNames = entity.getAppendPropertyIndexNames();
-        List<IndexLabel> addedIndexLabels = collectIndexLabels(
-                                            addedIndexLabelNames, client);
+        List<IndexLabel> addedIndexLabels = convertIndexLabels(
+                                            entity.getAppendPropertyIndexes(),
+                                            client, true, entity.getName());
 
         List<String> removedIndexLabelNames = entity.getRemovePropertyIndexes();
         List<IndexLabel> removedIndexLabels = collectIndexLabels(
                                               removedIndexLabelNames, client);
 
-        for (String name : addedIndexLabelNames) {
-            if (existedIndexLabelNames.contains(name)) {
-                throw new ExternalException(
-                          "schema.vertexlabel.update.append-index-existed",
-                          entity.getName(), name);
+        if (addedIndexLabelNames != null) {
+            for (String name : addedIndexLabelNames) {
+                if (existedIndexLabelNames.contains(name)) {
+                    throw new ExternalException(
+                            "schema.vertexlabel.update.append-index-existed",
+                            entity.getName(), name);
+                }
             }
         }
-        for (String name : removedIndexLabelNames) {
-            if (!existedIndexLabelNames.contains(name)) {
-                throw new ExternalException(
-                          "schema.vertexlabel.update.remove-index-unexisted",
-                          entity.getName(), name);
+        if (removedIndexLabelNames != null) {
+            for (String name : removedIndexLabelNames) {
+                if (!existedIndexLabelNames.contains(name)) {
+                    throw new ExternalException(
+                            "schema.vertexlabel.update.remove-index-unexisted",
+                            entity.getName(), name);
+                }
             }
         }
 
@@ -197,76 +213,49 @@ public class VertexLabelService extends SchemaService {
         return false;
     }
 
-    public ConflictDetail checkConflict(List<String> names, int reusedConnId,
-                                        int connId) {
+    public ConflictDetail checkConflict(MultiSchemaEntity multiEntity,
+                                        int connId, boolean compareEachOther) {
         ConflictDetail detail = new ConflictDetail(SchemaType.VERTEX_LABEL);
-        if (names.isEmpty()) {
+        if (CollectionUtils.isEmpty(multiEntity.getVlEntities())) {
             return detail;
         }
 
-        HugeClient reusedClient = this.client(reusedConnId);
-        HugeClient targetClient = this.client(connId);
-
-        // Collect reused and origin vertexlabels
-        List<VertexLabel> reusedVertexLabels;
-        reusedVertexLabels = reusedClient.schema().getVertexLabels(names);
-        Map<String, VertexLabel> originVertexLabels = new HashMap<>();
-        targetClient.schema().getVertexLabels().forEach(vl -> {
-            originVertexLabels.put(vl.name(), vl);
-        });
-
-        Set<String> pkNames = new HashSet<>();
-        reusedVertexLabels.forEach(vl -> pkNames.addAll(vl.properties()));
-        detail.merge(this.pkService.checkConflict(new ArrayList<>(pkNames), reusedConnId, connId));
-
-        // Collect all index labels to avoid multi get
-        Map<String, List<IndexLabel>> relatedIndexLabels;
-        relatedIndexLabels = collectReleatedIndexLabels(names, SchemaType.VERTEX_LABEL,
-                                                        reusedClient);
-        for (List<IndexLabel> reusedIndexLabels : relatedIndexLabels.values()) {
-            detail.merge(this.piService.checkConflict(reusedIndexLabels, connId));
-        }
-
-        for (VertexLabel reusedVertexLabel : reusedVertexLabels) {
-            String name = reusedVertexLabel.name();
-            VertexLabelEntity entity = convert(reusedVertexLabel, relatedIndexLabels.get(name));
-
-            // Firstly determine if any properties are conflicted
-            if (detail.anyPropertyKeyConflict(reusedVertexLabel.properties())) {
-                detail.add(entity, ConflictStatus.DUPNAME);
-                continue;
-            }
-            // Then determine if any property indexes are conflicted
-            if (detail.anyPropertyIndexConflict(relatedIndexLabels.get(name))) {
-                detail.add(entity, ConflictStatus.DUPNAME);
-                continue;
-            }
-            // Last check conflict of vertex label itself
-            VertexLabel originVertexLabel = originVertexLabels.get(name);
-            ConflictStatus status;
-            if (originVertexLabel == null) {
-                status = ConflictStatus.PASSED;
-            } else if (equals(reusedVertexLabel, originVertexLabel)) {
-                status = ConflictStatus.EXISTED;
-            } else {
-                status = ConflictStatus.DUPNAME;
-            }
-            detail.add(entity, status);
-        }
+        this.pkService.checkConflict(multiEntity.getPkEntities(), detail,
+                                     connId, compareEachOther);
+        this.piService.checkConflict(multiEntity.getPiEntities(), detail,
+                                     connId, compareEachOther);
+        this.checkConflict(multiEntity.getVlEntities(), detail,
+                           connId, compareEachOther);
         return detail;
     }
 
-    public ConflictStatus checkConflict(VertexLabelEntity entity, int connId) {
-        HugeClient client = this.client(connId);
-        String name = entity.getName();
-        VertexLabel newVertexLabel = convert(entity, client);
-        VertexLabel originVertexLabel = convert(this.get(name, connId), client);
-        if (originVertexLabel == null) {
-            return ConflictStatus.PASSED;
-        } else if (equals(newVertexLabel, originVertexLabel)) {
-            return ConflictStatus.EXISTED;
-        } else {
-            return ConflictStatus.DUPNAME;
+    public void checkConflict(List<VertexLabelEntity> entities,
+                              ConflictDetail detail, int connId,
+                              boolean compareEachOther) {
+        if (CollectionUtils.isEmpty(entities)) {
+            return;
+        }
+
+        Map<String, VertexLabelEntity> originEntities = new HashMap<>();
+        for (VertexLabelEntity entity : this.list(connId)) {
+            originEntities.put(entity.getName(), entity);
+        }
+        for (VertexLabelEntity entity : entities) {
+            if (detail.anyPropertyKeyConflict(entity.getPropNames())) {
+                detail.add(entity, ConflictStatus.DUPNAME);
+                continue;
+            }
+            if (detail.anyPropertyIndexConflict(entity.getIndexProps())) {
+                detail.add(entity, ConflictStatus.DUPNAME);
+                continue;
+            }
+            VertexLabelEntity originEntity = originEntities.get(entity.getName());
+            ConflictStatus status = SchemaEntity.compare(entity, originEntity);
+            detail.add(entity, status);
+        }
+        // Compare resued entities with each other
+        if (compareEachOther) {
+            compareWithEachOther(detail, SchemaType.VERTEX_LABEL);
         }
     }
 
@@ -308,7 +297,7 @@ public class VertexLabelService extends SchemaService {
     }
 
     public List<VertexLabel> filter(ConflictDetail detail, HugeClient client) {
-        return detail.getVertexLabelConflicts().stream()
+        return detail.getVlConflicts().stream()
                      .filter(c -> c.getStatus() == ConflictStatus.PASSED)
                      .map(SchemaConflict::getEntity)
                      .map(e -> convert(e, client))
@@ -380,14 +369,5 @@ public class VertexLabelService extends SchemaService {
                      .userdata(USER_KEY_ICON, entity.getStyle().getIcon())
                      .userdata(USER_KEY_COLOR, entity.getStyle().getColor())
                      .build();
-    }
-
-    private static boolean equals(VertexLabel oldSchema, VertexLabel newSchema) {
-        return oldSchema.name().equals(newSchema.name()) &&
-               oldSchema.idStrategy().equals(newSchema.idStrategy()) &&
-               oldSchema.properties().equals(newSchema.properties()) &&
-               oldSchema.primaryKeys().equals(newSchema.primaryKeys()) &&
-               oldSchema.nullableKeys().equals(newSchema.nullableKeys()) &&
-               oldSchema.enableLabelIndex() == newSchema.enableLabelIndex();
     }
 }

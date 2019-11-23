@@ -20,6 +20,8 @@
 package com.baidu.hugegraph.service.schema;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +29,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.baidu.hugegraph.common.Constant;
@@ -35,6 +38,7 @@ import com.baidu.hugegraph.entity.schema.ConflictDetail;
 import com.baidu.hugegraph.entity.schema.ConflictStatus;
 import com.baidu.hugegraph.entity.schema.PropertyIndex;
 import com.baidu.hugegraph.entity.schema.SchemaConflict;
+import com.baidu.hugegraph.entity.schema.SchemaEntity;
 import com.baidu.hugegraph.entity.schema.SchemaType;
 import com.baidu.hugegraph.exception.ServerException;
 import com.baidu.hugegraph.structure.constant.HugeType;
@@ -47,6 +51,34 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Service
 public class PropertyIndexService extends SchemaService {
+
+    public List<PropertyIndex> list(int connId) {
+        return this.list(Collections.emptyList(), connId);
+    }
+
+    public List<PropertyIndex> list(Collection<String> names, int connId) {
+        return this.list(names, connId, true);
+    }
+
+    public List<PropertyIndex> list(Collection<String> names, int connId,
+                                    boolean emptyAsAll) {
+        HugeClient client = this.client(connId);
+        List<IndexLabel> indexLabels;
+        if (CollectionUtils.isEmpty(names)) {
+            if (emptyAsAll) {
+                indexLabels = client.schema().getIndexLabels();
+            } else {
+                indexLabels = new ArrayList<>();
+            }
+        } else {
+            indexLabels = client.schema().getIndexLabels(new ArrayList<>(names));
+        }
+        List<PropertyIndex> results = new ArrayList<>(indexLabels.size());
+        indexLabels.forEach(indexLabel -> {
+            results.add(convert(indexLabel));
+        });
+        return results;
+    }
 
     public IPage<PropertyIndex> list(int connId, HugeType type,
                                      int pageNo, int pageSize) {
@@ -183,31 +215,30 @@ public class PropertyIndexService extends SchemaService {
                     SchemaType.PROPERTY_INDEX);
     }
 
-    public ConflictDetail checkConflict(List<IndexLabel> indexLabels,
-                                        int connId) {
-        HugeClient client = this.client(connId);
-        Map<String, IndexLabel> oldIndexLabels = new HashMap<>();
-        client.schema().getIndexLabels().forEach(il -> {
-            oldIndexLabels.put(il.name(), il);
-        });
+    public void checkConflict(List<PropertyIndex> entities,
+                              ConflictDetail detail, int connId,
+                              boolean compareEachOther) {
+        if (CollectionUtils.isEmpty(entities)) {
+            return;
+        }
 
-        ConflictDetail detail = new ConflictDetail(SchemaType.PROPERTY_INDEX);
-        for (IndexLabel newIndexLabel : indexLabels) {
-            String name = newIndexLabel.name();
-            IndexLabel oldIndexLabel = oldIndexLabels.get(name);
-
-            PropertyIndex entity = convert(newIndexLabel);
-            ConflictStatus status;
-            if (oldIndexLabel == null) {
-                status = ConflictStatus.PASSED;
-            } else if (isEqual(newIndexLabel, oldIndexLabel)) {
-                status = ConflictStatus.EXISTED;
-            } else {
-                status = ConflictStatus.DUPNAME;
+        Map<String, PropertyIndex> originEntities = new HashMap<>();
+        for (PropertyIndex entity : this.list(connId)) {
+            originEntities.put(entity.getName(), entity);
+        }
+        for (PropertyIndex entity : entities) {
+            if (detail.anyPropertyKeyConflict(entity.getFields())) {
+                detail.add(entity, ConflictStatus.DUPNAME);
+                continue;
             }
+            PropertyIndex originEntity = originEntities.get(entity.getName());
+            ConflictStatus status = SchemaEntity.compare(entity, originEntity);
             detail.add(entity, status);
         }
-        return detail;
+        // Compare resued entities with each other
+        if (compareEachOther) {
+            compareWithEachOther(detail, SchemaType.PROPERTY_INDEX);
+        }
     }
 
     public ConflictStatus checkConflict(PropertyIndex entity, int connId) {
@@ -225,7 +256,7 @@ public class PropertyIndexService extends SchemaService {
     }
 
     public List<IndexLabel> filter(ConflictDetail detail, HugeClient client) {
-        return detail.getPropertyIndexConflicts().stream()
+        return detail.getPiConflicts().stream()
                      .filter(c -> c.getStatus() == ConflictStatus.PASSED)
                      .map(SchemaConflict::getEntity)
                      .map(e -> convert(e, client))

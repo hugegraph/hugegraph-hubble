@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.baidu.hugegraph.structure.constant.IdStrategy;
+import com.baidu.hugegraph.util.CommonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -64,5 +65,25 @@ public class VertexLabelEntity implements SchemaLabelEntity, Timefiable {
     @Override
     public SchemaType getSchemaType() {
         return SchemaType.VERTEX_LABEL;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof VertexLabelEntity)) {
+            return false;
+        }
+        VertexLabelEntity other = (VertexLabelEntity) object;
+        return this.name.equals(other.name) &&
+               this.idStrategy == other.idStrategy &&
+               CommonUtil.equalCollection(this.properties, other.properties) &&
+               CommonUtil.equalCollection(this.primaryKeys, other.primaryKeys) &&
+               CommonUtil.equalCollection(this.propertyIndexes,
+                                          other.propertyIndexes) &&
+               this.openLabelIndex == other.openLabelIndex;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.name.hashCode();
     }
 }

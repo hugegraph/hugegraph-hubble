@@ -19,10 +19,8 @@
 
 package com.baidu.hugegraph.entity.schema;
 
-import java.util.Date;
+import java.util.List;
 
-import com.baidu.hugegraph.structure.constant.Cardinality;
-import com.baidu.hugegraph.structure.constant.DataType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -34,40 +32,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PropertyKeyEntity implements SchemaEntity, Timefiable {
+public class MultiSchemaEntity {
 
-    @JsonProperty("name")
-    private String name;
+    @JsonProperty("propertykeys")
+    private List<PropertyKeyEntity> pkEntities;
 
-    @JsonProperty("data_type")
-    private DataType dataType;
+    @JsonProperty("propertyindexes")
+    private List<PropertyIndex> piEntities;
 
-    @JsonProperty("cardinality")
-    private Cardinality cardinality;
+    @JsonProperty("vertexlabels")
+    private List<VertexLabelEntity> vlEntities;
 
-    // TODO: add aggregateType
-
-    @JsonProperty("create_time")
-    private Date createTime;
-
-    @Override
-    public SchemaType getSchemaType() {
-        return SchemaType.PROPERTY_KEY;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (!(object instanceof PropertyKeyEntity)) {
-            return false;
-        }
-        PropertyKeyEntity other = (PropertyKeyEntity) object;
-        return this.name.equals(other.name) &&
-               this.dataType == other.dataType &&
-               this.cardinality == other.cardinality;
-    }
-
-    @Override
-    public int hashCode() {
-        return this.name.hashCode();
-    }
+    @JsonProperty("edgelabels")
+    private List<EdgeLabelEntity> elEntities;
 }
