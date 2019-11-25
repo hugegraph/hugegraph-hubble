@@ -21,21 +21,20 @@ function read_property() {
 
 # wait_for_startup friendly_name host port timeout_s
 function wait_for_startup() {
-    local log=$1
-    local tip=$2
-    local timeout_s=$3
-
+    local server_url=$1
+    local timeout_s=$2
     local now_s=`date '+%s'`
     local stop_s=$(( $now_s + $timeout_s ))
 
     while [[ ${now_s} -le ${stop_s} ]]; do
         echo -n .
-        if cat ${log} | grep ${tip}; then
-            sleep 2
-            now_s=`date '+%s'`
+        status=`curl -o /dev/null -s -w %{http_code} ${server_url}`
+        if [[ ${status} -eq 200 ]]; then
+            echo "OK"
+            return 0
         fi
-        echo "OK"
-        return 0
+        sleep 2
+        now_s=`date '+%s'`
     done
 
     echo "timed out" >&2

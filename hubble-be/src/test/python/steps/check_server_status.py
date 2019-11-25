@@ -20,8 +20,5 @@ def step_impl(context, response):
     res_json = context.res_json
     ass_json = json.loads(response)
 
-    if res_json["status"] == ass_json["status"]:
-        assert True
-    else:
-        assert False
-        
+    assert ass_json["status"] == res_json["status"]
+

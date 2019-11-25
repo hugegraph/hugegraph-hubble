@@ -70,9 +70,9 @@ echo ${pid} > ${PID_FILE}
 timeout_s=30
 server_host=`read_property ${CONF_PATH}/hugegraph-hubble.properties server.host`
 server_port=`read_property ${CONF_PATH}/hugegraph-hubble.properties server.port`
-started_tip="Started HugeGraphHubble in"
+server_url="http://${server_host}:${server_port}/api/v1.1/actuator/health"
 
-wait_for_startup ${log} ${started_tip} ${timeout_s} || {
+wait_for_startup ${server_url} ${timeout_s} || {
     cat ${log}
     exit 1
 }
