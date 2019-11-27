@@ -159,8 +159,6 @@ public class EdgeLabelController extends SchemaController {
     @PostMapping("reuse")
     public void reuse(@RequestBody ConflictDetail detail,
                       @RequestParam("conn_id") int connId) {
-//        Ex.check(!CollectionUtils.isEmpty(names),
-//                 "common.param.cannot-be-empty", "names");
         this.elService.reuse(detail, connId);
     }
 
@@ -169,7 +167,7 @@ public class EdgeLabelController extends SchemaController {
                        @RequestParam("conn_id") int connId,
                        @RequestBody LabelUpdateEntity entity) {
         Ex.check(!StringUtils.isEmpty(name),
-                 "common.param.cannot-be-null-and-empty", name);
+                 "common.param.cannot-be-null-or-empty", name);
         entity.setName(name);
         entity.setType(SchemaType.EDGE_LABEL);
 
@@ -214,10 +212,10 @@ public class EdgeLabelController extends SchemaController {
         String sourceLabel = entity.getSourceLabel();
         String targetLabel = entity.getTargetLabel();
         Ex.check(!StringUtils.isEmpty(sourceLabel),
-                 "common.param.cannot-be-null-and-empty",
+                 "common.param.cannot-be-null-or-empty",
                  "edgelabel.source_label");
         Ex.check(!StringUtils.isEmpty(targetLabel),
-                 "common.param.cannot-be-null-and-empty",
+                 "common.param.cannot-be-null-or-empty",
                  "edgelabel.target_label");
 
         Ex.check(this.vlService.exist(sourceLabel, connId),
@@ -230,10 +228,10 @@ public class EdgeLabelController extends SchemaController {
         List<String> sortKeys = entity.getSortKeys();
         if (entity.isLinkMultiTimes()) {
             Ex.check(!CollectionUtils.isEmpty(entity.getProperties()),
-                     "schema.edgelabel.property.cannot-be-null-and-empty",
+                     "schema.edgelabel.property.cannot-be-null-or-empty",
                      entity.getName());
             Ex.check(!CollectionUtils.isEmpty(sortKeys),
-                     "schema.edgelabel.sortkey.cannot-be-null-and-empty",
+                     "schema.edgelabel.sortkey.cannot-be-null-or-empty",
                      entity.getName());
             // All sort keys must belong to properties
             Set<String> propNames = entity.getPropNames();

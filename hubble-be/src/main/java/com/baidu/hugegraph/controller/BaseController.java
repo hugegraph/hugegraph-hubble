@@ -43,7 +43,7 @@ public abstract class BaseController {
                                     boolean creating) {
         if (creating) {
             Ex.check(!StringUtils.isEmpty(value),
-                     "common.param.cannot-be-null-and-empty", name);
+                     "common.param.cannot-be-null-or-empty", name);
         } else {
             // The default null and user-passed null indicate no update
             Ex.check(value == null || !value.isEmpty(),
@@ -53,7 +53,7 @@ public abstract class BaseController {
 
     public void checkParamsNotEmpty(String name, List<?> values) {
         Ex.check(values != null && !values.isEmpty(),
-                 "common.param.cannot-be-null-and-empty", name);
+                 "common.param.cannot-be-null-or-empty", name);
     }
 
     public <T extends Mergeable> T mergeEntity(T oldEntity, T newEntity) {

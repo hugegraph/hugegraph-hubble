@@ -179,7 +179,7 @@ public class VertexLabelController extends SchemaController {
                        @RequestParam("conn_id") int connId,
                        @RequestBody LabelUpdateEntity entity) {
         Ex.check(!StringUtils.isEmpty(name),
-                 "common.param.cannot-be-null-and-empty", name);
+                 "common.param.cannot-be-null-or-empty", name);
         entity.setName(name);
         entity.setType(SchemaType.VERTEX_LABEL);
 
@@ -238,10 +238,10 @@ public class VertexLabelController extends SchemaController {
         List<String> primaryKeys = entity.getPrimaryKeys();
         if (idStrategy.isPrimaryKey()) {
             Ex.check(!CollectionUtils.isEmpty(entity.getProperties()),
-                     "schema.vertexlabel.property.cannot-be-null-and-empty",
+                     "schema.vertexlabel.property.cannot-be-null-or-empty",
                      entity.getName());
             Ex.check(!CollectionUtils.isEmpty(primaryKeys),
-                     "schema.vertexlabel.primarykey.cannot-be-null-and-empty",
+                     "schema.vertexlabel.primarykey.cannot-be-null-or-empty",
                      entity.getName());
             // All primary keys must belong to properties
             Set<String> propNames = entity.getPropNames();

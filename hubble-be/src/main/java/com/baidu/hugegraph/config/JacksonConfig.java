@@ -43,8 +43,6 @@ public class JacksonConfig {
     public ObjectMapper jacksonObjectMapper(Jackson2ObjectMapperBuilder builder) {
         ObjectMapper mapper = builder.createXmlMapper(false).build();
 
-        // objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-
         SimpleModule module = new SimpleModule();
         // Serailize long to string
         module.addSerializer(Long.class, ToStringSerializer.instance);

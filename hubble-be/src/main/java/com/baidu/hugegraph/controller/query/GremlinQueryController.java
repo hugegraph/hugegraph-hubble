@@ -65,7 +65,6 @@ public class GremlinQueryController extends GremlinController {
         this.checkParamsValid(query);
 
         Date createTime = new Date();
-
         // Insert execute history
         ExecuteStatus status = ExecuteStatus.RUNNING;
         ExecuteHistory history = ExecuteHistory.builder()
@@ -96,7 +95,7 @@ public class GremlinQueryController extends GremlinController {
             history.setDuration(duration);
             rows = this.historyService.update(history);
             if (rows != 1) {
-                log.error("Failed to save execute history entity");
+                log.error("Failed to save execute history entity {}", history);
             }
         }
     }
@@ -110,23 +109,23 @@ public class GremlinQueryController extends GremlinController {
 
     private void checkParamsValid(GremlinQuery query) {
         Ex.check(!StringUtils.isEmpty(query.getContent()),
-                 "common.param.cannot-be-null-and-empty",
+                 "common.param.cannot-be-null-or-empty",
                  "gremlin-query.content");
         checkContentLength(query.getContent());
     }
 
     private void checkParamsValid(AdjacentQuery query) {
-        Ex.check(query.getVertexId() != null,
-                 "common.param.cannot-be-null", "vertex_id");
-        Ex.check(query.getVertexLabel() != null,
-                 "common.param.cannot-be-null", "vertex_label");
+        Ex.check(!StringUtils.isEmpty(query.getVertexId()),
+                 "common.param.cannot-be-null-or-empty", "vertex_id");
+        Ex.check(!StringUtils.isEmpty(query.getVertexLabel()),
+                 "common.param.cannot-be-null-or-empty", "vertex_label");
         if (query.getConditions() != null && !query.getConditions().isEmpty()) {
             for (AdjacentQuery.Condition condition : query.getConditions()) {
                 Ex.check(!StringUtils.isEmpty(condition.getKey()),
-                         "common.param.cannot-be-null-and-empty",
+                         "common.param.cannot-be-null-or-empty",
                          "condition.key");
                 Ex.check(!StringUtils.isEmpty(condition.getOperator()),
-                         "common.param.cannot-be-null-and-empty",
+                         "common.param.cannot-be-null-or-empty",
                          "condition.operator");
                 Ex.check(CONDITION_OPERATORS.contains(condition.getOperator()),
                          "common.param.should-belong-to", "condition.operator",
