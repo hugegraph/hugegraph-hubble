@@ -55,6 +55,9 @@ public class PropertyKeyController extends SchemaController {
 
     @GetMapping
     public IPage<PropertyKeyEntity> list(@RequestParam("conn_id") int connId,
+                                         @RequestParam(name = "content",
+                                                       required = false)
+                                         String content,
                                          @RequestParam(name = "name_order",
                                                        required = false)
                                          String nameOrder,
@@ -67,7 +70,7 @@ public class PropertyKeyController extends SchemaController {
                                                        defaultValue = "10")
                                          int pageSize) {
         return this.listInPage(id -> this.service.list(id),
-                               connId, nameOrder, pageNo, pageSize);
+                               connId, content, nameOrder, pageNo, pageSize);
     }
 
     @GetMapping("{name}")

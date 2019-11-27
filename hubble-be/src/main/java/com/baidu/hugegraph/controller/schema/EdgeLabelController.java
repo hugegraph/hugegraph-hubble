@@ -77,6 +77,9 @@ public class EdgeLabelController extends SchemaController {
 
     @GetMapping
     public IPage<EdgeLabelEntity> list(@RequestParam("conn_id") int connId,
+                                       @RequestParam(name = "content",
+                                                     required = false)
+                                       String content,
                                        @RequestParam(name = "name_order",
                                                      required = false)
                                        String nameOrder,
@@ -89,7 +92,7 @@ public class EdgeLabelController extends SchemaController {
                                                      defaultValue = "10")
                                        int pageSize) {
         return this.listInPage(id -> this.elService.list(id),
-                               connId, nameOrder, pageNo, pageSize);
+                               connId, content, nameOrder, pageNo, pageSize);
     }
 
     @GetMapping("{name}")

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.util.StringUtils;
 
@@ -48,17 +49,38 @@ public class SchemaController extends BaseController {
 
     public <T extends SchemaEntity> IPage<T> listInPage(
                                              Function<Integer, List<T>> fetcher,
-                                             int connId, String nameOrder,
+                                             int connId, String content,
+                                             String nameOrder,
                                              int pageNo, int pageSize) {
-        List<T> entities = fetcher.apply(connId);
+        Boolean nameOrderAsc = null;
         if (!StringUtils.isEmpty(nameOrder)) {
             Ex.check(ORDER_ASC.equals(nameOrder) || ORDER_DESC.equals(nameOrder),
                      "common.name-order.invalid", nameOrder);
-            // sort by name
-            this.sortByName(entities, ORDER_ASC.equals(nameOrder));
+            nameOrderAsc = ORDER_ASC.equals(nameOrder);
+        }
+
+        List<T> entities = fetcher.apply(connId);
+        if (!StringUtils.isEmpty(content)) {
+            // Select by content
+            entities = entities.stream()
+                               .filter(e -> e.getName().contains(content))
+                               .collect(Collectors.toList());
+            if (nameOrderAsc != null) {
+                // order by name
+                this.sortByName(entities, nameOrderAsc);
+            } else {
+                // order by relativity
+                this.sortByRelativity(entities, content);
+            }
         } else {
-            // sort by create time(NOTE: some entity create time maybe null)
-            this.sortByCreateTime(entities, false);
+            // Select all
+            if (nameOrderAsc != null) {
+                // order by name
+                this.sortByName(entities, nameOrderAsc);
+            } else {
+                // order by time
+                this.sortByCreateTime(entities, false);
+            }
         }
         return PageUtil.page(entities, pageNo, pageSize);
     }
@@ -98,6 +120,18 @@ public class SchemaController extends BaseController {
         } else {
             entities.sort(dateAscComparator.reversed());
         }
+    }
+
+    public <T extends SchemaEntity> void sortByRelativity(List<T> entities,
+                                                          String content) {
+        Comparator<T> occurrencesComparator = (o1, o2) -> {
+            String name1 = o1.getName();
+            String name2 = o2.getName();
+            int count1 = StringUtils.countOccurrencesOf(name1, content);
+            int count2 = StringUtils.countOccurrencesOf(name2, content);
+            return count1 - count2;
+        };
+        entities.sort(occurrencesComparator);
     }
 
     /**

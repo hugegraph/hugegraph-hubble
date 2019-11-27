@@ -96,6 +96,9 @@ public class VertexLabelController extends SchemaController {
 
     @GetMapping
     public IPage<VertexLabelEntity> list(@RequestParam("conn_id") int connId,
+                                         @RequestParam(name = "content",
+                                                       required = false)
+                                         String content,
                                          @RequestParam(name = "name_order",
                                                        required = false)
                                          String nameOrder,
@@ -108,7 +111,7 @@ public class VertexLabelController extends SchemaController {
                                                        defaultValue = "10")
                                          int pageSize) {
         return this.listInPage(id -> this.vlService.list(id),
-                               connId, nameOrder, pageNo, pageSize);
+                               connId, content, nameOrder, pageNo, pageSize);
     }
 
     @GetMapping("{name}")
