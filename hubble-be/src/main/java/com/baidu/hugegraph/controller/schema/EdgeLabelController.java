@@ -54,7 +54,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.google.common.collect.ImmutableList;
 
 @RestController
-@RequestMapping(Constant.API_VERSION + "schema/edgelabels")
+@RequestMapping(Constant.API_VERSION + "graph-connections/{connId}/schema/edgelabels")
 public class EdgeLabelController extends SchemaController {
 
     private static final List<String> PRESET_COLORS = ImmutableList.of(
@@ -79,7 +79,7 @@ public class EdgeLabelController extends SchemaController {
     }
 
     @GetMapping
-    public IPage<EdgeLabelEntity> list(@RequestParam("conn_id") int connId,
+    public IPage<EdgeLabelEntity> list(@PathVariable("connId") int connId,
                                        @RequestParam(name = "content",
                                                      required = false)
                                        String content,
@@ -99,16 +99,16 @@ public class EdgeLabelController extends SchemaController {
     }
 
     @GetMapping("{name}")
-    public EdgeLabelEntity get(@PathVariable("name") String name,
-                               @RequestParam("conn_id") int connId) {
+    public EdgeLabelEntity get(@PathVariable("connId") int connId,
+                               @PathVariable("name") String name) {
         EdgeLabelEntity entity = this.elService.get(name, connId);
         Ex.check(entity != null, "schema.edgelabel.not-exist", name);
         return entity;
     }
 
     @PostMapping
-    public void create(@RequestBody EdgeLabelEntity entity,
-                       @RequestParam("conn_id") int connId) {
+    public void create(@PathVariable("connId") int connId,
+                       @RequestBody EdgeLabelEntity entity) {
         this.checkParamsValid(entity, connId, true);
         this.checkEntityUnique(entity, connId, true);
         entity.setCreateTime(new Date());
@@ -117,9 +117,9 @@ public class EdgeLabelController extends SchemaController {
 
     @PostMapping("check_conflict")
     public ConflictDetail checkConflict(
-                          @RequestBody ConflictCheckEntity entity,
+                          @PathVariable("connId") int connId,
                           @RequestParam("reused_conn_id") int reusedConnId,
-                          @RequestParam("conn_id") int connId) {
+                          @RequestBody ConflictCheckEntity entity) {
         Ex.check(!CollectionUtils.isEmpty(entity.getElEntities()),
                  "common.param.cannot-be-empty", "edgelabels");
         Ex.check(CollectionUtils.isEmpty(entity.getPkEntities()),
@@ -153,22 +153,22 @@ public class EdgeLabelController extends SchemaController {
 
     @PostMapping("recheck_conflict")
     public ConflictDetail recheckConflict(
-                          @RequestBody ConflictCheckEntity entity,
-                          @RequestParam("conn_id") int connId) {
+                          @PathVariable("connId") int connId,
+                          @RequestBody ConflictCheckEntity entity) {
         Ex.check(!CollectionUtils.isEmpty(entity.getElEntities()),
                  "common.param.cannot-be-empty", "edgelabels");
         return this.elService.checkConflict(entity, connId, true);
     }
 
     @PostMapping("reuse")
-    public void reuse(@RequestBody ConflictDetail detail,
-                      @RequestParam("conn_id") int connId) {
+    public void reuse(@PathVariable("connId") int connId,
+                      @RequestBody ConflictDetail detail) {
         this.elService.reuse(detail, connId);
     }
 
     @PutMapping("{name}")
-    public void update(@PathVariable("name") String name,
-                       @RequestParam("conn_id") int connId,
+    public void update(@PathVariable("connId") int connId,
+                       @PathVariable("name") String name,
                        @RequestBody LabelUpdateEntity entity) {
         Ex.check(!StringUtils.isEmpty(name),
                  "common.param.cannot-be-null-or-empty", name);
@@ -185,8 +185,8 @@ public class EdgeLabelController extends SchemaController {
      * Delete edge label doesn't need check checkUsing
      */
     @DeleteMapping
-    public void delete(@RequestParam("names") List<String> names,
-                       @RequestParam("conn_id") int connId) {
+    public void delete(@PathVariable("connId") int connId,
+                       @RequestParam("names") List<String> names) {
         for (String name : names) {
             EdgeLabelEntity entity = this.elService.get(name, connId);
             Ex.check(entity != null, "schema.edgelabel.not-exist", name);

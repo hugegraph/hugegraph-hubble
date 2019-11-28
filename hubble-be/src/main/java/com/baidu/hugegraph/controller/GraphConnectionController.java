@@ -115,7 +115,7 @@ public class GraphConnectionController extends BaseController {
     @PutMapping("{id}")
     public GraphConnection update(@PathVariable("id") int id,
                                   @RequestBody GraphConnection newEntity) {
-        this.checkIdWhenUpdate(id, newEntity);
+        this.checkIdSameAsBody(id, newEntity);
         this.checkParamsValid(newEntity, false);
 
         // Check exist connection with this id

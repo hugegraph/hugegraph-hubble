@@ -42,7 +42,7 @@ import com.baidu.hugegraph.util.Ex;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 @RestController
-@RequestMapping(Constant.API_VERSION + "gremlin-collections")
+@RequestMapping(Constant.API_VERSION + "graph-connections/{connId}/gremlin-collections")
 public class GremlinCollectionController extends GremlinController {
 
     private static final int LIMIT = 100;
@@ -55,7 +55,8 @@ public class GremlinCollectionController extends GremlinController {
     }
 
     @GetMapping
-    public IPage<GremlinCollection> list(@RequestParam(name = "content",
+    public IPage<GremlinCollection> list(@PathVariable("connId") int connId,
+                                         @RequestParam(name = "content",
                                                        required = false)
                                          String content,
                                          @RequestParam(name = "name_order",
@@ -87,7 +88,7 @@ public class GremlinCollectionController extends GremlinController {
                      "common.time-order.invalid", timeOrder);
             timeOrderAsc = ORDER_ASC.equals(timeOrder);
         }
-        return this.service.list(content, nameOrderAsc, timeOrderAsc,
+        return this.service.list(connId, content, nameOrderAsc, timeOrderAsc,
                                  pageNo, pageSize);
     }
 
@@ -97,13 +98,15 @@ public class GremlinCollectionController extends GremlinController {
     }
 
     @PostMapping
-    public GremlinCollection create(@RequestBody GremlinCollection newEntity) {
+    public GremlinCollection create(@PathVariable("connId") int connId,
+                                    @RequestBody GremlinCollection newEntity) {
         this.checkParamsValid(newEntity, true);
         this.checkEntityUnique(newEntity, true);
         // The service is an singleton object
         synchronized(this.service) {
             Ex.check(this.service.count() < LIMIT,
                      "gremlin-collection.reached-limit", LIMIT);
+            newEntity.setConnId(connId);
             newEntity.setCreateTime(new Date());
             int rows = this.service.save(newEntity);
             if (rows != 1) {
@@ -116,7 +119,7 @@ public class GremlinCollectionController extends GremlinController {
     @PutMapping("{id}")
     public GremlinCollection update(@PathVariable("id") int id,
                                     @RequestBody GremlinCollection newEntity) {
-        this.checkIdWhenUpdate(id, newEntity);
+        this.checkIdSameAsBody(id, newEntity);
         this.checkParamsValid(newEntity, false);
 
         GremlinCollection oldEntity = this.service.get(id);
@@ -150,6 +153,9 @@ public class GremlinCollectionController extends GremlinController {
                                   boolean creating) {
         Ex.check(creating, () -> newEntity.getId() == null,
                  "common.param.must-be-null", "id");
+
+        Ex.check(newEntity.getConnId() == null,
+                 "common.param.must-be-null", "conn_id");
 
         String name = newEntity.getName();
         this.checkParamsNotEmpty("name", name, creating);
