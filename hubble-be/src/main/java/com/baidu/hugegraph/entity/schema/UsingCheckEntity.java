@@ -32,17 +32,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MultiSchemaEntity {
+public class UsingCheckEntity {
 
-    @JsonProperty("propertykeys")
-    private List<PropertyKeyEntity> pkEntities;
-
-    @JsonProperty("propertyindexes")
-    private List<PropertyIndex> piEntities;
-
-    @JsonProperty("vertexlabels")
-    private List<VertexLabelEntity> vlEntities;
-
-    @JsonProperty("edgelabels")
-    private List<EdgeLabelEntity> elEntities;
+    @JsonProperty("names")
+    private List<String> names;
 }

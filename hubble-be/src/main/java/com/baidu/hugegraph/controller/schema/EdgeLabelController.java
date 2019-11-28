@@ -37,12 +37,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.hugegraph.entity.schema.ConflictCheckEntity;
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
 import com.baidu.hugegraph.entity.schema.EdgeLabelEntity;
 import com.baidu.hugegraph.entity.schema.LabelUpdateEntity;
-import com.baidu.hugegraph.entity.schema.MultiSchemaEntity;
-import com.baidu.hugegraph.entity.schema.PropertyIndex;
-import com.baidu.hugegraph.entity.schema.PropertyKeyEntity;
 import com.baidu.hugegraph.entity.schema.SchemaType;
 import com.baidu.hugegraph.entity.schema.VertexLabelEntity;
 import com.baidu.hugegraph.service.schema.EdgeLabelService;
@@ -114,49 +112,47 @@ public class EdgeLabelController extends SchemaController {
 
     @PostMapping("check_conflict")
     public ConflictDetail checkConflict(
-                          @RequestBody List<EdgeLabelEntity> entities,
+                          @RequestBody ConflictCheckEntity entity,
                           @RequestParam("reused_conn_id") int reusedConnId,
                           @RequestParam("conn_id") int connId) {
-        Ex.check(!CollectionUtils.isEmpty(entities),
-                 "common.param.cannot-be-empty", "entities");
+        Ex.check(!CollectionUtils.isEmpty(entity.getElEntities()),
+                 "common.param.cannot-be-empty", "edgelabels");
+        Ex.check(CollectionUtils.isEmpty(entity.getPkEntities()),
+                 "common.param.must-be-null", "propertykeys");
+        Ex.check(CollectionUtils.isEmpty(entity.getPiEntities()),
+                 "common.param.must-be-null", "propertyindexes");
+        Ex.check(CollectionUtils.isEmpty(entity.getVlEntities()),
+                 "common.param.must-be-null", "vertexlabels");
         Ex.check(connId != reusedConnId, "schema.conn.cannot-reuse-self");
 
         Set<String> pkNames = new HashSet<>();
         Set<String> piNames = new HashSet<>();
         Set<String> vlNames = new HashSet<>();
-        for (EdgeLabelEntity entity : entities) {
-            pkNames.addAll(entity.getPropNames());
-            piNames.addAll(entity.getIndexProps());
-            vlNames.addAll(entity.getLinkLabels());
+        for (EdgeLabelEntity e : entity.getElEntities()) {
+            pkNames.addAll(e.getPropNames());
+            piNames.addAll(e.getIndexProps());
+            vlNames.addAll(e.getLinkLabels());
         }
-
         List<VertexLabelEntity> vlEntities;
         vlEntities = this.vlService.list(vlNames, reusedConnId, false);
-
-        for (VertexLabelEntity entity : vlEntities) {
-            pkNames.addAll(entity.getPropNames());
-            piNames.addAll(entity.getIndexProps());
+        for (VertexLabelEntity e : vlEntities) {
+            pkNames.addAll(e.getPropNames());
+            piNames.addAll(e.getIndexProps());
         }
-        List<PropertyKeyEntity> pkEntities;
-        pkEntities = this.pkService.list(pkNames, reusedConnId, false);
-        List<PropertyIndex> piEntities;
-        piEntities = this.piService.list(piNames, reusedConnId, false);
-        MultiSchemaEntity multiEntity = MultiSchemaEntity.builder()
-                                                         .pkEntities(pkEntities)
-                                                         .piEntities(piEntities)
-                                                         .vlEntities(vlEntities)
-                                                         .elEntities(entities)
-                                                         .build();
-        return this.elService.checkConflict(multiEntity, connId, false);
+
+        entity.setPkEntities(this.pkService.list(pkNames, reusedConnId, false));
+        entity.setPiEntities(this.piService.list(piNames, reusedConnId, false));
+        entity.setVlEntities(vlEntities);
+        return this.elService.checkConflict(entity, connId, false);
     }
 
     @PostMapping("recheck_conflict")
     public ConflictDetail recheckConflict(
-                          @RequestBody MultiSchemaEntity multiEntity,
+                          @RequestBody ConflictCheckEntity entity,
                           @RequestParam("conn_id") int connId) {
-        Ex.check(!CollectionUtils.isEmpty(multiEntity.getElEntities()),
+        Ex.check(!CollectionUtils.isEmpty(entity.getElEntities()),
                  "common.param.cannot-be-empty", "edgelabels");
-        return this.elService.checkConflict(multiEntity, connId, true);
+        return this.elService.checkConflict(entity, connId, true);
     }
 
     @PostMapping("reuse")

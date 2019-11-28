@@ -38,7 +38,7 @@ import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
 import com.baidu.hugegraph.entity.schema.ConflictStatus;
 import com.baidu.hugegraph.entity.schema.LabelUpdateEntity;
-import com.baidu.hugegraph.entity.schema.MultiSchemaEntity;
+import com.baidu.hugegraph.entity.schema.ConflictCheckEntity;
 import com.baidu.hugegraph.entity.schema.Property;
 import com.baidu.hugegraph.entity.schema.PropertyIndex;
 import com.baidu.hugegraph.entity.schema.SchemaConflict;
@@ -213,18 +213,18 @@ public class VertexLabelService extends SchemaService {
         return false;
     }
 
-    public ConflictDetail checkConflict(MultiSchemaEntity multiEntity,
+    public ConflictDetail checkConflict(ConflictCheckEntity entity,
                                         int connId, boolean compareEachOther) {
         ConflictDetail detail = new ConflictDetail(SchemaType.VERTEX_LABEL);
-        if (CollectionUtils.isEmpty(multiEntity.getVlEntities())) {
+        if (CollectionUtils.isEmpty(entity.getVlEntities())) {
             return detail;
         }
 
-        this.pkService.checkConflict(multiEntity.getPkEntities(), detail,
+        this.pkService.checkConflict(entity.getPkEntities(), detail,
                                      connId, compareEachOther);
-        this.piService.checkConflict(multiEntity.getPiEntities(), detail,
+        this.piService.checkConflict(entity.getPiEntities(), detail,
                                      connId, compareEachOther);
-        this.checkConflict(multiEntity.getVlEntities(), detail,
+        this.checkConflict(entity.getVlEntities(), detail,
                            connId, compareEachOther);
         return detail;
     }

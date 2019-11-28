@@ -32,9 +32,9 @@ import org.springframework.util.CollectionUtils;
 
 import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.driver.HugeClient;
+import com.baidu.hugegraph.entity.schema.ConflictCheckEntity;
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
 import com.baidu.hugegraph.entity.schema.ConflictStatus;
-import com.baidu.hugegraph.entity.schema.MultiSchemaEntity;
 import com.baidu.hugegraph.entity.schema.PropertyKeyEntity;
 import com.baidu.hugegraph.entity.schema.SchemaConflict;
 import com.baidu.hugegraph.entity.schema.SchemaEntity;
@@ -130,14 +130,14 @@ public class PropertyKeyService extends SchemaService {
         return false;
     }
 
-    public ConflictDetail checkConflict(MultiSchemaEntity multiEntity,
+    public ConflictDetail checkConflict(ConflictCheckEntity entity,
                                         int connId, boolean compareEachOther) {
         ConflictDetail detail = new ConflictDetail(SchemaType.PROPERTY_KEY);
-        if (CollectionUtils.isEmpty(multiEntity.getPkEntities())) {
+        if (CollectionUtils.isEmpty(entity.getPkEntities())) {
             return detail;
         }
 
-        this.checkConflict(multiEntity.getPkEntities(), detail,
+        this.checkConflict(entity.getPkEntities(), detail,
                            connId, compareEachOther);
         return detail;
     }

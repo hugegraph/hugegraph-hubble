@@ -39,7 +39,7 @@ import com.baidu.hugegraph.entity.schema.ConflictDetail;
 import com.baidu.hugegraph.entity.schema.ConflictStatus;
 import com.baidu.hugegraph.entity.schema.EdgeLabelEntity;
 import com.baidu.hugegraph.entity.schema.LabelUpdateEntity;
-import com.baidu.hugegraph.entity.schema.MultiSchemaEntity;
+import com.baidu.hugegraph.entity.schema.ConflictCheckEntity;
 import com.baidu.hugegraph.entity.schema.Property;
 import com.baidu.hugegraph.entity.schema.PropertyIndex;
 import com.baidu.hugegraph.entity.schema.SchemaConflict;
@@ -192,25 +192,25 @@ public class EdgeLabelService extends SchemaService {
         return this.get(name, connId) != null;
     }
 
-    public ConflictDetail checkConflict(MultiSchemaEntity multiEntity,
+    public ConflictDetail checkConflict(ConflictCheckEntity entity,
                                         int connId, boolean compareEachOther) {
         ConflictDetail detail = new ConflictDetail(SchemaType.EDGE_LABEL);
-        if (CollectionUtils.isEmpty(multiEntity.getElEntities())) {
+        if (CollectionUtils.isEmpty(entity.getElEntities())) {
             return detail;
         }
 
         Map<String, EdgeLabelEntity> originElEntities = new HashMap<>();
-        for (EdgeLabelEntity entity : this.list(connId)) {
-            originElEntities.put(entity.getName(), entity);
+        for (EdgeLabelEntity e : this.list(connId)) {
+            originElEntities.put(e.getName(), e);
         }
 
-        this.pkService.checkConflict(multiEntity.getPkEntities(), detail,
+        this.pkService.checkConflict(entity.getPkEntities(), detail,
                                      connId, compareEachOther);
-        this.piService.checkConflict(multiEntity.getPiEntities(), detail,
+        this.piService.checkConflict(entity.getPiEntities(), detail,
                                      connId, compareEachOther);
-        this.vlService.checkConflict(multiEntity.getVlEntities(), detail,
+        this.vlService.checkConflict(entity.getVlEntities(), detail,
                                      connId, compareEachOther);
-        for (EdgeLabelEntity elEntity : multiEntity.getElEntities()) {
+        for (EdgeLabelEntity elEntity : entity.getElEntities()) {
             // Firstly check if any properties are conflicted
             if (detail.anyPropertyKeyConflict(elEntity.getPropNames())) {
                 detail.add(elEntity, ConflictStatus.DUPNAME);

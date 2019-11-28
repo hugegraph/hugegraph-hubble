@@ -35,9 +35,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.hugegraph.entity.schema.ConflictCheckEntity;
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
-import com.baidu.hugegraph.entity.schema.MultiSchemaEntity;
 import com.baidu.hugegraph.entity.schema.PropertyKeyEntity;
+import com.baidu.hugegraph.entity.schema.UsingCheckEntity;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.service.schema.PropertyKeyService;
 import com.baidu.hugegraph.util.Ex;
@@ -92,30 +93,34 @@ public class PropertyKeyController extends SchemaController {
 
     @PostMapping("check_conflict")
     public ConflictDetail checkConflict(
-                          @RequestBody List<PropertyKeyEntity> entities,
+                          @RequestBody ConflictCheckEntity entity,
                           @RequestParam("conn_id") int connId) {
+        List<PropertyKeyEntity> entities = entity.getPkEntities();
         Ex.check(!CollectionUtils.isEmpty(entities),
                  "common.param.cannot-be-empty", "entities");
-        entities.forEach(entity -> this.checkParamsValid(entity, false));
-        MultiSchemaEntity multiEntity = MultiSchemaEntity.builder()
-                                                         .pkEntities(entities)
-                                                         .build();
-        return this.service.checkConflict(multiEntity, connId, false);
+        Ex.check(CollectionUtils.isEmpty(entity.getPiEntities()),
+                 "common.param.must-be-null", "propertyindexes");
+        Ex.check(CollectionUtils.isEmpty(entity.getVlEntities()),
+                 "common.param.must-be-null", "vertexlabels");
+        Ex.check(CollectionUtils.isEmpty(entity.getElEntities()),
+                 "common.param.must-be-null", "edgelabels");
+        entities.forEach(e -> this.checkParamsValid(e, false));
+        return this.service.checkConflict(entity, connId, false);
     }
 
     @PostMapping("recheck_conflict")
     public ConflictDetail recheckConflict(
-                          @RequestBody MultiSchemaEntity multiEntity,
+                          @RequestBody ConflictCheckEntity entity,
                           @RequestParam("conn_id") int connId) {
-        Ex.check(!CollectionUtils.isEmpty(multiEntity.getPkEntities()),
+        Ex.check(!CollectionUtils.isEmpty(entity.getPkEntities()),
                  "common.param.cannot-be-empty", "propertykeys");
-        Ex.check(CollectionUtils.isEmpty(multiEntity.getPiEntities()),
-                 "common.param.cannot-be-empty", "propertyindexes");
-        Ex.check(CollectionUtils.isEmpty(multiEntity.getVlEntities()),
-                 "common.param.cannot-be-empty", "vertexlabels");
-        Ex.check(CollectionUtils.isEmpty(multiEntity.getElEntities()),
-                 "common.param.cannot-be-empty", "edgelabels");
-        return this.service.checkConflict(multiEntity, connId, true);
+        Ex.check(CollectionUtils.isEmpty(entity.getPiEntities()),
+                 "common.param.must-be-null", "propertyindexes");
+        Ex.check(CollectionUtils.isEmpty(entity.getVlEntities()),
+                 "common.param.must-be-null", "vertexlabels");
+        Ex.check(CollectionUtils.isEmpty(entity.getElEntities()),
+                 "common.param.must-be-null", "edgelabels");
+        return this.service.checkConflict(entity, connId, true);
     }
 
     @PostMapping("reuse")
@@ -127,12 +132,12 @@ public class PropertyKeyController extends SchemaController {
     }
 
     @PostMapping("check_using")
-    public Map<String, Boolean> checkUsing(@RequestBody List<String> names,
+    public Map<String, Boolean> checkUsing(@RequestBody UsingCheckEntity entity,
                                            @RequestParam("conn_id") int connId) {
-        Ex.check(!CollectionUtils.isEmpty(names),
+        Ex.check(!CollectionUtils.isEmpty(entity.getNames()),
                  "common.param.cannot-be-empty", "names");
         Map<String, Boolean> inUsing = new LinkedHashMap<>();
-        for (String name : names) {
+        for (String name : entity.getNames()) {
             Ex.check(this.service.exist(name, connId),
                      "schema.propertykey.not-exist", name);
             inUsing.put(name, this.service.checkUsing(name, connId));
