@@ -25,9 +25,11 @@ public enum ConflictStatus {
 
     EXISTED,
 
+    DEP_CONFLICT,
+
     DUPNAME;
 
     public boolean isConflicted() {
-        return this == DUPNAME;
+        return this == DEP_CONFLICT || this == DUPNAME;
     }
 }

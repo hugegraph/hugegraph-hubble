@@ -37,7 +37,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EdgeLabelEntity implements SchemaLabelEntity, Timefiable {
+public class EdgeLabelEntity implements SchemaLabelEntity, Timefiable,
+                                        Stylefiable {
 
     @JsonProperty("name")
     private String name;
@@ -64,7 +65,7 @@ public class EdgeLabelEntity implements SchemaLabelEntity, Timefiable {
     private boolean openLabelIndex;
 
     @JsonProperty("style")
-    private SchemaStyle style = new SchemaStyle();
+    private SchemaStyle style;
 
     @JsonProperty("create_time")
     private Date createTime;

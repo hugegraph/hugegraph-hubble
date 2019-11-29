@@ -17,27 +17,20 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity.schema;
+package com.baidu.hugegraph.config;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+@Configuration
+public class WebMvcConfig implements WebMvcConfigurer {
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class SchemaStyle {
-
-    public static final SchemaStyle DEFAULT_STYLE =
-                        new SchemaStyle("", "#ED5736");
-
-    @JsonProperty("icon")
-    private String icon;
-
-    @JsonProperty("color")
-    private String color;
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/{spring:[\\w-]+}")
+                .setViewName("forward:/");
+        registry.addViewController("/**/{spring:[\\w-]+}")
+                .setViewName("forward:/");
+    }
 }

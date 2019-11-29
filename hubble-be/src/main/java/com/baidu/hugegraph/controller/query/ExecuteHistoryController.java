@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.entity.query.ExecuteHistory;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.InternalException;
@@ -37,7 +38,7 @@ import com.baidu.hugegraph.util.Ex;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 @RestController
-@RequestMapping("execute-histories")
+@RequestMapping(Constant.API_VERSION + "execute-histories")
 public class ExecuteHistoryController extends GremlinController {
 
     @Autowired

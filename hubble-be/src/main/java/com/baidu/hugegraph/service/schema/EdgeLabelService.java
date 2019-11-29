@@ -35,15 +35,16 @@ import org.springframework.util.CollectionUtils;
 
 import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.driver.HugeClient;
+import com.baidu.hugegraph.entity.schema.ConflictCheckEntity;
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
 import com.baidu.hugegraph.entity.schema.ConflictStatus;
 import com.baidu.hugegraph.entity.schema.EdgeLabelEntity;
 import com.baidu.hugegraph.entity.schema.LabelUpdateEntity;
-import com.baidu.hugegraph.entity.schema.ConflictCheckEntity;
 import com.baidu.hugegraph.entity.schema.Property;
 import com.baidu.hugegraph.entity.schema.PropertyIndex;
 import com.baidu.hugegraph.entity.schema.SchemaConflict;
 import com.baidu.hugegraph.entity.schema.SchemaEntity;
+import com.baidu.hugegraph.entity.schema.SchemaStyle;
 import com.baidu.hugegraph.entity.schema.SchemaType;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.ServerException;
@@ -213,17 +214,17 @@ public class EdgeLabelService extends SchemaService {
         for (EdgeLabelEntity elEntity : entity.getElEntities()) {
             // Firstly check if any properties are conflicted
             if (detail.anyPropertyKeyConflict(elEntity.getPropNames())) {
-                detail.add(elEntity, ConflictStatus.DUPNAME);
+                detail.add(elEntity, ConflictStatus.DEP_CONFLICT);
                 continue;
             }
             // Then check if any property indexes are conflicted
             if (detail.anyPropertyIndexConflict(elEntity.getIndexProps())) {
-                detail.add(elEntity, ConflictStatus.DUPNAME);
+                detail.add(elEntity, ConflictStatus.DEP_CONFLICT);
                 continue;
             }
             // Then determine if source/target vertex labels are conflicted
             if (detail.anyVertexLabelConflict(elEntity.getLinkLabels())) {
-                detail.add(elEntity, ConflictStatus.DUPNAME);
+                detail.add(elEntity, ConflictStatus.DEP_CONFLICT);
                 continue;
             }
             // Then check conflict of edge label itself
@@ -339,6 +340,7 @@ public class EdgeLabelService extends SchemaService {
         }
         Frequency frequency = entity.isLinkMultiTimes() ? Frequency.MULTIPLE :
                                                           Frequency.SINGLE;
+        SchemaStyle style = getSchemaStyle(entity);
         return client.schema().edgeLabel(entity.getName())
                      .sourceLabel(entity.getSourceLabel())
                      .targetLabel(entity.getTargetLabel())
@@ -348,8 +350,8 @@ public class EdgeLabelService extends SchemaService {
                      .nullableKeys(toStringArray(entity.getNullableProps()))
                      .enableLabelIndex(entity.isOpenLabelIndex())
                      .userdata(USER_KEY_CREATE_TIME, entity.getCreateTime())
-                     .userdata(USER_KEY_ICON, entity.getStyle().getIcon())
-                     .userdata(USER_KEY_COLOR, entity.getStyle().getColor())
+                     .userdata(USER_KEY_ICON, style.getIcon())
+                     .userdata(USER_KEY_COLOR, style.getColor())
                      .build();
     }
 
@@ -364,11 +366,18 @@ public class EdgeLabelService extends SchemaService {
                 properties.add(p.getName());
             });
         }
-        return client.schema().edgeLabel(entity.getName())
-                     .properties(toStringArray(properties))
-                     .nullableKeys(toStringArray(properties))
-                     .userdata(USER_KEY_ICON, entity.getStyle().getIcon())
-                     .userdata(USER_KEY_COLOR, entity.getStyle().getColor())
-                     .build();
+
+        EdgeLabel.Builder builder;
+        builder = client.schema().edgeLabel(entity.getName())
+                        .properties(toStringArray(properties))
+                        .nullableKeys(toStringArray(properties));
+        SchemaStyle style = entity.getStyle();
+        if (style.getIcon() != null) {
+            builder.userdata(USER_KEY_ICON, style.getIcon());
+        }
+        if (style.getColor() != null) {
+            builder.userdata(USER_KEY_COLOR, style.getColor());
+        }
+        return builder.build();
     }
 }

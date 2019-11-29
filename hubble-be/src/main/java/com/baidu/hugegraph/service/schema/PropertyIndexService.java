@@ -93,6 +93,15 @@ public class PropertyIndexService extends SchemaService {
             // Collect all indexlabels
             results.add(convert(indexLabel));
         }
+        // Sort by owner name a-z, then index name a-z
+        results.sort((o1, o2) -> {
+            String owner1 = o1.getOwner();
+            String owner2 = o2.getOwner();
+            if (!owner1.equals(owner2)) {
+                return owner1.compareTo(owner2);
+            }
+            return o1.getName().compareTo(o2.getName());
+        });
         return PageUtil.page(results, pageNo, pageSize);
     }
 
@@ -228,7 +237,7 @@ public class PropertyIndexService extends SchemaService {
         }
         for (PropertyIndex entity : entities) {
             if (detail.anyPropertyKeyConflict(entity.getFields())) {
-                detail.add(entity, ConflictStatus.DUPNAME);
+                detail.add(entity, ConflictStatus.DEP_CONFLICT);
                 continue;
             }
             PropertyIndex originEntity = originEntities.get(entity.getName());

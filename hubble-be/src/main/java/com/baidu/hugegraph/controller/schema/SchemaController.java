@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.util.StringUtils;
@@ -42,10 +41,6 @@ import com.baidu.hugegraph.util.PageUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 public class SchemaController extends BaseController {
-
-    protected static final Pattern NAME_PATTERN = Pattern.compile(
-            "^[A-Za-z0-9_]{0,128}$"
-    );
 
     public <T extends SchemaEntity> IPage<T> listInPage(
                                              Function<Integer, List<T>> fetcher,
@@ -129,7 +124,7 @@ public class SchemaController extends BaseController {
             String name2 = o2.getName();
             int count1 = StringUtils.countOccurrencesOf(name1, content);
             int count2 = StringUtils.countOccurrencesOf(name2, content);
-            return count1 - count2;
+            return count2 - count1;
         };
         entities.sort(occurrencesComparator);
     }
@@ -148,7 +143,7 @@ public class SchemaController extends BaseController {
             Ex.check(service.exist(pkName, connId),
                      "schema.propertykey.not-exist", pkName);
             Ex.check(mustNullable, property::isNullable,
-                     "schema.propertykey.should-be-nullable");
+                     "schema.propertykey.must-be-nullable");
         }
     }
 

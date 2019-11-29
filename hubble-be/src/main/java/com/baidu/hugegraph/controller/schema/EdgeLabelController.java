@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.entity.schema.ConflictCheckEntity;
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
 import com.baidu.hugegraph.entity.schema.EdgeLabelEntity;
@@ -53,7 +54,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.google.common.collect.ImmutableList;
 
 @RestController
-@RequestMapping("schema/edgelabels")
+@RequestMapping(Constant.API_VERSION + "schema/edgelabels")
 public class EdgeLabelController extends SchemaController {
 
     private static final List<String> PRESET_COLORS = ImmutableList.of(
@@ -72,6 +73,12 @@ public class EdgeLabelController extends SchemaController {
     private VertexLabelService vlService;
     @Autowired
     private EdgeLabelService elService;
+
+    @GetMapping("optional-colors")
+    public List<String> getOptionalColors(@RequestParam("connection_id")
+                                          int connId) {
+        return PRESET_COLORS;
+    }
 
     @GetMapping
     public IPage<EdgeLabelEntity> list(@RequestParam("conn_id") int connId,
@@ -193,7 +200,7 @@ public class EdgeLabelController extends SchemaController {
                                   boolean checkCreateTime) {
         String name = entity.getName();
         Ex.check(name != null, "common.param.cannot-be-null", "name");
-        Ex.check(NAME_PATTERN.matcher(name).matches(),
+        Ex.check(Constant.SCHEMA_NAME_PATTERN.matcher(name).matches(),
                  "schema.edgelabel.unmatch-regex", name);
         Ex.check(checkCreateTime, () -> entity.getCreateTime() == null,
                  "common.param.must-be-null", "create_time");

@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.entity.enums.ExecuteStatus;
 import com.baidu.hugegraph.entity.enums.ExecuteType;
 import com.baidu.hugegraph.entity.query.AdjacentQuery;
@@ -48,7 +49,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RestController
-@RequestMapping("gremlin-query")
+@RequestMapping(Constant.API_VERSION + "gremlin-query")
 public class GremlinQueryController extends GremlinController {
 
     private static final Set<String> CONDITION_OPERATORS = ImmutableSet.of(

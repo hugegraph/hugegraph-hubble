@@ -44,12 +44,7 @@ public class JacksonConfig {
         ObjectMapper mapper = builder.createXmlMapper(false).build();
 
         SimpleModule module = new SimpleModule();
-        // Serailize long to string
-        module.addSerializer(Long.class, ToStringSerializer.instance);
-        module.addSerializer(Long.TYPE, ToStringSerializer.instance);
-        // Serailize boolean to string
-        module.addSerializer(Boolean.class, ToStringSerializer.instance);
-        module.addSerializer(Boolean.TYPE, ToStringSerializer.instance);
+        // Add global serializer here
 
         mapper.registerModule(module);
         return mapper;
@@ -121,9 +116,14 @@ public class JacksonConfig {
             Object value = entry.getValue();
             generator.writeFieldName(key);
             if (value != null) {
-                JsonSerializer<Object> serializer = provider.findValueSerializer(
-                                                             value.getClass());
-                serializer.serialize(value, generator, provider);
+                if (value instanceof Long) {
+                    // To avoid javascript loss of long precision
+                    generator.writeStringField(key, String.valueOf(value));
+                } else {
+                    JsonSerializer<Object> serializer;
+                    serializer = provider.findValueSerializer(value.getClass());
+                    serializer.serialize(value, generator, provider);
+                }
             } else {
                 generator.writeNull();
             }

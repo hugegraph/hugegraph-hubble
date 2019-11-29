@@ -87,6 +87,8 @@ public class GremlinQueryService {
     private static final String TIMEOUT_EXCEPTION =
             "java.net.SocketTimeoutException";
 
+    private static final String CONN_REFUSED_MSG = "Connection refused";
+
     @Autowired
     private HugeConfig config;
     @Autowired
@@ -178,6 +180,10 @@ public class GremlinQueryService {
                     throw new InternalException("gremlin.execute.timeout", e,
                                                 message);
                 }
+                if (message != null && message.contains(CONN_REFUSED_MSG)) {
+                    throw new InternalException("gremlin.connection.refused", e,
+                                                message);
+                }
             }
             throw e;
         } catch (Exception e) {
@@ -196,10 +202,9 @@ public class GremlinQueryService {
             return new TypedResult(Type.EMPTY, null);
         }
 
-        int limit = this.config.get(HubbleOptions.GREMLIN_SUFFIX_LIMIT);
         Map<Type, Integer> typeVotes = new HashMap<>();
         List<Object> typedData = new ArrayList<>(resultSet.size());
-        for (int i = 0; iter.hasNext() && i < limit; i++) {
+        while (iter.hasNext()) {
             Result result = iter.next();
             if (result == null) {
                 // NOTE: null value doesn't vote

@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.entity.schema.ConflictCheckEntity;
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
 import com.baidu.hugegraph.entity.schema.PropertyKeyEntity;
@@ -48,7 +49,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RestController
-@RequestMapping("schema/propertykeys")
+@RequestMapping(Constant.API_VERSION + "schema/propertykeys")
 public class PropertyKeyController extends SchemaController {
 
     @Autowired
@@ -173,7 +174,7 @@ public class PropertyKeyController extends SchemaController {
                                   boolean checkCreateTime) {
         String name = entity.getName();
         Ex.check(name != null, "common.param.cannot-be-null", "name");
-        Ex.check(NAME_PATTERN.matcher(name).matches(),
+        Ex.check(Constant.SCHEMA_NAME_PATTERN.matcher(name).matches(),
                  "schema.propertykey.unmatch-regex", name);
         Ex.check(entity.getDataType() != null,
                  "common.param.cannot-be-null", "data_type");

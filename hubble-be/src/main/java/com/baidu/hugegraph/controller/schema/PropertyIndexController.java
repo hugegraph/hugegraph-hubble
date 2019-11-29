@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.entity.schema.ConflictStatus;
 import com.baidu.hugegraph.entity.schema.PropertyIndex;
 import com.baidu.hugegraph.service.schema.PropertyIndexService;
@@ -37,7 +38,7 @@ import com.baidu.hugegraph.util.Ex;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 @RestController
-@RequestMapping("schema/propertyindexes")
+@RequestMapping(Constant.API_VERSION + "schema/propertyindexes")
 public class PropertyIndexController extends SchemaController {
 
     @Autowired
@@ -77,7 +78,7 @@ public class PropertyIndexController extends SchemaController {
     private void checkParamsValid(PropertyIndex entity) {
         String name = entity.getName();
         Ex.check(name != null, "common.param.cannot-be-null", "name");
-        Ex.check(NAME_PATTERN.matcher(name).matches(),
+        Ex.check(Constant.SCHEMA_NAME_PATTERN.matcher(name).matches(),
                  "schema.propertykey.unmatch-regex", name);
         Ex.check(entity.getOwner() != null,
                  "common.param.cannot-be-null", "owner");

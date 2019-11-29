@@ -46,7 +46,7 @@ import com.baidu.hugegraph.util.HugeClientUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 @RestController
-@RequestMapping("graph-connections")
+@RequestMapping(Constant.API_VERSION + "graph-connections")
 public class GraphConnectionController extends BaseController {
 
     private static final Pattern GRAPH_PATTERN = Pattern.compile(
@@ -151,8 +151,8 @@ public class GraphConnectionController extends BaseController {
 
         String name = newEntity.getName();
         this.checkParamsNotEmpty("name", name, creating);
-        Ex.check(name != null, () -> Constant.NAME_PATTERN.matcher(name)
-                                                          .matches(),
+        Ex.check(name != null, () -> Constant.COMMON_NAME_PATTERN.matcher(name)
+                                                                 .matches(),
                  "graph-connection.name.unmatch-regex", name);
 
         String graph = newEntity.getGraph();
@@ -170,7 +170,7 @@ public class GraphConnectionController extends BaseController {
                  "common.param.cannot-be-null", "port");
         Ex.check(port != null, () -> 0 < port && port <= 65535,
                  "graph-connection.port.must-be-in-range", "[1, 65535]", port);
-        
+
         Ex.check(newEntity.getCreateTime() == null,
                  "common.param.must-be-null", "create_time");
     }

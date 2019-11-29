@@ -35,7 +35,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LabelUpdateEntity implements Typifiable {
+public class LabelUpdateEntity implements Typifiable, Stylefiable {
 
     @JsonProperty("append_properties")
     private Set<Property> appendProperties;
@@ -47,7 +47,7 @@ public class LabelUpdateEntity implements Typifiable {
     private List<String> removePropertyIndexes;
 
     @JsonProperty("style")
-    private SchemaStyle style = new SchemaStyle();
+    private SchemaStyle style;
 
     private transient String name;
     private transient SchemaType type;

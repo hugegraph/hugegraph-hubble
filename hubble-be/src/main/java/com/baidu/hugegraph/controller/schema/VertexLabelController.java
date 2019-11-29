@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.controller.schema;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.entity.schema.ConflictCheckEntity;
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
 import com.baidu.hugegraph.entity.schema.LabelUpdateEntity;
@@ -56,7 +56,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.google.common.collect.ImmutableList;
 
 @RestController
-@RequestMapping("schema/vertexlabels")
+@RequestMapping(Constant.API_VERSION + "schema/vertexlabels")
 public class VertexLabelController extends SchemaController {
 
     private static final List<String> PRESET_COLORS = ImmutableList.of(
@@ -71,18 +71,10 @@ public class VertexLabelController extends SchemaController {
     @Autowired
     private VertexLabelService vlService;
 
-    @GetMapping("style")
-    public Map<String, String> getVertexLabelStyle(@RequestParam("connection_id")
-                                                   int connId) {
-        List<VertexLabelEntity> entities = this.vlService.list(connId);
-        Map<String, String> styles = new HashMap<>();
-        for (int i = 0; i < entities.size(); i++) {
-            VertexLabelEntity entity = entities.get(i);
-            int colorIdx = i % PRESET_COLORS.size();
-            String color = PRESET_COLORS.get(colorIdx);
-            styles.put(entity.getName(), color);
-        }
-        return styles;
+    @GetMapping("optional-colors")
+    public List<String> getOptionalColors(@RequestParam("connection_id")
+                                          int connId) {
+        return PRESET_COLORS;
     }
 
     @GetMapping("{name}/link")
@@ -90,7 +82,7 @@ public class VertexLabelController extends SchemaController {
                                           @RequestParam("conn_id") int connId) {
         VertexLabelEntity entity = this.vlService.get(name, connId);
         Ex.check(entity != null, "schema.vertexlabel.not-exist", name);
-        return this.vlService.linkEdgeLabels(name, connId);
+        return this.vlService.getLinkEdgeLabels(name, connId);
     }
 
     @GetMapping
@@ -221,7 +213,7 @@ public class VertexLabelController extends SchemaController {
                                   boolean checkCreateTime) {
         String name = entity.getName();
         Ex.check(name != null, "common.param.cannot-be-null", "name");
-        Ex.check(NAME_PATTERN.matcher(name).matches(),
+        Ex.check(Constant.SCHEMA_NAME_PATTERN.matcher(name).matches(),
                  "schema.vertexlabel.unmatch-regex", name);
         Ex.check(checkCreateTime, () -> entity.getCreateTime() == null,
                  "common.param.must-be-null", "create_time");

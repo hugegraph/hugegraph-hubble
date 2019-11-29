@@ -42,7 +42,7 @@ import com.baidu.hugegraph.util.Ex;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 @RestController
-@RequestMapping("gremlin-collections")
+@RequestMapping(Constant.API_VERSION + "gremlin-collections")
 public class GremlinCollectionController extends GremlinController {
 
     private static final int LIMIT = 100;
@@ -153,8 +153,8 @@ public class GremlinCollectionController extends GremlinController {
 
         String name = newEntity.getName();
         this.checkParamsNotEmpty("name", name, creating);
-        Ex.check(name != null, () -> Constant.NAME_PATTERN.matcher(name)
-                                                          .matches(),
+        Ex.check(name != null, () -> Constant.COMMON_NAME_PATTERN.matcher(name)
+                                                                 .matches(),
                  "gremlin-collection.name.unmatch-regex", name);
 
         String content = newEntity.getContent();
