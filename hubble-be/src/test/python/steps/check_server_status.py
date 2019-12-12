@@ -1,24 +1,35 @@
 # -*- coding: UTF-8 -*-
 
-from behave import *
-import requests
-import sys
 import json
+import sys
+
+import requests
+from assertpy import assert_that
+from behave import *
 
 reload(sys)
 sys.setdefaultencoding('utf8')
 use_step_matcher("re")
 
+
 @when("scene:(?P<scene>.+) url:(?P<url>.+)")
 def step_impl(context, scene, url):
     http_url = "http://" + url + "/api/v1.1/actuator/health"
-    res = requests.get(http_url)
-    context.res_json = res.json()
+    context.response = requests.get(http_url)
+    context.code = context.response.status_code
+    context.json = context.response.json()
 
-@then("response:(?P<response>.+)")
-def step_impl(context, response):
-    res_json = context.res_json
-    ass_json = json.loads(response)
 
-    assert ass_json["status"] == res_json["status"]
+@then("code:(?P<expect_code>.+) response:(?P<expect_json>.+)")
+def step_impl(context, expect_code, expect_json):
+    actual_code = context.code
+    actual_json = context.json
+
+    expect_code = int(expect_code)
+    expect_json = json.loads(expect_json)
+
+    assert_that(actual_code).described_as(context.response) \
+        .is_equal_to(expect_code)
+    assert_that(actual_json).described_as(context.response) \
+        .is_equal_to(expect_json)
 

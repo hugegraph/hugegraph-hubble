@@ -2,8 +2,8 @@
 Feature: check hugegraph-hubble server health status
 
   Scenario Outline: check hugegraph-hubble server health status
-    When  scene:<scene>  url:<url>
-    Then  response:<response>
+    When  scene:<scene> url:<url>
+    Then  code:<code> response:<response>
     Examples:
-      | scene                      | url            | response        |
-      | check server health status | localhost:8088 | {"status":"UP"} |
+      | scene                      | url            | code | response        |
+      | check server health status | localhost:8088 | 200  | {"status":"UP"} |
