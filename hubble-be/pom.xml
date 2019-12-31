@@ -101,7 +101,7 @@
 
     <profiles>
         <profile>
-            <id>unit</id>
+            <id>unit-test</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>

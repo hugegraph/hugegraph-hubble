@@ -30,6 +30,7 @@ before_script:
   - jps
 
 script:
+  - mvn test -Punit-test
   - $TRAVIS_DIR/run-api-test.sh
   - $TRAVIS_DIR/build-report.sh
 
