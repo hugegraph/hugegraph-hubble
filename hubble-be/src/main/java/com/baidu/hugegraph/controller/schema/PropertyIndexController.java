@@ -79,7 +79,7 @@ public class PropertyIndexController extends SchemaController {
         String name = entity.getName();
         Ex.check(name != null, "common.param.cannot-be-null", "name");
         Ex.check(Constant.SCHEMA_NAME_PATTERN.matcher(name).matches(),
-                 "schema.propertykey.unmatch-regex", name);
+                 "schema.propertyindex.unmatch-regex");
         Ex.check(entity.getOwner() != null,
                  "common.param.cannot-be-null", "owner");
         Ex.check(entity.getOwnerType() != null,

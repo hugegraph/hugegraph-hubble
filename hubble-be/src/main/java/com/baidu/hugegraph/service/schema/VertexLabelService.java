@@ -127,11 +127,9 @@ public class VertexLabelService extends SchemaService {
         client.schema().addVertexLabel(vertexLabel);
 
         List<IndexLabel> indexLabels = collectIndexLabels(entity, client);
-        // Remove vertex label if create index labels failed
         try {
-            this.piService.atomicAddBatch(indexLabels, client);
+            this.piService.addBatch(indexLabels, client);
         } catch (Exception e) {
-            client.schema().removeVertexLabel(vertexLabel.name());
             throw new ExternalException("schema.vertexlabel.create.failed", e,
                                         entity.getName());
         }
@@ -151,8 +149,6 @@ public class VertexLabelService extends SchemaService {
                                             client, true, entity.getName());
 
         List<String> removedIndexLabelNames = entity.getRemovePropertyIndexes();
-        List<IndexLabel> removedIndexLabels = collectIndexLabels(
-                                              removedIndexLabelNames, client);
 
         if (addedIndexLabelNames != null) {
             for (String name : addedIndexLabelNames) {
@@ -177,7 +173,7 @@ public class VertexLabelService extends SchemaService {
         client.schema().appendVertexLabel(vertexLabel);
 
         try {
-            this.piService.atomicAddBatch(addedIndexLabels, client);
+            this.piService.addBatch(addedIndexLabels, client);
         } catch (Exception e) {
             // client.schema().eliminateVertexLabel(vertexLabel);
             throw new ExternalException("schema.vertexlabel.update.failed", e,
@@ -185,10 +181,8 @@ public class VertexLabelService extends SchemaService {
         }
 
         try {
-            this.piService.atomicRemoveBatch(removedIndexLabels, client);
+            this.piService.removeBatch(removedIndexLabelNames, client);
         } catch (Exception e) {
-            this.piService.removeBatch(addedIndexLabelNames, client);
-            // client.schema().eliminateVertexLabel(vertexLabel);
             throw new ExternalException("schema.vertexlabel.update.failed", e,
                                         entity.getName());
         }
@@ -196,7 +190,7 @@ public class VertexLabelService extends SchemaService {
 
     public void remove(String name, int connId) {
         HugeClient client = this.client(connId);
-        client.schema().removeVertexLabel(name);
+        client.schema().removeVertexLabelAsync(name);
     }
 
     public boolean exist(String name, int connId) {
@@ -268,7 +262,7 @@ public class VertexLabelService extends SchemaService {
         List<PropertyKey> propertyKeys = this.pkService.filter(detail, client);
         if (!propertyKeys.isEmpty()) {
             try {
-                this.pkService.atomicAddBatch(propertyKeys, client);
+                this.pkService.addBatch(propertyKeys, client);
             } catch (Exception e) {
                 throw new ExternalException("schema.propertykey.reuse.failed", e);
             }
@@ -278,7 +272,7 @@ public class VertexLabelService extends SchemaService {
         // Filter propertykeys and propertyindexes
         if (!vertexLabels.isEmpty()) {
             try {
-                this.atomicAddBatch(vertexLabels, client);
+                this.addBatch(vertexLabels, client);
             } catch (Exception e) {
                 this.pkService.removeBatch(propertyKeys, client);
                 throw new ExternalException("schema.vertexlabel.reuse.failed", e);
@@ -288,7 +282,7 @@ public class VertexLabelService extends SchemaService {
         List<IndexLabel> indexLabels = this.piService.filter(detail, client);
         if (!indexLabels.isEmpty()) {
             try {
-                this.piService.atomicAddBatch(indexLabels, client);
+                this.piService.addBatch(indexLabels, client);
             } catch (Exception e) {
                 this.removeBatch(vertexLabels, client);
                 this.pkService.removeBatch(propertyKeys, client);
@@ -305,17 +299,14 @@ public class VertexLabelService extends SchemaService {
                      .collect(Collectors.toList());
     }
 
-    public void atomicAddBatch(List<VertexLabel> vertexLabels,
-                               HugeClient client) throws Exception {
-        atomicAddBatch(vertexLabels, client,
-                       (c, vl) -> c.schema().addVertexLabel(vl),
-                       (c, n) -> c.schema().removeVertexLabel(n),
-                       SchemaType.VERTEX_LABEL);
+    public void addBatch(List<VertexLabel> vertexLabels, HugeClient client) {
+        addBatch(vertexLabels, client, (c, vl) -> c.schema().addVertexLabel(vl),
+                 SchemaType.VERTEX_LABEL);
     }
 
     public void removeBatch(List<VertexLabel> vertexLabels, HugeClient client) {
         removeBatch(collectNames(vertexLabels), client,
-                    (c, n) -> c.schema().removeVertexLabel(n),
+                    (c, n) -> c.schema().removeVertexLabelAsync(n),
                     SchemaType.VERTEX_LABEL);
     }
 

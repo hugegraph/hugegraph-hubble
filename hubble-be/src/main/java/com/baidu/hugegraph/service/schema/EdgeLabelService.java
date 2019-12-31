@@ -119,7 +119,7 @@ public class EdgeLabelService extends SchemaService {
 
         List<IndexLabel> indexLabels = collectIndexLabels(entity, client);
         try {
-            this.piService.atomicAddBatch(indexLabels, client);
+            this.piService.addBatch(indexLabels, client);
         } catch (Exception e) {
             client.schema().removeEdgeLabel(edgeLabel.name());
             throw new ExternalException("schema.edgelabel.create.failed", e,
@@ -141,8 +141,6 @@ public class EdgeLabelService extends SchemaService {
                                             client, false, entity.getName());
 
         List<String> removedIndexLabelNames = entity.getRemovePropertyIndexes();
-        List<IndexLabel> removedIndexLabels = collectIndexLabels(
-                                              removedIndexLabelNames, client);
 
         if (addedIndexLabelNames != null) {
             for (String name : addedIndexLabelNames) {
@@ -167,18 +165,15 @@ public class EdgeLabelService extends SchemaService {
         client.schema().appendEdgeLabel(edgeLabel);
 
         try {
-            this.piService.atomicAddBatch(addedIndexLabels, client);
+            this.piService.addBatch(addedIndexLabels, client);
         } catch (Exception e) {
-            // client.schema().eliminateEdgeLabel(edgeLabel);
             throw new ExternalException("schema.edgelabel.update.failed", e,
                                         entity.getName());
         }
 
         try {
-            this.piService.atomicRemoveBatch(removedIndexLabels, client);
+            this.piService.removeBatch(removedIndexLabelNames, client);
         } catch (Exception e) {
-            this.piService.removeBatch(addedIndexLabelNames, client);
-            // client.schema().eliminateEdgeLabel(edgeLabel);
             throw new ExternalException("schema.edgelabel.update.failed", e,
                                         entity.getName());
         }
@@ -186,7 +181,7 @@ public class EdgeLabelService extends SchemaService {
 
     public void remove(String name, int connId) {
         HugeClient client = this.client(connId);
-        client.schema().removeEdgeLabel(name);
+        client.schema().removeEdgeLabelAsync(name);
     }
 
     public boolean exist(String name, int connId) {
@@ -247,7 +242,7 @@ public class EdgeLabelService extends SchemaService {
         List<PropertyKey> propertyKeys = this.pkService.filter(detail, client);
         if (!propertyKeys.isEmpty()) {
             try {
-                this.pkService.atomicAddBatch(propertyKeys, client);
+                this.pkService.addBatch(propertyKeys, client);
             } catch (Exception e) {
                 throw new ExternalException("schema.propertykey.reuse.failed", e);
             }
@@ -256,7 +251,7 @@ public class EdgeLabelService extends SchemaService {
         List<VertexLabel> vertexLabels = this.vlService.filter(detail, client);
         if (!vertexLabels.isEmpty()) {
             try {
-                this.vlService.atomicAddBatch(vertexLabels, client);
+                this.vlService.addBatch(vertexLabels, client);
             } catch (Exception e) {
                 this.pkService.removeBatch(propertyKeys, client);
                 throw new ExternalException("schema.vertexlabel.reuse.failed", e);
@@ -266,7 +261,7 @@ public class EdgeLabelService extends SchemaService {
         List<EdgeLabel> edgeLabels = this.filter(detail, client);
         if (!edgeLabels.isEmpty()) {
             try {
-                this.atomicAddBatch(edgeLabels, client);
+                this.addBatch(edgeLabels, client);
             } catch (Exception e) {
                 this.vlService.removeBatch(vertexLabels, client);
                 this.pkService.removeBatch(propertyKeys, client);
@@ -277,7 +272,7 @@ public class EdgeLabelService extends SchemaService {
         List<IndexLabel> indexLabels = this.piService.filter(detail, client);
         if (!indexLabels.isEmpty()) {
             try {
-                this.piService.atomicAddBatch(indexLabels, client);
+                this.piService.addBatch(indexLabels, client);
             } catch (Exception e) {
                 this.removeBatch(edgeLabels, client);
                 this.vlService.removeBatch(vertexLabels, client);
@@ -296,17 +291,14 @@ public class EdgeLabelService extends SchemaService {
                      .collect(Collectors.toList());
     }
 
-    public void atomicAddBatch(List<EdgeLabel> edgeLabels, HugeClient client)
-                               throws Exception {
-        atomicAddBatch(edgeLabels, client,
-                       (c, el) -> c.schema().addEdgeLabel(el),
-                       (c, n) -> c.schema().removeEdgeLabel(n),
-                       SchemaType.EDGE_LABEL);
+    public void addBatch(List<EdgeLabel> edgeLabels, HugeClient client) {
+        addBatch(edgeLabels, client, (c, el) -> c.schema().addEdgeLabel(el),
+                 SchemaType.EDGE_LABEL);
     }
 
     public void removeBatch(List<EdgeLabel> edgeLabels, HugeClient client) {
         removeBatch(collectNames(edgeLabels), client,
-                    (c, n) -> c.schema().removeEdgeLabel(n),
+                    (c, n) -> c.schema().removeEdgeLabelAsync(n),
                     SchemaType.EDGE_LABEL);
     }
 

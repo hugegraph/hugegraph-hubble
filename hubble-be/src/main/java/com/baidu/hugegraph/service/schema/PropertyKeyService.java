@@ -175,7 +175,7 @@ public class PropertyKeyService extends SchemaService {
             return;
         }
         try {
-            this.atomicAddBatch(propertyKeys, client);
+            this.addBatch(propertyKeys, client);
         } catch (Exception e) {
             throw new ExternalException("schema.propertykey.reuse.failed", e);
         }
@@ -189,12 +189,9 @@ public class PropertyKeyService extends SchemaService {
                      .collect(Collectors.toList());
     }
 
-    public void atomicAddBatch(List<PropertyKey> propertyKeys,
-                               HugeClient client) throws Exception {
-        atomicAddBatch(propertyKeys, client,
-                       (c, pk) -> c.schema().addPropertyKey(pk),
-                       (c, n) -> c.schema().removePropertyKey(n),
-                       SchemaType.PROPERTY_KEY);
+    public void addBatch(List<PropertyKey> propertyKeys, HugeClient client) {
+        addBatch(propertyKeys, client, (c, pk) -> c.schema().addPropertyKey(pk),
+                 SchemaType.PROPERTY_KEY);
     }
 
     public void removeBatch(List<PropertyKey> propertyKeys, HugeClient client) {

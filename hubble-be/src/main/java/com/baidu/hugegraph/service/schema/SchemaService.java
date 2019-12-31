@@ -207,56 +207,21 @@ public class SchemaService {
     }
 
     public static <T extends SchemaElement>
-           void atomicAddBatch(List<T> schemas, HugeClient client,
-                               BiConsumer<HugeClient, T> createFunc,
-                               BiConsumer<HugeClient, String> removeFunc,
-                               SchemaType type) throws Exception {
-        int addingIdx = 0;
+           void addBatch(List<T> schemas, HugeClient client,
+                         BiConsumer<HugeClient, T> createFunc,
+                         SchemaType type) {
         Date now = new Date();
-        try {
-            for (addingIdx = 0; addingIdx < schemas.size(); addingIdx++) {
-                T schema = schemas.get(addingIdx);
-                schema.resetId();
-                if (!(schema instanceof IndexLabel)) {
-                    schema.userdata().put(USER_KEY_CREATE_TIME, now);
-                }
+        for (T schema : schemas) {
+            schema.resetId();
+            if (!(schema instanceof IndexLabel)) {
+                schema.userdata().put(USER_KEY_CREATE_TIME, now);
+            }
+            try {
                 createFunc.accept(client, schema);
+            } catch (Exception e) {
+                log.error("Failed to create {} {}",
+                          type.string(), schema.name(), e);
             }
-        } catch (Exception e) {
-            for (int i = addingIdx - 1; i >= 0; i--) {
-                String name = schemas.get(i).name();
-                try {
-                    removeFunc.accept(client, name);
-                } catch (Exception ex) {
-                    log.error("Failed to remove {} {}", type.string(), name, ex);
-                }
-            }
-            throw e;
-        }
-    }
-
-    public static <T extends SchemaElement>
-           void atomicRemoveBatch(List<T> schemas, HugeClient client,
-                                  BiConsumer<HugeClient, String> removeFunc,
-                                  BiConsumer<HugeClient, T> createFunc,
-                                  SchemaType type) throws Exception {
-        int removingIdx = 0;
-        try {
-            for (removingIdx = 0; removingIdx < schemas.size(); removingIdx++) {
-                T schema = schemas.get(removingIdx);
-                removeFunc.accept(client, schema.name());
-            }
-        } catch (Exception e) {
-            for (int i = removingIdx - 1; i >= 0; i--) {
-                T schema = schemas.get(i);
-                try {
-                    createFunc.accept(client, schema);
-                } catch (Exception ex) {
-                    log.error("Failed to create {} {}", type.string(),
-                              schema.name(), ex);
-                }
-            }
-            throw e;
         }
     }
 

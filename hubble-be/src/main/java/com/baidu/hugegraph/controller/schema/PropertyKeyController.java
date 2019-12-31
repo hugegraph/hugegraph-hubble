@@ -175,7 +175,7 @@ public class PropertyKeyController extends SchemaController {
         String name = entity.getName();
         Ex.check(name != null, "common.param.cannot-be-null", "name");
         Ex.check(Constant.SCHEMA_NAME_PATTERN.matcher(name).matches(),
-                 "schema.propertykey.unmatch-regex", name);
+                 "schema.propertykey.unmatch-regex");
         Ex.check(entity.getDataType() != null,
                  "common.param.cannot-be-null", "data_type");
         Ex.check(entity.getCardinality() != null,

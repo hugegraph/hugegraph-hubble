@@ -201,7 +201,7 @@ public class EdgeLabelController extends SchemaController {
         String name = entity.getName();
         Ex.check(name != null, "common.param.cannot-be-null", "name");
         Ex.check(Constant.SCHEMA_NAME_PATTERN.matcher(name).matches(),
-                 "schema.edgelabel.unmatch-regex", name);
+                 "schema.edgelabel.unmatch-regex");
         Ex.check(checkCreateTime, () -> entity.getCreateTime() == null,
                  "common.param.must-be-null", "create_time");
         // Check source label and target label

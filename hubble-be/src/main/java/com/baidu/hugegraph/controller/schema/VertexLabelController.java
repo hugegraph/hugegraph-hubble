@@ -214,7 +214,7 @@ public class VertexLabelController extends SchemaController {
         String name = entity.getName();
         Ex.check(name != null, "common.param.cannot-be-null", "name");
         Ex.check(Constant.SCHEMA_NAME_PATTERN.matcher(name).matches(),
-                 "schema.vertexlabel.unmatch-regex", name);
+                 "schema.vertexlabel.unmatch-regex");
         Ex.check(checkCreateTime, () -> entity.getCreateTime() == null,
                  "common.param.must-be-null", "create_time");
         // Check properties

@@ -155,7 +155,7 @@ public class GremlinCollectionController extends GremlinController {
         this.checkParamsNotEmpty("name", name, creating);
         Ex.check(name != null, () -> Constant.COMMON_NAME_PATTERN.matcher(name)
                                                                  .matches(),
-                 "gremlin-collection.name.unmatch-regex", name);
+                 "gremlin-collection.name.unmatch-regex");
 
         String content = newEntity.getContent();
         this.checkParamsNotEmpty("content", content, creating);

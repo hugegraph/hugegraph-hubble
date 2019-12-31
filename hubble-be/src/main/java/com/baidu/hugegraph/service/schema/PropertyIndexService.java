@@ -202,25 +202,15 @@ public class PropertyIndexService extends SchemaService {
         }
     }
 
-    public void atomicAddBatch(List<IndexLabel> indexLabels,
-                               HugeClient client) throws Exception {
-        atomicAddBatch(indexLabels, client,
-                       (c, il) -> c.schema().addIndexLabel(il),
-                       (c, n) -> c.schema().removeIndexLabel(n),
-                       SchemaType.PROPERTY_INDEX);
-    }
-
-    public void atomicRemoveBatch(List<IndexLabel> indexLabels,
-                                  HugeClient client) throws Exception {
-        atomicRemoveBatch(indexLabels, client,
-                          (c, n) -> c.schema().removeIndexLabel(n),
-                          (c, il) -> c.schema().addIndexLabel(il),
-                          SchemaType.PROPERTY_INDEX);
+    public void addBatch(List<IndexLabel> indexLabels, HugeClient client) {
+        addBatch(indexLabels, client,
+                 (c, il) -> c.schema().addIndexLabelAsync(il),
+                 SchemaType.PROPERTY_INDEX);
     }
 
     public void removeBatch(List<String> indexLabels, HugeClient client) {
         removeBatch(indexLabels, client,
-                    (c, n) -> c.schema().removeIndexLabel(n),
+                    (c, n) -> c.schema().removeIndexLabelAsync(n),
                     SchemaType.PROPERTY_INDEX);
     }
 

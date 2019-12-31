@@ -153,17 +153,17 @@ public class GraphConnectionController extends BaseController {
         this.checkParamsNotEmpty("name", name, creating);
         Ex.check(name != null, () -> Constant.COMMON_NAME_PATTERN.matcher(name)
                                                                  .matches(),
-                 "graph-connection.name.unmatch-regex", name);
+                 "graph-connection.name.unmatch-regex");
 
         String graph = newEntity.getGraph();
         this.checkParamsNotEmpty("graph", graph, creating);
         Ex.check(graph != null, () -> GRAPH_PATTERN.matcher(graph).matches(),
-                 "graph-connection.graph.unmatch-regex", graph);
+                 "graph-connection.graph.unmatch-regex");
 
         String host = newEntity.getHost();
         this.checkParamsNotEmpty("host", host, creating);
         Ex.check(host != null, () -> HOST_PATTERN.matcher(host).matches(),
-                 "graph-connection.host.unmatch-regex", host);
+                 "graph-connection.host.unmatch-regex");
 
         Integer port = newEntity.getPort();
         Ex.check(creating, () -> port != null,
