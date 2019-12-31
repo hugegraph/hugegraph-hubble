@@ -26,6 +26,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -203,15 +204,17 @@ public class PropertyIndexService extends SchemaService {
     }
 
     public void addBatch(List<IndexLabel> indexLabels, HugeClient client) {
-        addBatch(indexLabels, client,
-                 (c, il) -> c.schema().addIndexLabelAsync(il),
-                 SchemaType.PROPERTY_INDEX);
+        BiFunction<HugeClient, IndexLabel, Long> func = (hugeClient, il) -> {
+            return hugeClient.schema().addIndexLabelAsync(il);
+        };
+        addBatch(indexLabels, client, func, SchemaType.PROPERTY_INDEX);
     }
 
     public void removeBatch(List<String> indexLabels, HugeClient client) {
-        removeBatch(indexLabels, client,
-                    (c, n) -> c.schema().removeIndexLabelAsync(n),
-                    SchemaType.PROPERTY_INDEX);
+        BiFunction<HugeClient, String, Long> func = (hugeClient, name) -> {
+            return hugeClient.schema().removeIndexLabelAsync(name);
+        };
+        removeBatch(indexLabels, client, func, SchemaType.PROPERTY_INDEX);
     }
 
     public void checkConflict(List<PropertyIndex> entities,

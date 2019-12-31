@@ -20,8 +20,11 @@
 package com.baidu.hugegraph.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import com.baidu.hugegraph.advisor.CustomInterceptor;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -32,5 +35,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .setViewName("forward:/");
         registry.addViewController("/**/{spring:[\\w-]+}")
                 .setViewName("forward:/");
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new CustomInterceptor())
+                .addPathPatterns("/**");
     }
 }

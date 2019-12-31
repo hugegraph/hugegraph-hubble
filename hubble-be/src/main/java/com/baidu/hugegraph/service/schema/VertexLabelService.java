@@ -27,6 +27,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -300,14 +302,18 @@ public class VertexLabelService extends SchemaService {
     }
 
     public void addBatch(List<VertexLabel> vertexLabels, HugeClient client) {
-        addBatch(vertexLabels, client, (c, vl) -> c.schema().addVertexLabel(vl),
-                 SchemaType.VERTEX_LABEL);
+        BiConsumer<HugeClient, VertexLabel> consumer = (hugeClient, vl) -> {
+            hugeClient.schema().addVertexLabel(vl);
+        };
+        addBatch(vertexLabels, client, consumer, SchemaType.VERTEX_LABEL);
     }
 
     public void removeBatch(List<VertexLabel> vertexLabels, HugeClient client) {
-        removeBatch(collectNames(vertexLabels), client,
-                    (c, n) -> c.schema().removeVertexLabelAsync(n),
-                    SchemaType.VERTEX_LABEL);
+        List<String> names = collectNames(vertexLabels);
+        BiFunction<HugeClient, String, Long> func = (hugeClient, name) -> {
+            return hugeClient.schema().removeVertexLabelAsync(name);
+        };
+        removeBatch(names, client, func, SchemaType.VERTEX_LABEL);
     }
 
     private static VertexLabelEntity convert(VertexLabel vertexLabel,

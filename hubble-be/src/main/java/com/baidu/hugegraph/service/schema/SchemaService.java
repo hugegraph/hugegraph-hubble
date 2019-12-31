@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ import com.baidu.hugegraph.entity.schema.SchemaLabelEntity;
 import com.baidu.hugegraph.entity.schema.SchemaStyle;
 import com.baidu.hugegraph.entity.schema.SchemaType;
 import com.baidu.hugegraph.entity.schema.Stylefiable;
+import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.service.HugeClientPoolService;
 import com.baidu.hugegraph.structure.SchemaElement;
 import com.baidu.hugegraph.structure.schema.IndexLabel;
@@ -208,8 +210,11 @@ public class SchemaService {
 
     public static <T extends SchemaElement>
            void addBatch(List<T> schemas, HugeClient client,
-                         BiConsumer<HugeClient, T> createFunc,
+                         BiConsumer<HugeClient, T> consumer,
                          SchemaType type) {
+        if (CollectionUtils.isEmpty(schemas)) {
+            return;
+        }
         Date now = new Date();
         for (T schema : schemas) {
             schema.resetId();
@@ -217,25 +222,71 @@ public class SchemaService {
                 schema.userdata().put(USER_KEY_CREATE_TIME, now);
             }
             try {
-                createFunc.accept(client, schema);
+                consumer.accept(client, schema);
             } catch (Exception e) {
-                log.error("Failed to create {} {}",
-                          type.string(), schema.name(), e);
+                throw new ExternalException("Failed to create %s %s", e,
+                                            type.string(), schema.name());
+
             }
         }
     }
 
-    public static void removeBatch(List<String> names, HugeClient client,
-                                   BiConsumer<HugeClient, String> removeFunc,
-                                   SchemaType type) {
-        if (names == null) {
+    public static <T extends SchemaElement>
+           List<Long> addBatch(List<T> schemas, HugeClient client,
+                               BiFunction<HugeClient, T, Long> func,
+                               SchemaType type) {
+        List<Long> tasks = new ArrayList<>();
+        if (CollectionUtils.isEmpty(schemas)) {
+            return tasks;
+        }
+        Date now = new Date();
+        for (T schema : schemas) {
+            schema.resetId();
+            if (!(schema instanceof IndexLabel)) {
+                schema.userdata().put(USER_KEY_CREATE_TIME, now);
+            }
+            try {
+                tasks.add(func.apply(client, schema));
+            } catch (Exception e) {
+                throw new ExternalException("schema.create.failed", e,
+                                            type.string(), schema.name());
+
+            }
+        }
+        return tasks;
+    }
+
+    public static List<Long> removeBatch(List<String> names, HugeClient client,
+                                         BiFunction<HugeClient, String, Long> func,
+                                         SchemaType type) {
+        List<Long> tasks = new ArrayList<>();
+        if (CollectionUtils.isEmpty(names)) {
+            return tasks;
+        }
+        for (String name : names) {
+            try {
+                tasks.add(func.apply(client, name));
+            } catch (Exception e) {
+                throw new ExternalException("schema.remove.failed", e,
+                                            type.string(), name);
+            }
+        }
+        return tasks;
+    }
+
+    public static void removeBatch(
+            List<String> names, HugeClient client,
+            BiConsumer<HugeClient, String> consumer,
+            SchemaType type) {
+        if (CollectionUtils.isEmpty(names)) {
             return;
         }
         for (String name : names) {
             try {
-                removeFunc.accept(client, name);
+                consumer.accept(client, name);
             } catch (Exception e) {
-                log.error("Failed to remove {} {}", type.string(), name, e);
+                throw new ExternalException("Failed to remove %s %s", e,
+                                            type.string(), name);
             }
         }
     }

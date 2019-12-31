@@ -41,6 +41,14 @@ public class HubbleOptions extends OptionHolder {
         return instance;
     }
 
+    public static final ConfigOption<String> SERVER_ID =
+            new ConfigOption<>(
+                    "server.id",
+                    "The id of hugegraph-hubble server.",
+                    disallowEmpty(),
+                    "hubble-1"
+            );
+
     public static final ConfigOption<String> SERVER_HOST =
             new ConfigOption<>(
                     "server.host",

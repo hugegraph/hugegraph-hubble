@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -190,14 +191,18 @@ public class PropertyKeyService extends SchemaService {
     }
 
     public void addBatch(List<PropertyKey> propertyKeys, HugeClient client) {
-        addBatch(propertyKeys, client, (c, pk) -> c.schema().addPropertyKey(pk),
-                 SchemaType.PROPERTY_KEY);
+        BiConsumer<HugeClient, PropertyKey> consumer = (hugeClient, pk) -> {
+            hugeClient.schema().addPropertyKey(pk);
+        };
+        addBatch(propertyKeys, client, consumer, SchemaType.PROPERTY_KEY);
     }
 
     public void removeBatch(List<PropertyKey> propertyKeys, HugeClient client) {
-        removeBatch(collectNames(propertyKeys), client,
-                    (c, n) -> c.schema().removePropertyKey(n),
-                    SchemaType.PROPERTY_KEY);
+        List<String> names = collectNames(propertyKeys);
+        BiConsumer<HugeClient, String> consumer = (hugeClient, name) -> {
+            hugeClient.schema().removePropertyKey(name);
+        };
+        removeBatch(names, client, consumer, SchemaType.PROPERTY_KEY);
     }
 
     private static PropertyKeyEntity convert(PropertyKey propertyKey) {

@@ -27,6 +27,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -292,14 +294,18 @@ public class EdgeLabelService extends SchemaService {
     }
 
     public void addBatch(List<EdgeLabel> edgeLabels, HugeClient client) {
-        addBatch(edgeLabels, client, (c, el) -> c.schema().addEdgeLabel(el),
-                 SchemaType.EDGE_LABEL);
+        BiConsumer<HugeClient, EdgeLabel> consumer = (hugeClient, el) -> {
+            hugeClient.schema().addEdgeLabel(el);
+        };
+        addBatch(edgeLabels, client, consumer, SchemaType.EDGE_LABEL);
     }
 
     public void removeBatch(List<EdgeLabel> edgeLabels, HugeClient client) {
-        removeBatch(collectNames(edgeLabels), client,
-                    (c, n) -> c.schema().removeEdgeLabelAsync(n),
-                    SchemaType.EDGE_LABEL);
+        List<String> names = collectNames(edgeLabels);
+        BiFunction<HugeClient, String, Long> func = (hugeClient, name) -> {
+            return hugeClient.schema().removeEdgeLabelAsync(name);
+        };
+        removeBatch(names, client, func, SchemaType.EDGE_LABEL);
     }
 
     private static EdgeLabelEntity convert(EdgeLabel edgeLabel,
