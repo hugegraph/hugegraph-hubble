@@ -58,8 +58,6 @@ import com.google.common.collect.ImmutableList;
 public class EdgeLabelController extends SchemaController {
 
     private static final List<String> PRESET_COLORS = ImmutableList.of(
-            //            "#fa2f4c", "#ff7438", "#ffc900", "#00c22a", "#00bbff",
-            //            "#0079ff", "#5957e0", "#bb4be5", "#ff1c5f"
             "#ED5736", "#4C8DAE", "#48C0A3", "#FF8C31", "#3B2E7E", "#6E511E",
             "#F47983", "#60281E", "#B36D61", "#C89B40", "#8D4BBB", "#789262",
             "#177CB0", "#8C4356"

@@ -26,7 +26,12 @@ import org.springframework.stereotype.Component;
 
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.license.LicenseVerifier;
+import com.baidu.hugegraph.license.ServerInfo;
+import com.baidu.hugegraph.options.HubbleOptions;
 
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 @Component
 public class CustomApplicationRunner implements ApplicationRunner {
 
@@ -35,10 +40,13 @@ public class CustomApplicationRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-//        this.installLicense(this.config, "9662b261c388fc5923ace0ebe2a34b02");
+        String serverId = this.config.get(HubbleOptions.SERVER_ID);
+        ServerInfo serverInfo = new ServerInfo(serverId);
+        log.info("The server info has been inited");
+        this.installLicense(serverInfo, "9662b261c388fc5923ace0ebe2a34b02");
     }
 
-    private void installLicense(HugeConfig config, String md5) {
-        LicenseVerifier.instance().install(config, md5);
+    private void installLicense(ServerInfo serverInfo, String md5) {
+        LicenseVerifier.instance().install(serverInfo, md5);
     }
 }

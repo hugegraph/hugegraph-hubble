@@ -39,6 +39,7 @@ import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.entity.GraphConnection;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.InternalException;
+import com.baidu.hugegraph.license.LicenseVerifier;
 import com.baidu.hugegraph.service.GraphConnectionService;
 import com.baidu.hugegraph.service.HugeClientPoolService;
 import com.baidu.hugegraph.util.Ex;
@@ -74,6 +75,7 @@ public class GraphConnectionController extends BaseController {
                                                      required = false,
                                                      defaultValue = "10")
                                        int pageSize) {
+        this.checkGraphConnectionCount(false);
         return this.connService.list(content, pageNo, pageSize);
     }
 
@@ -92,6 +94,9 @@ public class GraphConnectionController extends BaseController {
 
     @PostMapping
     public GraphConnection create(@RequestBody GraphConnection newEntity) {
+        // Verify graph connections
+        this.checkGraphConnectionCount(true);
+
         this.checkParamsValid(newEntity, true);
         // Make sure the new entity doesn't conflict with exists
         this.checkEntityUnique(newEntity, true);
@@ -191,6 +196,19 @@ public class GraphConnectionController extends BaseController {
                      "graph-connection.exist.graph-host-port",
                      oldEntity.getGraph(), oldEntity.getHost(),
                      oldEntity.getPort());
+        }
+    }
+
+    private void checkGraphConnectionCount(boolean plusOne) {
+        int allowedGraphs = LicenseVerifier.instance().allowedGraphs();
+        if (allowedGraphs == Constant.NO_LIMIT) {
+            return;
+        }
+        int increment = plusOne ? 1 : 0;
+        int actualGraphs = this.connService.count() + increment;
+        if (actualGraphs > allowedGraphs) {
+            throw new ExternalException("license.verify.graphs.exceed",
+                                        actualGraphs, allowedGraphs);
         }
     }
 }

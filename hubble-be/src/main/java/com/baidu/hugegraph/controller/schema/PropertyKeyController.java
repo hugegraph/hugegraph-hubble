@@ -127,8 +127,6 @@ public class PropertyKeyController extends SchemaController {
     @PostMapping("reuse")
     public void reuse(@RequestBody ConflictDetail detail,
                       @RequestParam("conn_id") int connId) {
-//        Ex.check(!CollectionUtils.isEmpty(detail.getPropertyKeyConflicts()),
-//                 "common.param.cannot-be-empty", "names");
         this.service.reuse(detail, connId);
     }
 

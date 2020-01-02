@@ -37,9 +37,9 @@ public final class HubbleVersion {
 
     public static void check() {
         // Check version of hugegraph-common & hugegraph-client
-//        VersionUtil.check(CommonVersion.VERSION, "1.6.0", "1.7",
-//                          CommonVersion.NAME);
-//        VersionUtil.check(ClientVersion.VERSION, "1.8.0", "1.9",
-//                          ClientVersion.NAME);
+        VersionUtil.check(CommonVersion.VERSION, "1.6.0", "1.7",
+                          CommonVersion.NAME);
+        VersionUtil.check(ClientVersion.VERSION, "1.8.0", "1.9",
+                          ClientVersion.NAME);
     }
 }

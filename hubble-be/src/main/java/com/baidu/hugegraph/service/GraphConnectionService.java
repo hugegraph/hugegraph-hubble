@@ -62,6 +62,10 @@ public class GraphConnectionService {
         return this.mapper.selectById(id);
     }
 
+    public int count() {
+        return this.mapper.selectCount(null);
+    }
+
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public int save(GraphConnection connection) {
         return this.mapper.insert(connection);

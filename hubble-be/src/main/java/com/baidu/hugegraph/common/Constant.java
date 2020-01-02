@@ -52,6 +52,8 @@ public final class Constant {
     public static final int STATUS_ILLEGAL_GREMLIN = 460;
     public static final int STATUS_INTERNAL_ERROR = 500;
 
+    public static final int NO_LIMIT = -1;
+
     public static final Pattern COMMON_NAME_PATTERN = Pattern.compile(
             "[A-Za-z0-9\u4e00-\u9fa5_]{1,48}"
     );

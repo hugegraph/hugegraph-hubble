@@ -17,25 +17,23 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.advisor;
+package com.baidu.hugegraph.license;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+public final class ServerInfo {
 
-import org.springframework.web.servlet.HandlerInterceptor;
+    private final String serverId;
+    private final MachineInfo machineInfo;
 
-import com.baidu.hugegraph.license.LicenseVerifier;
+    public ServerInfo(String serverId) {
+        this.serverId = serverId;
+        this.machineInfo = new MachineInfo();
+    }
 
-import lombok.extern.log4j.Log4j2;
+    public String serverId() {
+        return this.serverId;
+    }
 
-@Log4j2
-public class CustomInterceptor implements HandlerInterceptor {
-
-    @Override
-    public boolean preHandle(HttpServletRequest request,
-                             HttpServletResponse response,
-                             Object handler) {
-        LicenseVerifier.instance().verifyIfNeeded();
-        return true;
+    public MachineInfo machineInfo() {
+        return this.machineInfo;
     }
 }

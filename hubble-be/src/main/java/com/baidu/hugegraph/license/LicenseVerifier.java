@@ -30,8 +30,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.HugeGraphHubble;
-import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.exception.ExternalException;
+import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.util.Log;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -51,9 +51,6 @@ public class LicenseVerifier {
 
     private static volatile LicenseVerifier INSTANCE = null;
 
-    /**
-     * Verfiy license every 10 minutes
-     */
     private static final Duration CHECK_INTERVAL = Duration.ofMinutes(10);
     private volatile Instant lastCheckTime = Instant.now();
 
@@ -77,6 +74,10 @@ public class LicenseVerifier {
         return INSTANCE;
     }
 
+    public int allowedGraphs() {
+        return INSTANCE.manager.allowedGraphs();
+    }
+
     public void verifyIfNeeded() {
         Instant now = Instant.now();
         Duration interval = Duration.between(this.lastCheckTime, now);
@@ -86,8 +87,8 @@ public class LicenseVerifier {
         }
     }
 
-    public synchronized void install(HugeConfig config, String md5) {
-        this.manager.config(config);
+    public synchronized void install(ServerInfo serverInfo, String md5) {
+        this.manager.serverInfo(serverInfo);
         try {
             this.manager.uninstall();
             File licenseFile = new File(this.verifyParam.licensePath());
@@ -96,7 +97,10 @@ public class LicenseVerifier {
             LOG.info("The license is successfully installed, valid for {} - {}",
                      content.getNotBefore(), content.getNotAfter());
         } catch (Exception e) {
-            throw new ExternalException("Failed to install license", e);
+            if (e instanceof ExternalException) {
+                throw (ExternalException) e;
+            }
+            throw new ExternalException("license.install.failed", e);
         }
     }
 
@@ -106,7 +110,10 @@ public class LicenseVerifier {
             LOG.info("The license verification passed, valid for {} - {}",
                      content.getNotBefore(), content.getNotAfter());
         } catch (Exception e) {
-            throw new ExternalException("Failed to verify license", e);
+            if (e instanceof ExternalException) {
+                throw (ExternalException) e;
+            }
+            throw new ExternalException("license.verify.failed", e);
         }
     }
 
@@ -115,10 +122,10 @@ public class LicenseVerifier {
         try (InputStream is = LicenseVerifier.class.getResourceAsStream(path)) {
             String actualMD5 = DigestUtils.md5Hex(is);
             if (!actualMD5.equals(expectMD5)) {
-                throw new ExternalException("Invalid public cert");
+                throw new ExternalException("license.public-cert.invalid");
             }
         } catch (IOException e) {
-            throw new ExternalException("Failed to read public cert", e);
+            throw new InternalException("license.read.public-cert.failed", e);
         }
     }
 
@@ -143,8 +150,7 @@ public class LicenseVerifier {
              LicenseVerifier.class.getResourceAsStream(path)) {
             return mapper.readValue(stream, LicenseVerifyParam.class);
         } catch (IOException e) {
-            throw new ExternalException("Failed to read json stream to %s",
-                                        LicenseVerifyParam.class);
+            throw new InternalException("license.read.failed", e);
         }
     }
 }
