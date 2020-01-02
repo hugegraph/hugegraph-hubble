@@ -16,7 +16,7 @@ PID_FILE=${BIN_PATH}/pid
 . ${BIN_PATH}/common_functions
 
 print_usage() {
-    echo "  usage: start-hubble [options]"
+    echo "  usage: start-hubble.sh [options]"
     echo "  options: "
     echo "  -d,--debug      Start program in debug mode"
     echo "  -h,--help       Display help information"
@@ -38,7 +38,7 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --help|-help|-h)
         print_usage
-        exit 1
+        exit 0
         ;;
         --debug|-d)
         java_opts="$java_opts -Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y"
