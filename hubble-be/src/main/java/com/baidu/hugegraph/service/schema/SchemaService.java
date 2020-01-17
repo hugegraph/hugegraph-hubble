@@ -305,7 +305,13 @@ public class SchemaService {
 
     public static SchemaStyle getSchemaStyle(SchemaElement element) {
         String icon = (String) element.userdata().get(USER_KEY_ICON);
+        if (icon == null) {
+            icon = SchemaStyle.DEFAULT_STYLE.getIcon();
+        }
         String color = (String) element.userdata().get(USER_KEY_COLOR);
+        if (color == null) {
+            color = SchemaStyle.DEFAULT_STYLE.getColor();
+        }
         return new SchemaStyle(icon, color);
     }
 

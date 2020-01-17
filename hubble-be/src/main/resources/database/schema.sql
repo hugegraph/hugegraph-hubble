@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS `graph_connection` (
     `port` INT NOT NULL DEFAULT '8080',
     `username` VARCHAR(48),
     `password` VARCHAR(48),
+    `enabled` BOOLEAN NOT NULL DEFAULT true,
+    `disable_reason` VARCHAR(65535) NOT NULL DEFAULT '',
     `create_time` DATETIME(6) NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE (`name`),

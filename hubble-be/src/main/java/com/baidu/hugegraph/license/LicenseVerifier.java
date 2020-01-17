@@ -79,6 +79,10 @@ public class LicenseVerifier {
         return INSTANCE.manager.allowedGraphs();
     }
 
+    public long allowedDataSize() {
+        return INSTANCE.manager.allowedDataSize();
+    }
+
     public void verifyIfNeeded() {
         Instant now = CommonUtil.nowTime();
         Duration interval = Duration.between(this.lastCheckTime, now);

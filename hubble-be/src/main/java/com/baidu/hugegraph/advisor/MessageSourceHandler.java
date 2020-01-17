@@ -30,6 +30,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.WebUtils;
 
@@ -43,6 +44,8 @@ import lombok.extern.log4j.Log4j2;
 @Component
 public class MessageSourceHandler {
 
+    private static final Locale DEFAULT_LOCALE = Locale.SIMPLIFIED_CHINESE;
+
     @Autowired
     private MessageSource messageSource;
     @Autowired
@@ -50,10 +53,10 @@ public class MessageSourceHandler {
     @Autowired
     private UserInfoService service;
 
-    public String getMessage(String message, String[] args) {
+    public String getMessage(String message, Object... args) {
+        Locale locale = this.getLocale();
         try {
-            return this.messageSource.getMessage(message, args,
-                                                 this.getLocale());
+            return this.messageSource.getMessage(message, args, locale);
         } catch (NoSuchMessageException e) {
             log.error("There is no message corresponding to '{}'", message);
             return message;
@@ -61,16 +64,22 @@ public class MessageSourceHandler {
     }
 
     private Locale getLocale() {
-        Locale locale;
+        try {
+            RequestContextHolder.currentRequestAttributes();
+        } catch (IllegalStateException e) {
+            return DEFAULT_LOCALE;
+//            return LocaleContextHolder.getLocale();
+        }
+
         UserInfo userInfo = this.getUserInfo();
         if (userInfo != null && userInfo.getLocale() != null) {
-            locale = LocaleUtils.toLocale(userInfo.getLocale());
+            return LocaleUtils.toLocale(userInfo.getLocale());
         } else if (this.request.getLocale() != null) {
-            locale = RequestContextUtils.getLocale(this.request);
+            return RequestContextUtils.getLocale(this.request);
         } else {
-            locale = LocaleContextHolder.getLocale();
+            return DEFAULT_LOCALE;
+//            return LocaleContextHolder.getLocale();
         }
-        return locale;
     }
 
     private UserInfo getUserInfo() {

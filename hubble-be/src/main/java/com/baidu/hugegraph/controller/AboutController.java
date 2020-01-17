@@ -17,32 +17,27 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.exception;
+package com.baidu.hugegraph.controller;
 
-public class ExternalException extends ParameterizedException {
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-    private int status;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-    public ExternalException(String message, Object... args) {
-        this(400, message, args);
-    }
+import com.baidu.hugegraph.common.Constant;
 
-    public ExternalException(int status, String message, Object... args) {
-        super(message, args);
-        this.status = status;
-    }
+@RestController
+@RequestMapping("about")
+public class AboutController extends BaseController {
 
-    public ExternalException(String message, Throwable cause, Object... args) {
-        this(400, message, cause, args);
-    }
-
-    public ExternalException(int status, String message, Throwable cause,
-                             Object... args) {
-        super(message, cause, args);
-        this.status = status;
-    }
-
-    public int status() {
-        return this.status;
+    @GetMapping
+    public Map<String, Object> about() {
+        Map<String, Object> about = new LinkedHashMap<>();
+        about.put("name", Constant.SERVER_NAME);
+        about.put("edition", Constant.EDITION_COMMUNITY);
+        about.put("version", "1.2.0");
+        return about;
     }
 }
