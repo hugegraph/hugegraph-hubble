@@ -30,11 +30,13 @@ import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
  * Unused
  */
 @Configuration
+//@EnableSwagger2
 public class SwaggerConfig {
 
     @Bean
@@ -51,7 +53,7 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder().title("hugegraph-hubble RESTFul API docs")
-                                   .version("1.1")
+                                   .version("1.2")
                                    .description("API descriptions")
                                    .build();
     }
