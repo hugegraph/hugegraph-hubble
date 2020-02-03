@@ -163,8 +163,6 @@ public class VertexLabelController extends SchemaController {
     @PostMapping("reuse")
     public void reuse(@RequestBody ConflictDetail detail,
                       @RequestParam("conn_id") int connId) {
-//        Ex.check(!CollectionUtils.isEmpty(names),
-//                 "common.param.cannot-be-empty", "names");
         this.vlService.reuse(detail, connId);
     }
 
