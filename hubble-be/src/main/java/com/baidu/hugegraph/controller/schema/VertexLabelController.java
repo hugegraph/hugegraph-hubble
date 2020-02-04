@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.controller.schema;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -51,6 +50,7 @@ import com.baidu.hugegraph.service.schema.PropertyKeyService;
 import com.baidu.hugegraph.service.schema.VertexLabelService;
 import com.baidu.hugegraph.structure.constant.IdStrategy;
 import com.baidu.hugegraph.util.CollectionUtil;
+import com.baidu.hugegraph.util.CommonUtil;
 import com.baidu.hugegraph.util.Ex;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.google.common.collect.ImmutableList;
@@ -117,7 +117,7 @@ public class VertexLabelController extends SchemaController {
                        @RequestBody VertexLabelEntity entity) {
         this.checkParamsValid(entity, connId, true);
         this.checkEntityUnique(entity, connId, true);
-        entity.setCreateTime(new Date());
+        entity.setCreateTime(CommonUtil.nowDate());
         this.vlService.add(entity, connId);
     }
 
@@ -188,7 +188,7 @@ public class VertexLabelController extends SchemaController {
                  "common.param.cannot-be-empty", "names");
         Map<String, Boolean> inUsing = new LinkedHashMap<>();
         for (String name : entity.getNames()) {
-            Ex.check(this.vlService.exist(name, connId),
+            Ex.check(this.vlService.get(name, connId) != null,
                      "schema.vertexlabel.not-exist", name);
             inUsing.put(name, this.vlService.checkUsing(name, connId));
         }

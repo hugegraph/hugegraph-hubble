@@ -58,7 +58,7 @@ public class SchemaController extends BaseController {
         if (!StringUtils.isEmpty(content)) {
             // Select by content
             entities = entities.stream()
-                               .filter(e -> e.getName().contains(content))
+                               .filter(c -> c.getName().contains(content))
                                .collect(Collectors.toList());
             if (nameOrderAsc != null) {
                 // order by name

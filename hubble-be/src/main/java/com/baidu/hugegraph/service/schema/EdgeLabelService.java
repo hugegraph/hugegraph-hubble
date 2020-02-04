@@ -186,10 +186,6 @@ public class EdgeLabelService extends SchemaService {
         client.schema().removeEdgeLabelAsync(name);
     }
 
-    public boolean exist(String name, int connId) {
-        return this.get(name, connId) != null;
-    }
-
     public ConflictDetail checkConflict(ConflictCheckEntity entity,
                                         int connId, boolean compareEachOther) {
         ConflictDetail detail = new ConflictDetail(SchemaType.EDGE_LABEL);

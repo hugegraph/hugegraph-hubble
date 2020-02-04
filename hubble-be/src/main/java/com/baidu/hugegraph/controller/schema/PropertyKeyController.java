@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.controller.schema;
 
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +41,7 @@ import com.baidu.hugegraph.entity.schema.PropertyKeyEntity;
 import com.baidu.hugegraph.entity.schema.UsingCheckEntity;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.service.schema.PropertyKeyService;
+import com.baidu.hugegraph.util.CommonUtil;
 import com.baidu.hugegraph.util.Ex;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -88,7 +88,7 @@ public class PropertyKeyController extends SchemaController {
                        @RequestBody PropertyKeyEntity entity) {
         this.checkParamsValid(entity, true);
         this.checkEntityUnique(entity, connId);
-        entity.setCreateTime(new Date());
+        entity.setCreateTime(CommonUtil.nowDate());
         this.service.add(entity, connId);
     }
 

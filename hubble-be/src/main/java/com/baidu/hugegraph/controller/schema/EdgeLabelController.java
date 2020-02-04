@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.controller.schema;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,6 +48,7 @@ import com.baidu.hugegraph.service.schema.PropertyIndexService;
 import com.baidu.hugegraph.service.schema.PropertyKeyService;
 import com.baidu.hugegraph.service.schema.VertexLabelService;
 import com.baidu.hugegraph.util.CollectionUtil;
+import com.baidu.hugegraph.util.CommonUtil;
 import com.baidu.hugegraph.util.Ex;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.google.common.collect.ImmutableList;
@@ -111,7 +111,7 @@ public class EdgeLabelController extends SchemaController {
                        @RequestBody EdgeLabelEntity entity) {
         this.checkParamsValid(entity, connId, true);
         this.checkEntityUnique(entity, connId, true);
-        entity.setCreateTime(new Date());
+        entity.setCreateTime(CommonUtil.nowDate());
         this.elService.add(entity, connId);
     }
 
@@ -222,9 +222,9 @@ public class EdgeLabelController extends SchemaController {
                  "common.param.cannot-be-null-or-empty",
                  "edgelabel.target_label");
 
-        Ex.check(this.vlService.exist(sourceLabel, connId),
+        Ex.check(this.vlService.get(sourceLabel, connId) != null,
                  "schema.vertexlabel.not-exist", sourceLabel);
-        Ex.check(this.vlService.exist(targetLabel, connId),
+        Ex.check(this.vlService.get(targetLabel, connId) != null,
                  "schema.vertexlabel.not-exist", targetLabel);
     }
 

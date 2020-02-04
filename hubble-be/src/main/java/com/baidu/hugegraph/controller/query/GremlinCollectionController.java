@@ -19,8 +19,6 @@
 
 package com.baidu.hugegraph.controller.query;
 
-import java.util.Date;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,6 +36,7 @@ import com.baidu.hugegraph.entity.query.GremlinCollection;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.service.query.GremlinCollectionService;
+import com.baidu.hugegraph.util.CommonUtil;
 import com.baidu.hugegraph.util.Ex;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -107,7 +106,7 @@ public class GremlinCollectionController extends GremlinController {
             Ex.check(this.service.count() < LIMIT,
                      "gremlin-collection.reached-limit", LIMIT);
             newEntity.setConnId(connId);
-            newEntity.setCreateTime(new Date());
+            newEntity.setCreateTime(CommonUtil.nowDate());
             int rows = this.service.save(newEntity);
             if (rows != 1) {
                 throw new InternalException("entity.insert.failed", newEntity);
