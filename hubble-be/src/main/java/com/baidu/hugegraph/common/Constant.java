@@ -62,7 +62,5 @@ public final class Constant {
             "[A-Za-z0-9\u4e00-\u9fa5_]{1,128}"
     );
 
-    public static final Set<String> LIKE_WILDCARDS = ImmutableSet.of(
-            "%", "_", "^", "[", "]"
-    );
+    public static final String[] LIKE_WILDCARDS = {"%", "_", "^", "[", "]"};
 }

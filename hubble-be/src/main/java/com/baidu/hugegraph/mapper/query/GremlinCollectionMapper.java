@@ -33,8 +33,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 public interface GremlinCollectionMapper extends BaseMapper<GremlinCollection> {
 
     @Select("SELECT * FROM `gremlin_collection` " +
-            "WHERE `conn_id` = ${conn_id} AND " +
-            "(`name` LIKE '%${content}%' OR `content` LIKE '%${content}%') " +
+            "WHERE `conn_id` = #{conn_id} AND " +
+            "(`name` LIKE concat('%', #{content}, '%') OR " +
+            "`content` LIKE concat('%', #{content}, '%')) " +
             "ORDER BY " +
             "   CASE " +
             "       WHEN `name` LIKE '%${content}%' AND " +

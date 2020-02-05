@@ -79,8 +79,7 @@ public class VertexLabelController extends SchemaController {
     @GetMapping("{name}/link")
     public List<String> getLinkEdgeLabels(@PathVariable("connId") int connId,
                                           @PathVariable("name") String name) {
-        VertexLabelEntity entity = this.vlService.get(name, connId);
-        Ex.check(entity != null, "schema.vertexlabel.not-exist", name);
+        this.vlService.checkExist(name, connId);
         return this.vlService.getLinkEdgeLabels(name, connId);
     }
 
@@ -107,9 +106,7 @@ public class VertexLabelController extends SchemaController {
     @GetMapping("{name}")
     public VertexLabelEntity get(@PathVariable("connId") int connId,
                                  @PathVariable("name") String name) {
-        VertexLabelEntity entity = this.vlService.get(name, connId);
-        Ex.check(entity != null, "schema.vertexlabel.not-exist", name);
-        return entity;
+        return this.vlService.get(name, connId);
     }
 
     @PostMapping
@@ -174,8 +171,7 @@ public class VertexLabelController extends SchemaController {
         entity.setName(name);
         entity.setType(SchemaType.VERTEX_LABEL);
 
-        VertexLabelEntity oldEntity = this.vlService.get(name, connId);
-        Ex.check(oldEntity != null, "schema.vertexlabel.not-exist", name);
+        this.vlService.checkExist(name, connId);
         checkParamsValid(this.pkService, entity, connId);
         this.vlService.update(entity, connId);
     }
@@ -188,8 +184,7 @@ public class VertexLabelController extends SchemaController {
                  "common.param.cannot-be-empty", "names");
         Map<String, Boolean> inUsing = new LinkedHashMap<>();
         for (String name : entity.getNames()) {
-            Ex.check(this.vlService.get(name, connId) != null,
-                     "schema.vertexlabel.not-exist", name);
+            this.vlService.checkExist(name, connId);
             inUsing.put(name, this.vlService.checkUsing(name, connId));
         }
         return inUsing;
@@ -199,8 +194,7 @@ public class VertexLabelController extends SchemaController {
     public void delete(@PathVariable("connId") int connId,
                        @RequestParam("names") List<String> names) {
         for (String name : names) {
-            VertexLabelEntity entity = this.vlService.get(name, connId);
-            Ex.check(entity != null, "schema.vertexlabel.not-exist", name);
+            this.vlService.checkExist(name, connId);
             Ex.check(!this.vlService.checkUsing(name, connId),
                      "schema.vertexlabel.in-using", name);
             this.vlService.remove(name, connId);
@@ -256,7 +250,6 @@ public class VertexLabelController extends SchemaController {
                                    boolean creating) {
         // The name must be unique
         String name = newEntity.getName();
-        VertexLabelEntity oldEntity = this.vlService.get(name, connId);
-        Ex.check(oldEntity == null, "schema.vertexlabel.exist", name);
+        this.vlService.checkNotExist(name, connId);
     }
 }

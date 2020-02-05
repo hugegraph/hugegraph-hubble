@@ -78,9 +78,7 @@ public class PropertyKeyController extends SchemaController {
     @GetMapping("{name}")
     public PropertyKeyEntity get(@PathVariable("connId") int connId,
                                  @PathVariable("name") String name) {
-        PropertyKeyEntity entity = this.service.get(name, connId);
-        Ex.check(entity != null, "schema.propertykey.not-exist", name);
-        return entity;
+        return this.service.get(name, connId);
     }
 
     @PostMapping
@@ -139,8 +137,7 @@ public class PropertyKeyController extends SchemaController {
                  "common.param.cannot-be-empty", "names");
         Map<String, Boolean> inUsing = new LinkedHashMap<>();
         for (String name : entity.getNames()) {
-            Ex.check(this.service.exist(name, connId),
-                     "schema.propertykey.not-exist", name);
+            this.service.checkExist(name, connId);
             inUsing.put(name, this.service.checkUsing(name, connId));
         }
         return inUsing;
@@ -156,8 +153,7 @@ public class PropertyKeyController extends SchemaController {
                                      defaultValue = "false")
                        boolean skipUsing) {
         for (String name : names) {
-            PropertyKeyEntity entity = this.service.get(name, connId);
-            Ex.check(entity != null, "schema.propertykey.not-exist", name);
+            this.service.checkExist(name, connId);
             if (this.service.checkUsing(name, connId)) {
                 if (skipUsing) {
                     continue;
@@ -187,7 +183,6 @@ public class PropertyKeyController extends SchemaController {
     private void checkEntityUnique(PropertyKeyEntity newEntity, int connId) {
         // The name must be unique
         String name = newEntity.getName();
-        PropertyKeyEntity oldEntity = this.service.get(name, connId);
-        Ex.check(oldEntity == null, "schema.propertykey.exist", name);
+        this.service.checkNotExist(name, connId);
     }
 }

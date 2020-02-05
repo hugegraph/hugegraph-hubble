@@ -105,10 +105,28 @@ public class VertexLabelService extends SchemaService {
             return join(vertexLabel, indexLabels);
         } catch (ServerException e) {
             if (e.status() == Constant.STATUS_NOT_FOUND) {
-                return null;
+                throw new ExternalException("schema.vertexlabel.not-exist",
+                                            e, name);
+            }
+            throw new ExternalException("schema.vertexlabel.get.failed", name);
+        }
+    }
+
+    public void checkExist(String name, int connId) {
+        // Throw exception if it doesn't exist
+        this.get(name, connId);
+    }
+
+    public void checkNotExist(String name, int connId) {
+        try {
+            this.get(name, connId);
+        } catch (ExternalException e) {
+            if (e.getCause() instanceof ServerException) {
+                return;
             }
             throw e;
         }
+        throw new ExternalException("schema.vertexlabel.exist", name);
     }
 
     public List<String> getLinkEdgeLabels(String name, int connId) {

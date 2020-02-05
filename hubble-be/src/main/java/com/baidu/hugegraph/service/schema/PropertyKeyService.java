@@ -88,11 +88,28 @@ public class PropertyKeyService extends SchemaService {
             return convert(propertyKey);
         } catch (ServerException e) {
             if (e.status() == Constant.STATUS_NOT_FOUND) {
-                // return null if does not exist
-                return null;
+                throw new ExternalException("schema.propertykey.not-exist",
+                                            e, name);
+            }
+            throw new ExternalException("schema.propertykey.get.failed", name);
+        }
+    }
+
+    public void checkExist(String name, int connId) {
+        // Throw exception if it doesn't exist
+        this.get(name, connId);
+    }
+
+    public void checkNotExist(String name, int connId) {
+        try {
+            this.get(name, connId);
+        } catch (ExternalException e) {
+            if (e.getCause() instanceof ServerException) {
+                return;
             }
             throw e;
         }
+        throw new ExternalException("schema.propertykey.exist", name);
     }
 
     public void add(PropertyKeyEntity entity, int connId) {
@@ -104,10 +121,6 @@ public class PropertyKeyService extends SchemaService {
     public void remove(String name, int connId) {
         HugeClient client = this.client(connId);
         client.schema().removePropertyKey(name);
-    }
-
-    public boolean exist(String name, int connId) {
-        return this.get(name, connId) != null;
     }
 
     /**

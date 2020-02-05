@@ -101,9 +101,7 @@ public class EdgeLabelController extends SchemaController {
     @GetMapping("{name}")
     public EdgeLabelEntity get(@PathVariable("connId") int connId,
                                @PathVariable("name") String name) {
-        EdgeLabelEntity entity = this.elService.get(name, connId);
-        Ex.check(entity != null, "schema.edgelabel.not-exist", name);
-        return entity;
+        return this.elService.get(name, connId);
     }
 
     @PostMapping
@@ -175,8 +173,7 @@ public class EdgeLabelController extends SchemaController {
         entity.setName(name);
         entity.setType(SchemaType.EDGE_LABEL);
 
-        EdgeLabelEntity oldEntity = this.elService.get(name, connId);
-        Ex.check(oldEntity != null, "schema.edgelabel.not-exist", name);
+        this.elService.checkExist(name, connId);
         checkParamsValid(this.pkService, entity, connId);
         this.elService.update(entity, connId);
     }
@@ -188,8 +185,7 @@ public class EdgeLabelController extends SchemaController {
     public void delete(@PathVariable("connId") int connId,
                        @RequestParam("names") List<String> names) {
         for (String name : names) {
-            EdgeLabelEntity entity = this.elService.get(name, connId);
-            Ex.check(entity != null, "schema.edgelabel.not-exist", name);
+            this.elService.checkExist(name, connId);
             this.elService.remove(name, connId);
         }
     }
@@ -222,10 +218,8 @@ public class EdgeLabelController extends SchemaController {
                  "common.param.cannot-be-null-or-empty",
                  "edgelabel.target_label");
 
-        Ex.check(this.vlService.get(sourceLabel, connId) != null,
-                 "schema.vertexlabel.not-exist", sourceLabel);
-        Ex.check(this.vlService.get(targetLabel, connId) != null,
-                 "schema.vertexlabel.not-exist", targetLabel);
+        this.vlService.checkExist(sourceLabel, connId);
+        this.vlService.checkExist(targetLabel, connId);
     }
 
     private void checkSortKeys(EdgeLabelEntity entity) {
@@ -258,7 +252,6 @@ public class EdgeLabelController extends SchemaController {
                                    boolean creating) {
         // The name must be unique
         String name = newEntity.getName();
-        EdgeLabelEntity oldEntity = this.elService.get(name, connId);
-        Ex.check(oldEntity == null, "schema.edgelabel.exist", name);
+        this.elService.checkNotExist(name, connId);
     }
 }
