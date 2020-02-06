@@ -91,7 +91,8 @@ public class PropertyKeyService extends SchemaService {
                 throw new ExternalException("schema.propertykey.not-exist",
                                             e, name);
             }
-            throw new ExternalException("schema.propertykey.get.failed", name);
+            throw new ExternalException("schema.propertykey.get.failed",
+                                        e, name);
         }
     }
 
@@ -104,7 +105,9 @@ public class PropertyKeyService extends SchemaService {
         try {
             this.get(name, connId);
         } catch (ExternalException e) {
-            if (e.getCause() instanceof ServerException) {
+            Throwable cause = e.getCause();
+            if (cause instanceof ServerException &&
+                ((ServerException) cause).status() == Constant.STATUS_NOT_FOUND) {
                 return;
             }
             throw e;

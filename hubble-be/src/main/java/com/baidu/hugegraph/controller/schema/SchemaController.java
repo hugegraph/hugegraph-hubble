@@ -140,8 +140,7 @@ public class SchemaController extends BaseController {
         }
         for (Property property : properties) {
             String pkName = property.getName();
-            Ex.check(service.exist(pkName, connId),
-                     "schema.propertykey.not-exist", pkName);
+            service.checkExist(pkName, connId);
             Ex.check(mustNullable, property::isNullable,
                      "schema.propertykey.must-be-nullable");
         }

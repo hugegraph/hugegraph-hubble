@@ -108,7 +108,8 @@ public class VertexLabelService extends SchemaService {
                 throw new ExternalException("schema.vertexlabel.not-exist",
                                             e, name);
             }
-            throw new ExternalException("schema.vertexlabel.get.failed", name);
+            throw new ExternalException("schema.vertexlabel.get.failed",
+                                        e, name);
         }
     }
 
@@ -121,7 +122,9 @@ public class VertexLabelService extends SchemaService {
         try {
             this.get(name, connId);
         } catch (ExternalException e) {
-            if (e.getCause() instanceof ServerException) {
+            Throwable cause = e.getCause();
+            if (cause instanceof ServerException &&
+                ((ServerException) cause).status() == Constant.STATUS_NOT_FOUND) {
                 return;
             }
             throw e;

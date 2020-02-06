@@ -69,8 +69,8 @@
 
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
-            <artifactId>hugegraph-client</artifactId>
-            <version>1.8.3</version>
+            <artifactId>hugegraph-common</artifactId>
+            <version>1.7.3</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>
@@ -83,6 +83,37 @@
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>
                     <artifactId>log4j-slf4j-impl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>javassist</artifactId>
+                    <groupId>org.javassist</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.baidu.hugegraph</groupId>
+            <artifactId>hugegraph-client</artifactId>
+            <version>1.8.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-slf4j-impl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hugegraph-common</artifactId>
+                    <groupId>com.baidu.hugegraph</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
