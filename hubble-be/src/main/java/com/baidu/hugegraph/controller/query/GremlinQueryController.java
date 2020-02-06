@@ -73,7 +73,8 @@ public class GremlinQueryController extends GremlinController {
         ExecuteStatus status = ExecuteStatus.RUNNING;
         ExecuteHistory history;
         history = new ExecuteHistory(null, connId, ExecuteType.GREMLIN,
-                                     query.getContent(), status, -1L, createTime);
+                                     query.getContent(), status, -1L,
+                                     createTime);
         int rows = this.historyService.save(history);
         if (rows != 1) {
             throw new InternalException("entity.insert.failed", history);

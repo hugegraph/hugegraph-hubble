@@ -116,7 +116,7 @@ public class JacksonConfig {
             if (value != null) {
                 if (value instanceof Long) {
                     // To avoid javascript loss of long precision
-                    generator.writeStringField(key, String.valueOf(value));
+                    generator.writeString(String.valueOf(value));
                 } else {
                     JsonSerializer<Object> serializer;
                     serializer = provider.findValueSerializer(value.getClass());

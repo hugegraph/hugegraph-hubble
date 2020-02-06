@@ -58,7 +58,7 @@ public class MessageSourceHandler {
         try {
             return this.messageSource.getMessage(message, args, locale);
         } catch (NoSuchMessageException e) {
-            log.error("There is no message corresponding to '{}'", message);
+            log.error("There is no message for key '{}'", message);
             return message;
         }
     }
