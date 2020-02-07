@@ -183,7 +183,12 @@ public class LicenseService {
             conn.setEnabled(false);
             conn.setDisableReason(msg);
             this.connService.update(conn);
+            return;
         }
+
+        conn.setEnabled(true);
+        conn.setDisableReason("");
+        this.connService.update(conn);
     }
 
     private String getMessage(String msgKey, Object... args) {

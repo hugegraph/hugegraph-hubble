@@ -19,28 +19,103 @@
 
 package com.baidu.hugegraph.controller.schema;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.controller.BaseController;
+import com.baidu.hugegraph.entity.query.GraphView;
+import com.baidu.hugegraph.entity.schema.EdgeLabelEntity;
 import com.baidu.hugegraph.entity.schema.LabelUpdateEntity;
 import com.baidu.hugegraph.entity.schema.Property;
 import com.baidu.hugegraph.entity.schema.PropertyIndex;
 import com.baidu.hugegraph.entity.schema.SchemaEntity;
 import com.baidu.hugegraph.entity.schema.SchemaLabelEntity;
 import com.baidu.hugegraph.entity.schema.Timefiable;
+import com.baidu.hugegraph.entity.schema.VertexLabelEntity;
+import com.baidu.hugegraph.service.schema.EdgeLabelService;
 import com.baidu.hugegraph.service.schema.PropertyKeyService;
+import com.baidu.hugegraph.service.schema.VertexLabelService;
+import com.baidu.hugegraph.structure.GraphElement;
+import com.baidu.hugegraph.structure.constant.IdStrategy;
+import com.baidu.hugegraph.structure.graph.Edge;
+import com.baidu.hugegraph.structure.graph.Vertex;
 import com.baidu.hugegraph.util.Ex;
 import com.baidu.hugegraph.util.PageUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
+@RestController
+@RequestMapping(Constant.API_VERSION + "graph-connections/{connId}/schema")
 public class SchemaController extends BaseController {
+
+    @Autowired
+    private VertexLabelService vlService;
+    @Autowired
+    private EdgeLabelService elService;
+
+    @GetMapping("graphview")
+    public GraphView displayInGraphView(@PathVariable("connId") int connId) {
+        List<VertexLabelEntity> vertexLabels = this.vlService.list(connId);
+        List<EdgeLabelEntity> edgeLabels = this.elService.list(connId);
+
+        List<Vertex> vertices = new ArrayList<>(vertexLabels.size());
+        for (VertexLabelEntity entity : vertexLabels) {
+            Vertex vertex = new Vertex(entity.getName());
+            vertex.id(entity.getName());
+
+            vertex.property("id_strategy", entity.getIdStrategy().string());
+            if (entity.getIdStrategy() == IdStrategy.PRIMARY_KEY) {
+                vertex.property("primary_keys", entity.getPrimaryKeys());
+            }
+            this.fillCommonProperties(vertex, entity);
+            vertices.add(vertex);
+        }
+
+        List<Edge> edges = new ArrayList<>(edgeLabels.size());
+        for (EdgeLabelEntity entity : edgeLabels) {
+            Edge edge = new Edge(entity.getName());
+            edge.sourceId(entity.getSourceLabel());
+            edge.targetId(entity.getTargetLabel());
+            edge.property("link_multitimes", entity.isLinkMultiTimes());
+            if (entity.isLinkMultiTimes()) {
+                edge.property("sort_keys", entity.getSortKeys());
+            }
+            this.fillCommonProperties(edge, entity);
+            edges.add(edge);
+        }
+        return GraphView.builder().vertices(vertices).edges(edges).build();
+    }
+
+    private void fillCommonProperties(GraphElement element,
+                                      SchemaLabelEntity entity) {
+        Iterator<Property> propIter = entity.getProperties().iterator();
+        for (int i = 1; propIter.hasNext(); i++) {
+            Property property = propIter.next();
+            element.property("property_" + i, property.getName());
+        }
+
+        Iterator<PropertyIndex> propIndexIter = entity.getPropertyIndexes()
+                                                      .iterator();
+        for (int i = 1; propIndexIter.hasNext(); i++) {
+            PropertyIndex propertyIndex = propIndexIter.next();
+            element.property("propertyindex_" + i, propertyIndex.getName());
+        }
+
+        element.property("open_label_index", entity.isOpenLabelIndex());
+    }
 
     public <T extends SchemaEntity> IPage<T> listInPage(
                                              Function<Integer, List<T>> fetcher,

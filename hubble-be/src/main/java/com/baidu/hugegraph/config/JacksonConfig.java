@@ -86,7 +86,9 @@ public class JacksonConfig {
         public void serialize(Edge edge, JsonGenerator generator,
                               SerializerProvider provider) throws IOException {
             generator.writeStartObject();
-            writeIdField("id", edge.id(), generator);
+            if (edge.id() != null) {
+                writeIdField("id", edge.id(), generator);
+            }
             generator.writeStringField("label", edge.label());
             writeIdField("source", edge.sourceId(), generator);
             writeIdField("target", edge.targetId(), generator);
