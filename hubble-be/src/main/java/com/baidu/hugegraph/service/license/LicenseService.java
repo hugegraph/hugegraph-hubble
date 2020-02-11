@@ -83,22 +83,28 @@ public class LicenseService {
                 return null;
             }
 
+            String comma = LicenseService.this.getMessage("common.joiner.comma");
+            String semicolon = LicenseService.this.getMessage(
+                                                   "common.joiner.semicolon");
+
             StringBuilder sb = new StringBuilder();
             sb.append(LicenseService.this.getMessage(
                       "license.verify.graph-connection.failed.preifx"));
-            sb.append(",");
+            sb.append(comma);
             if (!StringUtils.isEmpty(this.graphsMessage)) {
                 sb.append(this.graphsMessage);
-                sb.append(";");
+                sb.append(semicolon);
             }
             if (!this.dataSizeMessages.isEmpty()) {
                 for (String dataSizeMsg : this.dataSizeMessages) {
-                    sb.append(dataSizeMsg);
-                    sb.append(",");
+                    if (!StringUtils.isEmpty(dataSizeMsg)) {
+                        sb.append(dataSizeMsg);
+                        sb.append(comma);
+                    }
                 }
             }
             sb.deleteCharAt(sb.length() - 1);
-            sb.append(",");
+            sb.append(comma);
             sb.append(LicenseService.this.getMessage(
                       "license.verify.graph-connection.failed.suffix"));
             return sb.toString();
@@ -152,7 +158,7 @@ public class LicenseService {
     }
 
     @Async
-    @Scheduled(fixedRate = 10 * 60 * 1000)
+    @Scheduled(fixedRate = 3 * 60 * 1000)
     public void updateAllGraphStatus() {
         List<GraphConnection> connections = this.connService.listAll();
         for (GraphConnection conn : connections) {

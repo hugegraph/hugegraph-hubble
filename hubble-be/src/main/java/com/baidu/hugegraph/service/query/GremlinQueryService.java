@@ -283,6 +283,8 @@ public class GremlinQueryService {
                                 ids.add(((Vertex) element).id());
                             } else if (element instanceof Edge) {
                                 ids.add(((Edge) element).id());
+                            } else {
+                                ids.add(element);
                             }
                         });
                         paths.add(ImmutableMap.of("path", ids));
@@ -316,9 +318,11 @@ public class GremlinQueryService {
                     if (element instanceof Vertex) {
                         Vertex vertex = (Vertex) element;
                         vertices.put(vertex.id(), vertex);
-                    } else {
+                    } else if (element instanceof Edge) {
                         Edge edge = (Edge) element;
                         edges.put(edge.id(), edge);
+                    } else {
+                        return GraphView.EMPTY;
                     }
                 }
             }

@@ -79,6 +79,10 @@ public class GraphConnectionController extends BaseController {
                                                              pageSize);
         LicenseService.VerifyResult verifyResult;
         verifyResult = this.licenseService.verifyGraphs((int) conns.getTotal());
+        // Verifed graphs failed, all connections marked as disabled
+        if (!verifyResult.isEnabled()) {
+            conns.getRecords().forEach(r -> r.setEnabled(false));
+        }
         for (GraphConnection conn : conns.getRecords()) {
             if (!conn.getEnabled()) {
                 verifyResult.setEnabled(false);

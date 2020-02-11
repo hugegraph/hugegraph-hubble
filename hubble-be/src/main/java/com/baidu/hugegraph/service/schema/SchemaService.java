@@ -47,13 +47,11 @@ import com.baidu.hugegraph.entity.schema.SchemaLabelEntity;
 import com.baidu.hugegraph.entity.schema.SchemaStyle;
 import com.baidu.hugegraph.entity.schema.SchemaType;
 import com.baidu.hugegraph.entity.schema.Stylefiable;
-import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.service.HugeClientPoolService;
 import com.baidu.hugegraph.structure.SchemaElement;
 import com.baidu.hugegraph.structure.schema.IndexLabel;
 import com.baidu.hugegraph.structure.schema.SchemaLabel;
 import com.baidu.hugegraph.util.CommonUtil;
-import com.baidu.hugegraph.util.Ex;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -222,13 +220,7 @@ public class SchemaService {
             if (!(schema instanceof IndexLabel)) {
                 schema.userdata().put(USER_KEY_CREATE_TIME, now);
             }
-            try {
-                func.accept(client, schema);
-            } catch (Exception e) {
-                throw new ExternalException("Failed to create %s %s", e,
-                                            type.string(), schema.name());
-
-            }
+            func.accept(client, schema);
         }
     }
 
@@ -245,13 +237,7 @@ public class SchemaService {
             if (!(schema instanceof IndexLabel)) {
                 schema.userdata().put(USER_KEY_CREATE_TIME, now);
             }
-            try {
-                tasks.add(func.apply(client, schema));
-            } catch (Exception e) {
-                throw new ExternalException("schema.create.failed", e,
-                                            type.string(), schema.name());
-
-            }
+            tasks.add(func.apply(client, schema));
         }
         return tasks;
     }
@@ -264,12 +250,7 @@ public class SchemaService {
             return tasks;
         }
         for (String name : names) {
-            try {
-                tasks.add(func.apply(client, name));
-            } catch (Exception e) {
-                throw new ExternalException("schema.remove.failed", e,
-                                            type.string(), name);
-            }
+            tasks.add(func.apply(client, name));
         }
         return tasks;
     }
@@ -281,12 +262,7 @@ public class SchemaService {
             return;
         }
         for (String name : names) {
-            try {
-                func.accept(client, name);
-            } catch (Exception e) {
-                throw new ExternalException("Failed to remove %s %s", e,
-                                            type.string(), name);
-            }
+            func.accept(client, name);
         }
     }
 
