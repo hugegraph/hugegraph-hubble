@@ -40,7 +40,26 @@ const GraphManagementHeader: React.FC = observer(() => {
 
   return (
     <div className="graph-management-header">
-      <span>图管理</span>
+      {graphManagementStore.licenseInfo &&
+      graphManagementStore.licenseInfo.edition === 'community' ? (
+        <div className="graph-management-header-description-community">
+          <div>图管理</div>
+          <div>
+            {graphManagementStore.licenseInfo.edition === 'community'
+              ? '社区版'
+              : '商业版'}
+            ：支持图上限 {graphManagementStore.licenseInfo.allowed_graphs + ' '}
+            个，图磁盘上限 {graphManagementStore.licenseInfo.allowed_datasize}
+          </div>
+        </div>
+      ) : (
+        <span className="graph-management-header-description">图管理</span>
+      )}
+      {/* <span>图管理</span> */}
+      {/* <div className="graph-management-header-description-community">
+        <div>图管理</div>
+        <div>社区版：支持图上限3个，图磁盘上限100G</div>
+      </div> */}
       <Input.Search
         size="medium"
         width={200}
@@ -61,6 +80,10 @@ const GraphManagementHeader: React.FC = observer(() => {
         style={styles}
         onClick={handleLayoutSwitch(true)}
         disabled={
+          // graphManagementStore.errorInfo.fetchGraphData.code === 401 ||
+          (graphManagementStore.licenseInfo &&
+            graphManagementStore.graphData.length >=
+              graphManagementStore.licenseInfo.allowed_graphs) ||
           graphManagementStore.showCreateNewGraph ||
           graphManagementStore.selectedEditIndex !== null
         }

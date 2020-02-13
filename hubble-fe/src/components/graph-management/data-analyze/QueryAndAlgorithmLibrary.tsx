@@ -68,6 +68,9 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
   }, [dataAnalyzeStore]);
 
   const resetCodeEditorText = useCallback(() => {
+    switchFavoritePop(false);
+    dataAnalyzeStore.resetFavoriteRequestStatus('add');
+
     if (codeEditor.current) {
       codeEditor.current.setValue('');
       dataAnalyzeStore.mutateCodeEditorText('');
@@ -176,7 +179,6 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
             <Alert
               content={dataAnalyzeStore.errorInfo.fetchGraphs.message}
               type="error"
-              title="不支持的操作"
               showIcon
               style={styles.alert}
             />
@@ -210,7 +212,7 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
             </Tooltip>
             {dataAnalyzeStore.codeEditorText.length !== 0 ? (
               <TooltipTrigger
-                tooltipShown={isFavoritePop}
+                tooltipShown={dataAnalyzeStore.favoritePopUp === 'addFavorite'}
                 placement="bottom-start"
                 tooltip={({
                   arrowRef,
@@ -222,7 +224,10 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
                   <div
                     {...getTooltipProps({
                       ref: tooltipRef,
-                      className: 'tooltips'
+                      className: 'tooltips',
+                      style: {
+                        zIndex: 7
+                      }
                     })}
                   >
                     <div
@@ -245,10 +250,12 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
                     <Button
                       style={styles.primaryButton}
                       disabled={
-                        dataAnalyzeStore.codeEditorText.length === 0 ||
                         !codeRegexp.test(dataAnalyzeStore.codeEditorText)
                       }
                       onClick={() => {
+                        dataAnalyzeStore.setFavoritePopUp('addFavorite');
+                        dataAnalyzeStore.resetFavoriteRequestStatus('add');
+                        dataAnalyzeStore.resetFavoriteRequestStatus('edit');
                         switchFavoritePop(true);
                       }}
                     >
@@ -267,10 +274,7 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
                 }
                 type="dark"
               >
-                <Button
-                  style={styles.primaryButton}
-                  disabled={dataAnalyzeStore.codeEditorText.length === 0}
-                >
+                <Button style={styles.primaryButton} disabled={true}>
                   收藏
                 </Button>
               </Tooltip>

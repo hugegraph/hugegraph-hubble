@@ -1,519 +1,754 @@
-import React, { useState, useContext, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  useContext,
+  useEffect,
+  useRef,
+  useCallback
+} from 'react';
 import { observer } from 'mobx-react';
-import * as d3 from 'd3';
+import { isUndefined, isEmpty } from 'lodash-es';
+import { saveAs } from 'file-saver';
+import vis from 'vis-network';
+import 'vis-network/styles/vis-network.min.css';
+import { Message } from '@baidu/one-ui';
 
 import QueryFilterOptions from './QueryFilterOptions';
 import { DataAnalyzeStoreContext } from '../../../../stores';
-import {
-  GraphNode,
-  GraphLink
-} from '../../../../stores/GraphManagementStore/dataAnalyzeStore';
+import ZoomInIcon from '../../../../assets/imgs/ic_fangda_16.svg';
+import ZoomOutIcon from '../../../../assets/imgs/ic_suoxiao_16.svg';
+import CenterIcon from '../../../../assets/imgs/ic_middle_16.svg';
+import DownloadIcon from '../../../../assets/imgs/ic_xiazai_16.svg';
+import FullScreenIcon from '../../../../assets/imgs/ic_quanping_16.svg';
+import ResetScreenIcon from '../../../../assets/imgs/ic_tuichuquanping_16.svg';
+import LoadingBackIcon from '../../../../assets/imgs/ic_loading_back.svg';
+import LoadingFrontIcon from '../../../../assets/imgs/ic_loading_front.svg';
 
 export interface GraphQueryResult {
-  isFullScreen: boolean;
+  hidden: boolean;
 }
 
-const GraphQueryResult: React.FC<GraphQueryResult> = observer(
-  ({ isFullScreen }) => {
-    const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
-    const graphViewElement = useRef<SVGSVGElement>(null);
+const GraphQueryResult: React.FC<GraphQueryResult> = observer(({ hidden }) => {
+  const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
+  const graphWrapper = useRef<HTMLDivElement>(null);
+  const resultWrapper = useRef<HTMLDivElement>(null);
+  const legendViewPointWrapper = useRef<HTMLDivElement>(null);
+  const legendWrapper = useRef<HTMLDivElement>(null);
+  const [loadingGraphs, switchLoadingGraphs] = useState(true);
+  const [isPopover, switchIsPopover] = useState(false);
+  const [nodeTooltipX, setNodeToolTipX] = useState(0);
+  const [nodeTooltipY, setNodeToolTipY] = useState(0);
+  const [legendStep, setLegendStep] = useState(0);
+  const [legendWidth, setlegendWitdh] = useState(0);
 
-    // const nodeRaidus = {
-    //   normal: 20,
-    //   hover: 30
-    // };
+  const [graph, setGraph] = useState<vis.Network | null>(null);
+  const [visGraphNodes, setVisGraphNodes] = useState<vis.DataSetNodes | null>(
+    null
+  );
+  const [visGraphEdges, setVisGraphEdges] = useState<vis.DataSetNodes | null>(
+    null
+  );
 
-    let radius: number;
-    const nodeNumber =
-      dataAnalyzeStore.graphData.data.graph_view.vertices.length;
+  const redrawGraphs = useCallback(() => {
+    if (graph) {
+      const width = getComputedStyle(resultWrapper.current!).width as string;
+      const height = getComputedStyle(resultWrapper.current!).height as string;
 
-    if (nodeNumber > 400) {
-      radius = 2;
-    } else if (nodeNumber < 40) {
-      radius = 20;
-    } else {
-      radius = 20 - (nodeNumber - 40) / 20;
+      graph.setSize(width, height);
+      graph.redraw();
     }
+  }, [graph]);
 
-    const arrowOffset = radius + 10;
+  useEffect(() => {
+    const width = getComputedStyle(resultWrapper.current!).width as string;
+    const height = getComputedStyle(resultWrapper.current!).height as string;
 
-    const setupGraphView = () => {
-      const svgWrapper = document.querySelector(
-        isFullScreen ? '.full-screen-graph-svg-wrapper' : '.graph-svg-wrapper'
-      ) as HTMLDivElement;
+    if (!graph) {
+      const graphNodes = new vis.DataSet(dataAnalyzeStore.graphNodes);
+      const graphEdges = new vis.DataSet(dataAnalyzeStore.graphEdges);
 
-      const width = Number(
-        (getComputedStyle(svgWrapper).width as string).split('px')[0]
-      );
-      const height = Number(
-        (getComputedStyle(svgWrapper).height as string).split('px')[0]
-      );
+      const data = {
+        nodes: graphNodes,
+        edges: graphEdges
+      };
 
-      const chart = d3
-        .select(svgWrapper)
-        .select('svg')
-        .attr('width', width)
-        .attr('height', height);
+      setVisGraphNodes(graphNodes);
+      setVisGraphEdges(graphEdges);
 
-      const defs = chart.append('defs');
-
-      chart
-        .selectAll('g')
-        .remove()
-        .selectAll('defs')
-        .remove();
-
-      defs
-        .append('marker')
-        .attr('id', 'arrowhead')
-        .attr('viewBox', '0 -5 10 10')
-        .attr('refX', arrowOffset)
-        .attr('refY', 0)
-        .attr('orient', 'auto')
-        .attr('markerWidth', 6)
-        .attr('markerHeight', 6)
-        .attr('xoverflow', 'visible')
-        .append('svg:path')
-        .attr('d', 'M 0,-5 L 10,0 L 0,5')
-        .attr('fill', '#5c73e6')
-        .style('stroke', 'none');
-
-      defs
-        .append('marker')
-        .attr('id', 'arrowhead-hover')
-        .attr('viewBox', '0 -5 10 10')
-        .attr('refX', arrowOffset)
-        .attr('refY', 0)
-        .attr('orient', 'auto')
-        .attr('markerWidth', 6)
-        .attr('markerHeight', 6)
-        .attr('xoverflow', 'visible')
-        .append('svg:path')
-        .attr('d', 'M 0,-5 L 10,0 L 0,5')
-        .attr('fill', '#5c73e6')
-        // .attr('fill-opacity', 1)
-        .style('stroke', 'none');
-
-      const circleShadowFilters = defs.append('filter');
-
-      circleShadowFilters
-        .attr('id', 'circle-shadow')
-        .attr('filterUnits', 'userSpaceOnUse')
-        .attr('width', '130%')
-        .attr('height', '130%');
-
-      circleShadowFilters
-        .append('feDropShadow')
-        .attr('stdDeviation', 10)
-        .attr('flood-color', '#000')
-        .attr('flood-opacity', 0.2);
-
-      const lineShadowFilter = defs.append('filter');
-
-      lineShadowFilter
-        .attr('id', 'line-shadow')
-        .attr('filterUnits', 'userSpaceOnUse');
-      // .attr('width', '130%')
-      // .attr('height', '130%');
-
-      lineShadowFilter
-        .append('feDropShadow')
-        .attr('stdDeviation', 10)
-        .attr('flood-color', '#000')
-        .attr('flood-opacity', 0.8);
-
-      // shadowFilters
-      //   .append('feGaussianBlur')
-      //   .attr('in', 'SourceGraphic')
-      //   .attr('stdDeviation', 10)
-      //   .attr('result', 'blur-out');
-
-      // shadowFilters
-      //   .append('feColorMatrix')
-      //   .attr('in', 'blur-out')
-      //   .attr('type', 'hueRotate')
-      //   .attr('values', 180)
-      //   .attr('result', 'yo');
-
-      // shadowFilters
-      //   .append('feOffset')
-      //   // .attr('in', 'blur-out')
-      //   .attr('in', 'yo')
-      //   .attr('dx', 10)
-      //   .attr('dy', 10)
-      //   .attr('result', 'coloraka');
-
-      // shadowFilters
-      //   .append('feComponentTransfer')
-      //   .append('feFuncA')
-      //   .attr('in', 'coloraka')
-      //   .attr('type', 'linear')
-      //   .attr('slope', 0.4)
-      //   .attr('result', 'shadow-blur');
-
-      // shadowFilters
-      //   .append('feBlend')
-      //   .attr('in', 'SourceGraphic')
-      //   .attr('in2', 'shadow-blur')
-      //   .attr('mode', 'normal');
-
-      // close pop over when click on other areas
-      chart.on('click', function() {
-        d3.select('.graph-pop-over').style('display', 'none');
-      });
-
-      const forceSimulation = d3
-        .forceSimulation(dataAnalyzeStore.graphNodes)
-        .force(
-          'link',
-          d3
-            // have to specified generics here to avoid compiler error
-            .forceLink<GraphNode, GraphLink>(
-              dataAnalyzeStore.graphLinks as GraphLink[]
-            )
-            .id(d => d.id)
-            .distance(() => Math.floor(Math.random() * (120 - 50)) + 90)
-        )
-        .force('charge', d3.forceManyBody().strength(-25))
-        .force('center', d3.forceCenter(width / 2, height / 2))
-        .force('collide', d3.forceCollide(30).strength(0.5))
-        .on('tick', ticked);
-
-      if (!isFullScreen) {
-        dataAnalyzeStore.setD3Simluation(forceSimulation);
-      }
-
-      let linkTimer: number | undefined;
-
-      const links = chart
-        .append('g')
-        .selectAll('.links')
-        .data(dataAnalyzeStore.graphLinks as GraphLink[])
-        .enter()
-        .append('line')
-        .attr('class', 'links')
-        .attr('marker-end', 'url(#arrowhead)')
-        .attr('stroke', '#5c73e6')
-        .attr('stroke-width', 1.5)
-        .attr('opacity', 0.8)
-        .on('mouseover', function(l) {
-          d3.select(this)
-            .attr('opacity', 1)
-            .attr('marker-end', 'url(#arrowhead-hover)');
-        })
-        .on('mouseout', function(l) {
-          if (
-            dataAnalyzeStore.graphInfoDataSet !== 'link' ||
-            l.label !== dataAnalyzeStore.selectedGraphLinkData.label
-          ) {
-            d3.select(this)
-              .attr('opacity', 0.8)
-              .attr('filter', 'none')
-              .attr('marker-end', 'url(#arrowhead)');
+      const layout: vis.Options = {
+        width,
+        height,
+        nodes: {
+          shape: 'dot'
+        },
+        edges: {
+          arrows: 'to',
+          arrowStrikethrough: false,
+          width: 1.5,
+          color: {
+            color: 'rgba(92, 115, 230, 0.8)',
+            hover: 'rgba(92, 115, 230, 1)',
+            highlight: 'rgba(92, 115, 230, 1)'
           }
-        })
-        .on('click', function(l) {
-          d3.select(this)
-            .attr('opacity', 1)
-            .attr('filter', 'url(#line-shadow)');
+        },
+        interaction: {
+          hover: true
+        },
+        physics: {
+          maxVelocity: 50,
+          solver: 'forceAtlas2Based',
+          timestep: 0.3,
+          stabilization: { iterations: 150 }
+        }
+      };
 
-          linkTimer = window.setTimeout(() => {
-            dataAnalyzeStore.changeSelectedGraphLinkData(l);
+      // initialize your network!
+      if (graphWrapper.current !== null) {
+        const network = new vis.Network(graphWrapper!.current, data, layout);
 
-            if (
-              dataAnalyzeStore.graphInfoDataSet !== 'link' ||
-              !dataAnalyzeStore.isShowGraphInfo
-            ) {
-              dataAnalyzeStore.switchShowScreeDataSet('link');
-              dataAnalyzeStore.switchShowScreenInfo(true);
-            }
-          }, 200);
+        let timer: number | undefined = undefined;
+
+        network.on('click', ({ nodes, edges }) => {
+          // click on node, note that edges(related) also has value
+          if (!isEmpty(nodes)) {
+            // note: cannot abstract switchClickOn...() and clearTimeout
+            // as common callings with node and edge, since click event
+            // would be dispatched even if click is not on node and edge
+            dataAnalyzeStore.switchClickOnNodeOrEdge(true);
+            clearTimeout(timer);
+
+            timer = window.setTimeout(() => {
+              const nodeId = nodes[0];
+              const node = dataAnalyzeStore.graphData.data.graph_view.vertices.find(
+                ({ id }) => id === nodeId
+              );
+
+              if (isUndefined(node)) {
+                return;
+              }
+
+              dataAnalyzeStore.changeSelectedGraphData({
+                id: node.id,
+                label: node.label,
+                properties: node.properties
+              });
+
+              if (
+                dataAnalyzeStore.graphInfoDataSet !== 'node' ||
+                !dataAnalyzeStore.isShowGraphInfo
+              ) {
+                dataAnalyzeStore.switchShowScreeDataSet('node');
+                dataAnalyzeStore.switchShowScreenInfo(true);
+              }
+
+              // close filter board after click on node
+              dataAnalyzeStore.switchShowFilterBoard(false);
+              // reset status, or click blank area won't collpase the drawer
+              dataAnalyzeStore.switchClickOnNodeOrEdge(false);
+            }, 200);
+
+            return;
+          }
+
+          // click on edge
+          if (!isEmpty(edges)) {
+            dataAnalyzeStore.switchClickOnNodeOrEdge(true);
+            clearTimeout(timer);
+
+            timer = window.setTimeout(() => {
+              const edgeId = edges[0];
+
+              const node = dataAnalyzeStore.graphData.data.graph_view.edges.find(
+                ({ id }) => id === edgeId
+              );
+
+              if (isUndefined(node)) {
+                return;
+              }
+
+              dataAnalyzeStore.changeSelectedGraphLinkData({
+                id: node.id,
+                label: node.label,
+                properties: node.properties,
+                source: node.source,
+                target: node.target
+              });
+
+              if (
+                dataAnalyzeStore.graphInfoDataSet !== 'edge' ||
+                !dataAnalyzeStore.isShowGraphInfo
+              ) {
+                dataAnalyzeStore.switchShowScreeDataSet('edge');
+                dataAnalyzeStore.switchShowScreenInfo(true);
+              }
+
+              // close filter board after click on node
+              dataAnalyzeStore.switchShowFilterBoard(false);
+              // reset status, or click blank area won't collpase the drawer
+              dataAnalyzeStore.switchClickOnNodeOrEdge(false);
+            }, 200);
+          }
         });
 
-      // links.exit().remove();
+        network.on('doubleClick', async ({ nodes }) => {
+          clearTimeout(timer);
+          dataAnalyzeStore.switchClickOnNodeOrEdge(false);
 
-      let nodeTimer: number | undefined = undefined;
+          if (!isEmpty(nodes)) {
+            const nodeId = nodes[0];
+            const node = dataAnalyzeStore.graphData.data.graph_view.vertices.find(
+              ({ id }) => id === nodeId
+            );
 
-      const nodes = chart
-        .append('g')
-        .selectAll('.node')
-        .data(dataAnalyzeStore.graphNodes)
-        .enter()
-        .append('g')
-        .attr('class', 'node')
-        .on('mouseover', function(d) {
-          d3.select(this)
-            .selectAll('circle')
-            .attr('cursor', 'move')
-            .transition()
-            .duration(300)
-            .attr('r', radius * 1.2);
+            if (!isUndefined(node)) {
+              await dataAnalyzeStore.expandGraphNode(node.id, node.label);
 
-          // links.attr('opacity', function(l: any) {
-          //   if (d.id === l.source.id || d.id === l.target.id) {
-          //     d3.select(this).attr('marker-end', 'url(#arrowhead-hover)');
-          //     return 1;
-          //   } else {
-          //     return 0.8;
-          //   }
-          // });
-        })
-        .on('mouseout', function(d) {
-          if (
-            dataAnalyzeStore.graphInfoDataSet !== 'node' ||
-            d.id !== dataAnalyzeStore.selectedGraphData.id
-          ) {
-            d3.select(this)
-              .selectAll('circle')
-              .transition()
-              .duration(350)
-              .attr('r', radius);
-          }
+              if (
+                dataAnalyzeStore.requestStatus.expandGraphNode === 'success'
+              ) {
+                dataAnalyzeStore.expandedGraphData.data.graph_view.vertices.forEach(
+                  ({ id, label, properties }) => {
+                    graphNodes.add({
+                      id,
+                      label: id.length <= 15 ? id : id.slice(0, 15) + '...',
+                      vLabel: label,
+                      properties,
+                      title: `
+                          <div class="tooltip-fields">
+                            <div>顶点类型：</div>
+                            <div>${label}</div>
+                          </div>
+                          <div class="tooltip-fields">
+                            <div>顶点ID：</div>
+                            <div>${id}</div>
+                          </div>
+                          ${Object.entries(properties)
+                            .map(([key, value]) => {
+                              return `<div class="tooltip-fields">
+                                        <div>${key}: </div>
+                                        <div>${value}</div>
+                                      </div>`;
+                            })
+                            .join('')}
+                        `,
+                      color: {
+                        background:
+                          dataAnalyzeStore.colorMappings[label] || '#5c73e6',
+                        border:
+                          dataAnalyzeStore.colorMappings[label] || '#5c73e6',
+                        highlight: {
+                          background: '#fb6a02',
+                          border: '#fb6a02'
+                        },
+                        hover: { background: '#ec3112', border: '#ec3112' }
+                      },
+                      chosen: {
+                        node(
+                          values: any,
+                          id: string,
+                          selected: boolean,
+                          hovering: boolean
+                        ) {
+                          if (hovering || selected) {
+                            values.shadow = true;
+                            values.shadowColor = 'rgba(0, 0, 0, 0.6)';
+                            values.shadowX = 0;
+                            values.shadowY = 0;
+                            values.shadowSize = 25;
+                          }
 
-          // links.attr('opacity', 0.8).attr('marker-end', 'url(#arrowhead)');
-        })
-        .on('contextmenu', function(d) {
-          dataAnalyzeStore.changeRightClickedGraphData(d);
+                          if (selected) {
+                            values.size = 30;
+                          }
+                        }
+                      }
+                    });
+                  }
+                );
 
-          d3.select('.graph-pop-over')
-            .style('display', 'block')
-            .style('left', String(d.x) + 'px')
-            .style('top', String(d.y) + 'px');
-        })
-        .on('click', function(d) {
-          clearTimeout(nodeTimer);
-          nodeTimer = window.setTimeout(() => {
-            dataAnalyzeStore.changeSelectedGraphData(d);
-
-            d3.selectAll('line')
-              .attr('opacity', function(l: any) {
-                if (d.id === l.source.id || d.id === l.target.id) {
-                  return 1;
-                } else {
-                  return 0.8;
-                }
-              })
-              .attr('filter', function(l: any) {
-                if (d.id === l.source.id || d.id === l.target.id) {
-                  return 'url(#line-shadow)';
-                } else {
-                  return 'none';
-                }
+                dataAnalyzeStore.expandedGraphData.data.graph_view.edges.forEach(
+                  edge => {
+                    graphEdges.add({
+                      ...edge,
+                      from: edge.source,
+                      to: edge.target,
+                      title: `
+                          <div class="tooltip-fields">
+                            <div>边类型：</div>
+                            <div>${edge.label}</div>
+                          </div>
+                          <div class="tooltip-fields">
+                            <div>边ID：</div>
+                            <div>${edge.id}</div>
+                          </div>
+                          ${Object.entries(edge.properties)
+                            .map(([key, value]) => {
+                              return `<div class="tooltip-fields">
+                                        <div>${key}: </div>
+                                        <div>${value}</div>
+                                      </div>`;
+                            })
+                            .join('')}
+                        `
+                    });
+                  }
+                );
+              }
+            } else {
+              Message.error({
+                content: dataAnalyzeStore.errorInfo.expandGraphNode.message,
+                size: 'medium',
+                showCloseIcon: false
               });
-
-            d3.selectAll('circle')
-              .transition()
-              .duration(350)
-              .attr('filter', function(d: any) {
-                if (d.id !== dataAnalyzeStore.selectedGraphData.id) {
-                  return 'none';
-                }
-
-                return 'url(#circle-shadow)';
-              })
-              .attr('r', function(d: any) {
-                if (d.id !== dataAnalyzeStore.selectedGraphData.id) {
-                  return radius;
-                }
-
-                return radius * 1.2;
-              });
-
-            d3.select(this)
-              .selectAll('circle')
-              .attr('cursor', 'move')
-              .attr('r', radius * 1.2)
-              .attr('filter', 'url(#circle-shadow)');
-
-            if (
-              dataAnalyzeStore.graphInfoDataSet !== 'node' ||
-              !dataAnalyzeStore.isShowGraphInfo
-            ) {
-              dataAnalyzeStore.switchShowScreeDataSet('node');
-              dataAnalyzeStore.switchShowScreenInfo(true);
             }
-          }, 200);
-        })
-        .on('dblclick', function(d) {
-          clearTimeout(nodeTimer);
-          // chart.selectAll('g').remove();
-          dataAnalyzeStore.expandGraphNode(d.id, d.label);
-        })
-        .call(
-          d3
-            // have to specified generics here to avoid compiler error
-            .drag<SVGGElement, GraphNode>()
-            .on('start', dragstarted)
-            .on('drag', dragged)
-            .on('end', dragended)
-        );
+          }
+        });
 
-      nodes
-        .append('circle')
-        .attr('r', radius)
-        .attr('fill', d => dataAnalyzeStore.colorSchemas[d.label]);
+        network.on('oncontext', async e => {
+          // disable default context menu
+          e.event.preventDefault();
 
-      // Add text below each node
-      nodes
-        .append('text')
-        .html((d: any) =>
-          d.id.length <= 15 ? d.id : d.id.slice(0, 15) + '...'
-        )
-        .style('fill', '#666')
-        .style('font-size', '12px')
-        .attr('text-anchor', 'middle')
-        .attr('y', 35);
+          const nodeId = network.getNodeAt(e.pointer.DOM);
+          const node = dataAnalyzeStore.graphData.data.graph_view.vertices.find(
+            ({ id }) => id === nodeId
+          );
 
-      // Add title on each node
-      nodes.append('title').text((d: any) => d.id);
+          if (!isUndefined(node)) {
+            dataAnalyzeStore.changeRightClickedGraphData({
+              id: node.id,
+              label: node.label,
+              properties: node.properties
+            });
 
-      d3.select('.graph-pop-over').on('click', function() {
-        d3.select(this).style('display', 'none');
-      });
+            switchIsPopover(true);
 
-      function ticked() {
-        links
-          .attr('x1', function(d: any) {
-            return d.source.x;
-          })
-          .attr('y1', function(d: any) {
-            return d.source.y;
-          })
-          .attr('x2', function(d: any) {
-            return d.target.x;
-          })
-          .attr('y2', function(d: any) {
-            return d.target.y;
-          });
+            network.selectNodes([nodeId]);
+            setNodeToolTipX(e.pointer.DOM.x);
+            setNodeToolTipY(e.pointer.DOM.y);
 
-        nodes
-          .attr('cx', function(d: any) {
-            // return (d.x = Math.max(20, Math.min(width - 20, d.x)));
-            return d.x;
-          })
-          .attr('cy', function(d: any) {
-            // return (d.y = Math.max(20, Math.min(height - 33, d.y)));
-            return d.y;
-          })
-          .attr('transform', (d: any) => `translate(${d.x}, ${d.y})`);
+            await dataAnalyzeStore.fetchRelatedVertex();
+            dataAnalyzeStore.fetchFilteredPropertyOptions(
+              dataAnalyzeStore.graphDataEdgeTypes[0]
+            );
+          }
+        });
+
+        network.on('dragEnd', e => {
+          if (!isEmpty(e.nodes)) {
+            network.unselectAll();
+          }
+        });
+
+        network.once('stabilizationIterationsDone', () => {
+          switchLoadingGraphs(false);
+        });
+
+        setGraph(network);
       }
+    } else {
+      redrawGraphs();
+    }
+  }, [
+    dataAnalyzeStore,
+    dataAnalyzeStore.originalGraphData,
+    graph,
+    dataAnalyzeStore.isFullScreenReuslt,
+    redrawGraphs
+  ]);
 
-      function dragstarted(d: any) {
-        if (!d3.event.active) {
-          forceSimulation.alphaTarget(0.3).restart();
-        }
-        d.fx = d.x;
-        d.fy = d.y;
-      }
+  useEffect(() => {
+    if (legendWrapper.current) {
+      const legendWidth = getComputedStyle(legendWrapper.current).width!.split(
+        'px'
+      )[0];
 
-      function dragged(d: any) {
-        d.fx = d3.event.x;
-        d.fy = d3.event.y;
-      }
+      setlegendWitdh(Number(legendWidth));
+    }
+  }, []);
 
-      function dragended(d: any) {
-        if (!d3.event.active) {
-          forceSimulation.alphaTarget(0);
-        }
-        d.fx = null;
-        d.fy = null;
-      }
+  useEffect(() => {
+    window.addEventListener('resize', redrawGraphs, false);
+
+    return () => {
+      window.removeEventListener('resize', redrawGraphs);
     };
+  }, [redrawGraphs]);
 
-    useEffect(() => {
-      const root = document.getElementById('root');
-      const cb = (e: MouseEvent) => e.preventDefault();
-
-      if (graphViewElement.current) {
-        graphViewElement.current.addEventListener('contextmenu', cb);
-      }
-
-      setupGraphView();
-
-      root!.onclick = e => {
-        if (
-          (e.target as Element).nodeName !== 'circle' &&
-          (e.target as Element).nodeName !== 'line'
-        ) {
-          d3.selectAll('circle')
-            .attr('r', radius)
-            .attr('filter', 'none');
-
-          d3.selectAll('line')
-            .attr('opacity', '0.8')
-            .attr('filter', 'none');
-
-          dataAnalyzeStore.switchShowScreenInfo(false);
-        }
-      };
-
-      return () => {
-        if (graphViewElement.current) {
-          graphViewElement.current.removeEventListener('contextmenu', cb);
-        }
-
-        root!.onclick = null;
-      };
-    }, [
-      dataAnalyzeStore,
-      setupGraphView,
-      dataAnalyzeStore.graphData.data.graph_view.vertices.length,
-      radius
-    ]);
-    // 无法展示图，请查看表格/Json
-    return (
+  return (
+    <>
       <div
         className={
-          isFullScreen ? 'full-screen-graph-svg-wrapper' : 'graph-svg-wrapper'
+          dataAnalyzeStore.isFullScreenReuslt
+            ? 'full-screen-graph-wrapper'
+            : 'graph-wrapper'
         }
+        ref={resultWrapper}
+        style={{
+          zIndex: hidden ? -1 : 0,
+          margin: '-9px'
+        }}
       >
-        <svg ref={graphViewElement}></svg>
-        {dataAnalyzeStore.isShowFilterBoard && <QueryFilterOptions />}
-        <GraphPopover />
+        <div
+          className={
+            dataAnalyzeStore.isFullScreenReuslt
+              ? 'query-result-content-manipulations fullscreen'
+              : 'query-result-content-manipulations'
+          }
+        >
+          <div
+            style={{
+              position: 'relative',
+              width: '50%',
+              overflow: 'auto',
+              height: '20px',
+              display: 'flex',
+              justifyContent: 'space-around',
+              alignItems: 'center',
+              color: '#666',
+              fontSize: 12
+            }}
+            ref={legendViewPointWrapper}
+          >
+            <div
+              style={{
+                display: 'flex',
+                position: 'absolute',
+                top: 0,
+                left: legendStep
+              }}
+              ref={legendWrapper}
+            >
+              {Array.from(
+                new Set(
+                  dataAnalyzeStore.graphData.data.graph_view.vertices.map(
+                    ({ label }) => label
+                  )
+                )
+              ).map(label => {
+                return (
+                  <div
+                    style={{
+                      display: 'flex',
+                      marginRight: 14,
+                      alignItems: 'center'
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: 5,
+                        marginRight: 5,
+                        backgroundColor:
+                          dataAnalyzeStore.colorMappings[label] || '#5c73e6'
+                      }}
+                    ></div>
+                    <div>{label}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <img
+              src={ZoomInIcon}
+              alt="放大"
+              title="放大"
+              onClick={() => {
+                if (graph) {
+                  const currentScale = graph.getScale();
+
+                  graph.moveTo({
+                    scale: currentScale + 0.1
+                  });
+                }
+              }}
+            />
+            <img
+              src={ZoomOutIcon}
+              alt="缩小"
+              title="缩小"
+              onClick={() => {
+                if (graph) {
+                  const currentScale = graph.getScale();
+
+                  graph.moveTo({
+                    scale:
+                      currentScale - 0.1 > 0 ? currentScale - 0.1 : currentScale
+                  });
+                }
+              }}
+            />
+            <img
+              src={CenterIcon}
+              alt="居中"
+              title="居中"
+              onClick={() => {
+                if (graph) {
+                  graph.moveTo({
+                    position: {
+                      x: 0,
+                      y: 0
+                    }
+                  });
+                }
+              }}
+            />
+            <img
+              src={DownloadIcon}
+              alt="下载"
+              title="下载"
+              onClick={() => {
+                const blob = new Blob(
+                  [
+                    JSON.stringify(
+                      dataAnalyzeStore.originalGraphData.data.json_view.data,
+                      null,
+                      4
+                    )
+                  ],
+                  { type: 'text/plain;charset=utf-8' }
+                );
+
+                saveAs(blob, 'gremlin-data.json');
+              }}
+            />
+            {dataAnalyzeStore.isFullScreenReuslt ? (
+              <img
+                src={ResetScreenIcon}
+                alt="退出全屏"
+                title="退出全屏"
+                onClick={() => {
+                  dataAnalyzeStore.setFullScreenReuslt(false);
+                }}
+              />
+            ) : (
+              <img
+                src={FullScreenIcon}
+                alt="全屏"
+                title="全屏"
+                onClick={() => {
+                  dataAnalyzeStore.setFullScreenReuslt(true);
+                }}
+              />
+            )}
+          </div>
+        </div>
+        <div ref={graphWrapper}></div>
+        {isPopover && (
+          <GraphPopover
+            x={nodeTooltipX}
+            y={nodeTooltipY}
+            switchIsPopover={switchIsPopover}
+            visNetwork={graph}
+            visGraphNodes={visGraphNodes}
+            visGraphEdges={visGraphEdges}
+          />
+        )}
+      </div>
+      {dataAnalyzeStore.isShowFilterBoard && (
+        <QueryFilterOptions
+          visNetwork={graph}
+          visGraphNodes={visGraphNodes}
+          visGraphEdges={visGraphEdges}
+        />
+      )}
+      {loadingGraphs && (
+        <div className="graph-loading-placeholder">
+          <div className="query-result-loading-bg">
+            <img
+              className="query-result-loading-back"
+              src={LoadingBackIcon}
+              alt="加载背景"
+            />
+            <img
+              className="query-result-loading-front"
+              src={LoadingFrontIcon}
+              alt="加载 spinner"
+            />
+          </div>
+          <span>正在渲染...</span>
+        </div>
+      )}
+    </>
+  );
+});
+
+const GraphPopover: React.FC<{
+  x: number;
+  y: number;
+  switchIsPopover: (state: boolean) => void;
+  visNetwork: vis.Network | null;
+  visGraphNodes: vis.DataSetNodes;
+  visGraphEdges: vis.DataSetEdges;
+}> = observer(
+  ({ x, y, switchIsPopover, visNetwork, visGraphNodes, visGraphEdges }) => {
+    const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
+    const popoverWrapperRef = useRef<HTMLDivElement>(null);
+
+    const handleOutSideClick = useCallback(
+      (e: MouseEvent) => {
+        // if clicked element is not on dropdown, collpase it
+        if (
+          popoverWrapperRef.current &&
+          !popoverWrapperRef.current.contains(e.target as Element)
+        ) {
+          switchIsPopover(false);
+        }
+      },
+      [switchIsPopover]
+    );
+
+    useEffect(() => {
+      document.addEventListener('click', handleOutSideClick, false);
+
+      return () => {
+        document.removeEventListener('click', handleOutSideClick, false);
+      };
+    }, [handleOutSideClick]);
+
+    return (
+      <div
+        className="graph-pop-over"
+        onContextMenu={e => e.preventDefault()}
+        style={{ top: y, left: x }}
+        ref={popoverWrapperRef}
+      >
+        <div
+          className="graph-pop-over-item"
+          onClick={async () => {
+            await dataAnalyzeStore.expandGraphNode();
+
+            if (dataAnalyzeStore.requestStatus.expandGraphNode === 'success') {
+              dataAnalyzeStore.expandedGraphData.data.graph_view.vertices.forEach(
+                ({ id, label, properties }) => {
+                  visGraphNodes.add({
+                    id,
+                    label: id.length <= 15 ? id : id.slice(0, 15) + '...',
+                    vLabel: label,
+                    properties,
+                    title: `
+                      <div class="tooltip-fields">
+                        <div>顶点类型：</div>
+                        <div>${label}</div>
+                      </div>
+                      <div class="tooltip-fields">
+                        <div>顶点ID：</div>
+                        <div>${id}</div>
+                      </div>
+                      ${Object.entries(properties)
+                        .map(([key, value]) => {
+                          return `<div class="tooltip-fields">
+                                    <div>${key}: </div>
+                                    <div>${value}</div>
+                                  </div>`;
+                        })
+                        .join('')}
+                    `,
+                    color: {
+                      background:
+                        dataAnalyzeStore.colorMappings[label] || '#5c73e6',
+                      border:
+                        dataAnalyzeStore.colorMappings[label] || '#5c73e6',
+                      highlight: {
+                        background: '#fb6a02',
+                        border: '#fb6a02'
+                      },
+                      hover: { background: '#ec3112', border: '#ec3112' }
+                    },
+                    chosen: {
+                      node(
+                        values: any,
+                        id: string,
+                        selected: boolean,
+                        hovering: boolean
+                      ) {
+                        if (hovering || selected) {
+                          values.shadow = true;
+                          values.shadowColor = 'rgba(0, 0, 0, 0.6)';
+                          values.shadowX = 0;
+                          values.shadowY = 0;
+                          values.shadowSize = 25;
+                        }
+
+                        if (selected) {
+                          values.size = 30;
+                        }
+                      }
+                    }
+                  });
+                }
+              );
+
+              dataAnalyzeStore.expandedGraphData.data.graph_view.edges.forEach(
+                edge => {
+                  visGraphEdges.add({
+                    ...edge,
+                    from: edge.source,
+                    to: edge.target,
+                    title: `
+                      <div class="tooltip-fields">
+                        <div>边类型：</div>
+                        <div>${edge.label}</div>
+                      </div>
+                      <div class="tooltip-fields">
+                        <div>边ID：</div>
+                        <div>${edge.id}</div>
+                      </div>
+                      ${Object.entries(edge.properties)
+                        .map(([key, value]) => {
+                          return `<div class="tooltip-fields">
+                                    <div>${key}: </div>
+                                    <div>${value}</div>
+                                  </div>
+                                `;
+                        })
+                        .join('')}
+                    `
+                  });
+                }
+              );
+
+              dataAnalyzeStore.resetRightClickedGraphData();
+              switchIsPopover(false);
+            } else {
+              Message.error({
+                content: dataAnalyzeStore.errorInfo.expandGraphNode.message,
+                size: 'medium',
+                showCloseIcon: false
+              });
+            }
+          }}
+        >
+          展开
+        </div>
+        <div
+          className="graph-pop-over-item"
+          onClick={() => {
+            dataAnalyzeStore.switchShowFilterBoard(true);
+            switchIsPopover(false);
+          }}
+        >
+          查询
+        </div>
+        <div
+          className="graph-pop-over-item"
+          onClick={() => {
+            if (visNetwork !== null) {
+              visGraphNodes.remove([dataAnalyzeStore.rightClickedGraphData.id]);
+              dataAnalyzeStore.hideGraphNode(
+                dataAnalyzeStore.rightClickedGraphData.id
+              );
+              dataAnalyzeStore.resetRightClickedGraphData();
+              switchIsPopover(false);
+            }
+          }}
+        >
+          隐藏
+        </div>
       </div>
     );
   }
 );
-
-const GraphPopover = observer(() => {
-  const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
-  const [isShowPopover, switchShowPopover] = useState(false);
-
-  return (
-    <div
-      className="graph-pop-over"
-      onContextMenu={e => e.preventDefault()}
-      style={{ display: isShowPopover ? 'block' : 'none' }}
-    >
-      <div
-        className="graph-pop-over-item"
-        onClick={() => {
-          switchShowPopover(false);
-          dataAnalyzeStore.expandGraphNode();
-        }}
-      >
-        展开
-      </div>
-      <div
-        className="graph-pop-over-item"
-        onClick={() => {
-          dataAnalyzeStore.clearFilteredGraphQueryOptions();
-          dataAnalyzeStore.switchShowFilterBoard(true);
-        }}
-      >
-        查询
-      </div>
-      <div
-        className="graph-pop-over-item"
-        onClick={() => {
-          switchShowPopover(false);
-          dataAnalyzeStore.hideGraphNode();
-        }}
-      >
-        隐藏
-      </div>
-    </div>
-  );
-});
 
 export default GraphQueryResult;

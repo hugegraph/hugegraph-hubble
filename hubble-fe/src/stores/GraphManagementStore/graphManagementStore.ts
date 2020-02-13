@@ -2,39 +2,14 @@ import { createContext } from 'react';
 import { observable, action, flow } from 'mobx';
 import axios, { AxiosResponse } from 'axios';
 
-export interface GraphData {
-  id: number;
-  name: string;
-  graph: string;
-  host: string;
-  port: number;
-  create_time: string;
-  username: string;
-}
-
-export interface GraphDataConfig {
-  [index: string]: string | undefined;
-  name: string;
-  graph: string;
-  host: string;
-  port: string;
-  username: string;
-  password: string;
-}
-
-export interface GraphDataPageConfig {
-  pageNumber: number;
-  pageSize: number;
-  pageTotal: number;
-}
-
-export interface GraphDataResponse {
-  status: number;
-  data: { records: GraphData[]; total: number };
-  message: string;
-}
-
-const baseUrl = 'http://localhost:8181/api/v1.1';
+import { baseUrl, responseData } from '../types/common';
+import {
+  LincenseInfo,
+  GraphData,
+  GraphDataConfig,
+  GraphDataPageConfig,
+  GraphDataResponse
+} from '../types/GraphManagementStore/graphManagementStore';
 
 export class GraphManagementStore {
   [key: string]: any;
@@ -51,8 +26,32 @@ export class GraphManagementStore {
   // values from the Search component
   @observable searchWords = '';
 
-  // message from failed request
-  @observable errorMessage = '';
+  @observable errorInfo = {
+    fetchLicenseInfo: {
+      code: NaN,
+      message: ''
+    },
+    fetchIdList: {
+      code: NaN,
+      message: ''
+    },
+    fetchGraphData: {
+      code: NaN,
+      message: ''
+    },
+    AddGraphData: {
+      code: NaN,
+      message: ''
+    },
+    upgradeGraphData: {
+      code: NaN,
+      message: ''
+    },
+    deleteGraphData: {
+      code: NaN,
+      message: ''
+    }
+  };
 
   // searched results rather than initial fetched result
   @observable.shallow isSearched = {
@@ -60,10 +59,15 @@ export class GraphManagementStore {
     value: ''
   };
 
+  // is sidebar in graphdata details has expanded
+  @observable isExpanded = false;
+
   // is clicekd submit or save to validate
   @observable isValidated = false;
 
   @observable.shallow requestStatus = {
+    fetchLicenseInfo: 'standby',
+    fetchIdList: 'standby',
     fetchGraphData: 'standby',
     AddGraphData: 'standby',
     upgradeGraphData: 'standby',
@@ -96,7 +100,9 @@ export class GraphManagementStore {
     password: ''
   };
 
+  @observable.ref idList: { id: number; name: string }[] = [];
   @observable.ref graphData: GraphData[] = [];
+  @observable.ref licenseInfo: LincenseInfo | null = null;
 
   @observable.shallow graphDataPageConfig: GraphDataPageConfig = {
     pageNumber: 1,
@@ -110,13 +116,15 @@ export class GraphManagementStore {
     this.showDeleteModal = false;
     this.selectedEditIndex = null;
     this.searchWords = '';
-    this.errorMessage = '';
     this.isSearched = {
       status: false,
       value: ''
     };
     this.isValidated = false;
+    this.isExpanded = false;
     this.requestStatus = {
+      fetchLicenseInfo: 'standby',
+      fetchIdList: 'standby',
       fetchGraphData: 'standby',
       AddGraphData: 'standby',
       upgradeGraphData: 'standby',
@@ -130,6 +138,7 @@ export class GraphManagementStore {
     };
     this.resetGraphDataConfig('new');
     this.resetGraphDataConfig('edit');
+    this.resetErrorInfo();
     this.resetValidateErrorMessage();
   }
 
@@ -141,6 +150,11 @@ export class GraphManagementStore {
   @action
   switchDeleteModal(flag: boolean) {
     this.showDeleteModal = flag;
+  }
+
+  @action
+  switchExpanded(flag: boolean) {
+    this.isExpanded = flag;
   }
 
   @action
@@ -266,17 +280,107 @@ export class GraphManagementStore {
   }
 
   @action
+  resetErrorInfo() {
+    this.errorInfo = {
+      fetchLicenseInfo: {
+        code: NaN,
+        message: ''
+      },
+      fetchIdList: {
+        code: NaN,
+        message: ''
+      },
+      fetchGraphData: {
+        code: NaN,
+        message: ''
+      },
+      AddGraphData: {
+        code: NaN,
+        message: ''
+      },
+      upgradeGraphData: {
+        code: NaN,
+        message: ''
+      },
+      deleteGraphData: {
+        code: NaN,
+        message: ''
+      }
+    };
+  }
+
+  @action
   resetValidateErrorMessage() {
     Object.keys(this.validateErrorMessage).forEach(key => {
       this.validateErrorMessage[key] = '';
     });
   }
 
+  fetchLicenseInfo = flow(function* fetchLicenseInfo(
+    this: GraphManagementStore
+  ) {
+    this.resetErrorInfo();
+    this.requestStatus.fetchLicenseInfo = 'pending';
+
+    try {
+      const result: AxiosResponse<responseData<LincenseInfo>> = yield axios.get(
+        '/about'
+      );
+
+      if (result.data.status !== 200) {
+        this.errorInfo.fetchLicenseInfo.code = result.data.status;
+        throw new Error(result.data.message);
+      }
+
+      this.licenseInfo = result.data.data;
+    } catch (error) {
+      this.requestStatus.fetchLicenseInfo = 'failed';
+      this.errorInfo.fetchLicenseInfo.message = error.message;
+      console.error(error.message);
+    }
+  });
+
+  fetchIdList = flow(function* fetchIdList(this: GraphManagementStore) {
+    this.resetErrorInfo();
+    this.requestStatus.fetchIdList = 'pending';
+
+    try {
+      const result: AxiosResponse<GraphDataResponse> = yield axios.get<
+        GraphData
+      >(baseUrl, {
+        params: {
+          page_size: -1
+        }
+      });
+
+      if (result.data.status === 200 || result.data.status === 401) {
+        if (result.data.status === 200) {
+          this.requestStatus.fetchIdList = 'success';
+        }
+
+        this.idList = result.data.data.records.map(({ id, name }) => ({
+          id,
+          name
+        }));
+      }
+
+      if (result.data.status !== 200) {
+        this.errorInfo.fetchIdList.code = result.data.status;
+        throw new Error(result.data.message);
+      }
+    } catch (error) {
+      this.requestStatus.fetchIdList = 'failed';
+      this.errorInfo.fetchIdList.message = error.message;
+      console.error(error.message);
+    }
+  });
+
   fetchGraphDataList = flow(function* fetchGraphDataList(
     this: GraphManagementStore
   ) {
+    this.resetErrorInfo();
     const url =
-      `${baseUrl}/graph-connections?page_no=${this.graphDataPageConfig.pageNumber}&page_size=${this.graphDataPageConfig.pageSize}` +
+      `${baseUrl}?page_no=${this.graphDataPageConfig.pageNumber}&page_size=${this.graphDataPageConfig.pageSize}` +
       (this.isSearched.status && this.searchWords !== ''
         ? `&content=${this.searchWords}`
         : '');
@@ -288,37 +392,49 @@ export class GraphManagementStore {
         GraphData
       >(url);
 
-      if (result.data.status !== 200) {
-        throw new Error(result.data.message);
+      if (result.data.status === 200 || result.data.status === 401) {
+        if (result.data.status === 200) {
+          this.requestStatus.fetchGraphData = 'success';
+        }
+
+        this.graphData = result.data.data.records;
+        this.graphDataPageConfig.pageTotal = result.data.data.total;
       }
 
-      this.graphData = result.data.data.records;
-      this.graphDataPageConfig.pageTotal = result.data.data.total;
-      this.requestStatus.fetchGraphData = 'success';
+      if (result.data.status !== 200) {
+        this.errorInfo.fetchGraphData.code = result.data.status;
+        throw new Error(result.data.message);
+      }
     } catch (error) {
       this.requestStatus.fetchGraphData = 'failed';
-      this.errorMessage = error.message;
+      this.errorInfo.fetchGraphData.message = error.message;
       console.error(error.message);
     }
   });
 
   AddGraphData = flow(function* AddGraphData(this: GraphManagementStore) {
+    this.resetErrorInfo();
     this.requestStatus.AddGraphData = 'pending';
     const filteredParams = filterParams(this.newGraphData);
 
     try {
       const result: AxiosResponse<GraphDataResponse> = yield axios.post<
         GraphDataResponse
-      >(`${baseUrl}/graph-connections`, filteredParams);
+      >(baseUrl, filteredParams);
 
-      if (result.data.status !== 200) {
-        throw new Error(result.data.message);
+      if (result.data.status === 200 || result.data.status === 401) {
+        if (result.data.status === 200) {
+          this.requestStatus.AddGraphData = 'success';
+        }
       }
 
-      this.requestStatus.AddGraphData = 'success';
+      if (result.data.status !== 200) {
+        this.errorInfo.AddGraphData.code = result.data.status;
+        throw new Error(result.data.message);
+      }
     } catch (error) {
       this.requestStatus.AddGraphData = 'failed';
-      this.errorMessage = error.message;
+      this.errorInfo.AddGraphData.message = error.message;
       console.error(error.message);
     }
   });
@@ -327,22 +443,28 @@ export class GraphManagementStore {
     this: GraphManagementStore,
     id: number
   ) {
+    this.resetErrorInfo();
     this.requestStatus.upgradeGraphData = 'pending';
     const filteredParams = filterParams(this.editGraphData);
 
     try {
       const result: AxiosResponse<GraphDataResponse> = yield axios.put<
         GraphDataResponse
-      >(`${baseUrl}/graph-connections/${id}`, filteredParams);
+      >(`${baseUrl}/${id}`, filteredParams);
 
-      if (result.data.status !== 200) {
-        throw new Error(result.data.message);
+      if (result.data.status === 200 || result.data.status === 401) {
+        if (result.data.status === 200) {
+          this.requestStatus.upgradeGraphData = 'success';
+        }
       }
 
-      this.requestStatus.upgradeGraphData = 'success';
+      if (result.data.status !== 200) {
+        this.errorInfo.upgradeGraphData.code = result.data.status;
+        throw new Error(result.data.message);
+      }
     } catch (error) {
       this.requestStatus.upgradeGraphData = 'failed';
-      this.errorMessage = error.message;
+      this.errorInfo.upgradeGraphData.message = error.message;
       console.error(error.message);
     }
   });
@@ -351,30 +473,36 @@ export class GraphManagementStore {
     this: GraphManagementStore,
     id
   ) {
+    this.resetErrorInfo();
     this.requestStatus.deleteGraphData = 'pending';
 
     try {
       const result: AxiosResponse<GraphDataResponse> = yield axios.delete<
         GraphDataResponse
-      >(`${baseUrl}/graph-connections/${id}`);
+      >(`${baseUrl}/${id}`);
+
+      if (result.data.status === 200 || result.data.status === 401) {
+        if (result.data.status === 200) {
+          this.requestStatus.deleteGraphData = 'success';
+        }
+
+        // if current pageNumber has no data after delete, set the pageNumber to the previous
+        if (
+          this.graphData.length === 1 &&
+          this.graphDataPageConfig.pageNumber > 1
+        ) {
+          this.graphDataPageConfig.pageNumber =
+            this.graphDataPageConfig.pageNumber - 1;
+        }
+      }
 
       if (result.data.status !== 200) {
+        this.errorInfo.deleteGraphData.code = result.data.status;
         throw new Error(result.data.message);
       }
-
-      // if current pageNumber has no data after delete, set the pageNumber to the previous
-      if (
-        this.graphData.length === 1 &&
-        this.graphDataPageConfig.pageNumber > 1
-      ) {
-        this.graphDataPageConfig.pageNumber =
-          this.graphDataPageConfig.pageNumber - 1;
-      }
-
-      this.requestStatus.deleteGraphData = 'success';
     } catch (error) {
       this.requestStatus.deleteGraphData = 'failed';
-      this.errorMessage = error.message;
+      this.errorInfo.deleteGraphData.message = error.message;
       console.error(error.message);
     }
   });

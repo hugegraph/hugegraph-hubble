@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import { observer } from 'mobx-react';
 
 import { GraphManagementStoreContext } from '../../stores';
+import GraphManagementLimitHint from './GraphManagementLimitHint';
 import GraphManagementHeader from './GraphManagementHeader';
 import NewGraphConfig from './NewGraphConfig';
 import GraphManagementList from './GraphManagementList';
@@ -13,6 +14,7 @@ const GraphManagement: React.FC = observer(() => {
   const graphManagementStore = useContext(GraphManagementStoreContext);
 
   useEffect(() => {
+    graphManagementStore.fetchLicenseInfo();
     graphManagementStore.fetchGraphDataList();
 
     return () => {
@@ -22,6 +24,7 @@ const GraphManagement: React.FC = observer(() => {
 
   return (
     <section className="graph-management">
+      <GraphManagementLimitHint />
       <GraphManagementHeader />
       <NewGraphConfig />
       <GraphManagementEmptyList />

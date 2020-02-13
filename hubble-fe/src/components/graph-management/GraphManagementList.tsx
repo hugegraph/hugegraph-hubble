@@ -7,16 +7,31 @@ import {
   Dropdown,
   Pagination,
   Modal,
-  Message
+  Message,
+  Tooltip
 } from '@baidu/one-ui';
 import { useLocation } from 'wouter';
 import Highlighter from 'react-highlight-words';
+
 import { GraphManagementStoreContext } from '../../stores';
+import HintIcon from '../../assets/imgs/ic_question_mark.svg';
 
 const dropdownList = [
   {
     label: '编辑',
     value: 'edit'
+  },
+  {
+    label: '删除',
+    value: 'delete'
+  }
+];
+
+const disabledDropdownList = [
+  {
+    label: '编辑',
+    value: 'edit',
+    disabled: true
   },
   {
     label: '删除',
@@ -68,7 +83,7 @@ const GraphManagementList: React.FC = observer(() => {
       {graphManagementStore.graphData.map((data, index) => (
         <GraphManagementListItem {...data} index={index} key={data.id} />
       ))}
-      <div style={{ position: 'relative' }}>
+      <div style={{ position: 'relative', marginTop: 16 }}>
         {graphManagementStore.graphDataPageConfig.pageTotal > 1 &&
           (graphManagementStore.showCreateNewGraph ||
             graphManagementStore.selectedEditIndex !== null) && (
@@ -78,7 +93,8 @@ const GraphManagementList: React.FC = observer(() => {
                 background: 'rgba(255, 255, 255, 0.5)',
                 width,
                 height: 33,
-                left: `calc(540px - ${width / 2}px)`
+                left: `calc(540px - ${width / 2}px)`,
+                zIndex: 9
               }}
             ></div>
           )}
@@ -98,7 +114,7 @@ const GraphManagementList: React.FC = observer(() => {
 });
 
 const GraphManagementListItem = observer(
-  ({ id, name, graph, host, port, create_time, index }) => {
+  ({ id, name, graph, host, port, enabled, create_time, index }) => {
     const graphManagementStore = useContext(GraphManagementStoreContext);
     const [_, setLocation] = useLocation();
     const [isEditing, setEditingState] = useState(false);
@@ -133,7 +149,7 @@ const GraphManagementListItem = observer(
 
       if (graphManagementStore.requestStatus.upgradeGraphData === 'failed') {
         Message.error({
-          content: graphManagementStore.errorMessage,
+          content: graphManagementStore.errorInfo.upgradeGraphData.message,
           size: 'medium',
           showCloseIcon: false
         });
@@ -175,7 +191,8 @@ const GraphManagementListItem = observer(
                 graphManagementStore.requestStatus.deleteGraphData === 'failed'
               ) {
                 Message.error({
-                  content: graphManagementStore.errorMessage,
+                  content:
+                    graphManagementStore.errorInfo.deleteGraphData.message,
                   size: 'medium',
                   showCloseIcon: false
                 });
@@ -201,7 +218,14 @@ const GraphManagementListItem = observer(
         <div className="graph-management-list-create-content">
           <div>
             <div>
-              <span>图ID：</span>
+              <span>图ID:</span>
+              <Tooltip
+                placement="right"
+                title="为创建的图设置唯一标识的ID"
+                type="dark"
+              >
+                <img src={HintIcon} alt="hint" />
+              </Tooltip>
               <Input
                 {...isRequiredInputProps}
                 maxLen={48}
@@ -220,7 +244,14 @@ const GraphManagementListItem = observer(
               />
             </div>
             <div>
-              <span>图名称：</span>
+              <span>图名称:</span>
+              <Tooltip
+                placement="right"
+                title="填写需要连接的图的名称"
+                type="dark"
+              >
+                <img src={HintIcon} alt="hint" />
+              </Tooltip>
               <Input
                 {...isRequiredInputProps}
                 maxLen={48}
@@ -239,7 +270,7 @@ const GraphManagementListItem = observer(
               />
             </div>
             <div>
-              <span>主机名：</span>
+              <span>主机名:</span>
               <Input
                 {...isRequiredInputProps}
                 placeholder="请输入主机名"
@@ -257,7 +288,7 @@ const GraphManagementListItem = observer(
               />
             </div>
             <div>
-              <span>端口号：</span>
+              <span>端口号:</span>
               <Input
                 {...isRequiredInputProps}
                 placeholder="请输入端口号"
@@ -275,7 +306,7 @@ const GraphManagementListItem = observer(
               />
             </div>
             <div>
-              <span>用户名：</span>
+              <span>用户名:</span>
               <Input
                 {...commonInputProps}
                 errorMessage={
@@ -294,7 +325,7 @@ const GraphManagementListItem = observer(
               />
             </div>
             <div>
-              <span>密码：</span>
+              <span>密码:</span>
               <Input
                 {...commonInputProps}
                 errorMessage={
@@ -388,6 +419,7 @@ const GraphManagementListItem = observer(
             size="medium"
             style={{ width: 78, marginRight: 12 }}
             disabled={
+              !enabled ||
               graphManagementStore.showCreateNewGraph === true ||
               (graphManagementStore.selectedEditIndex !== null &&
                 graphManagementStore.selectedEditIndex !== index)
@@ -397,7 +429,7 @@ const GraphManagementListItem = observer(
             访问
           </Button>
           <Dropdown.Button
-            options={dropdownList}
+            options={enabled ? dropdownList : disabledDropdownList}
             title="更多"
             size="medium"
             trigger={['click']}

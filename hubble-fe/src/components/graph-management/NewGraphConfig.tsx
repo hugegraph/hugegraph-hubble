@@ -1,7 +1,9 @@
 import React, { useContext, useCallback } from 'react';
 import { observer } from 'mobx-react';
-import { Embedded, Input, Button, Message } from '@baidu/one-ui';
+import { Embedded, Input, Button, Message, Tooltip } from '@baidu/one-ui';
+
 import { GraphManagementStoreContext } from '../../stores';
+import HintIcon from '../../assets/imgs/ic_question_mark.svg';
 
 const commonInputProps = {
   size: 'medium',
@@ -46,7 +48,7 @@ const NewGraphConfig: React.FC = observer(() => {
 
     if (graphManagementStore.requestStatus.AddGraphData === 'failed') {
       Message.error({
-        content: graphManagementStore.errorMessage,
+        content: graphManagementStore.errorInfo.AddGraphData.message,
         size: 'medium',
         showCloseIcon: false
       });
@@ -63,7 +65,14 @@ const NewGraphConfig: React.FC = observer(() => {
       <div className="graph-management-list-create-content">
         <div>
           <div>
-            <span>图ID：</span>
+            <span>图ID:</span>
+            <Tooltip
+              placement="right"
+              title="为创建的图设置唯一标识的ID"
+              type="dark"
+            >
+              <img src={HintIcon} alt="hint" />
+            </Tooltip>
             <Input
               {...isRequiredInputProps}
               maxLen={48}
@@ -82,7 +91,14 @@ const NewGraphConfig: React.FC = observer(() => {
             />
           </div>
           <div>
-            <span>图名称：</span>
+            <span>图名称:</span>
+            <Tooltip
+              placement="right"
+              title="填写需要连接的图的名称"
+              type="dark"
+            >
+              <img src={HintIcon} alt="hint" />
+            </Tooltip>
             <Input
               {...isRequiredInputProps}
               maxLen={48}
@@ -101,7 +117,7 @@ const NewGraphConfig: React.FC = observer(() => {
             />
           </div>
           <div>
-            <span>主机名：</span>
+            <span>主机名:</span>
             <Input
               {...isRequiredInputProps}
               placeholder="请输入主机名"
@@ -119,7 +135,7 @@ const NewGraphConfig: React.FC = observer(() => {
             />
           </div>
           <div>
-            <span>端口号：</span>
+            <span>端口号:</span>
             <Input
               {...isRequiredInputProps}
               placeholder="请输入端口号"
@@ -137,7 +153,7 @@ const NewGraphConfig: React.FC = observer(() => {
             />
           </div>
           <div>
-            <span>用户名：</span>
+            <span>用户名:</span>
             <Input
               {...commonInputProps}
               placeholder="未设置则无需填写"
@@ -157,7 +173,7 @@ const NewGraphConfig: React.FC = observer(() => {
             />
           </div>
           <div>
-            <span>密码：</span>
+            <span>密码:</span>
             <Input
               {...commonInputProps}
               placeholder="未设置则无需填写"

@@ -1,6 +1,6 @@
 import React, { useState, useContext, useCallback } from 'react';
 import { observer } from 'mobx-react';
-import { Button, Input, Message, Alert } from '@baidu/one-ui';
+import { Button, Input, Message } from '@baidu/one-ui';
 
 import { DataAnalyzeStoreContext } from '../../../../stores';
 
@@ -18,7 +18,10 @@ const styles = {
     marginRight: 12
   },
   alert: {
-    margin: '16px 0'
+    width: 320,
+    fontSize: 12,
+    marginTop: 4,
+    color: '#f5535b'
   }
 };
 
@@ -36,18 +39,19 @@ const Favorite: React.FC<FavoriteProps> = observer(
       await dataAnalyzeStore.addQueryCollection(inputValue, queryStatement);
 
       if (dataAnalyzeStore.requestStatus.addQueryCollection === 'success') {
+        dataAnalyzeStore.setFavoritePopUp('');
         handlePop(false);
         setInputValue('');
 
         Message.success({
-          content: '收藏成功',
+          content: isEdit ? '修改成功' : '收藏成功',
           size: 'medium',
           showCloseIcon: false
         });
 
         dataAnalyzeStore.fetchFavoriteQueries();
       }
-    }, [dataAnalyzeStore, handlePop, inputValue, queryStatement]);
+    }, [dataAnalyzeStore, handlePop, inputValue, isEdit, queryStatement]);
 
     const handleEditQueryCollection = useCallback(async () => {
       await dataAnalyzeStore.editQueryCollection(
@@ -57,6 +61,7 @@ const Favorite: React.FC<FavoriteProps> = observer(
       );
 
       if (dataAnalyzeStore.requestStatus.editQueryCollection === 'success') {
+        dataAnalyzeStore.setFavoritePopUp('');
         handlePop(false);
         setInputValue('');
 
@@ -70,10 +75,15 @@ const Favorite: React.FC<FavoriteProps> = observer(
       }
     }, [dataAnalyzeStore, handlePop, id, inputValue, queryStatement]);
 
-    const handleCancel = useCallback(() => {
-      handlePop(false);
-      setInputValue(initialText);
-    }, [handlePop, initialText]);
+    const handleCancel = useCallback(
+      (type: 'add' | 'edit') => () => {
+        handlePop(false);
+        dataAnalyzeStore.setFavoritePopUp('');
+        setInputValue(initialText);
+        dataAnalyzeStore.resetFavoriteRequestStatus(type);
+      },
+      [dataAnalyzeStore, handlePop, initialText]
+    );
 
     return (
       <div className="data-analyze">
@@ -83,6 +93,7 @@ const Favorite: React.FC<FavoriteProps> = observer(
             size="large"
             width={320}
             maxLen={48}
+            countMode="en"
             placeholder="请输入收藏名称"
             value={inputValue}
             onChange={handleChange}
@@ -90,23 +101,15 @@ const Favorite: React.FC<FavoriteProps> = observer(
           />
           {dataAnalyzeStore.requestStatus.addQueryCollection === 'failed' &&
             isEdit === false && (
-              <Alert
-                content={dataAnalyzeStore.errorInfo.addQueryCollection.message}
-                type="error"
-                title="错误"
-                showIcon
-                style={styles.alert}
-              />
+              <div style={styles.alert}>
+                {dataAnalyzeStore.errorInfo.addQueryCollection.message}
+              </div>
             )}
           {dataAnalyzeStore.requestStatus.editQueryCollection === 'failed' &&
             isEdit === true && (
-              <Alert
-                content={dataAnalyzeStore.errorInfo.editQueryCollection.message}
-                type="error"
-                title="错误"
-                showIcon
-                style={styles.alert}
-              />
+              <div style={styles.alert}>
+                {dataAnalyzeStore.errorInfo.editQueryCollection.message}
+              </div>
             )}
           <div className="query-tab-favorite-footer">
             <Button
@@ -126,7 +129,7 @@ const Favorite: React.FC<FavoriteProps> = observer(
                 marginLeft: 12,
                 width: 60
               }}
-              onClick={handleCancel}
+              onClick={handleCancel(isEdit ? 'edit' : 'add')}
             >
               取消
             </Button>

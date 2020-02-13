@@ -1,6 +1,17 @@
 .data-analyze {
   position: relative;
 
+  // preload images which in hover state to solve blink issue
+  &::after {
+    position: absolute;
+    overflow: hidden;
+    left: -20000px;
+    content:
+      url(../../../assets/imgs/ic_tuzhanshi_hover.svg)
+      url(../../../assets/imgs/ic_biaoge_hover.svg)
+      url(../../../assets/imgs/ic_json_hover.svg);
+  }
+
   &-sidebar {
     width: 60px;
     height: calc(100vh - 60px);
@@ -105,6 +116,7 @@
 
       &.selected {
         background: #f2f7ff;
+        color: #2b65ff;
       }
 
       & > span {
@@ -196,6 +208,11 @@
       text-align: center;
       line-height: 20px;
       cursor: pointer;
+      -moz-user-select: none; /* ff */
+      -webkit-user-select: none; /* webkit */
+      -ms-user-select: none; /* IE10 */
+      -khtml-user-select: none; /* obsolete */
+      user-select: none;
 
       &.active {
         background-color: #fff;
@@ -241,6 +258,7 @@
         '微软雅黑',
         Arial,
         sans-serif;
+      font-weight: bold;
       color: #000;
       letter-spacing: 0;
     }
@@ -294,11 +312,21 @@
 
   .query-result {
     display: flex;
-    height: 700px;
-    margin-top: 16px;
+    height: calc(100vh - 312px);
+    margin-top: 24px;
     background: #fff;
     border-radius: 3px;
-    // position: relative;
+
+    &.query-result-fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 99;
+      margin-top: 0;
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+    }
 
     &-sidebar {
       width: 61px;
@@ -403,7 +431,7 @@
     &-content {
       width: 100%;
       height: 100%;
-      padding: 24px 16px;
+      padding: 8px;
       overflow: auto;
       position: relative;
 
@@ -418,29 +446,39 @@
       }
 
       &-manipulations {
-        height: 20px;
+        width: 100%;
         display: flex;
-        margin-bottom: 16px;
-        justify-content: flex-end;
+        justify-content: space-between;
+        padding: 9px;
+        align-items: center;
         font-size: 14px;
+        position: absolute;
+        background: #fff;
+        z-index: 5;
+        top: 0;
+        left: 0;
 
-        & > img {
-          cursor: pointer;
-          margin-right: 19.7px;
+        &.fullscreen {
+          width: calc(100% - 18px);
         }
 
-        & > span {
-          cursor: pointer;
-          line-height: 17 px;
+        & > div:last-child {
+          display: flex;
+          align-items: center;
+        }
 
-          &:nth-of-type(1) {
-            margin-right: 18.2px;
+        & img {
+          cursor: pointer;
+          margin-right: 19.7px;
+
+          &:last-child {
+            margin-right: 8px;
           }
         }
       }
 
       &-empty {
-        height: 616px;
+        height: calc(100vh - 328px);
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -460,6 +498,7 @@
       position: absolute;
       left: 0;
       top: 0;
+      z-index: 6;
       font-size: 14px;
       cursor: default;
 
@@ -499,7 +538,6 @@
 
       &-property-filter {
         padding: 14px 14px 0;
-        // border-top: 1px solid #e0e0e0;
 
         & > div {
           & > span {
@@ -543,7 +581,7 @@
     .exec-log-status {
       width: 63px;
       font-size: 12px;
-      border-radius: 100px;
+      border-radius: 2px;
       text-align: center;
 
       &.success {
@@ -628,18 +666,32 @@
     }
   }
 
-  .graph-svg-wrapper {
-    width: 100%;
-    height: 616px;
-    // position: relative;
-    cursor: pointer;
+  .graph-wrapper {
+    width: calc(100% + 18px);
+    position: relative;
+    height: calc(100vh - 310px);
   }
 
-  .full-screen-graph-svg-wrapper {
-    .graph-svg-wrapper();
+  .full-screen-graph-wrapper {
+    position: relative;
+    width: calc(100vw + 18px);
+    height: calc(100vh + 18px);
+  }
 
-    width: calc(100vw - 93px);
-    height: calc(100vh - 84px);
+  .graph-loading-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 9;
+    cursor: default;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 
   .graph-pop-over {
@@ -650,9 +702,9 @@
     border-radius: 3px;
     box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
     position: absolute;
-    // display: none;
     left: 0;
     top: 0;
+    z-index: 5;
 
     &-item {
       font-size: 14px;
@@ -682,6 +734,7 @@
         '微软雅黑',
         Arial,
         sans-serif;
+      font-weight: bold;
       color: #000;
       letter-spacing: 0;
     }
@@ -699,7 +752,7 @@
     }
   }
 
-  .query-reuslt-loading-bg {
+  .query-result-loading-bg {
     width: 144px;
     height: 144px;
     position: relative;
@@ -727,6 +780,26 @@
     to {
       transform: rotate(360deg);
     }
+  }
+}
+
+.tooltip-fields {
+  display: flex;
+  max-width: 240px;
+
+  & > div:first-child {
+    width: 60px;
+    margin-right: 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  & > div:last-child {
+    max-width: 175px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -803,9 +876,7 @@
 }
 
 .CodeMirror {
-  // height: 120px;
   height: auto;
-  // max-height: 150px;
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -817,6 +888,7 @@
     '微软雅黑',
     Arial,
     sans-serif;
+  font-weight: bold;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 14px;
@@ -833,14 +905,6 @@
   .CodeMirror-scroll {
     max-height: 120px;
   }
-
-  // .CodeMirror-lines {
-  //   padding-left: 10px;
-  // }
-
-  // .CodeMirror-linenumber.CodeMirror-gutter-elt {
-  //   left: -18px !important;
-  // }
 }
 
 .query-tab-code-edit.isLoading {
@@ -851,4 +915,19 @@
   .CodeMirror-lines {
     cursor: not-allowed;
   }
+}
+
+// override
+div.vis-tooltip {
+  position: absolute;
+  visibility: hidden;
+  padding: 12px;
+  font-size: 12px;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.8);
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  pointer-events: none;
+  z-index: 5;
 }

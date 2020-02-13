@@ -6,7 +6,6 @@ import { AppStoreContext } from '../../stores';
 import './AppBar.less';
 
 const AppBar: React.FC = observer(() => {
-  const appStore = useContext(AppStoreContext);
   const [_, setLocation] = useLocation();
 
   const setRoute = useCallback(
@@ -28,7 +27,7 @@ const AppBar: React.FC = observer(() => {
         </div>
       </div>
       <div className="navigator-additions">
-        <span>{appStore.user}</span>
+        <span></span>
       </div>
     </nav>
   );

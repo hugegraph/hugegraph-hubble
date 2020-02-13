@@ -1,6 +1,8 @@
 import React, { useContext, useCallback } from 'react';
 import { observer } from 'mobx-react';
 import { Select, Input, NumberBox, Calendar } from '@baidu/one-ui';
+import vis from 'vis-network';
+import { Message } from '@baidu/one-ui';
 
 import { DataAnalyzeStoreContext } from '../../../../stores';
 
@@ -25,14 +27,18 @@ const getRuleOptions = (ruleType: string = '') => {
   }
 };
 
-const QueryFilterOptions: React.FC = observer(() => {
+const QueryFilterOptions: React.FC<{
+  visNetwork: vis.Network | null;
+  visGraphNodes: vis.DataSetNodes;
+  visGraphEdges: vis.DataSetEdges;
+}> = observer(({ visNetwork, visGraphNodes, visGraphEdges }) => {
   const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
   const line = dataAnalyzeStore.filteredGraphQueryOptions.line;
   const properties = dataAnalyzeStore.filteredGraphQueryOptions.properties;
   const lastProperty = properties[properties.length - 1];
 
   // value of the corresponding revealed form should not be empty
-  const allowAddProperties =
+  const allowSendFilterRequest =
     (properties.length === 0 && line.type !== '') ||
     (lastProperty &&
       lastProperty.property !== '' &&
@@ -40,17 +46,27 @@ const QueryFilterOptions: React.FC = observer(() => {
       lastProperty.value !== '') ||
     (lastProperty &&
       (lastProperty.rule === 'True' || lastProperty.rule === 'False'));
-  const allowSendFilterRequest = allowAddProperties;
+
+  const allowAddProperties =
+    allowSendFilterRequest &&
+    dataAnalyzeStore.filteredPropertyOptions.length !== 0 &&
+    dataAnalyzeStore.filteredGraphQueryOptions.properties.length !==
+      dataAnalyzeStore.filteredPropertyOptions.length;
 
   const handleEdgeSelectChange = useCallback(
     (key: 'type' | 'direction') => (value: string) => {
       dataAnalyzeStore.editEdgeFilterOption(key, value);
+      dataAnalyzeStore.fetchFilteredPropertyOptions(value);
     },
     [dataAnalyzeStore]
   );
 
   const handlePropertyChange = useCallback(
-    (key: 'property' | 'rule' | 'value', value: string, index: number) => {
+    (
+      key: 'property' | 'rule' | 'value',
+      value: string | number,
+      index: number
+    ) => {
       dataAnalyzeStore.editPropertyFilterOption(key, value, index);
     },
     [dataAnalyzeStore]
@@ -91,7 +107,7 @@ const QueryFilterOptions: React.FC = observer(() => {
             step={1}
             value={value}
             onChange={(e: any) => {
-              handlePropertyChange('value', e.target.value, index);
+              handlePropertyChange('value', Number(e.target.value), index);
             }}
             disabled={shouldDisabled}
           />
@@ -146,13 +162,12 @@ const QueryFilterOptions: React.FC = observer(() => {
           <Select
             size="medium"
             trigger="click"
-            showSearch={true}
             value={dataAnalyzeStore.filteredGraphQueryOptions.line.type}
             width={180}
             onChange={handleEdgeSelectChange('type')}
             dropdownClassName="data-analyze-sidebar-select"
           >
-            {dataAnalyzeStore.GraphDataTypes.map(type => (
+            {dataAnalyzeStore.graphDataEdgeTypes.map(type => (
               <Select.Option value={type} key={type}>
                 {type}
               </Select.Option>
@@ -183,9 +198,124 @@ const QueryFilterOptions: React.FC = observer(() => {
             style={{
               color: allowSendFilterRequest ? '#2b65ff' : '#ccc'
             }}
-            onClick={() => {
-              dataAnalyzeStore.filterGraphData();
-              dataAnalyzeStore.switchShowFilterBoard(false);
+            onClick={async () => {
+              if (!allowSendFilterRequest) {
+                return;
+              }
+
+              await dataAnalyzeStore.filterGraphData();
+
+              if (
+                dataAnalyzeStore.requestStatus.filteredGraphData === 'success'
+              ) {
+                dataAnalyzeStore.expandedGraphData.data.graph_view.vertices.forEach(
+                  ({ id, label, properties }) => {
+                    visGraphNodes.add({
+                      id,
+                      label: id.length <= 15 ? id : id.slice(0, 15) + '...',
+                      vLabel: label,
+                      properties,
+                      title: `
+                          <div class="tooltip-fields">
+                            <div>顶点类型：</div>
+                            <div>${label}</div>
+                          </div>
+                          <div class="tooltip-fields">
+                            <div>顶点ID：</div>
+                            <div>${id}</div>
+                          </div>
+                          ${Object.entries(properties)
+                            .map(([key, value]) => {
+                              return `<div class="tooltip-fields">
+                                        <div>${key}: </div>
+                                        <div>${value}</div>
+                                      </div>
+                                      `;
+                            })
+                            .join('')}
+                        `,
+                      color: {
+                        background:
+                          dataAnalyzeStore.colorMappings[label] || '#5c73e6',
+                        border:
+                          dataAnalyzeStore.colorMappings[label] || '#5c73e6',
+                        highlight: {
+                          background: '#fb6a02',
+                          border: '#fb6a02'
+                        },
+                        hover: { background: '#ec3112', border: '#ec3112' }
+                      },
+                      chosen: {
+                        node(
+                          values: any,
+                          id: string,
+                          selected: boolean,
+                          hovering: boolean
+                        ) {
+                          if (hovering || selected) {
+                            values.shadow = true;
+                            values.shadowColor = 'rgba(0, 0, 0, 0.6)';
+                            values.shadowX = 0;
+                            values.shadowY = 0;
+                            values.shadowSize = 25;
+                          }
+
+                          if (selected) {
+                            values.size = 30;
+                          }
+                        }
+                      }
+                    });
+                  }
+                );
+
+                dataAnalyzeStore.expandedGraphData.data.graph_view.edges.forEach(
+                  edge => {
+                    visGraphEdges.add({
+                      ...edge,
+                      from: edge.source,
+                      to: edge.target,
+                      title: `
+                        <div class="tooltip-fields">
+                          <div>边类型：</div>
+                          <div>${edge.label}</div>
+                        </div>
+                        <div class="tooltip-fields">
+                          <div>边ID：</div>
+                          <div>${edge.id}</div>
+                        </div>
+                        ${Object.entries(edge.properties)
+                          .map(([key, value]) => {
+                            return `<div class="tooltip-fields">
+                                      <div>${key}: </div>
+                                      <div>${value}</div>
+                                    </div>`;
+                          })
+                          .join('')}
+                      `
+                    });
+                  }
+                );
+
+                // highlight new vertices
+                if (visNetwork !== null) {
+                  visNetwork.selectNodes(
+                    dataAnalyzeStore.expandedGraphData.data.graph_view.vertices
+                      .map(({ id }) => id)
+                      .concat([dataAnalyzeStore.rightClickedGraphData.id]),
+                    true
+                  );
+                }
+
+                dataAnalyzeStore.switchShowFilterBoard(false);
+                dataAnalyzeStore.clearFilteredGraphQueryOptions();
+              } else {
+                Message.error({
+                  content: dataAnalyzeStore.errorInfo.filteredGraphData.message,
+                  size: 'medium',
+                  showCloseIcon: false
+                });
+              }
             }}
           >
             筛选
@@ -194,6 +324,10 @@ const QueryFilterOptions: React.FC = observer(() => {
             onClick={() => {
               dataAnalyzeStore.switchShowFilterBoard(false);
               dataAnalyzeStore.clearFilteredGraphQueryOptions();
+
+              if (visNetwork) {
+                visNetwork.unselectAll();
+              }
             }}
           >
             取消
@@ -216,22 +350,37 @@ const QueryFilterOptions: React.FC = observer(() => {
                   size="medium"
                   trigger="click"
                   value={property}
+                  showSearch
                   width={180}
                   onChange={(value: string) => {
                     handlePropertyChange('property', value, index);
                     handlePropertyChange('rule', '', index);
-                    handlePropertyChange('value', '', index);
+
+                    if (
+                      ['byte', 'int', 'long'].includes(
+                        dataAnalyzeStore.valueTypes[value].toLowerCase()
+                      )
+                    ) {
+                      // set default value to 0
+                      handlePropertyChange('value', 0, index);
+                    } else {
+                      handlePropertyChange('value', '', index);
+                    }
                   }}
                   dropdownClassName="data-analyze-sidebar-select"
                 >
-                  {Object.keys(
-                    dataAnalyzeStore.graphData.data.graph_view.edges[0]
-                      .properties
-                  ).map(prop => (
-                    <Select.Option value={prop} key={prop}>
-                      {prop}
-                    </Select.Option>
-                  ))}
+                  {dataAnalyzeStore.filteredPropertyOptions
+                    .filter(
+                      option =>
+                        !dataAnalyzeStore.filteredGraphQueryOptions.properties
+                          .map(property => property.property)
+                          .includes(option)
+                    )
+                    .map(prop => (
+                      <Select.Option value={prop} key={prop}>
+                        {prop}
+                      </Select.Option>
+                    ))}
                 </Select>
               </div>
               <div>

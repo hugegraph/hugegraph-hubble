@@ -1,15 +1,37 @@
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useRef, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Drawer } from '@baidu/one-ui';
 
 import { DataAnalyzeStoreContext } from '../../../stores';
-import { GraphNode } from '../../../stores/GraphManagementStore/dataAnalyzeStore';
 
 const DataAnalyzeDrawer: React.FC = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
 
   const handleDrawerClose = useCallback(() => {
     dataAnalyzeStore.switchShowScreenInfo(false);
+  }, [dataAnalyzeStore]);
+
+  useEffect(() => {
+    const handleOutSideClick = (e: MouseEvent) => {
+      const drawerWrapper = document.querySelector(
+        '.new-fc-one-drawer-content-wrapper'
+      );
+
+      if (
+        dataAnalyzeStore.isShowGraphInfo &&
+        !dataAnalyzeStore.isClickOnNodeOrEdge &&
+        drawerWrapper &&
+        !drawerWrapper.contains(e.target as Element)
+      ) {
+        dataAnalyzeStore.switchShowScreenInfo(false);
+      }
+    };
+
+    document.addEventListener('click', handleOutSideClick, false);
+
+    return () => {
+      document.removeEventListener('click', handleOutSideClick, false);
+    };
   }, [dataAnalyzeStore]);
 
   return (
@@ -30,11 +52,10 @@ const DataAnalyzeDrawer: React.FC = observer(() => {
               <div>顶点ID：</div>
               <div>{dataAnalyzeStore.selectedGraphData.id}</div>
             </div>
-            <div>属性：</div>
             {Object.keys(dataAnalyzeStore.selectedGraphData.properties).map(
               key => (
                 <div className="data-analyze-graph-node-info-item" key={key}>
-                  <div>{key}</div>
+                  <div>{key}: </div>
                   <div>
                     {dataAnalyzeStore.selectedGraphData.properties[key]}
                   </div>
@@ -49,28 +70,21 @@ const DataAnalyzeDrawer: React.FC = observer(() => {
               <div>{dataAnalyzeStore.selectedGraphLinkData.label}</div>
             </div>
             <div className="data-analyze-graph-node-info-item">
+              <div>边ID：</div>
+              <div>{dataAnalyzeStore.selectedGraphLinkData.id}</div>
+            </div>
+            <div className="data-analyze-graph-node-info-item">
               <div>起点：</div>
-              <div>
-                {
-                  (dataAnalyzeStore.selectedGraphLinkData.source as GraphNode)
-                    .id
-                }
-              </div>
+              <div>{dataAnalyzeStore.selectedGraphLinkData.source}</div>
             </div>
             <div className="data-analyze-graph-node-info-item">
               <div>终点：</div>
-              <div>
-                {
-                  (dataAnalyzeStore.selectedGraphLinkData.target as GraphNode)
-                    .id
-                }
-              </div>
+              <div>{dataAnalyzeStore.selectedGraphLinkData.target}</div>
             </div>
-            <div>属性：</div>
             {Object.keys(dataAnalyzeStore.selectedGraphLinkData.properties).map(
               key => (
                 <div className="data-analyze-graph-node-info-item" key={key}>
-                  <div>{key}</div>
+                  <div>{key}: </div>
                   <div>
                     {dataAnalyzeStore.selectedGraphLinkData.properties[key]}
                   </div>

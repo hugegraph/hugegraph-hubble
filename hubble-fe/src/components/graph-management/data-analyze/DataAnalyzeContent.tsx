@@ -4,38 +4,28 @@ import classnames from 'classnames';
 
 import QueryAndAlgorithmLibrary from './QueryAndAlgorithmLibrary';
 import { QueryResult } from './query-result';
-import FullScreenQueryResult from './FullScreenQueryResult';
 import ExecLogAndQueryCollections from './ExecLogAndQueryCollections';
+import { GraphManagementStoreContext } from '../../../stores';
 
-export interface DataAnalyzeContentProps {
-  isExpand: boolean;
-}
+const DataAnalyzeContent: React.FC = observer(() => {
+  const graphManagementStore = useContext(GraphManagementStoreContext);
+  const [queryResultSidebarIndex, setQueryResultSidebarIndex] = useState(0);
 
-const DataAnalyzeContent: React.FC<DataAnalyzeContentProps> = observer(
-  ({ isExpand }) => {
-    const [queryResultSidebarIndex, setQueryResultSidebarIndex] = useState(0);
-    const wrapperClassName = classnames({
-      'data-analyze-content': true,
-      'sidebar-expand': isExpand
-    });
+  const wrapperClassName = classnames({
+    'data-analyze-content': true,
+    'sidebar-expand': graphManagementStore.isExpanded
+  });
 
-    return (
-      <div className={wrapperClassName}>
-        <QueryAndAlgorithmLibrary />
-        <QueryResult
-          sidebarIndex={queryResultSidebarIndex}
-          handleSetSidebarIndex={setQueryResultSidebarIndex}
-          isFullScreen={false}
-        />
-        <FullScreenQueryResult
-          sidebarIndex={queryResultSidebarIndex}
-          handleSetSidebarIndex={setQueryResultSidebarIndex}
-          isFullScreen={true}
-        />
-        <ExecLogAndQueryCollections />
-      </div>
-    );
-  }
-);
+  return (
+    <div className={wrapperClassName}>
+      <QueryAndAlgorithmLibrary />
+      <QueryResult
+        sidebarIndex={queryResultSidebarIndex}
+        handleSetSidebarIndex={setQueryResultSidebarIndex}
+      />
+      <ExecLogAndQueryCollections />
+    </div>
+  );
+});
 
 export default DataAnalyzeContent;

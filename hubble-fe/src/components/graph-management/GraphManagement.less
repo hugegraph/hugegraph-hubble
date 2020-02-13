@@ -9,18 +9,34 @@
   top: 60px;
   left: calc(50vw - 540px);
   width: 1080px;
-  margin: 16px auto;
+  margin: 0 auto 16px;
 }
 
 .graph-management-header {
+  margin-top: 16px;
   display: flex;
 
-  & > span {
+  &-description {
     margin-right: auto;
     display: block;
     font-size: 12px;
     line-height: 32px;
     color: #666;
+  }
+
+  &-description-community {
+    margin-right: auto;
+
+    & > div:first-child {
+      font-size: 14px;
+      line-height: 18px;
+    }
+
+    & > div:last-child {
+      font-size: 12px;
+      color: #999;
+      line-height: 17px;
+    }
   }
 
   &.dark > span {
@@ -104,10 +120,18 @@
         color: #fb4b53;
       }
 
+      &:nth-child(-n + 2) > span {
+        margin-right: 4px;
+      }
+
       & > span {
         display: block;
         font-size: 14px;
         line-height: 20px;
+        margin-right: 14px;
+      }
+
+      & > img {
         margin-right: 14px;
       }
     }

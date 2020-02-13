@@ -13,7 +13,8 @@ li,
 table,
 tr,
 th,
-td {
+td,
+p {
   margin: 0;
   padding: 0;
   border: 0;
@@ -57,6 +58,12 @@ code {
   padding: 28px 24px 24px;
 }
 
+.no-line-break {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* overrides (global) */
 
 //primary button background colors
@@ -89,5 +96,30 @@ code {
     '微软雅黑',
     Arial,
     sans-serif;
+  font-weight: bold;
   font-size: 16px;
+}
+
+// drawers, e.g. metadata-configs vertex/edge types
+.new-fc-one-drawer-wrapper-body-small .new-fc-one-drawer-title {
+  font-size: 16px;
+}
+
+.new-fc-one-drawer-close {
+  top: 28px;
+}
+
+// z-index input errorlayer in Drawer should be higher
+.new-fc-one-drawer-content-wrapper .new-fc-one-input-error.new-fc-one-input-error-layer {
+  z-index: 1041;
+}
+
+// also z-index is invalid if parent node has position: relative
+.new-fc-one-drawer-content-wrapper .new-fc-one-input-all-container {
+  position: absolute;
+}
+
+// Steps process style
+.new-fc-one-steps-item-process .new-fc-one-steps-item-icon {
+  background: #2b65ff;
 }

@@ -29,20 +29,30 @@ const TableQueryResult: React.FC = observer(() => {
   );
 
   return (
-    <Table
-      columns={columnConfigs}
-      dataSource={dataAnalyzeStore.originalGraphData.data.table_view.rows}
-      pagination={{
-        size: 'medium',
-        pageSize: 10,
-        hideOnSinglePage: true,
-        showSizeChange: false,
-        showPageJumper: false,
-        total: dataAnalyzeStore.pageConfigs.tableResult.pageTotal,
-        pageNo: dataAnalyzeStore.pageConfigs.tableResult.pageNumber,
-        onPageNoChange: handlePageChange
+    <div
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        padding: 8,
+        width: '100%'
       }}
-    />
+    >
+      <Table
+        columns={columnConfigs}
+        dataSource={dataAnalyzeStore.originalGraphData.data.table_view.rows}
+        pagination={{
+          size: 'medium',
+          pageSize: 10,
+          hideOnSinglePage: true,
+          showSizeChange: false,
+          showPageJumper: false,
+          total: dataAnalyzeStore.pageConfigs.tableResult.pageTotal,
+          pageNo: dataAnalyzeStore.pageConfigs.tableResult.pageNumber,
+          onPageNoChange: handlePageChange
+        }}
+      />
+    </div>
   );
 });
 

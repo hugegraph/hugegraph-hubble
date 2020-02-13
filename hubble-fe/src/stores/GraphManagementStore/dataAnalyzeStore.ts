@@ -1,11 +1,33 @@
 import { createContext } from 'react';
 import { observable, action, flow, computed, runInAction } from 'mobx';
 import axios, { AxiosResponse } from 'axios';
-import { GraphData, GraphDataResponse } from './graphManagementStore';
+import { isUndefined } from 'lodash-es';
 
-const baseUrl = 'http://localhost:8181/api/v1.1';
+import {
+  GraphData,
+  GraphDataResponse
+} from '../types/GraphManagementStore/graphManagementStore';
+import { checkIfLocalNetworkOffline } from '../utils';
 
-const ruleMap: Record<string, string> = {
+import { baseUrl, responseData, dict } from '../types/common';
+import {
+  ColorSchemas,
+  RuleMap,
+  FetchColorSchemas,
+  FetchFilteredPropertyOptions,
+  GraphNode,
+  GraphEdge,
+  FetchGraphReponse,
+  ValueTypes,
+  AddQueryCollectionParams,
+  ExecutionLogs,
+  ExecutionLogsResponse,
+  FavoriteQuery,
+  FavoriteQueryResponse
+} from '../types/GraphManagementStore/dataAnalyzeStore';
+import { VertexTypeListResponse } from '../types/GraphManagementStore/metadataConfigsStore';
+
+const ruleMap: RuleMap = {
   大于: 'gt',
   大于等于: 'gte',
   等于: 'eq',
@@ -15,99 +37,21 @@ const ruleMap: Record<string, string> = {
   False: 'eq'
 };
 
-export type ArbObjectArray = Record<string, any>[];
-export type ColorSchemas = Record<string, string>;
-
-export interface FetchColorSchemas {
-  status: number;
-  data: ColorSchemas;
-  message: string;
-}
-
-export interface FetchGraphReponse {
-  status: number;
-  data: {
-    table_view: {
-      header: string[];
-      rows: ArbObjectArray;
-    };
-    json_view: {
-      data: ArbObjectArray;
-    };
-    graph_view: {
-      vertices: GraphNode[];
-      edges: ArbObjectArray;
-    };
-    type: string;
-  };
-  message: string;
-}
-
-export interface ValueTypes {
-  name: string;
-  data_type: string;
-  cardinality: string;
-  create_time: string;
-}
-
-export interface AddQueryCollectionParams {
-  name: string;
-  content: string;
-}
-
-export interface ExecutionLogs {
-  id: number;
-  type: string;
-  content: string;
-  status: 'SUCCESS' | 'RUNNING' | 'FAILED';
-  duration: string;
-  create_time: string;
-}
-
-export interface ExecutionLogsResponse {
-  status: number;
-  data: { records: ExecutionLogs[]; total: number };
-  message: string;
-}
-
-export interface FavoriteQuery {
-  id: number;
-  name: string;
-  content: string;
-  create_time: string;
-}
-
-export interface FavoriteQueryResponse {
-  status: number;
-  data: { records: FavoriteQuery[]; total: number };
-  message: string;
-}
-
-export interface GraphNode extends d3.SimulationNodeDatum {
-  id: string;
-  label: string;
-  properties: Record<string, any>;
-}
-
-export interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
-  label: string;
-  properties: Record<string, any>;
-}
-
 export class DataAnalyzeStore {
   [key: string]: any;
 
   @observable currentId: number | null = null;
   @observable searchText = '';
   @observable isSidebarExpanded = false;
+  @observable isLoadingGraph = false;
   @observable isFullScreenReuslt = false;
   @observable isShowFilterBoard = false;
   // right-side drawer
   @observable isShowGraphInfo = false;
+  @observable isClickOnNodeOrEdge = false;
+  @observable favoritePopUp = '';
   @observable graphInfoDataSet = '';
   @observable codeEditorText = '';
-  @observable d3ForceSimulation: d3.Simulation<GraphNode, any> | null = null;
-  // @observable favoriteQueriesNameSortOrder = '';
   @observable favoriteQueriesSortOrder: Record<
     'time' | 'name',
     'desc' | 'asc' | ''
@@ -123,11 +67,19 @@ export class DataAnalyzeStore {
   @observable.ref idList: { id: number; name: string }[] = [];
   @observable.ref valueTypes: Record<string, string> = {};
   @observable.ref colorSchemas: ColorSchemas = {};
+  @observable.ref colorList: string[] = [];
+  @observable.ref colorMappings: Record<string, string> = {};
   @observable.ref
   originalGraphData: FetchGraphReponse = {} as FetchGraphReponse;
   @observable.ref graphData: FetchGraphReponse = {} as FetchGraphReponse;
+  @observable.ref
+  expandedGraphData: FetchGraphReponse = {} as FetchGraphReponse;
+  @observable vertexCollection = new Set();
+  @observable edgeCollection = new Set();
   @observable.ref executionLogData: ExecutionLogs[] = [];
   @observable.ref favoriteQueryData: FavoriteQuery[] = [];
+  @observable.ref graphDataEdgeTypes: string[] = [];
+  @observable.ref filteredPropertyOptions: string[] = [];
 
   // data struct sync to GraphManagementStore
   @observable.shallow isSearched = {
@@ -140,7 +92,7 @@ export class DataAnalyzeStore {
       type: '',
       direction: 'BOTH'
     } as Record<'type' | 'direction', string>,
-    properties: [] as ArbObjectArray
+    properties: [] as dict<any>[]
   };
 
   @observable selectedGraphData: GraphNode = {
@@ -149,14 +101,15 @@ export class DataAnalyzeStore {
     properties: {}
   };
 
-  @observable selectedGraphLinkData: GraphLink = {
+  @observable selectedGraphLinkData: GraphEdge = {
+    id: '',
     source: '',
     target: '',
     label: '',
     properties: {}
   };
 
-  @observable rightClickedGraphData: GraphNode = {
+  @observable.ref rightClickedGraphData: GraphNode = {
     id: '',
     label: '',
     properties: {}
@@ -185,9 +138,13 @@ export class DataAnalyzeStore {
     fetchIdList: 'standby',
     fetchValueTypes: 'standby',
     fetchColorSchemas: 'standby',
+    fetchColorList: 'standby',
+    fetchAllNodeColors: 'standby',
     fetchGraphs: 'standby',
     expandGraphNode: 'standby',
     filteredGraphData: 'standby',
+    fetchRelatedVertex: 'standby',
+    fetchFilteredPropertyOptions: 'standby',
     addQueryCollection: 'standby',
     editQueryCollection: 'standby',
     deleteQueryCollection: 'standby',
@@ -208,6 +165,14 @@ export class DataAnalyzeStore {
       code: NaN,
       message: ''
     },
+    fetchColorList: {
+      code: NaN,
+      message: ''
+    },
+    fetchAllNodeColors: {
+      code: NaN,
+      message: ''
+    },
     fetchGraphs: {
       code: NaN,
       message: ''
@@ -217,6 +182,14 @@ export class DataAnalyzeStore {
       message: ''
     },
     filteredGraphData: {
+      code: NaN,
+      message: ''
+    },
+    fetchRelatedVertex: {
+      code: NaN,
+      message: ''
+    },
+    filteredPropertyOptions: {
       code: NaN,
       message: ''
     },
@@ -243,17 +216,89 @@ export class DataAnalyzeStore {
   };
 
   @computed get graphNodes(): GraphNode[] {
-    return this.graphData.data.graph_view.vertices;
-  }
+    return this.originalGraphData.data.graph_view.vertices.map(
+      ({ id, label, properties }) => {
+        return {
+          id,
+          label: id.length <= 15 ? id : id.slice(0, 15) + '...',
+          vLabel: label,
+          properties,
+          title: `
+              <div class="tooltip-fields">
+                <div>顶点类型：</div>
+                <div>${label}</div>
+              </div>
+              <div class="tooltip-fields">
+                <div>顶点ID：</div>
+                <div>${id}</div>
+              </div>
+              ${Object.entries(properties)
+                .map(([key, value]) => {
+                  return `<div class="tooltip-fields">
+                            <div>${key}: </div>
+                            <div>${value}</div>
+                          </div>`;
+                })
+                .join('')}
+          `,
+          color: {
+            background: this.colorMappings[label] || '#5c73e6',
+            border: this.colorMappings[label] || '#5c73e6',
+            highlight: { background: '#fb6a02', border: '#fb6a02' },
+            hover: { background: '#ec3112', border: '#ec3112' }
+          },
+          chosen: {
+            node(
+              values: any,
+              id: string,
+              selected: boolean,
+              hovering: boolean
+            ) {
+              if (hovering || selected) {
+                values.shadow = true;
+                values.shadowColor = 'rgba(0, 0, 0, 0.6)';
+                values.shadowX = 0;
+                values.shadowY = 0;
+                values.shadowSize = 25;
+              }
 
-  @computed get graphLinks(): GraphLink[] | Record<string, any> {
-    return this.graphData.data.graph_view.edges;
-  }
-
-  @computed get GraphDataTypes() {
-    return Array.from(
-      new Set(this.graphData.data.graph_view.edges.map(({ label }) => label))
+              if (selected) {
+                values.size = 30;
+              }
+            }
+          }
+        };
+      }
     );
+  }
+
+  @computed get graphEdges(): GraphEdge[] {
+    return this.originalGraphData.data.graph_view.edges.map(edge => ({
+      ...edge,
+      from: edge.source,
+      to: edge.target,
+      font: {
+        color: '#666'
+      },
+      title: `
+        <div class="tooltip-fields">
+          <div>边类型：</div>
+          <div>${edge.label}</div>
+        </div>
+        <div class="tooltip-fields">
+          <div>边ID：</div>
+          <div>${edge.id}</div>
+        </div>
+        ${Object.entries(edge.properties)
+          .map(([key, value]) => {
+            return `<div class="tooltip-fields">
+                      <div>${key}: </div>
+                      <div>${value}</div>
+                    </div>`;
+          })
+          .join('')}
+      `
+    }));
   }
 
   @action
@@ -272,13 +317,13 @@ export class DataAnalyzeStore {
   }
 
   @action
-  setD3Simluation(simulation: d3.Simulation<GraphNode, any>) {
-    this.d3ForceSimulation = simulation;
+  switchShowScreenInfo(flag: boolean) {
+    this.isShowGraphInfo = flag;
   }
 
   @action
-  switchShowScreenInfo(flag: boolean) {
-    this.isShowGraphInfo = flag;
+  switchClickOnNodeOrEdge(flag: boolean) {
+    this.isClickOnNodeOrEdge = flag;
   }
 
   @action
@@ -292,6 +337,11 @@ export class DataAnalyzeStore {
   }
 
   @action
+  setFavoritePopUp(popupCategory: string) {
+    this.favoritePopUp = popupCategory;
+  }
+
+  @action
   triggerLoadingStatementsIntoEditor() {
     this.pulse = !this.pulse;
   }
@@ -301,13 +351,15 @@ export class DataAnalyzeStore {
     this.codeEditorText = text;
   }
 
+  // change selected graph node
   @action
   changeSelectedGraphData(selectedData: GraphNode) {
     this.selectedGraphData = selectedData;
   }
 
+  // change selected graph edge
   @action
-  changeSelectedGraphLinkData(selectedLinkData: GraphLink) {
+  changeSelectedGraphLinkData(selectedLinkData: GraphEdge) {
     this.selectedGraphLinkData = selectedLinkData;
   }
 
@@ -343,7 +395,7 @@ export class DataAnalyzeStore {
   @action
   editPropertyFilterOption(
     key: 'property' | 'rule' | 'value',
-    value: string,
+    value: string | number,
     index: number
   ) {
     this.filteredGraphQueryOptions.properties[index][key] = value;
@@ -373,9 +425,8 @@ export class DataAnalyzeStore {
     );
 
     return window.setInterval(() => {
-      this.executionLogData[0].duration = String(
-        Number(this.executionLogData[0].duration) + 10
-      );
+      this.executionLogData[0].duration =
+        String(Number(this.executionLogData[0].duration) + 10) + 'ms';
 
       runInAction(() => {
         this.executionLogData = this.executionLogData.slice();
@@ -407,8 +458,32 @@ export class DataAnalyzeStore {
         type: '',
         direction: 'BOTH'
       } as Record<'type' | 'direction', string>,
-      properties: [] as ArbObjectArray
+      properties: [] as dict<any>[]
     };
+  }
+
+  @action
+  resetRightClickedGraphData() {
+    this.rightClickedGraphData = {
+      id: '',
+      label: '',
+      properties: {}
+    };
+  }
+
+  @action
+  resetFavoriteRequestStatus(type: 'add' | 'edit') {
+    if (type === 'add') {
+      this.requestStatus.addQueryCollection = 'standby';
+      this.errorInfo.addQueryCollection.code = NaN;
+      this.errorInfo.addQueryCollection.message = '';
+    }
+
+    if (type === 'edit') {
+      this.requestStatus.editQueryCollection = 'standby';
+      this.errorInfo.editQueryCollection.code = NaN;
+      this.errorInfo.editQueryCollection.message = '';
+    }
   }
 
   @action
@@ -416,6 +491,8 @@ export class DataAnalyzeStore {
     this.currentId = null;
     this.searchText = '';
     this.isSidebarExpanded = false;
+    this.isLoadingGraph = false;
+    this.isShowGraphInfo = false;
     this.isFullScreenReuslt = false;
     this.codeEditorText = '';
     this.graphData = {} as FetchGraphReponse;
@@ -432,6 +509,7 @@ export class DataAnalyzeStore {
     };
 
     this.selectedGraphLinkData = {
+      id: '',
       source: '',
       target: '',
       label: '',
@@ -459,9 +537,13 @@ export class DataAnalyzeStore {
       fetchIdList: 'standby',
       fetchValueTypes: 'standby',
       fetchColorSchemas: 'standby',
+      fetchColorList: 'standby',
       fetchGraphs: 'standby',
+      fetchAllNodeColors: 'standby',
       expandGraphNode: 'standby',
       filteredGraphData: 'standby',
+      fetchRelatedVertex: 'standby',
+      fetchFilteredPropertyOptions: 'standby',
       addQueryCollection: 'standby',
       editQueryCollection: 'standby',
       deleteQueryCollection: 'standby',
@@ -482,6 +564,14 @@ export class DataAnalyzeStore {
         code: NaN,
         message: ''
       },
+      fetchColorList: {
+        code: NaN,
+        message: ''
+      },
+      fetchAllNodeColors: {
+        code: NaN,
+        message: ''
+      },
       fetchGraphs: {
         code: NaN,
         message: ''
@@ -491,6 +581,14 @@ export class DataAnalyzeStore {
         message: ''
       },
       filteredGraphData: {
+        code: NaN,
+        message: ''
+      },
+      fetchRelatedVertex: {
+        code: NaN,
+        message: ''
+      },
+      filteredPropertyOptions: {
         code: NaN,
         message: ''
       },
@@ -531,9 +629,13 @@ export class DataAnalyzeStore {
     try {
       const result: AxiosResponse<GraphDataResponse> = yield axios.get<
         GraphData
-      >(`${baseUrl}/graph-connections?page_size=-1`);
+      >(baseUrl, {
+        params: {
+          page_size: -1
+        }
+      });
 
-      if (result.status !== 200) {
+      if (result.data.status !== 200) {
         this.errorInfo.fetchIdList.code = result.data.status;
         throw new Error(result.data.message);
       }
@@ -550,26 +652,26 @@ export class DataAnalyzeStore {
     }
   });
 
+  // to know the type of properties
   fetchValueTypes = flow(function* fetchValueTypes(this: DataAnalyzeStore) {
     this.requestStatus.fetchValueTypes = 'pending';
 
     try {
       const result = yield axios.get<ValueTypes>(
-        `${baseUrl}/schema/propertykeys`,
+        `${baseUrl}/${this.currentId}/schema/propertykeys`,
         {
           params: {
-            conn_id: this.currentId,
             page_size: -1
           }
         }
       );
 
-      if (result.status !== 200) {
+      if (result.data.status !== 200) {
         this.errorInfo.fetchValueTypes.code = result.data.status;
         throw new Error(result.data.message);
       }
 
-      result.data.data.records.map(
+      result.data.data.records.forEach(
         ({ name, data_type }: Record<string, string>) => {
           this.valueTypes[name] = data_type;
         }
@@ -589,13 +691,9 @@ export class DataAnalyzeStore {
     try {
       const result: AxiosResponse<FetchColorSchemas> = yield axios.get<
         FetchGraphReponse
-      >(`${baseUrl}/schema/vertexlabels/style`, {
-        params: {
-          connection_id: this.currentId
-        }
-      });
+      >(`${baseUrl}/${this.currentId}/schema/vertexlabels/style`);
 
-      if (result.status !== 200) {
+      if (result.data.status !== 200) {
         this.errorInfo.fetchColorSchemas.code = result.data.status;
         throw new Error(result.data.message);
       }
@@ -609,16 +707,70 @@ export class DataAnalyzeStore {
     }
   });
 
-  fetchGraphs = flow(function* fetchGraphs(this: DataAnalyzeStore) {
-    this.requestStatus.fetchGraphs = 'pending';
+  fetchColorList = flow(function* fetchColorList(this: DataAnalyzeStore) {
+    this.requestStatus.fetchColorList = 'pending';
 
     try {
-      const result: AxiosResponse<FetchGraphReponse> = yield axios.post<
-        FetchGraphReponse
-      >(`${baseUrl}/gremlin-query`, {
-        connection_id: this.currentId,
-        content: this.codeEditorText
+      const result: AxiosResponse<responseData<string[]>> = yield axios.get(
+        `${baseUrl}/${this.currentId}/schema/vertexlabels/optional-colors`
+      );
+
+      if (result.data.status !== 200) {
+        throw new Error(result.data.message);
+      }
+
+      this.colorList = result.data.data;
+      this.requestStatus.fetchColorList = 'success';
+    } catch (error) {
+      this.requestStatus.fetchColorList = 'failed';
+      this.errorMessage = error.message;
+      console.error(error.message);
+    }
+  });
+
+  fetchAllNodeColors = flow(function* fetchAllNodeColors(
+    this: DataAnalyzeStore
+  ) {
+    this.requestStatus.fetchAllNodeColors = 'pending';
+
+    try {
+      const result: AxiosResponse<
+        responseData<VertexTypeListResponse>
+      > = yield axios.get(`${baseUrl}/${this.currentId}/schema/vertexlabels`, {
+        params: {
+          page_no: 1,
+          page_size: -1
+        }
       });
+
+      if (result.data.status !== 200) {
+        throw new Error(result.data.message);
+      }
+
+      result.data.data.records.forEach(({ name, style }) => {
+        if (style.color !== null) {
+          this.colorMappings[name] = style.color;
+        }
+      });
+
+      this.requestStatus.fetchAllNodeColors = 'success';
+    } catch (error) {
+      this.requestStatus.fetchAllNodeColors = 'failed';
+      this.errorInfo.fetchAllNodeColors.message = error.message;
+      console.error(error.message);
+    }
+  });
+
+  fetchGraphs = flow(function* fetchGraphs(this: DataAnalyzeStore) {
+    this.requestStatus.fetchGraphs = 'pending';
+    this.isLoadingGraph = true;
+
+    try {
+      const result: AxiosResponse<FetchGraphReponse> = yield axios
+        .post<FetchGraphReponse>(`${baseUrl}/${this.currentId}/gremlin-query`, {
+          content: this.codeEditorText
+        })
+        .catch(checkIfLocalNetworkOffline);
 
       if (result.data.status !== 200) {
         this.errorInfo.fetchGraphs.code = result.data.status;
@@ -635,10 +787,25 @@ export class DataAnalyzeStore {
       }
 
       this.originalGraphData = result.data;
+
+      if (
+        result.data.data.graph_view.vertices !== null &&
+        result.data.data.graph_view.edges !== null
+      ) {
+        this.vertexCollection = new Set(
+          result.data.data.graph_view.vertices.map(({ id }) => id)
+        );
+        this.edgeCollection = new Set(
+          result.data.data.graph_view.edges.map(({ id }) => id)
+        );
+      }
+
       this.graphData = result.data;
       this.pageConfigs.tableResult.pageTotal = this.originalGraphData.data.table_view.rows.length;
       this.requestStatus.fetchGraphs = 'success';
+      this.isLoadingGraph = false;
     } catch (error) {
+      this.isLoadingGraph = false;
       this.requestStatus.fetchGraphs = 'failed';
       this.errorInfo.fetchGraphs.message = error.message;
       console.error(error.message);
@@ -655,9 +822,8 @@ export class DataAnalyzeStore {
 
     try {
       const result: AxiosResponse<FetchGraphReponse> = yield axios.put(
-        `${baseUrl}/gremlin-query`,
+        `${baseUrl}/${this.currentId}/gremlin-query`,
         {
-          connection_id: this.currentId,
           vertex_id: nodeId || this.rightClickedGraphData.id,
           vertex_label: label || this.rightClickedGraphData.label
         }
@@ -669,6 +835,40 @@ export class DataAnalyzeStore {
       }
 
       const newGraphData = result.data;
+
+      const filteredVertices = newGraphData.data.graph_view.vertices.filter(
+        ({ id }) => {
+          if (this.vertexCollection.has(id)) {
+            return false;
+          }
+
+          this.vertexCollection.add(id);
+          return true;
+        }
+      );
+
+      const filteredEdges = newGraphData.data.graph_view.edges.filter(
+        ({ id }) => {
+          if (this.edgeCollection.has(id)) {
+            return false;
+          }
+
+          this.edgeCollection.add(id);
+          return true;
+        }
+      );
+
+      this.expandedGraphData = {
+        ...newGraphData,
+        data: {
+          ...newGraphData.data,
+          graph_view: {
+            vertices: filteredVertices,
+            edges: filteredEdges
+          }
+        }
+      };
+
       const vertexCollection = new Set();
       const edgeCollection = new Set();
 
@@ -705,32 +905,83 @@ export class DataAnalyzeStore {
   });
 
   @action
-  hideGraphNode() {
+  hideGraphNode(nodeId: any) {
     this.graphData.data.graph_view.vertices = this.graphData.data.graph_view.vertices.filter(
       data => data.id !== this.rightClickedGraphData.id
     );
 
-    this.graphData.data.graph_view.edges = this.graphData.data.graph_view.edges.filter(
-      data => {
-        return (
-          data.source.id !== this.rightClickedGraphData.id &&
-          data.target.id !== this.rightClickedGraphData.id
-        );
-      }
-    );
+    // only delete node in vertexCollection, not edges in EdgeCollection
+    this.vertexCollection.delete(nodeId);
 
     // assign new object to observable
     this.graphData = { ...this.graphData };
   }
+
+  // require list of edge type options in QueryFilteredOptions
+  fetchRelatedVertex = flow(function* fetchRelatedVertex(
+    this: DataAnalyzeStore
+  ) {
+    this.requestStatus.fetchRelatedVertex = 'pending';
+
+    try {
+      const result = yield axios.get(
+        `${baseUrl}/${this.currentId}/schema/vertexlabels/${this.rightClickedGraphData.label}/link`
+      );
+
+      if (result.data.status !== 200) {
+        this.errorInfo.fetchRelatedVertex = result.data.status;
+        throw new Error(result.data.message);
+      }
+
+      this.graphDataEdgeTypes = result.data.data;
+
+      this.editEdgeFilterOption(
+        'type',
+        !isUndefined(result.data.data[0]) ? result.data.data[0] : ''
+      );
+    } catch (error) {
+      this.requestStatus.fetchRelatedVertex = 'failed';
+      this.errorInfo.fetchRelatedVertex.message = error.message;
+      console.error(error.message);
+    }
+  });
+
+  // require list of property options in QueryFilteredOptions
+  fetchFilteredPropertyOptions = flow(function* fetchFilteredPropertyOptions(
+    this: DataAnalyzeStore,
+    edgeName: string
+  ) {
+    this.requestStatus.fetchFilteredPropertyOptions = 'pending';
+
+    try {
+      const result: AxiosResponse<
+        FetchFilteredPropertyOptions
+      > = yield axios.get(
+        `${baseUrl}/${this.currentId}/schema/edgelabels/${edgeName}`
+      );
+
+      if (result.data.status !== 200) {
+        this.errorInfo.filteredPropertyOptions.code = result.data.status;
+        throw new Error(result.data.message);
+      }
+
+      this.filteredPropertyOptions = result.data.data.properties.map(
+        ({ name }) => name
+      );
+    } catch (error) {
+      this.requestStatus.fetchFilteredPropertyOptions = 'failed';
+      this.errorInfo.filteredPropertyOptions = error.message;
+      console.error(error.message);
+    }
+  });
 
   filterGraphData = flow(function* filteredGraphData(this: DataAnalyzeStore) {
     this.requestStatus.filteredGraphData = 'pending';
 
     try {
       const result: AxiosResponse<FetchGraphReponse> = yield axios.put(
-        `${baseUrl}/gremlin-query`,
+        `${baseUrl}/${this.currentId}/gremlin-query`,
         {
-          connection_id: this.currentId,
           vertex_id: this.rightClickedGraphData.id,
           vertex_label: this.rightClickedGraphData.label,
           edge_label: this.filteredGraphQueryOptions.line.type,
@@ -751,6 +1002,40 @@ export class DataAnalyzeStore {
       }
 
       const newGraphData = result.data;
+
+      const filteredVertices = newGraphData.data.graph_view.vertices.filter(
+        ({ id }) => {
+          if (this.vertexCollection.has(id)) {
+            return false;
+          }
+
+          this.vertexCollection.add(id);
+          return true;
+        }
+      );
+
+      const filteredEdges = newGraphData.data.graph_view.edges.filter(
+        ({ id }) => {
+          if (this.edgeCollection.has(id)) {
+            return false;
+          }
+
+          this.edgeCollection.add(id);
+          return true;
+        }
+      );
+
+      this.expandedGraphData = {
+        ...newGraphData,
+        data: {
+          ...newGraphData.data,
+          graph_view: {
+            vertices: filteredVertices,
+            edges: filteredEdges
+          }
+        }
+      };
+
       const vertexCollection = new Set();
       const edgeCollection = new Set();
 
@@ -779,7 +1064,10 @@ export class DataAnalyzeStore {
 
       this.graphData = mergeData;
       this.requestStatus.filteredGraphData = 'success';
-    } catch (error) {}
+    } catch (error) {
+      this.errorInfo.filteredGraphData.message = error.message;
+      console.error(error.message);
+    }
   });
 
   addQueryCollection = flow(function* addQueryCollection(
@@ -792,7 +1080,7 @@ export class DataAnalyzeStore {
 
     try {
       const result = yield axios.post<AddQueryCollectionParams>(
-        `${baseUrl}/gremlin-collections`,
+        `${baseUrl}/${this.currentId}/gremlin-collections`,
         {
           name,
           content: content || this.codeEditorText
@@ -822,7 +1110,7 @@ export class DataAnalyzeStore {
 
     try {
       const result = yield axios.put<AddQueryCollectionParams>(
-        `${baseUrl}/gremlin-collections/${id}`,
+        `${baseUrl}/${this.currentId}/gremlin-collections/${id}`,
         {
           name,
           content
@@ -849,7 +1137,9 @@ export class DataAnalyzeStore {
     this.requestStatus.deleteQueryCollection = 'pending';
 
     try {
-      const result = yield axios.delete(`${baseUrl}/gremlin-collections/${id}`);
+      const result = yield axios.delete(
+        `${baseUrl}/${this.currentId}/gremlin-collections/${id}`
+      );
 
       if (result.data.status !== 200) {
         this.errorInfo.deleteQueryCollection = result.data.status;
@@ -881,7 +1171,7 @@ export class DataAnalyzeStore {
     try {
       const result: AxiosResponse<ExecutionLogsResponse> = yield axios.get<
         ExecutionLogsResponse
-      >(`${baseUrl}/execute-histories`, {
+      >(`${baseUrl}/${this.currentId}/execute-histories`, {
         params: {
           page_size: this.pageConfigs.executionLog.pageSize,
           page_no: this.pageConfigs.executionLog.pageNumber
@@ -889,6 +1179,7 @@ export class DataAnalyzeStore {
       });
 
       if (result.data.status !== 200) {
+        this.errorInfo.fetchExecutionLogs.code = result.data.status;
         throw new Error(result.data.message);
       }
 
@@ -906,7 +1197,7 @@ export class DataAnalyzeStore {
     this: DataAnalyzeStore
   ) {
     const url =
-      `${baseUrl}/gremlin-collections?` +
+      `${baseUrl}/${this.currentId}/gremlin-collections?` +
       `&page_no=${this.pageConfigs.favoriteQueries.pageNumber}` +
       `&page_size=${this.pageConfigs.favoriteQueries.pageSize}` +
       (this.favoriteQueriesSortOrder.time !== ''

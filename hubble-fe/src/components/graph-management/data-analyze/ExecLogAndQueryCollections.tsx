@@ -10,7 +10,7 @@ import { DataAnalyzeStoreContext } from '../../../stores';
 import {
   ExecutionLogs,
   FavoriteQuery
-} from '../../../stores/GraphManagementStore/dataAnalyzeStore';
+} from '../../../stores/types/GraphManagementStore/dataAnalyzeStore';
 import ArrowIcon from '../../../assets/imgs/ic_arrow_16.svg';
 import EmptyIcon from '../../../assets/imgs/ic_sousuo_empty.svg';
 
@@ -39,6 +39,9 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
   const [currentFavoritePop, setCurrentFavoritePop] = useState<number | null>(
     null
   );
+
+  // hack: @observable in columnConfigs cannot be observed
+  dataAnalyzeStore.favoritePopUp.toUpperCase();
 
   const execLogsColumnConfigs = [
     {
@@ -104,7 +107,7 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
             <TooltipTrigger
               tooltipShown={
                 currentPopInTable === 'execLogs' &&
-                isFavoritePop &&
+                dataAnalyzeStore.favoritePopUp === 'addFavoriteInExeclog' &&
                 currentFavoritePop === index
               }
               placement="left"
@@ -141,6 +144,9 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
                     ref: triggerRef,
                     className: 'exec-log-manipulation',
                     onClick: () => {
+                      dataAnalyzeStore.setFavoritePopUp('addFavoriteInExeclog');
+                      dataAnalyzeStore.resetFavoriteRequestStatus('add');
+                      dataAnalyzeStore.resetFavoriteRequestStatus('edit');
                       switchFavoritePop(true);
                       setCurrentFavoritePop(index);
                     }
@@ -215,7 +221,7 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
               placement="left"
               tooltipShown={
                 currentPopInTable === 'favoriteQueries' &&
-                isFavoritePop &&
+                dataAnalyzeStore.favoritePopUp === 'editFavorite' &&
                 currentFavoritePop === index
               }
               tooltip={({
@@ -254,6 +260,9 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
                     ref: triggerRef,
                     className: 'exec-log-manipulation',
                     onClick: () => {
+                      dataAnalyzeStore.setFavoritePopUp('editFavorite');
+                      dataAnalyzeStore.resetFavoriteRequestStatus('add');
+                      dataAnalyzeStore.resetFavoriteRequestStatus('edit');
                       setCurrentPopInTable('favoriteQueries');
                       switchFavoritePop(true);
                       setCurrentFavoritePop(index);
@@ -342,6 +351,7 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
   const handleExecLogPageSizeChange = useCallback(
     (e: React.ChangeEvent<HTMLButtonElement>) => {
       dataAnalyzeStore.mutatePageSize('executionLog', Number(e.target.value));
+      dataAnalyzeStore.mutatePageNumber('executionLog', 1);
       dataAnalyzeStore.fetchExecutionLogs();
     },
     [dataAnalyzeStore]
@@ -353,6 +363,7 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
         'favoriteQueries',
         Number(e.target.value)
       );
+      dataAnalyzeStore.mutatePageNumber('favoriteQueries', 1);
       dataAnalyzeStore.fetchFavoriteQueries();
     },
     [dataAnalyzeStore]
@@ -360,10 +371,12 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
 
   const loadStatements = useCallback(
     (content: string) => () => {
-      switchFavoritePop(false);
-      dataAnalyzeStore.mutateCodeEditorText(content);
-      dataAnalyzeStore.triggerLoadingStatementsIntoEditor();
-      window.scrollTo(0, 0);
+      if (!dataAnalyzeStore.isLoadingGraph) {
+        switchFavoritePop(false);
+        dataAnalyzeStore.mutateCodeEditorText(content);
+        dataAnalyzeStore.triggerLoadingStatementsIntoEditor();
+        window.scrollTo(0, 0);
+      }
     },
     [dataAnalyzeStore]
   );
@@ -412,9 +425,12 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
   );
 
   useEffect(() => {
-    dataAnalyzeStore.fetchExecutionLogs();
-    dataAnalyzeStore.fetchFavoriteQueries();
-  }, [dataAnalyzeStore]);
+    if (dataAnalyzeStore.currentId !== null) {
+      dataAnalyzeStore.fetchExecutionLogs();
+      dataAnalyzeStore.fetchFavoriteQueries();
+    }
+    // fetch execlogs & favorites after id changes
+  }, [dataAnalyzeStore, dataAnalyzeStore.currentId]);
 
   return (
     <div className="data-analyze-logs-favorite">
@@ -453,6 +469,7 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
                   showPageJumper: false,
                   pageSize: dataAnalyzeStore.pageConfigs.executionLog.pageSize,
                   pageSizeOptions: ['10', '20', '50'],
+                  pageNo: dataAnalyzeStore.pageConfigs.executionLog.pageNumber,
                   total: dataAnalyzeStore.pageConfigs.executionLog.pageTotal,
                   onPageNoChange: handleExecLogPageNoChange,
                   onPageSizeChange: handleExecLogPageSizeChange
@@ -519,7 +536,7 @@ const ExecutionContent: React.FC<{
 }> = observer(({ content, highlightText }) => {
   const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
   const [isExpand, switchExpand] = useState(dataAnalyzeStore.isSearched.status);
-  const statements = content.split('\n');
+  const statements = content.split('\n').filter(statement => statement !== '');
 
   const arrowIconClassName = classnames({
     'data-analyze-logs-favorite-content-icon': true,
