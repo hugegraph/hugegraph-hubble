@@ -87,6 +87,10 @@ public class SchemaController extends BaseController {
         List<Edge> edges = new ArrayList<>(edgeLabels.size());
         for (EdgeLabelEntity entity : edgeLabels) {
             Edge edge = new Edge(entity.getName());
+            String edgeId = String.format(
+                            "%s-%s->%s", entity.getSourceLabel(),
+                            entity.getName(), entity.getTargetLabel());
+            edge.id(edgeId);
             edge.sourceId(entity.getSourceLabel());
             edge.targetId(entity.getTargetLabel());
             edge.property("link_multitimes", entity.isLinkMultiTimes());

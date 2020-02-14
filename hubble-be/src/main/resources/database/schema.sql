@@ -41,6 +41,6 @@ CREATE TABLE IF NOT EXISTS `gremlin_collection` (
     `content` VARCHAR(65535) NOT NULL,
     `create_time` DATETIME(6) NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE (`name`)
+    UNIQUE (`conn_id`, `name`)
 );
 CREATE INDEX IF NOT EXISTS `gremlin_collection_conn_id` ON `gremlin_collection`(`conn_id`);

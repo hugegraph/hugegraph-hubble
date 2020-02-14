@@ -30,6 +30,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.HugeGraphHubble;
+import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.util.CommonUtil;
@@ -58,8 +59,17 @@ public class LicenseVerifier {
     private final LicenseVerifyParam verifyParam;
     private final LicenseVerifyManager manager;
 
+    private final String edition;
+
     private LicenseVerifier() {
         this.verifyParam = buildVerifyParam(LICENSE_PARAM_PATH);
+        // TODO: replaced by reading from ExtraParam
+        String licensePath = this.verifyParam.licensePath();
+        if (licensePath.contains("community")) {
+            this.edition = Constant.EDITION_COMMUNITY;
+        } else {
+            this.edition = Constant.EDITION_COMMERCIAL;
+        }
         LicenseParam licenseParam = this.initLicenseParam(this.verifyParam);
         this.manager = new LicenseVerifyManager(licenseParam);
     }
@@ -73,6 +83,10 @@ public class LicenseVerifier {
             }
         }
         return INSTANCE;
+    }
+
+    public String edition() {
+        return this.edition;
     }
 
     public int allowedGraphs() {

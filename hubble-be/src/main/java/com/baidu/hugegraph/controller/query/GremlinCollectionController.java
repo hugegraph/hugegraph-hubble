@@ -100,13 +100,13 @@ public class GremlinCollectionController extends GremlinController {
     public GremlinCollection create(@PathVariable("connId") int connId,
                                     @RequestBody GremlinCollection newEntity) {
         this.checkParamsValid(newEntity, true);
+        newEntity.setConnId(connId);
+        newEntity.setCreateTime(CommonUtil.nowDate());
         this.checkEntityUnique(newEntity, true);
         // The service is an singleton object
         synchronized(this.service) {
             Ex.check(this.service.count() < LIMIT,
                      "gremlin-collection.reached-limit", LIMIT);
-            newEntity.setConnId(connId);
-            newEntity.setCreateTime(CommonUtil.nowDate());
             int rows = this.service.save(newEntity);
             if (rows != 1) {
                 throw new InternalException("entity.insert.failed", newEntity);
@@ -174,9 +174,10 @@ public class GremlinCollectionController extends GremlinController {
 
     private void checkEntityUnique(GremlinCollection newEntity,
                                    boolean creating) {
+        int connId = newEntity.getConnId();
         String name = newEntity.getName();
         // NOTE: Full table scan may slow, it's better to use index
-        GremlinCollection oldEntity = this.service.getByName(name);
+        GremlinCollection oldEntity = this.service.getByName(connId, name);
         if (creating) {
             Ex.check(oldEntity == null, "gremlin-collection.exist.name", name);
         } else {
