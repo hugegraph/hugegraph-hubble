@@ -36,7 +36,7 @@ import com.baidu.hugegraph.entity.query.GremlinCollection;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.service.query.GremlinCollectionService;
-import com.baidu.hugegraph.util.CommonUtil;
+import com.baidu.hugegraph.util.HubbleUtil;
 import com.baidu.hugegraph.util.Ex;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -101,7 +101,7 @@ public class GremlinCollectionController extends GremlinController {
                                     @RequestBody GremlinCollection newEntity) {
         this.checkParamsValid(newEntity, true);
         newEntity.setConnId(connId);
-        newEntity.setCreateTime(CommonUtil.nowDate());
+        newEntity.setCreateTime(HubbleUtil.nowDate());
         this.checkEntityUnique(newEntity, true);
         // The service is an singleton object
         synchronized(this.service) {

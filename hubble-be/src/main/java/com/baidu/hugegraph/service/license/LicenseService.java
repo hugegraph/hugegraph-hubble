@@ -41,7 +41,6 @@ import com.baidu.hugegraph.service.HugeClientPoolService;
 import com.baidu.hugegraph.util.Ex;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 
 @Service

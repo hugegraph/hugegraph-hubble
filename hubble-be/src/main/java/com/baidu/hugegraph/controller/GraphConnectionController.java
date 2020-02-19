@@ -42,7 +42,7 @@ import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.service.GraphConnectionService;
 import com.baidu.hugegraph.service.HugeClientPoolService;
 import com.baidu.hugegraph.service.license.LicenseService;
-import com.baidu.hugegraph.util.CommonUtil;
+import com.baidu.hugegraph.util.HubbleUtil;
 import com.baidu.hugegraph.util.Ex;
 import com.baidu.hugegraph.util.HugeClientUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -128,7 +128,7 @@ public class GraphConnectionController extends BaseController {
 
         // Do connect test, failure will throw an exception
         HugeClient client = HugeClientUtil.tryConnect(newEntity);
-        newEntity.setCreateTime(CommonUtil.nowDate());
+        newEntity.setCreateTime(HubbleUtil.nowDate());
 
         // Check current graph's data size
         verifyResult = this.licenseService.verifyDataSize(

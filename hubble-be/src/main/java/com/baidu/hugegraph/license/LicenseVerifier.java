@@ -33,7 +33,7 @@ import com.baidu.hugegraph.HugeGraphHubble;
 import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.InternalException;
-import com.baidu.hugegraph.util.CommonUtil;
+import com.baidu.hugegraph.util.HubbleUtil;
 import com.baidu.hugegraph.util.Log;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -90,15 +90,15 @@ public class LicenseVerifier {
     }
 
     public int allowedGraphs() {
-        return INSTANCE.manager.allowedGraphs();
+        return this.manager.allowedGraphs();
     }
 
     public long allowedDataSize() {
-        return INSTANCE.manager.allowedDataSize();
+        return this.manager.allowedDataSize();
     }
 
     public void verifyIfNeeded() {
-        Instant now = CommonUtil.nowTime();
+        Instant now = HubbleUtil.nowTime();
         Duration interval = Duration.between(this.lastCheckTime, now);
         if (!interval.minus(CHECK_INTERVAL).isNegative()) {
             this.verify();

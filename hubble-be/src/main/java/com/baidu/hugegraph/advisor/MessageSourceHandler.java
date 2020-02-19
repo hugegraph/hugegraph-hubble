@@ -68,7 +68,6 @@ public class MessageSourceHandler {
             RequestContextHolder.currentRequestAttributes();
         } catch (IllegalStateException e) {
             return DEFAULT_LOCALE;
-//            return LocaleContextHolder.getLocale();
         }
 
         UserInfo userInfo = this.getUserInfo();
@@ -77,8 +76,7 @@ public class MessageSourceHandler {
         } else if (this.request.getLocale() != null) {
             return RequestContextUtils.getLocale(this.request);
         } else {
-            return DEFAULT_LOCALE;
-//            return LocaleContextHolder.getLocale();
+            return LocaleContextHolder.getLocale();
         }
     }
 

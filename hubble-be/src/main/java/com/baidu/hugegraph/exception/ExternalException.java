@@ -28,8 +28,7 @@ public class ExternalException extends ParameterizedException {
     }
 
     public ExternalException(int status, String message, Object... args) {
-        super(message, args);
-        this.status = status;
+        this(status, message, null, args);
     }
 
     public ExternalException(String message, Throwable cause, Object... args) {

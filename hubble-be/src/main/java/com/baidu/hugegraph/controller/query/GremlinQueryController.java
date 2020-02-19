@@ -43,7 +43,7 @@ import com.baidu.hugegraph.entity.query.GremlinResult;
 import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.service.query.ExecuteHistoryService;
 import com.baidu.hugegraph.service.query.GremlinQueryService;
-import com.baidu.hugegraph.util.CommonUtil;
+import com.baidu.hugegraph.util.HubbleUtil;
 import com.baidu.hugegraph.util.Ex;
 import com.google.common.collect.ImmutableSet;
 
@@ -68,7 +68,7 @@ public class GremlinQueryController extends GremlinController {
                                  @RequestBody GremlinQuery query) {
         this.checkParamsValid(query);
 
-        Date createTime = CommonUtil.nowDate();
+        Date createTime = HubbleUtil.nowDate();
         // Insert execute history
         ExecuteStatus status = ExecuteStatus.RUNNING;
         ExecuteHistory history;

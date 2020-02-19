@@ -51,7 +51,7 @@ import com.baidu.hugegraph.service.HugeClientPoolService;
 import com.baidu.hugegraph.structure.SchemaElement;
 import com.baidu.hugegraph.structure.schema.IndexLabel;
 import com.baidu.hugegraph.structure.schema.SchemaLabel;
-import com.baidu.hugegraph.util.CommonUtil;
+import com.baidu.hugegraph.util.HubbleUtil;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -214,7 +214,7 @@ public class SchemaService {
         if (CollectionUtils.isEmpty(schemas)) {
             return;
         }
-        Date now = CommonUtil.nowDate();
+        Date now = HubbleUtil.nowDate();
         for (T schema : schemas) {
             schema.resetId();
             if (!(schema instanceof IndexLabel)) {
@@ -231,7 +231,7 @@ public class SchemaService {
         if (CollectionUtils.isEmpty(schemas)) {
             return tasks;
         }
-        Date now = CommonUtil.nowDate();
+        Date now = HubbleUtil.nowDate();
         for (T schema : schemas) {
             schema.resetId();
             if (!(schema instanceof IndexLabel)) {
