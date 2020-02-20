@@ -181,6 +181,7 @@ const CheckProperty: React.FC = observer(() => {
       title="查看属性"
       width={634}
       destroyOnClose
+      mask={false}
       visible={graphViewStore.currentDrawer === 'check-property'}
       onClose={handleCloseDrawer}
       footer={[]}
