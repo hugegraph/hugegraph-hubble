@@ -275,6 +275,9 @@ const QueryFilterOptions: React.FC<{
                       ...edge,
                       from: edge.source,
                       to: edge.target,
+                      font: {
+                        color: '#666'
+                      },
                       title: `
                         <div class="tooltip-fields">
                           <div>边类型：</div>
