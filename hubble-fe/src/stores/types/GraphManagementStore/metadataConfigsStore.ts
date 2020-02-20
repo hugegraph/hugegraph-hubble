@@ -138,3 +138,31 @@ export interface MetadataPropertyIndexResponse {
   records: MetadataPropertyIndex[];
   total: number;
 }
+
+// graph view data
+
+export type DrawerTypes =
+  | 'create-property'
+  | 'create-vertex'
+  | 'create-edge'
+  | 'check-property'
+  | 'check-vertex'
+  | 'check-edge'
+  | 'edit-vertex'
+  | 'edit-edge'
+  | '';
+
+export interface GraphViewData {
+  vertices: {
+    id: string;
+    label: string;
+    properties: Record<string, string | boolean>;
+  }[];
+  edges: {
+    id: string;
+    label: string;
+    source: string;
+    target: string;
+    properties: Record<string, string | boolean>;
+  }[];
+}

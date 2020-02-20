@@ -9,6 +9,7 @@ import { VertexTypeList } from './vertex-type';
 import { EdgeTypeList } from './edge-type';
 import { PropertyIndex } from './property-index';
 import { GraphView } from './graph-view';
+import DataAnalyzeStore from '../../../stores/GraphManagementStore/dataAnalyzeStore';
 import MetadataConfigsRootStore from '../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
 import './MetadataConfigs.less';
 import { AppStoreContext, GraphManagementStoreContext } from '../../../stores';
@@ -19,9 +20,10 @@ import ShowGraphIcon from '../../../assets/imgs/ic_tumoshi_black.svg';
 
 const MetadataConfig: React.FC = observer(() => {
   const appStore = useContext(AppStoreContext);
+  const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const graphManagementStore = useContext(GraphManagementStoreContext);
   const metadataConfigRootStore = useContext(MetadataConfigsRootStore);
-  const [viewMode, setViewMode] = useState('graph');
+  const [viewMode, setViewMode] = useState('list');
   const [selectedMenuItem, setSelectedMenuItem] = useState('property');
   const [match, params] = useRoute('/graph-management/:id/metadata-configs');
   const [_, setLocation] = useLocation();
@@ -61,6 +63,9 @@ const MetadataConfig: React.FC = observer(() => {
 
     if (match && params !== null) {
       appStore.setCurrentId(Number(params.id));
+      // fetch node colors
+      dataAnalyzeStore.setCurrentId(Number(params.id));
+      dataAnalyzeStore.fetchAllNodeColors();
       metadataConfigRootStore.setCurrentId(Number(params.id));
       metadataConfigRootStore.fetchIdList();
     }
