@@ -775,6 +775,12 @@ const NewVertexType: React.FC = observer(() => {
             style={{ width: 78, marginRight: 12 }}
             disabled={!edgeTypeStore.isCreatedReady}
             onClick={async () => {
+              edgeTypeStore.validateAllNewEdgeType();
+
+              if (!edgeTypeStore.isCreatedReady) {
+                return;
+              }
+
               await edgeTypeStore.addEdgeType();
 
               if (edgeTypeStore.requestStatus.addEdgeType === 'success') {

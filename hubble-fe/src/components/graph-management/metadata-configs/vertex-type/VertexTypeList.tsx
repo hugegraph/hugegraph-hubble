@@ -144,6 +144,7 @@ const VertexTypeList: React.FC = observer(() => {
         !dropdownWrapperRef.current.contains(e.target as Element)
       ) {
         switchIsAddProperty(false);
+        return;
       }
 
       if (
