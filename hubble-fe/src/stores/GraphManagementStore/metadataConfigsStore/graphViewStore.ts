@@ -47,6 +47,7 @@ export class GraphViewStore {
     return this.originalGraphViewData.vertices.map(
       ({ id, label, properties, ...rest }) => {
         return {
+          ...rest,
           id,
           label: id.length <= 15 ? id : id.slice(0, 15) + '...',
           vLabel: label,
@@ -90,8 +91,7 @@ export class GraphViewStore {
                 values.size = 30;
               }
             }
-          },
-          ...rest
+          }
         };
       }
     );
