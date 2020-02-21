@@ -103,8 +103,9 @@ public class GremlinQueryService {
     public GremlinResult executeQuery(int connId, GremlinQuery query) {
         HugeClient client = this.getClient(connId);
 
+        log.debug("The original gremlin ==> {}", query.getContent());
         String gremlin = this.optimize(query.getContent());
-        log.debug("optimized gremlin ==> {}", gremlin);
+        log.debug("The optimized gremlin ==> {}", gremlin);
         // Execute gremlin query
         ResultSet resultSet = this.executeGremlin(gremlin, client);
         // Scan data, vote the result type

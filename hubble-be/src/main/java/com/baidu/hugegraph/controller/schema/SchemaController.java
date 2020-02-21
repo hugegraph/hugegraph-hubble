@@ -100,8 +100,8 @@ public class SchemaController extends BaseController {
                             entity.getName(), entity.getTargetLabel());
             edge.put("id", edgeId);
             edge.put("label", entity.getName());
-            edge.put("source_label", entity.getSourceLabel());
-            edge.put("target_label", entity.getSourceLabel());
+            edge.put("source", entity.getSourceLabel());
+            edge.put("target", entity.getSourceLabel());
             if (entity.isLinkMultiTimes()) {
                 edge.put("sort_keys", entity.getSortKeys());
             } else {
