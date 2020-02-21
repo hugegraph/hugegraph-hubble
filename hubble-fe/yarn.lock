@@ -11712,10 +11712,10 @@ vfile@^3.0.0:
     unist-util-stringify-position "^1.0.0"
     vfile-message "^1.0.0"
 
-vis-network@^6.5.0:
-  version "6.5.0"
-  resolved "http://registry.npm.baidu-int.com/vis-network/-/vis-network-6.5.0.tgz#c1eabe7f83a704cf48717740f5741cde5dbf3229"
-  integrity sha1-weq+f4OnBM9IcXdA9XQc3l2/Mik=
+vis-network@^7.3.5:
+  version "7.3.5"
+  resolved "http://registry.npm.baidu-int.com/vis-network/-/vis-network-7.3.5.tgz#367f3a1c19ba1b677dc3dec495f7e0d235e1fd59"
+  integrity sha1-Nn86HBm6G2d9w97Elffg0jXh/Vk=
 
 vm-browserify@^1.0.1:
   version "1.1.0"
