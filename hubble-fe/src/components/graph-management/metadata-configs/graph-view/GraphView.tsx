@@ -33,7 +33,6 @@ const styles = {
 };
 
 const GraphView: React.FC = observer(() => {
-  const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const {
     metadataPropertyStore,
     vertexTypeStore,
@@ -54,13 +53,7 @@ const GraphView: React.FC = observer(() => {
       vertexTypeStore.dispose();
       edgeTypeStore.dispose();
     };
-  }, [
-    dataAnalyzeStore.colorMappings,
-    edgeTypeStore,
-    graphViewStore,
-    metadataPropertyStore,
-    vertexTypeStore
-  ]);
+  }, [edgeTypeStore, graphViewStore, metadataPropertyStore, vertexTypeStore]);
 
   return (
     <div className="metadata-configs-content-wrapper">
@@ -183,12 +176,19 @@ const GraphDataView: React.FC = observer(() => {
   }, [graph, graphViewStore.originalGraphViewData]);
 
   useEffect(() => {
-    graphViewStore.fetchGraphViewData(dataAnalyzeStore.colorMappings);
+    graphViewStore.fetchGraphViewData(
+      dataAnalyzeStore.colorMappings,
+      dataAnalyzeStore.edgeColorMappings
+    );
 
     return () => {
       graphViewStore.dispose();
     };
-  }, [dataAnalyzeStore.colorMappings, graphViewStore]);
+  }, [
+    dataAnalyzeStore.colorMappings,
+    dataAnalyzeStore.edgeColorMappings,
+    graphViewStore
+  ]);
 
   useEffect(() => {
     const graphNodes = new vis.DataSet(graphViewStore.graphNodes);

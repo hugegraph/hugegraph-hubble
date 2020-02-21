@@ -295,7 +295,13 @@ const QueryFilterOptions: React.FC<{
                                     </div>`;
                           })
                           .join('')}
-                      `
+                      `,
+                      color: {
+                        color: dataAnalyzeStore.edgeColorMappings[edge.label],
+                        highlight:
+                          dataAnalyzeStore.edgeColorMappings[edge.label],
+                        hover: dataAnalyzeStore.edgeColorMappings[edge.label]
+                      }
                     });
                   }
                 );

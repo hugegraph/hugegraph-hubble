@@ -291,7 +291,13 @@ const GraphQueryResult: React.FC<GraphQueryResult> = observer(({ hidden }) => {
                                       </div>`;
                             })
                             .join('')}
-                        `
+                        `,
+                      color: {
+                        color: dataAnalyzeStore.edgeColorMappings[edge.label],
+                        highlight:
+                          dataAnalyzeStore.edgeColorMappings[edge.label],
+                        hover: dataAnalyzeStore.edgeColorMappings[edge.label]
+                      }
                     });
                   }
                 );
@@ -710,7 +716,12 @@ const GraphPopover: React.FC<{
                                 `;
                         })
                         .join('')}
-                    `
+                    `,
+                    color: {
+                      color: dataAnalyzeStore.edgeColorMappings[edge.label],
+                      highlight: dataAnalyzeStore.edgeColorMappings[edge.label],
+                      hover: dataAnalyzeStore.edgeColorMappings[edge.label]
+                    }
                   });
                 }
               );

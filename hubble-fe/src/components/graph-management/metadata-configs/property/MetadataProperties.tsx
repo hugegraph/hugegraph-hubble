@@ -506,9 +506,14 @@ const MetadataProperties: React.FC = observer(() => {
   }, [
     metadataPropertyStore,
     metadataConfigsRootStore.currentId,
-    graphViewStore,
-    dataAnalyzeStore.colorMappings
+    graphViewStore
   ]);
+
+  // these would be called before <MetadataConfigs /> rendered, pre-load some data here
+  useEffect(() => {
+    dataAnalyzeStore.fetchAllNodeColors();
+    dataAnalyzeStore.fetchAllEdgeColors();
+  }, [dataAnalyzeStore]);
 
   useEffect(() => {
     document.addEventListener('click', handleOutSideClick, false);

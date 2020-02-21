@@ -19,6 +19,7 @@ export class GraphViewStore {
   }
 
   colorMappings: Record<string, string> = {};
+  edgeColorMappings: Record<string, string> = {};
   @observable currentDrawer: DrawerTypes = '';
   @observable currentSelected = '';
 
@@ -124,15 +125,9 @@ export class GraphViewStore {
           .join('')}
         `,
         color: {
-          color:
-            (edge.properties.style && edge.properties.style.color !== '') ||
-            '#5c73e6',
-          highlight:
-            (edge.properties.style && edge.properties.style.color !== '') ||
-            '#5c73e6',
-          hover:
-            (edge.properties.style && edge.properties.style.color !== '') ||
-            '#5c73e6'
+          color: this.edgeColorMappings[edge.label] || '#5c73e6',
+          highlight: this.edgeColorMappings[edge.label] || '#5c73e6',
+          hover: this.edgeColorMappings[edge.label] || '#5c73e6'
         }
       };
     });
@@ -173,12 +168,17 @@ export class GraphViewStore {
 
   fetchGraphViewData = flow(function* fetchGraphViewData(
     this: GraphViewStore,
-    colorMappings?: Record<string, string>
+    colorMappings?: Record<string, string>,
+    edgeColorMappings?: Record<string, string>
   ) {
     this.requestStatus.fetchGraphViewData = 'pending';
 
     if (!isUndefined(colorMappings)) {
       this.colorMappings = colorMappings;
+    }
+
+    if (!isUndefined(edgeColorMappings)) {
+      this.edgeColorMappings = edgeColorMappings;
     }
 
     try {
