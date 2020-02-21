@@ -121,9 +121,12 @@ const GraphView: React.FC = observer(() => {
 
 const GraphDataView: React.FC = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
-  const { vertexTypeStore, edgeTypeStore, graphViewStore } = useContext(
-    MetadataConfigsRootStore
-  );
+  const {
+    metadataPropertyStore,
+    vertexTypeStore,
+    edgeTypeStore,
+    graphViewStore
+  } = useContext(MetadataConfigsRootStore);
   const [graph, setGraph] = useState<vis.Network | null>(null);
   const [showLoadingGraphs, switchShowLoadingGraphs] = useState(true);
   const [isGraphDataLoaded, switchIsGraphLoaded] = useState(false);
@@ -367,22 +370,30 @@ const GraphDataView: React.FC = observer(() => {
         {graphViewStore.requestStatus.fetchGraphViewData === 'success' &&
           isEmpty(graphViewStore.originalGraphViewData!.vertices) &&
           isEmpty(graphViewStore.originalGraphViewData!.edges) && (
-            <EmptyGraphDataView />
+            <EmptyGraphDataView
+              hasProeprties={!isEmpty(metadataPropertyStore.metadataProperties)}
+            />
           )}
       </div>
     </>
   );
 });
 
-const EmptyGraphDataView: React.FC = observer(() => {
-  return (
-    <div className="metadata-graph-view-empty-wrapper">
-      <div className="metadata-graph-view-empty">
-        <img src={AddIcon} alt="您暂时还没有任何元数据" />
-        <div>您暂时还没有任何元数据</div>
+const EmptyGraphDataView: React.FC<{ hasProeprties: boolean }> = observer(
+  ({ hasProeprties }) => {
+    return (
+      <div className="metadata-graph-view-empty-wrapper">
+        <div className="metadata-graph-view-empty">
+          <img src={AddIcon} alt="您暂时还没有任何元数据" />
+          <div>
+            {hasProeprties
+              ? '您还未设置顶点类型或边类型'
+              : '您暂时还没有任何元数据'}
+          </div>
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 export default GraphView;
