@@ -1272,6 +1272,16 @@ export class EdgeTypeStore {
         throw new Error(result.data.message);
       }
 
+      if (
+        selectedEdgeTypeIndexes.length === this.edgeTypes.length &&
+        this.edgeTypeListPageConfig.pageNumber ===
+          Math.ceil(this.edgeTypeListPageConfig.pageTotal / 10) &&
+        this.edgeTypeListPageConfig.pageNumber > 1
+      ) {
+        this.edgeTypeListPageConfig.pageNumber =
+          this.edgeTypeListPageConfig.pageNumber - 1;
+      }
+
       this.requestStatus.deleteEdgeType = 'success';
     } catch (error) {
       this.requestStatus.deleteEdgeType = 'failed';

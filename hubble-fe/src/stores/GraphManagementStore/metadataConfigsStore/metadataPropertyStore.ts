@@ -450,6 +450,16 @@ export class MetadataPropertyStore {
         throw new Error(result.data.message);
       }
 
+      if (
+        selectedPropertyIndexes.length === this.metadataProperties.length &&
+        this.metadataPropertyPageConfig.pageNumber ===
+          Math.ceil(this.metadataPropertyPageConfig.pageTotal / 10) &&
+        this.metadataPropertyPageConfig.pageNumber > 1
+      ) {
+        this.metadataPropertyPageConfig.pageNumber =
+          this.metadataPropertyPageConfig.pageNumber - 1;
+      }
+
       this.requestStatus.deleteMetadataProperty = 'success';
     } catch (error) {
       this.requestStatus.deleteMetadataProperty = 'failed';

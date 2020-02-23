@@ -1049,6 +1049,16 @@ export class VertexTypeStore {
         throw new Error(result.data.message);
       }
 
+      if (
+        selectedVertexTypeIndexes.length === this.vertexTypes.length &&
+        this.vertexListPageConfig.pageNumber ===
+          Math.ceil(this.vertexListPageConfig.pageTotal / 10) &&
+        this.vertexListPageConfig.pageNumber > 1
+      ) {
+        this.vertexListPageConfig.pageNumber =
+          this.vertexListPageConfig.pageNumber - 1;
+      }
+
       this.requestStatus.deleteVertexType = 'success';
     } catch (error) {
       this.requestStatus.deleteVertexType = 'failed';
