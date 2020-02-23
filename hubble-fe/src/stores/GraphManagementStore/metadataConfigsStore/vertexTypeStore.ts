@@ -1028,20 +1028,25 @@ export class VertexTypeStore {
 
   deleteVertexType = flow(function* deleteVertexType(
     this: VertexTypeStore,
-    selectedVertexTypeIndexes: number[]
+    selectedVertexTypeIndexes: number[] | string
   ) {
     this.requestStatus.deleteVertexType = 'pending';
+
+    const combinedParams = Array.isArray(selectedVertexTypeIndexes)
+      ? selectedVertexTypeIndexes
+          .map(propertyIndex => 'names=' + this.vertexTypes[propertyIndex].name)
+          .join('&')
+      : `names=${selectedVertexTypeIndexes}`;
 
     try {
       const result: AxiosResponse<responseData<null>> = yield axios
         .delete(
           `${baseUrl}/${this.metadataConfigsRootStore.currentId}/schema/vertexlabels?` +
-            selectedVertexTypeIndexes
-              .map(
-                propertyIndex => 'names=' + this.vertexTypes[propertyIndex].name
-              )
-              .join('&') +
-            `&skip_using=${String(selectedVertexTypeIndexes.length !== 1)}`
+            combinedParams +
+            `&skip_using=${String(
+              Array.isArray(selectedVertexTypeIndexes) &&
+                selectedVertexTypeIndexes.length !== 1
+            )}`
         )
         .catch(checkIfLocalNetworkOffline);
 

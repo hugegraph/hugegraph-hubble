@@ -35,7 +35,7 @@ const CheckAndEditEdge: React.FC = observer(() => {
     MetadataConfigsRootStore
   );
   const [isAddProperty, switchIsAddProperty] = useState(false);
-  const [deletePopIndex, setDeletePopIndex] = useState<number | null>(null);
+  const [isDeletePop, switchDeletePop] = useState(false);
   const [
     deleteExistPopIndexInDrawer,
     setDeleteExistPopIndexInDrawer
@@ -70,14 +70,14 @@ const CheckAndEditEdge: React.FC = observer(() => {
       }
 
       if (
-        deletePopIndex !== null &&
+        isDeletePop !== null &&
         deleteWrapperRef.current &&
         !deleteWrapperRef.current.contains(e.target as Element)
       ) {
-        setDeletePopIndex(null);
+        switchDeletePop(false);
       }
     },
-    [isAddProperty, isEditEdge, deletePopIndex]
+    [isEditEdge, isAddProperty, isDeletePop]
   );
 
   const handleCloseDrawer = () => {
@@ -86,6 +86,41 @@ const CheckAndEditEdge: React.FC = observer(() => {
     edgeTypeStore.selectEdgeType(null);
     // clear mutations in <Drawer />
     edgeTypeStore.resetEditedSelectedEdgeType();
+  };
+
+  const handleDeleteEdge = async () => {
+    // cache vertex name here before it gets removed
+    const edgeName = edgeTypeStore.selectedEdgeType!.name;
+    const edgeId = `${
+      edgeTypeStore.selectedEdgeType!.source_label
+    }-${edgeName}->${edgeTypeStore.selectedEdgeType!.target_label}`;
+
+    switchIsAddProperty(false);
+    graphViewStore.setCurrentDrawer('');
+    switchDeletePop(false);
+    edgeTypeStore.selectEdgeType(null);
+    edgeTypeStore.resetEditedSelectedEdgeType();
+    graphViewStore.visDataSet!.edges.remove(edgeId);
+
+    await edgeTypeStore.deleteEdgeType(edgeName);
+
+    if (edgeTypeStore.requestStatus.deleteEdgeType === 'success') {
+      Message.success({
+        content: '已删除未使用项',
+        size: 'medium',
+        showCloseIcon: false
+      });
+
+      edgeTypeStore.fetchEdgeTypeList();
+    }
+
+    if (edgeTypeStore.requestStatus.deleteEdgeType === 'failed') {
+      Message.error({
+        content: edgeTypeStore.errorMessage,
+        size: 'medium',
+        showCloseIcon: false
+      });
+    }
   };
 
   useEffect(() => {
@@ -165,14 +200,82 @@ const CheckAndEditEdge: React.FC = observer(() => {
         >
           {isEditEdge ? '保存' : '编辑'}
         </Button>,
-        <Button
-          size="medium"
-          style={{ width: 60 }}
-          onClick={handleCloseDrawer}
-          key="drawer-close"
+        <TooltipTrigger
+          tooltipShown={isDeletePop}
+          placement="top-start"
+          tooltip={({
+            arrowRef,
+            tooltipRef,
+            getArrowProps,
+            getTooltipProps,
+            placement
+          }) => (
+            <div
+              {...getTooltipProps({
+                ref: tooltipRef,
+                className: 'metadata-properties-tooltips',
+                style: {
+                  zIndex: 1042
+                }
+              })}
+            >
+              <div
+                {...getArrowProps({
+                  ref: arrowRef,
+                  className: 'tooltip-arrow',
+                  'data-placement': placement
+                })}
+              />
+              <div ref={deleteWrapperRef}>
+                <p>确认删除此边类型？</p>
+                <p>删除后无法恢复，请谨慎操作。</p>
+                <div
+                  style={{
+                    display: 'flex',
+                    marginTop: 12,
+                    color: '#2b65ff',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <div
+                    style={{ marginRight: 16, cursor: 'pointer' }}
+                    onClick={handleDeleteEdge}
+                  >
+                    确认
+                  </div>
+                  <div
+                    onClick={() => {
+                      switchDeletePop(false);
+                    }}
+                  >
+                    取消
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         >
-          关闭
-        </Button>
+          {({ getTriggerProps, triggerRef }) => (
+            <span
+              {...getTriggerProps({
+                ref: triggerRef,
+                onClick() {
+                  if (isEditEdge) {
+                    handleCloseDrawer();
+                    return;
+                  }
+
+                  switchDeletePop(true);
+                }
+              })}
+              key="drawer-close"
+            >
+              <Button size="medium" style={{ width: 60 }}>
+                {isEditEdge ? '关闭' : '删除'}
+              </Button>
+            </span>
+          )}
+        </TooltipTrigger>
       ]}
     >
       <div>

@@ -1251,20 +1251,25 @@ export class EdgeTypeStore {
 
   deleteEdgeType = flow(function* deleteEdgeType(
     this: EdgeTypeStore,
-    selectedEdgeTypeIndexes: number[]
+    selectedEdgeTypeIndexes: number[] | string
   ) {
     this.requestStatus.deleteEdgeType = 'pending';
+
+    const combinedParams = Array.isArray(selectedEdgeTypeIndexes)
+      ? selectedEdgeTypeIndexes
+          .map(propertyIndex => 'names=' + this.edgeTypes[propertyIndex].name)
+          .join('&')
+      : `names=${selectedEdgeTypeIndexes}`;
 
     try {
       const result: AxiosResponse<responseData<null>> = yield axios
         .delete(
           `${baseUrl}/${this.metadataConfigsRootStore.currentId}/schema/edgelabels?` +
-            selectedEdgeTypeIndexes
-              .map(
-                propertyIndex => 'names=' + this.edgeTypes[propertyIndex].name
-              )
-              .join('&') +
-            `&skip_using=${String(selectedEdgeTypeIndexes.length !== 1)}`
+            combinedParams +
+            `&skip_using=${String(
+              Array.isArray(selectedEdgeTypeIndexes) &&
+                selectedEdgeTypeIndexes.length !== 1
+            )}`
         )
         .catch(checkIfLocalNetworkOffline);
 

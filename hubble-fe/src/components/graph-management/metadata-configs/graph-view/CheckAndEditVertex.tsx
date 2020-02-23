@@ -43,7 +43,7 @@ const CheckAndEditVertex: React.FC = observer(() => {
     MetadataConfigsRootStore
   );
   const [isAddProperty, switchIsAddProperty] = useState(false);
-  const [deletePopIndex, setDeletePopIndex] = useState<number | null>(null);
+  const [isDeletePop, switchDeletePop] = useState(false);
   const [
     deleteExistPopIndexInDrawer,
     setDeleteExistPopIndexInDrawer
@@ -78,14 +78,14 @@ const CheckAndEditVertex: React.FC = observer(() => {
       }
 
       if (
-        deletePopIndex !== null &&
+        isDeletePop &&
         deleteWrapperRef.current &&
         !deleteWrapperRef.current.contains(e.target as Element)
       ) {
-        setDeletePopIndex(null);
+        switchDeletePop(false);
       }
     },
-    [isAddProperty, isEditVertex, deletePopIndex]
+    [isAddProperty, isEditVertex, isDeletePop]
   );
 
   const handleCloseDrawer = () => {
@@ -94,6 +94,38 @@ const CheckAndEditVertex: React.FC = observer(() => {
     vertexTypeStore.selectVertexType(null);
     // clear mutations in <Drawer />
     vertexTypeStore.resetEditedSelectedVertexType();
+  };
+
+  const handleDeleteVertex = async () => {
+    // cache vertex name here before it gets removed
+    const vertexName = vertexTypeStore.selectedVertexType!.name;
+
+    switchIsAddProperty(false);
+    graphViewStore.setCurrentDrawer('');
+    switchDeletePop(false);
+    vertexTypeStore.selectVertexType(null);
+    vertexTypeStore.resetEditedSelectedVertexType();
+    graphViewStore.visDataSet!.nodes.remove(vertexName);
+
+    await vertexTypeStore.deleteVertexType(vertexName);
+
+    if (vertexTypeStore.requestStatus.deleteVertexType === 'success') {
+      Message.success({
+        content: '已删除未使用项',
+        size: 'medium',
+        showCloseIcon: false
+      });
+
+      vertexTypeStore.fetchVertexTypeList();
+    }
+
+    if (vertexTypeStore.requestStatus.deleteVertexType === 'failed') {
+      Message.error({
+        content: vertexTypeStore.errorMessage,
+        size: 'medium',
+        showCloseIcon: false
+      });
+    }
   };
 
   useEffect(() => {
@@ -175,14 +207,93 @@ const CheckAndEditVertex: React.FC = observer(() => {
         >
           {isEditVertex ? '保存' : '编辑'}
         </Button>,
-        <Button
-          size="medium"
-          style={{ width: 60 }}
-          onClick={handleCloseDrawer}
-          key="drawer-close"
+        <TooltipTrigger
+          tooltipShown={isDeletePop}
+          placement="top-start"
+          tooltip={({
+            arrowRef,
+            tooltipRef,
+            getArrowProps,
+            getTooltipProps,
+            placement
+          }) => (
+            <div
+              {...getTooltipProps({
+                ref: tooltipRef,
+                className: 'metadata-properties-tooltips',
+                style: {
+                  zIndex: 1042
+                }
+              })}
+            >
+              <div
+                {...getArrowProps({
+                  ref: arrowRef,
+                  className: 'tooltip-arrow',
+                  'data-placement': placement
+                })}
+              />
+              <div ref={deleteWrapperRef}>
+                {vertexTypeStore.vertexTypeUsingStatus &&
+                vertexTypeStore.vertexTypeUsingStatus[
+                  vertexTypeStore.selectedVertexType!.name
+                ] ? (
+                  <p style={{ width: 200 }}>
+                    当前顶点类型正在使用中，不可删除。
+                  </p>
+                ) : (
+                  <>
+                    <p>确认删除此顶点？</p>
+                    <p>删除后无法恢复，请谨慎操作。</p>
+                    <div
+                      style={{
+                        display: 'flex',
+                        marginTop: 12,
+                        color: '#2b65ff',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <div
+                        style={{ marginRight: 16, cursor: 'pointer' }}
+                        onClick={handleDeleteVertex}
+                      >
+                        确认
+                      </div>
+                      <div
+                        onClick={() => {
+                          switchDeletePop(false);
+                        }}
+                      >
+                        取消
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
         >
-          {isEditVertex ? '关闭' : '删除'}
-        </Button>
+          {({ getTriggerProps, triggerRef }) => (
+            <span
+              {...getTriggerProps({
+                ref: triggerRef,
+                onClick() {
+                  if (isEditVertex) {
+                    handleCloseDrawer();
+                    return;
+                  }
+
+                  switchDeletePop(true);
+                }
+              })}
+              key="drawer-close"
+            >
+              <Button size="medium" style={{ width: 60 }}>
+                {isEditVertex ? '关闭' : '删除'}
+              </Button>
+            </span>
+          )}
+        </TooltipTrigger>
       ]}
     >
       <div className="metadata-configs-drawer">
