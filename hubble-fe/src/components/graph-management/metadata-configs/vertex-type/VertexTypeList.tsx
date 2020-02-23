@@ -578,17 +578,28 @@ const VertexTypeList: React.FC = observer(() => {
                     }
                   }
                 ]}
-                dataSource={selectedRowKeys.map((rowNumber: number) => {
-                  const name = vertexTypeStore.vertexTypes[rowNumber].name;
+                dataSource={selectedRowKeys
+                  .map((rowNumber: number) => {
+                    // data in selectedRowKeys[index] could be non-exist in circustance that response data length don't match
+                    // so pointer(index) could out of bounds
+                    if (!isUndefined(vertexTypeStore.vertexTypes[rowNumber])) {
+                      const name = vertexTypeStore.vertexTypes[rowNumber].name;
 
-                  return {
-                    name,
-                    status:
-                      vertexTypeStore.vertexTypeUsingStatus !== null
-                        ? vertexTypeStore.vertexTypeUsingStatus[name]
-                        : true
-                  };
-                })}
+                      return {
+                        name,
+                        status:
+                          vertexTypeStore.vertexTypeUsingStatus !== null
+                            ? vertexTypeStore.vertexTypeUsingStatus[name]
+                            : true
+                      };
+                    }
+
+                    return {
+                      name: '',
+                      status: false
+                    };
+                  })
+                  .filter(({ name }) => name !== '')}
                 pagination={false}
               />
             </div>

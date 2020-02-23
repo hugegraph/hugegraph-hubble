@@ -6,6 +6,7 @@ import React, {
   useCallback
 } from 'react';
 import { observer } from 'mobx-react';
+import { isUndefined } from 'lodash-es';
 import { Input, Button, Table, Modal, Select, Message } from '@baidu/one-ui';
 import Highlighter from 'react-highlight-words';
 import TooltipTrigger from 'react-popper-tooltip';
@@ -679,18 +680,36 @@ const MetadataProperties: React.FC = observer(() => {
                     }
                   }
                 ]}
-                dataSource={selectedRowKeys.map((rowNumber: number) => {
-                  const name =
-                    metadataPropertyStore.metadataProperties[rowNumber].name;
+                dataSource={selectedRowKeys
+                  .map((rowNumber: number) => {
+                    // data in selectedRowKeys[index] could be non-exist in circustance that response data length don't match
+                    // so pointer(index) could out of bounds
+                    if (
+                      !isUndefined(
+                        metadataPropertyStore.metadataProperties[rowNumber]
+                      )
+                    ) {
+                      const name =
+                        metadataPropertyStore.metadataProperties[rowNumber]
+                          .name;
 
-                  return {
-                    name,
-                    status:
-                      metadataPropertyStore.metadataPropertyUsingStatus !==
-                        null &&
-                      metadataPropertyStore.metadataPropertyUsingStatus[name]
-                  };
-                })}
+                      return {
+                        name,
+                        status:
+                          metadataPropertyStore.metadataPropertyUsingStatus !==
+                            null &&
+                          metadataPropertyStore.metadataPropertyUsingStatus[
+                            name
+                          ]
+                      };
+                    }
+
+                    return {
+                      name: '',
+                      status: false
+                    };
+                  })
+                  .filter(({ name }) => name !== '')}
                 pagination={false}
               />
             </div>

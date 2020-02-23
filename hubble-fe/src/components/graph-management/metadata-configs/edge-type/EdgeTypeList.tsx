@@ -546,13 +546,23 @@ const EdgeTypeList: React.FC = observer(() => {
                     }
                   }
                 ]}
-                dataSource={selectedRowKeys.map((rowNumber: number) => {
-                  const name = edgeTypeStore.edgeTypes[rowNumber].name;
+                dataSource={selectedRowKeys
+                  .map((rowNumber: number) => {
+                    // data in selectedRowKeys[index] could be non-exist in circustance that response data length don't match
+                    // so pointer(index) could out of bounds
+                    if (!isUndefined(edgeTypeStore.edgeTypes[rowNumber])) {
+                      const name = edgeTypeStore.edgeTypes[rowNumber].name;
 
-                  return {
-                    name
-                  };
-                })}
+                      return {
+                        name
+                      };
+                    }
+
+                    return {
+                      name: ''
+                    };
+                  })
+                  .filter(({ name }) => name !== '')}
                 pagination={false}
               />
             </div>
