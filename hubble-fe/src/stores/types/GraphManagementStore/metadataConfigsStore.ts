@@ -156,13 +156,15 @@ export interface GraphViewData {
   vertices: {
     id: string;
     label: string;
-    properties: Record<string, string | boolean>;
+    properties: Record<string, string>;
+    primary_keys: string[];
   }[];
   edges: {
     id: string;
     label: string;
     source: string;
     target: string;
-    properties: Record<string, string | boolean>;
+    properties: Record<string, string>;
+    sort_keys: string[];
   }[];
 }

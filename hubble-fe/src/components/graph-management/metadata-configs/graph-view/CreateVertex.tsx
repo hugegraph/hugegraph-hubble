@@ -99,9 +99,20 @@ const CreateVertex: React.FC = observer(() => {
             const {
               name,
               properties,
+              primary_keys,
               style,
               ...rest
             } = vertexTypeStore.newVertexType;
+
+            const mappedProperties: Record<string, string> = {};
+
+            properties.forEach(({ name }) => {
+              const value = metadataPropertyStore.metadataProperties.find(
+                ({ name: propertyName }) => propertyName === name
+              )!.data_type;
+
+              mappedProperties[name] = value;
+            });
 
             graphViewStore.visDataSet!.nodes.add({
               ...rest,
@@ -111,15 +122,32 @@ const CreateVertex: React.FC = observer(() => {
               properties,
               title: `
                 <div class="metadata-graph-view-tooltip-fields">
-                  <div>类型名称：</div>
-                  <div>${name}</div>
+                  <div>顶点类型：</div>
+                  <div style="min-width: 60px; max-width: 145px; marigin-right: 0">${name}</div>
                 </div>
-                ${Object.entries(properties)
+                <div class="metadata-graph-view-tooltip-fields">
+                  <div style="max-width: 120px">关联属性及类型：</div>
+                </div>
+                ${Object.entries(mappedProperties)
                   .map(([key, value]) => {
+                    const convertedValue =
+                      value.toLowerCase() === 'text'
+                        ? 'string'
+                        : value.toLowerCase();
+
+                    const primaryKeyIndex = primary_keys.findIndex(
+                      primaryKey => primaryKey === key
+                    );
+
                     return `<div class="metadata-graph-view-tooltip-fields">
-                              <div>${key}: </div>
-                              <div>${value}</div>
-                            </div>`;
+                          <div>${key}: </div>
+                          <div>${convertedValue}</div>
+                          <div>${
+                            primaryKeyIndex === -1
+                              ? ''
+                              : `(主键${primaryKeyIndex})`
+                          }</div>
+                        </div>`;
                   })
                   .join('')}
               `,

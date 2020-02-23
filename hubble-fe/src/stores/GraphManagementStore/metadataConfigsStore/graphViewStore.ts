@@ -46,23 +46,39 @@ export class GraphViewStore {
     }
 
     return this.originalGraphViewData.vertices.map(
-      ({ id, label, properties, ...rest }) => {
+      ({ id, label, properties, primary_keys }) => {
         return {
-          ...rest,
           id,
           label: id.length <= 15 ? id : id.slice(0, 15) + '...',
           vLabel: label,
           properties,
           title: `
             <div class="metadata-graph-view-tooltip-fields">
-              <div>类型名称：</div>
-              <div>${label}</div>
+              <div>顶点类型：</div>
+              <div style="min-width: 60px; max-width: 145px; marigin-right: 0">${label}</div>
+            </div>
+            <div class="metadata-graph-view-tooltip-fields">
+              <div style="max-width: 120px">关联属性及类型：</div>
             </div>
             ${Object.entries(properties)
               .map(([key, value]) => {
+                const convertedValue =
+                  value.toLowerCase() === 'text'
+                    ? 'string'
+                    : value.toLowerCase();
+
+                const primaryKeyIndex = primary_keys.findIndex(
+                  primaryKey => primaryKey === key
+                );
+
                 return `<div class="metadata-graph-view-tooltip-fields">
                           <div>${key}: </div>
-                          <div>${value}</div>
+                          <div>${convertedValue}</div>
+                          <div>${
+                            primaryKeyIndex === -1
+                              ? ''
+                              : `(主键${primaryKeyIndex})`
+                          }</div>
                         </div>`;
               })
               .join('')}
@@ -103,35 +119,51 @@ export class GraphViewStore {
       return [];
     }
 
-    return this.originalGraphViewData.edges.map((edge: any) => {
-      return {
-        ...edge,
-        from: edge.source,
-        to: edge.target,
-        font: {
-          color: '#666'
-        },
-        title: `
-        <div class="tooltip-fields">
-          <div>类型名称：</div>
-          <div>${edge.label}</div>
-        </div>
-        ${Object.entries(edge.properties)
-          .map(([key, value]) => {
-            return `<div class="tooltip-fields">
-                      <div>${key}: </div>
-                      <div>${value}</div>
-                    </div>`;
-          })
-          .join('')}
-        `,
-        color: {
-          color: this.edgeColorMappings[edge.label] || '#5c73e6',
-          highlight: this.edgeColorMappings[edge.label] || '#5c73e6',
-          hover: this.edgeColorMappings[edge.label] || '#5c73e6'
-        }
-      };
-    });
+    return this.originalGraphViewData.edges.map(
+      ({ id, label, source, target, properties, sort_keys }) => {
+        return {
+          id,
+          label,
+          from: source,
+          to: target,
+          font: {
+            color: '#666'
+          },
+          title: `
+          <div class="metadata-graph-view-tooltip-fields">
+            <div>边类型：</div>
+            <div>${label}</div>
+          </div>
+          <div class="metadata-graph-view-tooltip-fields">
+            <div style="max-width: 120px">关联属性及类型：</div>
+          </div>
+          ${Object.entries(properties)
+            .map(([key, value]) => {
+              const convertedValue =
+                value.toLowerCase() === 'text' ? 'string' : value.toLowerCase();
+
+              const sortKeyIndex = sort_keys.findIndex(
+                sortKey => sortKey === key
+              );
+
+              return `<div class="metadata-graph-view-tooltip-fields">
+                        <div>${key}: </div>
+                        <div>${convertedValue}</div>
+                        <div>${
+                          sortKeyIndex === -1 ? '' : `(主键${sortKeyIndex})`
+                        }</div>
+                      </div>`;
+            })
+            .join('')}
+          `,
+          color: {
+            color: this.edgeColorMappings[label] || '#5c73e6',
+            highlight: this.edgeColorMappings[label] || '#5c73e6',
+            hover: this.edgeColorMappings[label] || '#5c73e6'
+          }
+        };
+      }
+    );
   }
 
   @action

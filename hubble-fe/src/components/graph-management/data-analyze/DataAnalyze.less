@@ -806,14 +806,22 @@
 .metadata-graph-view-tooltip-fields {
   .tooltip-fields();
 
-  max-width: 400px;
+  max-width: 300px;
 
-  & > div:first-child {
-    width: 120px;
+  & > div:nth-child(1) {
+    width: 100px;
   }
 
-  & > div:last-child {
-    max-width: 275px;
+  & > div:nth-child(2) {
+    width: 45px;
+    margin-right: 3px;
+  }
+
+  & > div:nth-child(3) {
+    max-width: 50px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

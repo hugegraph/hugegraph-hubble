@@ -101,31 +101,56 @@ const CreateEdge: React.FC = observer(() => {
               source_label,
               target_label,
               properties,
+              sort_keys,
               style,
               ...rest
             } = edgeTypeStore.newEdgeType;
 
+            const mappedProperties: Record<string, string> = {};
+
+            properties.forEach(({ name }) => {
+              const value = metadataPropertyStore.metadataProperties.find(
+                ({ name: propertyName }) => propertyName === name
+              )!.data_type;
+
+              mappedProperties[name] = value;
+            });
+
             graphViewStore.visDataSet!.edges.add({
               ...rest,
               id: name,
-              label: name.length <= 15 ? name : name.slice(0, 15) + '...',
-              vLabel: name,
+              label: name,
               from: source_label,
               to: target_label,
               font: {
                 color: '#666'
               },
               title: `
-                <div class="tooltip-fields">
-                  <div>类型名称：</div>
+                <div class="metadata-graph-view-tooltip-fields">
+                  <div>边类型：</div>
                   <div>${name}</div>
                 </div>
-                ${Object.entries(properties)
+                <div class="metadata-graph-view-tooltip-fields">
+                  <div style="max-width: 120px">关联属性及类型：</div>
+                </div>
+                ${Object.entries(mappedProperties)
                   .map(([key, value]) => {
-                    return `<div class="tooltip-fields">
-                              <div>${key}: </div>
-                              <div>${value}</div>
-                            </div>`;
+                    const convertedValue =
+                      value.toLowerCase() === 'text'
+                        ? 'string'
+                        : value.toLowerCase();
+
+                    const sortKeyIndex = sort_keys.findIndex(
+                      sortKey => sortKey === key
+                    );
+
+                    return `<div class="metadata-graph-view-tooltip-fields">
+                        <div>${key}: </div>
+                        <div>${convertedValue}</div>
+                        <div>${
+                          sortKeyIndex === -1 ? '' : `(主键${sortKeyIndex})`
+                        }</div>
+                      </div>`;
                   })
                   .join('')}
               `,
