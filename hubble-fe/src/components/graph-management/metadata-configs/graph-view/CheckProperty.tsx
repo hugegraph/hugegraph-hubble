@@ -20,6 +20,24 @@ const CheckProperty: React.FC = observer(() => {
 
   const handleOutSideClick = useCallback(
     (e: MouseEvent) => {
+      const drawerWrapper = document.querySelector(
+        '.new-fc-one-drawer-content-wrapper'
+      );
+      const buttonWrapper = document.querySelector(
+        '#metadata-graph-button-check-property'
+      );
+
+      if (
+        graphViewStore.currentDrawer === 'check-property' &&
+        // avoid drawer name reset when click button before drawer pop out
+        buttonWrapper &&
+        !buttonWrapper.contains(e.target as Element) &&
+        drawerWrapper &&
+        !drawerWrapper.contains(e.target as Element)
+      ) {
+        graphViewStore.setCurrentDrawer('');
+      }
+
       if (
         popIndex !== null &&
         deleteWrapperRef &&
@@ -29,7 +47,7 @@ const CheckProperty: React.FC = observer(() => {
         setPopIndex(null);
       }
     },
-    [popIndex]
+    [graphViewStore, popIndex]
   );
 
   const handleCloseDrawer = () => {

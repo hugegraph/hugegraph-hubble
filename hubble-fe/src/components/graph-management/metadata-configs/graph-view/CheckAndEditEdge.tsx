@@ -59,6 +59,27 @@ const CheckAndEditEdge: React.FC = observer(() => {
   // need useCallback to stop infinite callings of useEffect
   const handleOutSideClick = useCallback(
     (e: MouseEvent) => {
+      const drawerWrapper = document.querySelector(
+        '.new-fc-one-drawer-content-wrapper'
+      );
+
+      if (
+        graphViewStore.currentDrawer === 'check-edge' &&
+        drawerWrapper &&
+        !drawerWrapper.contains(e.target as Element)
+      ) {
+        /*
+          handleOutSideClick is being called after the value assignment of data and drawer-name,
+          we need to judge whether a node or edge is being clicked
+        */
+        if (graphViewStore.isNodeOrEdgeClicked) {
+          // if node/edge is clicked, reset state and prepare for next outside clicks
+          graphViewStore.switchNodeOrEdgeClicked(false);
+        } else {
+          graphViewStore.setCurrentDrawer('');
+        }
+      }
+
       if (
         isEditEdge &&
         isAddProperty &&
@@ -77,7 +98,7 @@ const CheckAndEditEdge: React.FC = observer(() => {
         switchDeletePop(false);
       }
     },
-    [isEditEdge, isAddProperty, isDeletePop]
+    [graphViewStore, isEditEdge, isAddProperty, isDeletePop]
   );
 
   const handleCloseDrawer = () => {

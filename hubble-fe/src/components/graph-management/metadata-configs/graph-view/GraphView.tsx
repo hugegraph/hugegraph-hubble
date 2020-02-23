@@ -85,16 +85,19 @@ const GraphView: React.FC = observer(() => {
         >
           创建边类型
         </Button>
+        {/* <CreateProperty />.outsideClick need id to specify logic here */}
         {!isEmpty(metadataPropertyStore.metadataProperties) && (
-          <Button
-            size="medium"
-            style={styles}
-            onClick={() => {
-              graphViewStore.setCurrentDrawer('check-property');
-            }}
-          >
-            查看属性
-          </Button>
+          <div id="metadata-graph-button-check-property">
+            <Button
+              size="medium"
+              style={styles}
+              onClick={() => {
+                graphViewStore.setCurrentDrawer('check-property');
+              }}
+            >
+              查看属性
+            </Button>
+          </div>
         )}
       </div>
       {/* note: components below all have graphView.currentDrawer in render
@@ -251,6 +254,7 @@ const GraphDataView: React.FC = observer(() => {
 
               vertexTypeStore.selectVertexType(index);
               graphViewStore.setCurrentDrawer('check-vertex');
+              graphViewStore.switchNodeOrEdgeClicked(true);
             }
 
             return;
@@ -272,6 +276,7 @@ const GraphDataView: React.FC = observer(() => {
 
               edgeTypeStore.selectEdgeType(index);
               graphViewStore.setCurrentDrawer('check-edge');
+              graphViewStore.switchNodeOrEdgeClicked(true);
             }
           }
         });

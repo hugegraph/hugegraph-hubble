@@ -22,6 +22,7 @@ export class GraphViewStore {
   edgeColorMappings: Record<string, string> = {};
   @observable currentDrawer: DrawerTypes = '';
   @observable currentSelected = '';
+  @observable isNodeOrEdgeClicked = false;
 
   @observable visNetwork: vis.Network | null = null;
   @observable visDataSet: Record<'nodes' | 'edges', any> | null = null;
@@ -136,6 +137,11 @@ export class GraphViewStore {
   @action
   setCurrentDrawer(drawer: DrawerTypes) {
     this.currentDrawer = drawer;
+  }
+
+  @action
+  switchNodeOrEdgeClicked(flag: boolean) {
+    this.isNodeOrEdgeClicked = flag;
   }
 
   @action
