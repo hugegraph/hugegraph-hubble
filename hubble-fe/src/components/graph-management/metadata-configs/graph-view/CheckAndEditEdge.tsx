@@ -710,7 +710,6 @@ const CheckAndEditEdge: React.FC = observer(() => {
                         <Input
                           size="medium"
                           width={100}
-                          maxLen={128}
                           placeholder="索引名称"
                           errorLocation="layer"
                           errorMessage={
