@@ -1,6 +1,12 @@
 {
   "name": "hubble",
-  "version": "1.1.0",
+  "version": "1.2.1",
+  "author": "wangzixi",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hugegraph/hugegraph-hubble"
+  },
   "dependencies": {
     "@baidu/one-ui": "^3.0.14-beta-04",
     "@types/classnames": "^2.2.9",
@@ -59,6 +65,9 @@
     "stylelint": "^13.2.0",
     "stylelint-config-standard": "^20.0.0"
   },
+  "keywords": [
+    "hugegraph"
+  ],
   "pre-commit": [
     "lint-staged"
   ],
