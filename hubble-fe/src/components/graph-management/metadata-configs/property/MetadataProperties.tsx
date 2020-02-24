@@ -185,13 +185,13 @@ const MetadataProperties: React.FC = observer(() => {
             }}
           >
             {metadataPropertyStore.isSearched.status ? (
-              // @ts-ignore
               <Highlighter
                 highlightClassName="metadata-properties-search-highlights"
                 searchWords={[metadataPropertyStore.isSearched.value]}
                 autoEscape={true}
                 textToHighlight={text}
                 // caution: no title property on type defination
+                // @ts-ignore
                 title={text}
               />
             ) : (
