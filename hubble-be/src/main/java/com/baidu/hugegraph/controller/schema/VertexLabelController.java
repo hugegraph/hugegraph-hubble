@@ -60,10 +60,10 @@ import com.google.common.collect.ImmutableList;
 public class VertexLabelController extends SchemaController {
 
     private static final List<String> PRESET_COLORS = ImmutableList.of(
-            // old
+            // bright color
             "#2B65FF", "#0EB880", "#76C100", "#ED7600", "#E65055",
             "#A64EE6", "#108CEE", "#00B5D9", "#F2CA00", "#E048AE",
-            // new
+            // dull color
             "#5C73E6", "#569380", "#76C100", "#FE9227", "#FE585D",
             "#FD6ACE", "#4D8DDA", "#57C7E3", "#F2CA00", "#C570FF"
     );
