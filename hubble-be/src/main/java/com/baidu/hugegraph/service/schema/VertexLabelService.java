@@ -40,21 +40,23 @@ import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.entity.schema.ConflictCheckEntity;
 import com.baidu.hugegraph.entity.schema.ConflictDetail;
 import com.baidu.hugegraph.entity.schema.ConflictStatus;
-import com.baidu.hugegraph.entity.schema.LabelUpdateEntity;
 import com.baidu.hugegraph.entity.schema.Property;
 import com.baidu.hugegraph.entity.schema.PropertyIndex;
 import com.baidu.hugegraph.entity.schema.SchemaConflict;
 import com.baidu.hugegraph.entity.schema.SchemaEntity;
-import com.baidu.hugegraph.entity.schema.SchemaStyle;
 import com.baidu.hugegraph.entity.schema.SchemaType;
 import com.baidu.hugegraph.entity.schema.VertexLabelEntity;
+import com.baidu.hugegraph.entity.schema.VertexLabelStyle;
+import com.baidu.hugegraph.entity.schema.VertexLabelUpdateEntity;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.ServerException;
+import com.baidu.hugegraph.structure.SchemaElement;
 import com.baidu.hugegraph.structure.schema.EdgeLabel;
 import com.baidu.hugegraph.structure.schema.IndexLabel;
 import com.baidu.hugegraph.structure.schema.PropertyKey;
 import com.baidu.hugegraph.structure.schema.VertexLabel;
 import com.baidu.hugegraph.util.Ex;
+import com.baidu.hugegraph.util.JsonUtil;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -158,7 +160,7 @@ public class VertexLabelService extends SchemaService {
         }
     }
 
-    public void update(LabelUpdateEntity entity, int connId) {
+    public void update(VertexLabelUpdateEntity entity, int connId) {
         HugeClient client = this.client(connId);
         VertexLabel vertexLabel = convert(entity, client);
 
@@ -348,9 +350,34 @@ public class VertexLabelService extends SchemaService {
                                 .primaryKeys(vertexLabel.primaryKeys())
                                 .propertyIndexes(propertyIndexes)
                                 .openLabelIndex(vertexLabel.enableLabelIndex())
-                                .style(getSchemaStyle(vertexLabel))
+                                .style(getStyle(vertexLabel))
                                 .createTime(getCreateTime(vertexLabel))
                                 .build();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static VertexLabelStyle getStyle(SchemaElement element) {
+        String icon = (String) element.userdata().get(USER_KEY_ICON);
+        String color = (String) element.userdata().get(USER_KEY_COLOR);
+
+        String sizeValue = (String) element.userdata().get(USER_KEY_SIZE);
+        VertexLabelStyle.Size size = null;
+        if (sizeValue != null) {
+            size = VertexLabelStyle.Size.valueOf(sizeValue);
+        }
+
+        String fieldsValue = (String) element.userdata().get(USER_KEY_FIELDS);
+        List<String> fields = null;
+        if (fieldsValue != null) {
+            fields = JsonUtil.fromJson(fieldsValue, List.class);
+        }
+
+        String symbolsValue = (String) element.userdata().get(USER_KEY_SYMBOLS);
+        List<String> symbols = null;
+        if (symbolsValue != null) {
+            symbols = JsonUtil.fromJson(symbolsValue, List.class);
+        }
+        return new VertexLabelStyle(icon, color, size, fields, symbols);
     }
 
     private static VertexLabel convert(VertexLabelEntity entity,
@@ -359,7 +386,7 @@ public class VertexLabelService extends SchemaService {
             return null;
         }
 
-        SchemaStyle style = getSchemaStyle(entity);
+        VertexLabelStyle style = entity.getStyle();
         return client.schema().vertexLabel(entity.getName())
                      .idStrategy(entity.getIdStrategy())
                      .properties(toStringArray(entity.getPropNames()))
@@ -369,11 +396,19 @@ public class VertexLabelService extends SchemaService {
                      .userdata(USER_KEY_CREATE_TIME, entity.getCreateTime())
                      .userdata(USER_KEY_ICON, style.getIcon())
                      .userdata(USER_KEY_COLOR, style.getColor())
+                     .userdata(USER_KEY_SIZE, style.getSize().name())
+                     .userdata(USER_KEY_FIELDS,
+                               JsonUtil.toJson(style.getDisplayFields()))
+                     .userdata(USER_KEY_SYMBOLS,
+                               JsonUtil.toJson(style.getJoinSymbols()))
                      .build();
     }
 
-    private static VertexLabel convert(LabelUpdateEntity entity,
+    private static VertexLabel convert(VertexLabelUpdateEntity entity,
                                        HugeClient client) {
+        if (entity == null) {
+            return null;
+        }
         Set<String> properties = new HashSet<>();
         if (entity.getAppendProperties() != null) {
             entity.getAppendProperties().forEach(p -> {
@@ -385,13 +420,31 @@ public class VertexLabelService extends SchemaService {
         builder = client.schema().vertexLabel(entity.getName())
                         .properties(toStringArray(properties))
                         .nullableKeys(toStringArray(properties));
-        SchemaStyle style = entity.getStyle();
+
+        VertexLabel vertexLabel = builder.build();
+        Map<String, Object> userdata = vertexLabel.userdata();
+
+        // The style requires the front end to pass in the full amount
+        // TODO: use builder or setter, Now use builder throw
+        //  Can't access builder which is completed
+        VertexLabelStyle style = entity.getStyle();
         if (style.getIcon() != null) {
-            builder.userdata(USER_KEY_ICON, style.getIcon());
+            userdata.put(USER_KEY_ICON, style.getIcon());
         }
         if (style.getColor() != null) {
-            builder.userdata(USER_KEY_COLOR, style.getColor());
+            userdata.put(USER_KEY_COLOR, style.getColor());
         }
-        return builder.build();
+        if (style.getSize() != null) {
+            userdata.put(USER_KEY_SIZE, style.getSize().name());
+        }
+        if (style.getDisplayFields() != null) {
+            userdata.put(USER_KEY_FIELDS,
+                         JsonUtil.toJson(style.getDisplayFields()));
+        }
+        if (style.getJoinSymbols() != null) {
+            userdata.put(USER_KEY_SYMBOLS,
+                         JsonUtil.toJson(style.getJoinSymbols()));
+        }
+        return vertexLabel;
     }
 }
