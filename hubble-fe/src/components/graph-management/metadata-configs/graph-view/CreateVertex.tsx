@@ -195,6 +195,13 @@ const CreateVertex: React.FC = observer(() => {
                 size: 'medium',
                 showCloseIcon: false
               });
+
+              // if vertex is empty before, trigger re-render here to reveal <GraphDataView />
+              if (graphViewStore.isGraphVertexEmpty) {
+                graphViewStore.switchGraphDataEmpty(false);
+                graphViewStore.fetchGraphViewData();
+              }
+
               return;
             }
 

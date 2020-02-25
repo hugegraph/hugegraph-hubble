@@ -24,6 +24,10 @@ export class GraphViewStore {
   @observable currentSelected = '';
   @observable isNodeOrEdgeClicked = false;
 
+  // avoid to re-assign value to originalGraphViewData from re-rendering
+  // have to set a flag to inform data is empty
+  @observable isGraphVertexEmpty = true;
+
   @observable visNetwork: vis.Network | null = null;
   @observable visDataSet: Record<'nodes' | 'edges', any> | null = null;
   @observable.ref graphViewData: GraphViewData | null = null;
@@ -177,6 +181,11 @@ export class GraphViewStore {
   }
 
   @action
+  switchGraphDataEmpty(flag: boolean) {
+    this.isGraphVertexEmpty = flag;
+  }
+
+  @action
   setVisNetwork(visNetwork: vis.Network) {
     this.visNetwork = visNetwork;
   }
@@ -232,6 +241,10 @@ export class GraphViewStore {
       }
 
       const data = result.data.data;
+
+      if (data.vertices.length !== 0) {
+        this.switchGraphDataEmpty(false);
+      }
 
       this.originalGraphViewData = data;
       this.graphViewData = data;

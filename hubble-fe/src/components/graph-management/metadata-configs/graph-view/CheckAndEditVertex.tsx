@@ -126,7 +126,11 @@ const CheckAndEditVertex: React.FC = observer(() => {
     switchDeletePop(false);
     vertexTypeStore.selectVertexType(null);
     vertexTypeStore.resetEditedSelectedVertexType();
-    graphViewStore.visDataSet!.nodes.remove(vertexName);
+
+    // if node > 1, delete node on local before send request
+    if (graphViewStore.visDataSet!.nodes.length > 1) {
+      graphViewStore.visDataSet!.nodes.remove(vertexName);
+    }
 
     await vertexTypeStore.deleteVertexType(vertexName);
 
@@ -138,6 +142,12 @@ const CheckAndEditVertex: React.FC = observer(() => {
       });
 
       vertexTypeStore.fetchVertexTypeList();
+
+      // if delete the last node, fetch graph data to trigger re-render to reveal <EmptyDataView />
+      if (graphViewStore.visDataSet?.nodes.length === 1) {
+        graphViewStore.switchGraphDataEmpty(true);
+        graphViewStore.fetchGraphViewData();
+      }
     }
 
     if (vertexTypeStore.requestStatus.deleteVertexType === 'failed') {

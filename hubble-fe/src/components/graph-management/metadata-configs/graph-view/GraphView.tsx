@@ -297,7 +297,7 @@ const GraphDataView: React.FC = observer(() => {
     } else {
       // if graph view data arrives, init to graph
       if (graphViewStore.originalGraphViewData !== null && !isGraphDataLoaded) {
-        switchIsGraphLoaded(true);
+        // switchIsGraphLoaded(true);
 
         graph.setData({
           nodes: graphNodes,
@@ -373,6 +373,7 @@ const GraphDataView: React.FC = observer(() => {
             </div>
           )}
         {graphViewStore.requestStatus.fetchGraphViewData === 'success' &&
+          graphViewStore.isGraphVertexEmpty &&
           isEmpty(graphViewStore.originalGraphViewData!.vertices) &&
           isEmpty(graphViewStore.originalGraphViewData!.edges) && (
             <EmptyGraphDataView
