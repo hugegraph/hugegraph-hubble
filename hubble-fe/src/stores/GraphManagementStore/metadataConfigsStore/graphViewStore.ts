@@ -136,7 +136,7 @@ export class GraphViewStore {
           title: `
           <div class="metadata-graph-view-tooltip-fields">
             <div>边类型：</div>
-            <div>${label}</div>
+            <div style="min-width: 60px; max-width: 145px; marigin-right: 0">${label}</div>
           </div>
           <div class="metadata-graph-view-tooltip-fields">
             <div style="max-width: 120px">关联属性及类型：</div>
