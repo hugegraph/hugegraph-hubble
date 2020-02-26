@@ -890,9 +890,9 @@ export class VertexTypeStore {
         : this.metadataConfigsRootStore.currentId;
 
     try {
-      const result: AxiosResponse<
-        responseData<VertexTypeListResponse>
-      > = yield axios
+      const result: AxiosResponse<responseData<
+        VertexTypeListResponse
+      >> = yield axios
         .get(`${baseUrl}/${conn_id}/schema/vertexlabels`, {
           params: {
             page_no: this.vertexListPageConfig.pageNumber,
@@ -940,9 +940,9 @@ export class VertexTypeStore {
     this.requestStatus.checkIfUsing = 'pending';
 
     try {
-      const result: AxiosResponse<
-        responseData<Record<string, boolean>>
-      > = yield axios
+      const result: AxiosResponse<responseData<
+        Record<string, boolean>
+      >> = yield axios
         .post(
           `${baseUrl}/${this.metadataConfigsRootStore.currentId}/schema/vertexlabels/check_using`,
           {
@@ -1116,9 +1116,9 @@ export class VertexTypeStore {
     this.requestStatus.recheckConflict = 'pending';
 
     try {
-      const result: AxiosResponse<
-        responseData<CheckedReusableData>
-      > = yield axios
+      const result: AxiosResponse<responseData<
+        CheckedReusableData
+      >> = yield axios
         .post(
           `${baseUrl}/${this.metadataConfigsRootStore.currentId}/schema/vertexlabels/recheck_conflict`,
           {
