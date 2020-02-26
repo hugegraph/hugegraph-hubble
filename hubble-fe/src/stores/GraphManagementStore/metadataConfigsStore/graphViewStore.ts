@@ -81,7 +81,7 @@ export class GraphViewStore {
                           <div>${
                             primaryKeyIndex === -1
                               ? ''
-                              : `(主键${primaryKeyIndex})`
+                              : `(主键${primaryKeyIndex + 1})`
                           }</div>
                         </div>`;
               })
@@ -154,7 +154,9 @@ export class GraphViewStore {
                         <div>${key}: </div>
                         <div>${convertedValue}</div>
                         <div>${
-                          sortKeyIndex === -1 ? '' : `(主键${sortKeyIndex})`
+                          sortKeyIndex === -1
+                            ? ''
+                            : `(区分键${sortKeyIndex + 1})`
                         }</div>
                       </div>`;
             })

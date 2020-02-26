@@ -148,7 +148,9 @@ const CreateEdge: React.FC = observer(() => {
                         <div>${key}: </div>
                         <div>${convertedValue}</div>
                         <div>${
-                          sortKeyIndex === -1 ? '' : `(主键${sortKeyIndex})`
+                          sortKeyIndex === -1
+                            ? ''
+                            : `(区分键${sortKeyIndex + 1})`
                         }</div>
                       </div>`;
                   })

@@ -142,7 +142,7 @@ const CreateVertex: React.FC = observer(() => {
                           <div>${
                             primaryKeyIndex === -1
                               ? ''
-                              : `(主键${primaryKeyIndex})`
+                              : `(主键${primaryKeyIndex + 1})`
                           }</div>
                         </div>`;
                   })
