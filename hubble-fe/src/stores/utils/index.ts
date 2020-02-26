@@ -25,3 +25,11 @@ export function mapMetadataProperties(
 
   return mappedProperties;
 }
+
+export function generateGraphModeId(
+  id: string,
+  source: string,
+  target: string
+): string {
+  return `${source}-${id}->${target}`;
+}

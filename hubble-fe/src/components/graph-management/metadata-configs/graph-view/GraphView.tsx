@@ -20,6 +20,7 @@ import CheckProperty from './CheckProperty';
 
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore';
 import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
+import { generateGraphModeId } from '../../../../stores/utils';
 
 import AddIcon from '../../../../assets/imgs/ic_add.svg';
 import LoadingBackIcon from '../../../../assets/imgs/ic_loading_back.svg';
@@ -266,8 +267,11 @@ const GraphDataView: React.FC = observer(() => {
             if (graphViewStore.graphViewData !== null) {
               const index = edgeTypeStore.edgeTypes.findIndex(
                 edge =>
-                  `${edge.source_label}-${edge.name}->${edge.target_label}` ===
-                  edgeId
+                  generateGraphModeId(
+                    edge.name,
+                    edge.source_label,
+                    edge.target_label
+                  ) === edgeId
               );
 
               if (index === -1) {

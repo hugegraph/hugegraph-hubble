@@ -22,7 +22,10 @@ import TooltipTrigger from 'react-popper-tooltip';
 
 import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
 import { EdgeTypeValidatePropertyIndexes } from '../../../../stores/types/GraphManagementStore/metadataConfigsStore';
-import { mapMetadataProperties } from '../../../../stores/utils';
+import {
+  mapMetadataProperties,
+  generateGraphModeId
+} from '../../../../stores/utils';
 
 import BlueArrowIcon from '../../../../assets/imgs/ic_arrow_blue.svg';
 import HintIcon from '../../../../assets/imgs/ic_question_mark.svg';
@@ -115,7 +118,7 @@ const CreateEdge: React.FC = observer(() => {
 
             graphViewStore.visDataSet!.edges.add({
               ...rest,
-              id: name,
+              id: generateGraphModeId(name, source_label, target_label),
               label: name,
               from: source_label,
               to: target_label,

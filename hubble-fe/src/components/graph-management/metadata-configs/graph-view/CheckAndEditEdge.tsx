@@ -21,7 +21,10 @@ import TooltipTrigger from 'react-popper-tooltip';
 
 import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
 import { EdgeTypeValidatePropertyIndexes } from '../../../../stores/types/GraphManagementStore/metadataConfigsStore';
-import { mapMetadataProperties } from '../../../../stores/utils';
+import {
+  mapMetadataProperties,
+  generateGraphModeId
+} from '../../../../stores/utils';
 
 import BlueArrowIcon from '../../../../assets/imgs/ic_arrow_blue.svg';
 import CloseIcon from '../../../../assets/imgs/ic_close_16.svg';
@@ -114,9 +117,11 @@ const CheckAndEditEdge: React.FC = observer(() => {
   const handleDeleteEdge = async () => {
     // cache vertex name here before it gets removed
     const edgeName = edgeTypeStore.selectedEdgeType!.name;
-    const edgeId = `${
-      edgeTypeStore.selectedEdgeType!.source_label
-    }-${edgeName}->${edgeTypeStore.selectedEdgeType!.target_label}`;
+    const edgeId = generateGraphModeId(
+      edgeName,
+      edgeTypeStore.selectedEdgeType!.source_label,
+      edgeTypeStore.selectedEdgeType!.target_label
+    );
 
     switchIsAddProperty(false);
     graphViewStore.setCurrentDrawer('');
@@ -179,9 +184,11 @@ const CheckAndEditEdge: React.FC = observer(() => {
               graphViewStore.setCurrentDrawer('edit-edge');
               edgeTypeStore.validateEditEdgeType();
             } else {
-              const id = `${edgeTypeStore.selectedEdgeType!.source_label}-${
-                edgeTypeStore.selectedEdgeType!.name
-              }->${edgeTypeStore.selectedEdgeType!.target_label}`;
+              const id = generateGraphModeId(
+                edgeTypeStore.selectedEdgeType!.name,
+                edgeTypeStore.selectedEdgeType!.source_label,
+                edgeTypeStore.selectedEdgeType!.target_label
+              );
               const updateInfo: Record<string, any> = {};
 
               if (
