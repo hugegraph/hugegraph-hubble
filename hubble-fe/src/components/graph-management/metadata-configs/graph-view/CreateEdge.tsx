@@ -22,6 +22,8 @@ import TooltipTrigger from 'react-popper-tooltip';
 
 import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
 import { EdgeTypeValidatePropertyIndexes } from '../../../../stores/types/GraphManagementStore/metadataConfigsStore';
+import { mapMetadataProperties } from '../../../../stores/utils';
+
 import BlueArrowIcon from '../../../../assets/imgs/ic_arrow_blue.svg';
 import HintIcon from '../../../../assets/imgs/ic_question_mark.svg';
 import closeIcon from '../../../../assets/imgs/ic_close_16.svg';
@@ -106,15 +108,10 @@ const CreateEdge: React.FC = observer(() => {
               ...rest
             } = edgeTypeStore.newEdgeType;
 
-            const mappedProperties: Record<string, string> = {};
-
-            properties.forEach(({ name }) => {
-              const value = metadataPropertyStore.metadataProperties.find(
-                ({ name: propertyName }) => propertyName === name
-              )!.data_type;
-
-              mappedProperties[name] = value;
-            });
+            const mappedProperties = mapMetadataProperties(
+              properties,
+              metadataPropertyStore.metadataProperties
+            );
 
             graphViewStore.visDataSet!.edges.add({
               ...rest,
@@ -128,7 +125,7 @@ const CreateEdge: React.FC = observer(() => {
               title: `
                 <div class="metadata-graph-view-tooltip-fields">
                   <div>边类型：</div>
-                  <div>${name}</div>
+                  <div style="min-width: 60px; max-width: 145px; marigin-right: 0">${name}</div>
                 </div>
                 <div class="metadata-graph-view-tooltip-fields">
                   <div style="max-width: 120px">关联属性及类型：</div>

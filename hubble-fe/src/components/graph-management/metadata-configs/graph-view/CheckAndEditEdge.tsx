@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react';
 import classnames from 'classnames';
-import { cloneDeep, isUndefined } from 'lodash-es';
+import { cloneDeep, merge, isUndefined, isEmpty } from 'lodash-es';
 import {
   Drawer,
   Button,
@@ -21,6 +21,8 @@ import TooltipTrigger from 'react-popper-tooltip';
 
 import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
 import { EdgeTypeValidatePropertyIndexes } from '../../../../stores/types/GraphManagementStore/metadataConfigsStore';
+import { mapMetadataProperties } from '../../../../stores/utils';
+
 import BlueArrowIcon from '../../../../assets/imgs/ic_arrow_blue.svg';
 import CloseIcon from '../../../../assets/imgs/ic_close_16.svg';
 
@@ -177,17 +179,66 @@ const CheckAndEditEdge: React.FC = observer(() => {
               graphViewStore.setCurrentDrawer('edit-edge');
               edgeTypeStore.validateEditEdgeType();
             } else {
+              const id = `${edgeTypeStore.selectedEdgeType!.source_label}-${
+                edgeTypeStore.selectedEdgeType!.name
+              }->${edgeTypeStore.selectedEdgeType!.target_label}`;
+              const updateInfo: Record<string, any> = {};
+
+              if (
+                !isEmpty(edgeTypeStore.editedSelectedEdgeType.append_properties)
+              ) {
+                const mappedProperties = mapMetadataProperties(
+                  edgeTypeStore.selectedEdgeType!.properties,
+                  metadataPropertyStore.metadataProperties
+                );
+
+                const newMappedProperties = mapMetadataProperties(
+                  edgeTypeStore.editedSelectedEdgeType.append_properties,
+                  metadataPropertyStore.metadataProperties
+                );
+
+                const mergedProperties = merge(
+                  mappedProperties,
+                  newMappedProperties
+                );
+
+                updateInfo.title = `
+                  <div class="metadata-graph-view-tooltip-fields">
+                    <div>边类型：</div>
+                    <div style="min-width: 60px; max-width: 145px; marigin-right: 0">${id}</div>
+                  </div>
+                  <div class="metadata-graph-view-tooltip-fields">
+                    <div style="max-width: 120px">关联属性及类型：</div>
+                  </div>
+                  ${Object.entries(mergedProperties)
+                    .map(([key, value]) => {
+                      const convertedValue =
+                        value.toLowerCase() === 'text'
+                          ? 'string'
+                          : value.toLowerCase();
+
+                      return `<div class="metadata-graph-view-tooltip-fields">
+                        <div>${key}: </div>
+                        <div>${convertedValue}</div>
+                        <div></div>
+                      </div>`;
+                    })
+                    .join('')}
+                `;
+              }
+
               if (edgeTypeStore.editedSelectedEdgeType.style.color !== null) {
-                graphViewStore.visDataSet!.edges.update({
-                  id: `${edgeTypeStore.selectedEdgeType!.source_label}-${
-                    edgeTypeStore.selectedEdgeType!.name
-                  }->${edgeTypeStore.selectedEdgeType!.target_label}`,
-                  color: {
-                    color: edgeTypeStore.editedSelectedEdgeType.style.color,
-                    highlight: edgeTypeStore.editedSelectedEdgeType.style.color,
-                    hover: edgeTypeStore.editedSelectedEdgeType.style.color
-                  }
-                });
+                updateInfo.color = {
+                  color: edgeTypeStore.editedSelectedEdgeType.style.color,
+                  highlight: edgeTypeStore.editedSelectedEdgeType.style.color,
+                  hover: edgeTypeStore.editedSelectedEdgeType.style.color
+                };
+              }
+
+              if (!isEmpty(updateInfo)) {
+                updateInfo.id = id;
+
+                graphViewStore.visDataSet!.edges.update(updateInfo);
               }
 
               await edgeTypeStore.updateEdgeType();

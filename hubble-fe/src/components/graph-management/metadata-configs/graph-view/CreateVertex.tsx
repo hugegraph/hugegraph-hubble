@@ -24,6 +24,8 @@ import TooltipTrigger from 'react-popper-tooltip';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore';
 import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
 import { VertexTypeValidatePropertyIndexes } from '../../../../stores/types/GraphManagementStore/metadataConfigsStore';
+import { mapMetadataProperties } from '../../../../stores/utils';
+
 import BlueArrowIcon from '../../../../assets/imgs/ic_arrow_blue.svg';
 import HintIcon from '../../../../assets/imgs/ic_question_mark.svg';
 import closeIcon from '../../../../assets/imgs/ic_close_16.svg';
@@ -104,15 +106,10 @@ const CreateVertex: React.FC = observer(() => {
               ...rest
             } = vertexTypeStore.newVertexType;
 
-            const mappedProperties: Record<string, string> = {};
-
-            properties.forEach(({ name }) => {
-              const value = metadataPropertyStore.metadataProperties.find(
-                ({ name: propertyName }) => propertyName === name
-              )!.data_type;
-
-              mappedProperties[name] = value;
-            });
+            const mappedProperties = mapMetadataProperties(
+              properties,
+              metadataPropertyStore.metadataProperties
+            );
 
             graphViewStore.visDataSet!.nodes.add({
               ...rest,
@@ -199,7 +196,12 @@ const CreateVertex: React.FC = observer(() => {
               // if vertex is empty before, trigger re-render here to reveal <GraphDataView />
               if (graphViewStore.isGraphVertexEmpty) {
                 graphViewStore.switchGraphDataEmpty(false);
-                graphViewStore.fetchGraphViewData();
+                // need to get node colors again since fetchGraphViewData() will cause re-render in <GraphView />
+                // the graph use graphNode() rather than local added node
+                await dataAnalyzeStore.fetchAllNodeColors();
+                graphViewStore.fetchGraphViewData(
+                  dataAnalyzeStore.colorMappings
+                );
               }
 
               return;

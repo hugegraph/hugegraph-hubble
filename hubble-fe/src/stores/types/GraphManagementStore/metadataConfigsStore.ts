@@ -20,18 +20,18 @@ export interface MetadataPropertyListResponse {
 
 // vertex types
 
-type VertexTypeProperty = {
+export type VertexTypeProperty = {
   name: string;
   nullable: boolean;
 };
 
-type VertexTypePropertyIndex = {
+export type VertexTypePropertyIndex = {
   name: string;
   type: string;
   fields: string[];
 };
 
-type VertexTypeStyle = {
+export type VertexTypeStyle = {
   icon: string | null;
   color: string | null;
 };
