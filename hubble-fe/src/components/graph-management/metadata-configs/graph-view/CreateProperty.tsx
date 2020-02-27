@@ -77,7 +77,7 @@ const CreateProperty: React.FC = observer(() => {
               });
             }
 
-            metadataPropertyStore.fetchMetadataPropertyList();
+            metadataPropertyStore.fetchMetadataPropertyList({ fetchAll: true });
             metadataPropertyStore.resetNewProperties();
           }}
         >

@@ -20,29 +20,42 @@ const CheckProperty: React.FC = observer(() => {
 
   const handleOutSideClick = useCallback(
     (e: MouseEvent) => {
+      // note: .new-fc-one-drawer-content-wrapper sometimes only contain one single element?
+      // however if you capture .new-fc-one-drawer-wrapper-body-container it still returns itself and contains all children
+      // thus here we capture body-container as drawer
       const drawerWrapper = document.querySelector(
-        '.new-fc-one-drawer-content-wrapper'
+        '.new-fc-one-drawer-wrapper-body-container'
       );
-      const buttonWrapper = document.querySelector(
-        '#metadata-graph-button-check-property'
-      );
+
+      const deleteWrapper = document.querySelector('.metadata-graph-tooltips');
 
       if (
         graphViewStore.currentDrawer === 'check-property' &&
-        // avoid drawer name reset when click button before drawer pop out
-        buttonWrapper &&
-        !buttonWrapper.contains(e.target as Element) &&
         drawerWrapper &&
         !drawerWrapper.contains(e.target as Element)
       ) {
-        graphViewStore.setCurrentDrawer('');
+        if (
+          deleteWrapper === null &&
+          (e.target as Element).className !==
+            'metadata-graph-property-manipulation'
+        ) {
+          graphViewStore.setCurrentDrawer('');
+        }
+
+        if (
+          deleteWrapper &&
+          !deleteWrapper.contains(e.target as Element) &&
+          (e.target as Element).className !==
+            'metadata-graph-property-manipulation'
+        ) {
+          graphViewStore.setCurrentDrawer('');
+        }
       }
 
       if (
         popIndex !== null &&
-        deleteWrapperRef &&
-        deleteWrapperRef.current &&
-        !deleteWrapperRef.current.contains(e.target as Element)
+        deleteWrapper &&
+        !deleteWrapper.contains(e.target as Element)
       ) {
         setPopIndex(null);
       }
@@ -55,10 +68,10 @@ const CheckProperty: React.FC = observer(() => {
   };
 
   useEffect(() => {
-    document.addEventListener('click', handleOutSideClick, false);
+    document.addEventListener('click', handleOutSideClick, true);
 
     return () => {
-      document.removeEventListener('click', handleOutSideClick, false);
+      document.removeEventListener('click', handleOutSideClick, true);
     };
   }, [handleOutSideClick]);
 
@@ -69,7 +82,12 @@ const CheckProperty: React.FC = observer(() => {
     },
     {
       title: '数据类型',
-      dataIndex: 'data_type'
+      dataIndex: 'data_type',
+      render(text: string) {
+        const realText = text === 'TEXT' ? 'string' : text.toLowerCase();
+
+        return realText;
+      }
     },
     {
       title: '基数',

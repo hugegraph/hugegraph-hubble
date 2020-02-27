@@ -202,6 +202,12 @@ export class GraphViewStore {
     this.currentDrawer = '';
     this.currentSelected = '';
     this.colorMappings = {};
+    this.edgeColorMappings = {};
+    this.graphViewData = null;
+    this.isNodeOrEdgeClicked = false;
+    this.isGraphVertexEmpty = true;
+    this.visNetwork = null;
+    this.visDataSet = null;
     this.graphViewData = null;
     this.originalGraphViewData = null;
     this.requestStatus = {
