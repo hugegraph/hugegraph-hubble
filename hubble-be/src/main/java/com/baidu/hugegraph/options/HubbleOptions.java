@@ -71,7 +71,7 @@ public class HubbleOptions extends OptionHolder {
 
     public static final ConfigListOption<String> CONNECTION_IP_WHITE_LIST =
             new ConfigListOption<>(
-                    "graph_connection.ip.white_list",
+                    "graph_connection.ip_white_list",
                     "The ip white list available for connecting to " +
                     "HugeGraphServer, * means no ip limited.",
                     input -> {
@@ -94,7 +94,7 @@ public class HubbleOptions extends OptionHolder {
 
     public static final ConfigListOption<Integer> CONNECTION_PORT_WHITE_LIST =
             new ConfigListOption<>(
-                    "graph_connection.port.white_list",
+                    "graph_connection.port_white_list",
                     "The port white list available for connecting to " +
                     "HugeGraphServer, -1 means no port limited.",
                     input -> {
