@@ -746,9 +746,9 @@ export class DataAnalyzeStore {
     this.requestStatus.fetchAllNodeColors = 'pending';
 
     try {
-      const result: AxiosResponse<
-        responseData<VertexTypeListResponse>
-      > = yield axios.get(`${baseUrl}/${this.currentId}/schema/vertexlabels`, {
+      const result: AxiosResponse<responseData<
+        VertexTypeListResponse
+      >> = yield axios.get(`${baseUrl}/${this.currentId}/schema/vertexlabels`, {
         params: {
           page_no: 1,
           page_size: -1
@@ -779,9 +779,9 @@ export class DataAnalyzeStore {
     this.requestStatus.fetchAllEdgeColors = 'pending';
 
     try {
-      const result: AxiosResponse<
-        responseData<EdgeTypeListResponse>
-      > = yield axios.get(`${baseUrl}/${this.currentId}/schema/edgelabels`, {
+      const result: AxiosResponse<responseData<
+        EdgeTypeListResponse
+      >> = yield axios.get(`${baseUrl}/${this.currentId}/schema/edgelabels`, {
         params: {
           page_no: 1,
           page_size: -1
@@ -999,9 +999,7 @@ export class DataAnalyzeStore {
     this.requestStatus.fetchFilteredPropertyOptions = 'pending';
 
     try {
-      const result: AxiosResponse<
-        FetchFilteredPropertyOptions
-      > = yield axios.get(
+      const result: AxiosResponse<FetchFilteredPropertyOptions> = yield axios.get(
         `${baseUrl}/${this.currentId}/schema/edgelabels/${edgeName}`
       );
 

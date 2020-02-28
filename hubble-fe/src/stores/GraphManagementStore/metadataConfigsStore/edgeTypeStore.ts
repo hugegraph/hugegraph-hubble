@@ -1143,9 +1143,9 @@ export class EdgeTypeStore {
         : this.metadataConfigsRootStore.currentId;
 
     try {
-      const result: AxiosResponse<
-        responseData<EdgeTypeListResponse>
-      > = yield axios
+      const result: AxiosResponse<responseData<
+        EdgeTypeListResponse
+      >> = yield axios
         .get(`${baseUrl}/${conn_id}/schema/edgelabels`, {
           params: {
             page_no: this.edgeTypeListPageConfig.pageNumber,
@@ -1302,9 +1302,9 @@ export class EdgeTypeStore {
     this.requestStatus.checkConflict = 'pending';
 
     try {
-      const result: AxiosResponse<
-        responseData<CheckedReusableData>
-      > = yield axios
+      const result: AxiosResponse<responseData<
+        CheckedReusableData
+      >> = yield axios
         .post(
           `${baseUrl}/${this.metadataConfigsRootStore.currentId}/schema/edgelabels/check_conflict`,
           {
@@ -1341,9 +1341,9 @@ export class EdgeTypeStore {
     this.requestStatus.recheckConflict = 'pending';
 
     try {
-      const result: AxiosResponse<
-        responseData<CheckedReusableData>
-      > = yield axios
+      const result: AxiosResponse<responseData<
+        CheckedReusableData
+      >> = yield axios
         .post(
           `${baseUrl}/${this.metadataConfigsRootStore.currentId}/schema/edgelabels/recheck_conflict`,
           {
