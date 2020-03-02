@@ -68,6 +68,10 @@ public final class HugeClientPoolService
     }
 
     public void remove(GraphConnection connection) {
-        super.remove(connection.getId());
+        HugeClient client = super.remove(connection.getId());
+        if (client == null) {
+            return;
+        }
+        client.close();
     }
 }
