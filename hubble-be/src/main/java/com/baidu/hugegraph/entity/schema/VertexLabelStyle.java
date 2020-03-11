@@ -30,10 +30,10 @@ import com.google.common.collect.ImmutableList;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 @Data
-@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Builder
 public class VertexLabelStyle extends SchemaStyle {
 
@@ -51,6 +51,10 @@ public class VertexLabelStyle extends SchemaStyle {
 
     @JsonProperty("join_symbols")
     private List<String> joinSymbols;
+
+    public VertexLabelStyle() {
+        this(null, null, null, null, null);
+    }
 
     @JsonCreator
     public VertexLabelStyle(@JsonProperty("icon") String icon,

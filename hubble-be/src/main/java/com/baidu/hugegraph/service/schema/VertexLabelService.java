@@ -355,29 +355,13 @@ public class VertexLabelService extends SchemaService {
                                 .build();
     }
 
-    @SuppressWarnings("unchecked")
     public static VertexLabelStyle getStyle(SchemaElement element) {
-        String icon = (String) element.userdata().get(USER_KEY_ICON);
-        String color = (String) element.userdata().get(USER_KEY_COLOR);
-
-        String sizeValue = (String) element.userdata().get(USER_KEY_SIZE);
-        VertexLabelStyle.Size size = null;
-        if (sizeValue != null) {
-            size = VertexLabelStyle.Size.valueOf(sizeValue);
+        String styleValue = (String) element.userdata().get(USER_KEY_STYLE);
+        if (styleValue != null) {
+            return JsonUtil.fromJson(styleValue, VertexLabelStyle.class);
+        } else {
+            return new VertexLabelStyle();
         }
-
-        String fieldsValue = (String) element.userdata().get(USER_KEY_FIELDS);
-        List<String> fields = null;
-        if (fieldsValue != null) {
-            fields = JsonUtil.fromJson(fieldsValue, List.class);
-        }
-
-        String symbolsValue = (String) element.userdata().get(USER_KEY_SYMBOLS);
-        List<String> symbols = null;
-        if (symbolsValue != null) {
-            symbols = JsonUtil.fromJson(symbolsValue, List.class);
-        }
-        return new VertexLabelStyle(icon, color, size, fields, symbols);
     }
 
     private static VertexLabel convert(VertexLabelEntity entity,
@@ -394,13 +378,7 @@ public class VertexLabelService extends SchemaService {
                      .nullableKeys(toStringArray(entity.getNullableProps()))
                      .enableLabelIndex(entity.isOpenLabelIndex())
                      .userdata(USER_KEY_CREATE_TIME, entity.getCreateTime())
-                     .userdata(USER_KEY_ICON, style.getIcon())
-                     .userdata(USER_KEY_COLOR, style.getColor())
-                     .userdata(USER_KEY_SIZE, style.getSize().name())
-                     .userdata(USER_KEY_FIELDS,
-                               JsonUtil.toJson(style.getDisplayFields()))
-                     .userdata(USER_KEY_SYMBOLS,
-                               JsonUtil.toJson(style.getJoinSymbols()))
+                     .userdata(USER_KEY_STYLE, JsonUtil.toJson(style))
                      .build();
     }
 
@@ -428,22 +406,8 @@ public class VertexLabelService extends SchemaService {
         // TODO: use builder or setter, Now use builder throw
         //  Can't access builder which is completed
         VertexLabelStyle style = entity.getStyle();
-        if (style.getIcon() != null) {
-            userdata.put(USER_KEY_ICON, style.getIcon());
-        }
-        if (style.getColor() != null) {
-            userdata.put(USER_KEY_COLOR, style.getColor());
-        }
-        if (style.getSize() != null) {
-            userdata.put(USER_KEY_SIZE, style.getSize().name());
-        }
-        if (style.getDisplayFields() != null) {
-            userdata.put(USER_KEY_FIELDS,
-                         JsonUtil.toJson(style.getDisplayFields()));
-        }
-        if (style.getJoinSymbols() != null) {
-            userdata.put(USER_KEY_SYMBOLS,
-                         JsonUtil.toJson(style.getJoinSymbols()));
+        if (style != null) {
+            userdata.put(USER_KEY_STYLE, JsonUtil.toJson(style));
         }
         return vertexLabel;
     }

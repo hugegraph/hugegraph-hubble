@@ -30,10 +30,10 @@ import com.google.common.collect.ImmutableList;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 @Data
-@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Builder
 public class EdgeLabelStyle extends SchemaStyle {
 
@@ -43,8 +43,11 @@ public class EdgeLabelStyle extends SchemaStyle {
     @JsonProperty("with_arrow")
     private Boolean withArrow;
 
+    @JsonProperty("line_type")
+    private LineType lineType;
+
     @JsonProperty("thickness")
-    private Thickness thickness = Thickness.NORMAL;
+    private Thickness thickness;
 
     @JsonProperty("display_fields")
     private List<String> displayFields;
@@ -52,9 +55,14 @@ public class EdgeLabelStyle extends SchemaStyle {
     @JsonProperty("join_symbols")
     private List<String> joinSymbols;
 
+    public EdgeLabelStyle() {
+        this(null, null, null, null, null, null);
+    }
+
     @JsonCreator
     public EdgeLabelStyle(@JsonProperty("color") String color,
                           @JsonProperty("with_arrow") Boolean withArrow,
+                          @JsonProperty("line_type") LineType lineType,
                           @JsonProperty("thickness") Thickness thickness,
                           @JsonProperty("display_fields")
                           List<String> displayFields,
@@ -62,11 +70,21 @@ public class EdgeLabelStyle extends SchemaStyle {
                           List<String> joinSymbols) {
         this.color = !StringUtils.isEmpty(color) ? color : "#5C73E6";
         this.withArrow = withArrow != null ? withArrow : true;
+        this.lineType = lineType != null ? lineType : LineType.SOLID;
         this.thickness = thickness != null ? thickness : Thickness.NORMAL;
         this.displayFields = !CollectionUtils.isEmpty(displayFields) ?
                              displayFields : ImmutableList.of("~id");
         this.joinSymbols = !CollectionUtils.isEmpty(joinSymbols) ?
                            joinSymbols : ImmutableList.of("-");
+    }
+
+    public enum LineType {
+
+        SOLID,
+
+        DASHED,
+
+        DOTTED
     }
 
     public enum Thickness {

@@ -58,13 +58,7 @@ import lombok.extern.log4j.Log4j2;
 public class SchemaService {
 
     public static final String USER_KEY_CREATE_TIME = "create_time";
-    public static final String USER_KEY_ICON = "~icon";
-    public static final String USER_KEY_COLOR = "~color";
-    public static final String USER_KEY_SIZE = "~size";
-    public static final String USER_KEY_ARROW = "~with_arrow";
-    public static final String USER_KEY_THICK = "~thickness";
-    public static final String USER_KEY_FIELDS = "~display_fields";
-    public static final String USER_KEY_SYMBOLS = "~join_symbols";
+    public static final String USER_KEY_STYLE = "~style";
 
     @Autowired
     private HugeConfig config;

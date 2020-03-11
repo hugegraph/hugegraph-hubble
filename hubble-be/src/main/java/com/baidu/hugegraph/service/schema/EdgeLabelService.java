@@ -349,29 +349,13 @@ public class EdgeLabelService extends SchemaService {
                               .build();
     }
 
-    @SuppressWarnings("unchecked")
     public static EdgeLabelStyle getStyle(SchemaElement element) {
-        String color = (String) element.userdata().get(USER_KEY_COLOR);
-        Boolean withArrow = (Boolean) element.userdata().get(USER_KEY_ARROW);
-
-        String thickValue = (String) element.userdata().get(USER_KEY_THICK);
-        EdgeLabelStyle.Thickness thick = null;
-        if (thickValue != null) {
-            thick = EdgeLabelStyle.Thickness.valueOf(thickValue);
+        String styleValue = (String) element.userdata().get(USER_KEY_STYLE);
+        if (styleValue != null) {
+            return JsonUtil.fromJson(styleValue, EdgeLabelStyle.class);
+        } else {
+            return new EdgeLabelStyle();
         }
-
-        String fieldsValue = (String) element.userdata().get(USER_KEY_FIELDS);
-        List<String> fields = null;
-        if (fieldsValue != null) {
-            fields = JsonUtil.fromJson(fieldsValue, List.class);
-        }
-
-        String symbolsValue = (String) element.userdata().get(USER_KEY_SYMBOLS);
-        List<String> symbols = null;
-        if (symbolsValue != null) {
-            symbols = JsonUtil.fromJson(symbolsValue, List.class);
-        }
-        return new EdgeLabelStyle(color, withArrow, thick, fields, symbols);
     }
 
     private static EdgeLabel convert(EdgeLabelEntity entity,
@@ -391,13 +375,7 @@ public class EdgeLabelService extends SchemaService {
                      .nullableKeys(toStringArray(entity.getNullableProps()))
                      .enableLabelIndex(entity.isOpenLabelIndex())
                      .userdata(USER_KEY_CREATE_TIME, entity.getCreateTime())
-                     .userdata(USER_KEY_COLOR, style.getColor())
-                     .userdata(USER_KEY_ARROW, style.getWithArrow())
-                     .userdata(USER_KEY_THICK, style.getThickness().name())
-                     .userdata(USER_KEY_FIELDS,
-                               JsonUtil.toJson(style.getDisplayFields()))
-                     .userdata(USER_KEY_SYMBOLS,
-                               JsonUtil.toJson(style.getJoinSymbols()))
+                     .userdata(USER_KEY_STYLE, JsonUtil.toJson(style))
                      .build();
     }
 
@@ -421,22 +399,8 @@ public class EdgeLabelService extends SchemaService {
         Map<String, Object> userdata = edgeLabel.userdata();
 
         EdgeLabelStyle style = entity.getStyle();
-        if (style.getColor() != null) {
-            userdata.put(USER_KEY_COLOR, style.getColor());
-        }
-        if (style.getWithArrow() != null) {
-            userdata.put(USER_KEY_ARROW, style.getWithArrow());
-        }
-        if (style.getThickness() != null) {
-            userdata.put(USER_KEY_THICK, style.getThickness().name());
-        }
-        if (style.getDisplayFields() != null) {
-            userdata.put(USER_KEY_FIELDS,
-                         JsonUtil.toJson(style.getDisplayFields()));
-        }
-        if (style.getJoinSymbols() != null) {
-            userdata.put(USER_KEY_SYMBOLS,
-                         JsonUtil.toJson(style.getJoinSymbols()));
+        if (style != null) {
+            userdata.put(USER_KEY_STYLE, JsonUtil.toJson(style));
         }
         return edgeLabel;
     }
