@@ -22,22 +22,26 @@ package com.baidu.hugegraph.util;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.baidu.hugegraph.common.Constant;
+import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.entity.GraphConnection;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.ServerException;
+import com.baidu.hugegraph.options.HubbleOptions;
 import com.baidu.hugegraph.rest.ClientException;
 import com.baidu.hugegraph.structure.gremlin.Result;
 import com.baidu.hugegraph.structure.gremlin.ResultSet;
 
 public final class HugeClientUtil {
 
-    public static HugeClient tryConnect(GraphConnection connection) {
+    public static HugeClient tryConnect(GraphConnection connection,
+                                        HugeConfig config) {
         String graph = connection.getGraph();
         String host = connection.getHost();
         Integer port = connection.getPort();
         String username = connection.getUsername();
         String password = connection.getPassword();
+        int timeout = config.get(HubbleOptions.CLIENT_REQUEST_TIMEOUT);
 
         String url = UriComponentsBuilder.newInstance()
                                          .scheme("http")
@@ -46,9 +50,9 @@ public final class HugeClientUtil {
         HugeClient client;
         try {
             if (username != null) {
-                client = new HugeClient(url, graph, username, password);
+                client = new HugeClient(url, graph, username, password, timeout);
             } else {
-                client = new HugeClient(url, graph);
+                client = new HugeClient(url, graph, timeout);
             }
         } catch (IllegalStateException e) {
             String message = e.getMessage();
