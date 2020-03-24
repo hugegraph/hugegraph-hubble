@@ -27,6 +27,7 @@ import com.baidu.hugegraph.common.Mergeable;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -61,6 +62,9 @@ public class GraphConnection implements Identifiable, Mergeable {
     @MergeProperty
     @JsonProperty("port")
     private Integer port;
+
+    @JsonIgnore
+    private Integer timeout;
 
     @MergeProperty
     @JsonProperty("username")

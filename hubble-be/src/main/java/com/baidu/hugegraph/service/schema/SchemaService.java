@@ -57,7 +57,7 @@ import lombok.extern.log4j.Log4j2;
 @Service
 public class SchemaService {
 
-    public static final String USER_KEY_CREATE_TIME = "create_time";
+    public static final String USER_KEY_CREATE_TIME = "~create_time";
     public static final String USER_KEY_STYLE = "~style";
 
     @Autowired

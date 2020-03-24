@@ -65,7 +65,7 @@ public final class HugeClientPoolService
         if (connection == null) {
             throw new ExternalException("graph-connection.get.failed", id);
         }
-        client = HugeClientUtil.tryConnect(connection, this.config);
+        client = HugeClientUtil.tryConnect(connection);
         this.put(id, client);
         return client;
     }
