@@ -402,9 +402,11 @@ public class VertexLabelService extends SchemaService {
         VertexLabel vertexLabel = builder.build();
         Map<String, Object> userdata = vertexLabel.userdata();
 
-        // The style requires the front end to pass in the full amount
-        // TODO: use builder or setter, Now use builder throw
-        //  Can't access builder which is completed
+        /*
+         * The style requires the front end to pass in the full amount
+         * TODO: use builder or setter, now use builder throw exception
+         * "Can't access builder which is completed"
+         */
         VertexLabelStyle style = entity.getStyle();
         if (style != null) {
             userdata.put(USER_KEY_STYLE, JsonUtil.toJson(style));

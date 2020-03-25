@@ -25,6 +25,7 @@ import com.baidu.hugegraph.annotation.MergeProperty;
 import com.baidu.hugegraph.common.Identifiable;
 import com.baidu.hugegraph.common.Mergeable;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -63,7 +64,9 @@ public class GraphConnection implements Identifiable, Mergeable {
     @JsonProperty("port")
     private Integer port;
 
-    @JsonIgnore
+    @TableField(exist = false)
+    @MergeProperty(useNew = false)
+    @JsonProperty("timeout")
     private Integer timeout;
 
     @MergeProperty

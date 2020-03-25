@@ -115,7 +115,7 @@ public class HubbleOptions extends OptionHolder {
                     "client.request_timeout",
                     "The request timeout in seconds for HugeClient.",
                     positiveInt(),
-                    30
+                    60
             );
 
     public static final ConfigOption<Integer> GREMLIN_SUFFIX_LIMIT =

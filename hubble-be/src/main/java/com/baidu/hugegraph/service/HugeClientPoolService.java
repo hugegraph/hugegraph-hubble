@@ -30,6 +30,7 @@ import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.entity.GraphConnection;
 import com.baidu.hugegraph.exception.ExternalException;
+import com.baidu.hugegraph.options.HubbleOptions;
 import com.baidu.hugegraph.util.HugeClientUtil;
 
 import lombok.extern.log4j.Log4j2;
@@ -64,6 +65,10 @@ public final class HugeClientPoolService
         GraphConnection connection = this.connService.get(id);
         if (connection == null) {
             throw new ExternalException("graph-connection.get.failed", id);
+        }
+        if (connection.getTimeout() == null) {
+            int timeout = this.config.get(HubbleOptions.CLIENT_REQUEST_TIMEOUT);
+            connection.setTimeout(timeout);
         }
         client = HugeClientUtil.tryConnect(connection);
         this.put(id, client);
