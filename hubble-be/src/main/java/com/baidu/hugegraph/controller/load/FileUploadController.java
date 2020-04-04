@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.controller.load;
 
+import static com.baidu.hugegraph.service.load.FileMappingService.CONN_PREIFX;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -38,11 +40,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.config.HugeConfig;
+import com.baidu.hugegraph.entity.load.FileMapping;
 import com.baidu.hugegraph.entity.load.FileUploadResult;
 import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.options.HubbleOptions;
 import com.baidu.hugegraph.service.load.FileMappingService;
 import com.baidu.hugegraph.util.Ex;
+import com.baidu.hugegraph.util.FileUtil;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -54,22 +58,28 @@ public class FileUploadController {
     @Autowired
     private HugeConfig config;
     @Autowired
-    private FileMappingService fmService;
+    private FileMappingService service;
 
     @PostMapping
     public FileUploadResult upload(@PathVariable("connId") int connId,
                                    @RequestParam("file") MultipartFile file,
                                    @RequestParam("total") int total,
                                    @RequestParam("index") int index) {
-        String location = this.config.get(HubbleOptions.UPLOAD_FILE_LOCATION);
-        this.ensureLocationExist(location, connId);
         // Now allowed to upload empty file
         Ex.check(!file.isEmpty(), "load.upload.file.cannot-be-empty");
+        String location = this.config.get(HubbleOptions.UPLOAD_FILE_LOCATION);
+        this.ensureLocationExist(location, CONN_PREIFX + connId);
         // Difficult: how to determine whether the file is csv or text
         log.info("File content type: {}", file.getContentType());
 
+        // vertex_person.csv
         String fileName = file.getOriginalFilename();
-        String dirPath = Paths.get(location, String.valueOf(connId), fileName)
+        FileMapping oldMapping = this.service.get(connId, fileName);
+        Ex.check(oldMapping == null, "There exist file with same name");
+
+        // Before merge: upload-files/conn-1/verson_person.csv/part-1
+        // After merge: upload-files/conn-1/file-mapping-1/verson_person.csv
+        String dirPath = Paths.get(location, CONN_PREIFX + connId, fileName)
                               .toString();
         // File all parts saved path
         File dir = new File(dirPath);
@@ -83,21 +93,51 @@ public class FileUploadController {
         }
         // Check destFile exist
 //        Ex.check(!destFile.exists(), "load.upload.file.existed", fileName);
-        FileUploadResult result = this.fmService.uploadFile(connId, file,
-                                                            curPartFile);
-        // Determine whether all the parts have been uploaded, and then merge them
-        this.fmService.tryMergePartFiles(dir, total);
+        FileUploadResult result = this.service.uploadFile(file, curPartFile);
+        if (result.getStatus() == FileUploadResult.Status.FAILURE) {
+            return result;
+        }
+        // Determine whether all the parts have been uploaded, then merge them
+        boolean merged = this.service.tryMergePartFiles(dir, total);
+        if (merged) {
+            // Save file mapping
+            FileMapping mapping = new FileMapping(connId, fileName, dirPath);
+            // Read column names and values then fill it
+            this.service.extractColumns(mapping);
+            try {
+                // TODO: maybe can get this info with tryMergePartFiles()
+                mapping.setTotalLines(FileUtil.countLines(mapping.getPath()));
+            } catch (IOException e) {
+                throw new InternalException("Failed to count lines of file %s",
+                                            mapping.getPath());
+            }
+            // Will generate mapping id
+            if (this.service.save(mapping) != 1) {
+                throw new InternalException("entity.insert.failed", mapping);
+            }
+            // Move to the directory corresponding to the file mapping Id
+            String newPath = this.service.moveToNextLevelDir(mapping);
+            // Update file mapping stored path
+            mapping.setPath(newPath);
+            if (this.service.update(mapping) != 1) {
+                throw new InternalException("entity.update.failed", mapping);
+            }
+            result.setId(mapping.getId());
+        }
         return result;
     }
 
+    /**
+     * TODO：需要组织好文件的路径，以及考虑是否删除文件映射
+     */
     @DeleteMapping
     public Map<String, Boolean> delete(@PathVariable("connId") int connId,
                                        @RequestParam("names")
-                                       List<String> names) {
-        Ex.check(names.size() > 0, "load.upload.files.at-least-one");
+                                       List<String> fileNames) {
+        Ex.check(fileNames.size() > 0, "load.upload.files.at-least-one");
         String location = this.config.get(HubbleOptions.UPLOAD_FILE_LOCATION);
         Map<String, Boolean> result = new LinkedHashMap<>();
-        for (String fileName : names) {
+        for (String fileName : fileNames) {
             String path = Paths.get(location, String.valueOf(connId), fileName)
                                .toString();
             File destFile = new File(path);
@@ -107,8 +147,8 @@ public class FileUploadController {
         return result;
     }
 
-    private void ensureLocationExist(String location, int connId) {
-        String path = Paths.get(location, String.valueOf(connId)).toString();
+    private void ensureLocationExist(String location, String connPath) {
+        String path = Paths.get(location, connPath).toString();
         File locationDir = new File(path);
         if (!locationDir.exists()) {
             try {

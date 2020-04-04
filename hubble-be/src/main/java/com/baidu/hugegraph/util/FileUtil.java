@@ -19,37 +19,33 @@
 
 package com.baidu.hugegraph.util;
 
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Date;
-import java.util.UUID;
-import java.util.regex.Pattern;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.LineNumberReader;
 
-import org.apache.commons.collections.CollectionUtils;
+public final class FileUtil {
 
-public final class HubbleUtil {
-
-    public static final Pattern HOST_PATTERN = Pattern.compile(
-            "(([0-9]{1,3}\\.){3}[0-9]{1,3}|" +
-            "([0-9A-Za-z_!~*'()-]+\\.)*[0-9A-Za-z_!~*'()-]+)$"
-    );
-
-    public static Date nowDate() {
-        return new Date();
+    public static long countLines(String path) throws IOException {
+        return countLines(new File(path));
     }
 
-    public static Instant nowTime() {
-        return Instant.now();
-    }
-
-    public static boolean equalCollection(Collection<?> c1, Collection<?> c2) {
-        if (c1 != null && c2 == null || c1 == null && c2 != null) {
-            return false;
+    public static long countLines(File file) throws IOException {
+        if (!file.exists()) {
+            throw new IllegalArgumentException(String.format(
+                      "The file %s doesn't exist", file));
         }
-        return c1 == null || CollectionUtils.isEqualCollection(c1, c2);
-    }
-
-    public static String generateSimpleId() {
-        return UUID.randomUUID().toString();
+        long fileLength = file.length();
+        LineNumberReader lineReader = null;
+        try {
+            FileReader fileReader = new FileReader(file);
+            lineReader = new LineNumberReader(fileReader);
+            lineReader.skip(fileLength);
+            return lineReader.getLineNumber();
+        } finally {
+            if (lineReader != null) {
+                lineReader.close();
+            }
+        }
     }
 }

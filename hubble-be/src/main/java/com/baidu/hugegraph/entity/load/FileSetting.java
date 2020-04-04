@@ -49,7 +49,7 @@ public class FileSetting implements Mergeable {
 
     @MergeProperty
     @JsonProperty("format")
-    private String format = "TEXT";
+    private String format = "CSV";
 
     @MergeProperty
     @JsonProperty("delimiter")
@@ -70,4 +70,8 @@ public class FileSetting implements Mergeable {
     @MergeProperty
     @JsonProperty("skipped_line")
     private String skippedLine = "(^#|^//).*|";
+
+    @MergeProperty
+    @JsonProperty("list_format")
+    private ListFormat listFormat = new ListFormat();
 }

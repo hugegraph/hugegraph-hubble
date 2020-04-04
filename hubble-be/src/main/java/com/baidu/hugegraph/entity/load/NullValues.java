@@ -17,24 +17,27 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.service.load;
+package com.baidu.hugegraph.entity.load;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import java.util.Set;
 
-import com.baidu.hugegraph.config.HugeConfig;
-import com.baidu.hugegraph.options.HubbleOptions;
-import com.baidu.hugegraph.util.Bytes;
+import com.baidu.hugegraph.annotation.MergeProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.extern.log4j.Log4j2;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Log4j2
-@Service
-public class LoadDataService {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class NullValues {
 
-    @Autowired
-    private HugeConfig config;
+    @MergeProperty
+    @JsonProperty("checked")
+    private Set<Object> checked;
 
-    @Autowired
-    private FileMappingService fileMappingService;
+    @MergeProperty
+    @JsonProperty("customized")
+    private Set<Object> customized;
 }

@@ -17,35 +17,26 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity.enums;
+package com.baidu.hugegraph.handler;
 
-import com.baomidou.mybatisplus.core.enums.IEnum;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public enum LoadStatus implements IEnum<Byte> {
+import com.baidu.hugegraph.service.load.LoadTaskService;
 
-    RUNNING(0),
+import lombok.extern.log4j.Log4j2;
 
-    SUCCEED(1),
+@Log4j2
+@Component
+public class HubbleDisposableBean implements DisposableBean {
 
-    FAILED(2),
-
-    PAUSED(3),
-
-    STOPPED(4);
-
-    private byte code;
-
-    LoadStatus(int code) {
-        assert code < 256;
-        this.code = (byte) code;
-    }
+    @Autowired
+    private LoadTaskService service;
 
     @Override
-    public Byte getValue() {
-        return this.code;
-    }
-
-    public boolean inRunning() {
-        return this == RUNNING;
+    public void destroy() throws Exception {
+        log.info("Hubble server will shutdown, will pause all load tasks");
+        this.service.pauseAllTasks();
     }
 }

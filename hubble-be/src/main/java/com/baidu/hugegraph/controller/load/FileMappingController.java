@@ -19,6 +19,9 @@
 
 package com.baidu.hugegraph.controller.load;
 
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,6 +50,7 @@ import com.baidu.hugegraph.service.load.FileMappingService;
 import com.baidu.hugegraph.service.schema.EdgeLabelService;
 import com.baidu.hugegraph.service.schema.VertexLabelService;
 import com.baidu.hugegraph.util.Ex;
+import com.baidu.hugegraph.util.HubbleUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import lombok.extern.log4j.Log4j2;
@@ -75,6 +80,15 @@ public class FileMappingController extends BaseController {
         return this.service.list(connId, pageNo, pageSize);
     }
 
+    @GetMapping("{id}")
+    public FileMapping get(@PathVariable("id") int id) {
+        FileMapping mapping = this.service.get(id);
+        if (mapping == null) {
+            throw new ExternalException("load.file-mapping.not-exist.id", id);
+        }
+        return mapping;
+    }
+
     @DeleteMapping("{id}")
     public void delete(@PathVariable("id") int id) {
         FileMapping mapping = this.service.get(id);
@@ -82,9 +96,17 @@ public class FileMappingController extends BaseController {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
 
-        int rows = this.service.remove(id);
-        if (rows != 1) {
+        if (this.service.remove(id) != 1) {
             throw new InternalException("entity.delete.failed", mapping);
+        }
+        this.service.deleteDiskFile(mapping);
+    }
+
+    @DeleteMapping
+    public void clear() {
+        List<FileMapping> mappings = this.service.listAll();
+        for (FileMapping mapping : mappings) {
+            this.service.remove(mapping.getId());
         }
     }
 
@@ -133,25 +155,54 @@ public class FileMappingController extends BaseController {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
 
-        mapping.getVertexMappings().put(newEntity.getLabel(), newEntity);
+        newEntity.setId(HubbleUtil.generateSimpleId());
+        mapping.getVertexMappings().put(newEntity.getId(), newEntity);
         if (this.service.update(mapping) != 1) {
             throw new InternalException("entity.update.failed", mapping);
         }
         return mapping;
     }
 
-    @DeleteMapping("{id}/vertex-mappings/{label}")
-    public FileMapping deleteVertexMapping(@PathVariable("id") int id,
-                                           @PathVariable("label") String label) {
+    @PutMapping("{id}/vertex-mappings/{vmid}")
+    public FileMapping updateVertexMapping(@PathVariable("connId") int connId,
+                                           @PathVariable("id") int id,
+                                           @PathVariable("vmid") String vmId,
+                                           @RequestBody VertexMapping newEntity) {
+        VertexLabelEntity vl = this.vlService.get(newEntity.getLabel(), connId);
+        Ex.check(!vl.getIdStrategy().isAutomatic(),
+                 "load.file-mapping.vertex-mapping.automatic-id-unsupported");
+        Ex.check(!CollectionUtils.isEmpty(newEntity.getIdFields()),
+                 "load.file-mapping.vertex-mapping.id-fields-cannot-be-empty");
+
         FileMapping mapping = this.service.get(id);
         if (mapping == null) {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
 
-        VertexMapping oldEntity = mapping.getVertexMappings().remove(label);
+        Map<String, VertexMapping> vertexMappings = mapping.getVertexMappings();
+        Ex.check(vertexMappings.containsKey(vmId),
+                 "load.file-mapping.vertex-mapping.not-exist.id", vmId);
+
+        newEntity.setId(vmId);
+        vertexMappings.put(vmId, newEntity);
+        if (this.service.update(mapping) != 1) {
+            throw new InternalException("entity.update.failed", mapping);
+        }
+        return mapping;
+    }
+
+    @DeleteMapping("{id}/vertex-mappings/{vmid}")
+    public FileMapping deleteVertexMapping(@PathVariable("id") int id,
+                                           @PathVariable("vmid") String vmid) {
+        FileMapping mapping = this.service.get(id);
+        if (mapping == null) {
+            throw new ExternalException("load.file-mapping.not-exist.id", id);
+        }
+
+        VertexMapping oldEntity = mapping.getVertexMappings().remove(vmid);
         if (oldEntity == null) {
             throw new ExternalException(
-                      "load.file-mapping.vertex-mapping.not-exist.label", label);
+                      "load.file-mapping.vertex-mapping.not-exist.id", vmid);
         }
         if (this.service.update(mapping) != 1) {
             throw new InternalException("entity.update.failed", mapping);
@@ -180,25 +231,60 @@ public class FileMappingController extends BaseController {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
 
-        mapping.getEdgeMappings().put(newEntity.getLabel(), newEntity);
+        newEntity.setId(HubbleUtil.generateSimpleId());
+        mapping.getEdgeMappings().put(newEntity.getId(), newEntity);
         if (this.service.update(mapping) != 1) {
             throw new InternalException("entity.update.failed", mapping);
         }
         return mapping;
     }
 
-    @DeleteMapping("{id}/edge-mappings/{label}")
-    public FileMapping deleteEdgeMapping(@PathVariable("id") int id,
-                                         @PathVariable("label") String label) {
+    @PutMapping("{id}/edge-mappings/{emid}")
+    public FileMapping updateEdgeMapping(@PathVariable("connId") int connId,
+                                         @PathVariable("id") int id,
+                                         @PathVariable("emid") String emId,
+                                         @RequestBody EdgeMapping newEntity) {
+        EdgeLabelEntity el = this.elService.get(newEntity.getLabel(), connId);
+        VertexLabelEntity source = this.vlService.get(el.getSourceLabel(), connId);
+        VertexLabelEntity target = this.vlService.get(el.getTargetLabel(), connId);
+        Ex.check(!source.getIdStrategy().isAutomatic(),
+                 "load.file-mapping.vertex-mapping.automatic-id-unsupported");
+        Ex.check(!target.getIdStrategy().isAutomatic(),
+                 "load.file-mapping.vertex-mapping.automatic-id-unsupported");
+        Ex.check(!CollectionUtils.isEmpty(newEntity.getSourceFields()),
+                 "load.file-mapping.edge-mapping.source-fields-cannot-be-empty");
+        Ex.check(!CollectionUtils.isEmpty(newEntity.getSourceFields()),
+                 "load.file-mapping.edge-mapping.target-fields-cannot-be-empty");
+
         FileMapping mapping = this.service.get(id);
         if (mapping == null) {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
 
-        EdgeMapping oldEntity = mapping.getEdgeMappings().remove(label);
+        Map<String, EdgeMapping> edgeMappings = mapping.getEdgeMappings();
+        Ex.check(edgeMappings.containsKey(emId),
+                 "load.file-mapping.edge-mapping.not-exist.id", emId);
+
+        newEntity.setId(emId);
+        edgeMappings.put(emId, newEntity);
+        if (this.service.update(mapping) != 1) {
+            throw new InternalException("entity.update.failed", mapping);
+        }
+        return mapping;
+    }
+
+    @DeleteMapping("{id}/edge-mappings/{emid}")
+    public FileMapping deleteEdgeMapping(@PathVariable("id") int id,
+                                         @PathVariable("emid") String emid) {
+        FileMapping mapping = this.service.get(id);
+        if (mapping == null) {
+            throw new ExternalException("load.file-mapping.not-exist.id", id);
+        }
+
+        EdgeMapping oldEntity = mapping.getEdgeMappings().remove(emid);
         if (oldEntity == null) {
             throw new ExternalException(
-                      "load.file-mapping.edge-mapping.not-exist.label", label);
+                      "load.file-mapping.edge-mapping.not-exist.id", emid);
         }
         if (this.service.update(mapping) != 1) {
             throw new InternalException("entity.update.failed", mapping);
@@ -206,20 +292,20 @@ public class FileMappingController extends BaseController {
         return mapping;
     }
 
-    @PostMapping("{id}/load-parameter")
-    public FileMapping loadParameter(@PathVariable("id") int id,
-                                     @RequestBody LoadParameter newEntity) {
-        FileMapping mapping = this.service.get(id);
-        if (mapping == null) {
-            throw new ExternalException("load.file-mapping.not-exist.id", id);
+    /**
+     * TODO: All file mapping share one load paramter now, should be separated
+     *  in actually
+     */
+    @PostMapping("load-parameter")
+    public void loadParameter(@RequestBody LoadParameter newEntity) {
+        List<FileMapping> mappings = this.service.listAll();
+        for (FileMapping mapping : mappings) {
+            LoadParameter oldEntity = mapping.getLoadParameter();
+            LoadParameter entity = this.mergeEntity(oldEntity, newEntity);
+            mapping.setLoadParameter(entity);
+            if (this.service.update(mapping) != 1) {
+                throw new InternalException("entity.update.failed", mapping);
+            }
         }
-
-        LoadParameter oldEntity = mapping.getLoadParameter();
-        LoadParameter entity = this.mergeEntity(oldEntity, newEntity);
-        mapping.setLoadParameter(entity);
-        if (this.service.update(mapping) != 1) {
-            throw new InternalException("entity.update.failed", mapping);
-        }
-        return mapping;
     }
 }

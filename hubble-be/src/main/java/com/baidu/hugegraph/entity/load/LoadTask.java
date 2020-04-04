@@ -19,29 +19,48 @@
 
 package com.baidu.hugegraph.entity.load;
 
-import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.baidu.hugegraph.annotation.MergeProperty;
+import com.baidu.hugegraph.entity.GraphConnection;
 import com.baidu.hugegraph.entity.enums.LoadStatus;
+import com.baidu.hugegraph.loader.HugeGraphLoader;
+import com.baidu.hugegraph.loader.executor.LoadContext;
+import com.baidu.hugegraph.loader.executor.LoadOptions;
+import com.baidu.hugegraph.util.Ex;
 import com.baidu.hugegraph.util.SerializeUtil;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@TableName("load_task")
-public class LoadTask {
+@TableName(value = "load_task", autoResultMap = true)
+@JsonPropertyOrder({"id", "conn_id", "file_id", "vertices", "edges", "load_rate",
+                    "load_progress", "file_total_lines", "file_read_lines",
+                    "status", "duration"})
+public class LoadTask implements Runnable {
+
+    @TableField(exist = false)
+    @JsonIgnore
+    private transient HugeGraphLoader loader;
 
     @TableId(type = IdType.AUTO)
     @MergeProperty(useNew = false)
@@ -53,34 +72,124 @@ public class LoadTask {
     @JsonProperty("conn_id")
     private Integer connId;
 
-    @TableField("name")
+    @TableField(value = "file_id")
     @MergeProperty
-    @JsonProperty("name")
-    private String name;
+    @JsonProperty("file_id")
+    private Integer fileId;
 
-    @TableField("remark")
+    @TableField(value = "options", typeHandler = JacksonTypeHandler.class)
     @MergeProperty
-    @JsonProperty("remark")
-    private String remark;
+    @JsonProperty(value = "options", access = JsonProperty.Access.WRITE_ONLY)
+    private LoadOptions options;
 
-    @TableField("total_file_size")
+    @TableField(value = "vertices", typeHandler = JacksonTypeHandler.class)
     @MergeProperty
-    @JsonProperty("total_file_size")
-    private Long totalFileSize;
+    @JsonProperty(value = "vertices")
+    private Set<String> vertices;
 
-    @TableField(value = "load_status")
+    @TableField(value = "edges", typeHandler = JacksonTypeHandler.class)
+    @MergeProperty
+    @JsonProperty(value = "edges")
+    private Set<String> edges;
+
+    @TableField("file_total_lines")
+    @MergeProperty
+    @JsonProperty("file_total_lines")
+    private Long fileTotalLines;
+
+    @TableField("file_read_lines")
+    @MergeProperty
+    @JsonProperty("file_read_lines")
+    private Long fileReadLines;
+
+    @TableField("load_status")
     @MergeProperty
     @JsonProperty("status")
     private LoadStatus status;
 
-    @TableField(value = "duration")
+    @TableField("duration")
     @MergeProperty
     @JsonProperty("duration")
     @JsonSerialize(using = SerializeUtil.DurationSerializer.class)
     private Long duration;
 
-    @TableField(value = "create_time")
-    @MergeProperty(useNew = false)
-    @JsonProperty("create_time")
-    private Date createTime;
+    public LoadTask(LoadOptions options, GraphConnection connection,
+                    FileMapping mapping) {
+        this.loader = new HugeGraphLoader(options);
+        this.id = null;
+        this.connId = connection.getId();
+        this.fileId = mapping.getId();
+        this.options = options;
+        if (mapping.getVertexMappings() != null) {
+            this.vertices = mapping.getVertexMappings().values().stream()
+                                   .map(ElementMapping::getLabel)
+                                   .collect(Collectors.toSet());
+        } else {
+            this.vertices = new HashSet<>();
+        }
+        if (mapping.getEdgeMappings() != null) {
+            this.edges = mapping.getEdgeMappings().values().stream()
+                                .map(ElementMapping::getLabel)
+                                .collect(Collectors.toSet());
+        } else {
+            this.edges = new HashSet<>();
+        }
+        this.fileTotalLines = mapping.getTotalLines();
+        this.fileReadLines = 0L;
+        this.status = LoadStatus.RUNNING;
+        this.duration = 0L;
+    }
+
+    @Override
+    public void run() {
+        log.info("LoadTaskMonitor is monitoring task : {}", this.id);
+        boolean succeed;
+        try {
+            succeed = this.loader.load();
+        } catch (Throwable e) {
+            succeed = false;
+            log.error("Run task {} failed. cause: {}", this.id, e.getMessage());
+        }
+        // Pay attention to whether the user stops actively or
+        // the program stops by itself
+        if (this.status.inRunning()) {
+            if (succeed) {
+                this.status = LoadStatus.SUCCEED;
+            } else {
+                this.status = LoadStatus.FAILED;
+            }
+        }
+        this.fileReadLines = this.context().newProgress().totalInputReaded();
+        this.duration = this.context().summary().totalTime();
+    }
+
+    public void restoreContext() {
+        Ex.check(this.options != null,
+                 "The load options shouldn't be null");
+        this.loader = new HugeGraphLoader(this.options);
+    }
+
+    public LoadContext context() {
+        return this.loader.context();
+    }
+
+    @JsonProperty("load_progress")
+    public int getLoadProgress() {
+        if (this.fileTotalLines == null || this.fileReadLines == null ||
+            this.fileTotalLines == 0) {
+            return 0;
+        } else {
+            return (int) (this.fileReadLines / this.fileTotalLines) * 100;
+        }
+    }
+
+    @JsonProperty("load_rate")
+    public float getLoadRate() {
+        if (this.fileReadLines == null || this.duration == null ||
+            this.duration == 0L) {
+            return 0;
+        } else {
+            return this.fileReadLines * 1000.0F / this.duration;
+        }
+    }
 }

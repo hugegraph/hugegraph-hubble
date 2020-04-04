@@ -28,8 +28,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -45,6 +47,7 @@ import com.baidu.hugegraph.entity.load.FileSetting;
 import com.baidu.hugegraph.entity.load.FileUploadResult;
 import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.mapper.load.FileMappingMapper;
+import com.baidu.hugegraph.util.Ex;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -56,11 +59,20 @@ import lombok.extern.log4j.Log4j2;
 @Service
 public class FileMappingService {
 
+    public static final String CONN_PREIFX = "graph-connection-";
+    public static final String FILE_PREIFX = "file-mapping-";
+
     @Autowired
     private FileMappingMapper mapper;
 
     public FileMapping get(int id) {
         return this.mapper.selectById(id);
+    }
+
+    public FileMapping get(int connId, String fileName) {
+        QueryWrapper<FileMapping> query = Wrappers.query();
+        query.eq("conn_id", connId).eq("name", fileName);
+        return this.mapper.selectOne(query);
     }
 
     public List<FileMapping> listAll() {
@@ -89,8 +101,7 @@ public class FileMappingService {
         return this.mapper.deleteById(id);
     }
 
-    public FileUploadResult uploadFile(int connId, MultipartFile srcFile,
-                                       File destFile) {
+    public FileUploadResult uploadFile(MultipartFile srcFile, File destFile) {
         String fileName = srcFile.getOriginalFilename();
         log.debug("Upload file {} length {}", fileName, srcFile.getSize());
 
@@ -100,17 +111,6 @@ public class FileMappingService {
         try (InputStream is = srcFile.getInputStream();
              OutputStream os = new FileOutputStream(destFile)) {
             IOUtils.copy(is, os);
-
-            // Save file mapping
-            FileMapping mapping = new FileMapping(connId, fileName,
-                                                  destFile.getPath());
-            if (this.save(mapping) != 1) {
-                // Delete current upload file
-                FileUtils.forceDelete(destFile);
-                throw new InternalException("entity.insert.failed", mapping);
-            }
-            // Get file mapping id
-            result.setId(mapping.getId());
             result.setStatus(FileUploadResult.Status.SUCCESS);
         } catch (Exception e) {
             log.error("Failed to save upload file and insert file mapping " +
@@ -121,25 +121,34 @@ public class FileMappingService {
         return result;
     }
 
-    public void tryMergePartFiles(File dir, int total) {
+    public boolean tryMergePartFiles(File dir, int total) {
         File[] partFiles = dir.listFiles();
         if (partFiles == null) {
             throw new InternalException("The part files can't be null");
         }
         if (partFiles.length != total) {
-            return;
+            return false;
         }
 
         File newFile = new File(dir.getAbsolutePath() + ".all");
         File destFile = new File(dir.getAbsolutePath());
         if (partFiles.length == 1) {
-            // Rename file to dest file
             try {
+                // Rename file to dest file
                 FileUtils.moveFile(partFiles[0], newFile);
             } catch (IOException e) {
                 throw new InternalException("load.upload.move-file.failed");
             }
         } else {
+            Arrays.sort(partFiles, (o1, o2) -> {
+                String file1Idx = StringUtils.substringAfterLast(o1.getName(),
+                                                                 "-");
+                String file2Idx = StringUtils.substringAfterLast(o2.getName(),
+                                                                 "-");
+                Integer idx1 = Integer.valueOf(file1Idx);
+                Integer idx2 = Integer.valueOf(file2Idx);
+                return idx1.compareTo(idx2);
+            });
             try (OutputStream os = new FileOutputStream(newFile, true)) {
                 for (int i = 0; i < partFiles.length; i++) {
                     File partFile = partFiles[i];
@@ -164,6 +173,7 @@ public class FileMappingService {
         if (!newFile.renameTo(destFile)) {
             throw new InternalException("load.upload.rename-file.failed");
         }
+        return true;
     }
 
     public void extractColumns(FileMapping mapping) {
@@ -176,11 +186,20 @@ public class FileMappingService {
         }
         FileSetting setting = mapping.getFileSetting();
         String delimiter = setting.getDelimiter();
+        Pattern pattern = Pattern.compile(setting.getSkippedLine());
 
         String[] columnNames;
         String[] columnValues;
         try {
-            String line = reader.readLine();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!pattern.matcher(line).matches()) {
+                    break;
+                }
+            }
+            Ex.check(line != null,
+                     "The file has no data line can treat as header");
+
             String[] firstLine = StringUtils.split(line, delimiter);
             if (setting.isHasHeader()) {
                 // The first line as column names
@@ -206,5 +225,35 @@ public class FileMappingService {
 
         setting.setColumnNames(Arrays.asList(columnNames));
         setting.setColumnValues(Arrays.asList(columnValues));
+    }
+
+    public String moveToNextLevelDir(FileMapping mapping) {
+        File currFile = new File(mapping.getPath());
+        String destPath = Paths.get(currFile.getParentFile().getAbsolutePath(),
+                                    FILE_PREIFX + mapping.getConnId())
+                               .toString();
+        File destDir = new File(destPath);
+        try {
+            FileUtils.moveFileToDirectory(currFile, destDir, true);
+        } catch (IOException e) {
+            this.remove(mapping.getId());
+            throw new InternalException(
+                      "Failed to move file to next level directory");
+        }
+        return Paths.get(destPath, currFile.getName()).toString();
+    }
+
+    public void deleteDiskFile(FileMapping mapping) {
+        File file = new File(mapping.getPath());
+        File parentDir = file.getParentFile();
+        log.info("Prepare to delete directory {}", parentDir);
+        try {
+            FileUtils.forceDelete(parentDir);
+        } catch (IOException e) {
+            throw new InternalException("Failed to delete directory " +
+                                        "corresponded to the file id %s, " +
+                                        "please delete it manually",
+                                        e, mapping.getId());
+        }
     }
 }

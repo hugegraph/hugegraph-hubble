@@ -29,7 +29,9 @@ public enum LoadAction implements IEnum<Byte> {
 
     RESUME(2),
 
-    STOP(3);
+    STOP(3),
+
+    RETRY(4);
 
     private byte code;
 

@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.entity.load;
 
 import java.util.Map;
-import java.util.Set;
 
 import com.baidu.hugegraph.annotation.MergeProperty;
 import com.baidu.hugegraph.common.Mergeable;
@@ -36,6 +35,10 @@ import lombok.NoArgsConstructor;
 public abstract class ElementMapping implements Mergeable {
 
     @MergeProperty(useNew = false)
+    @JsonProperty("id")
+    private String id;
+
+    @MergeProperty
     @JsonProperty("label")
     private String label;
 
@@ -49,5 +52,5 @@ public abstract class ElementMapping implements Mergeable {
 
     @MergeProperty
     @JsonProperty("null_values")
-    private Set<Object> nullValues;
+    private NullValues nullValues;
 }

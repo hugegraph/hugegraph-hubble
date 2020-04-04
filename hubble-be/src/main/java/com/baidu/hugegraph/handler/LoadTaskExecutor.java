@@ -17,23 +17,22 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity.load;
+package com.baidu.hugegraph.handler;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class LoadProgress {
+import com.baidu.hugegraph.entity.load.LoadTask;
 
-    // The number of bits of file read
-    private long bytesRead;
-    // The total number of files
-    private long contentLength;
-    // The index of the file being read
-    private long items;
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
+@Component
+public class LoadTaskExecutor {
+
+    @Async
+    public void execute(LoadTask task) {
+        log.info("LoadTask is executing run task:{}", task.getId());
+        task.run();
+    }
 }
