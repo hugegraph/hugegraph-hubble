@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import classnames from 'classnames';
 import { useLocation, useRoute } from 'wouter';
 
-import { Select, Tooltip, PopLayer } from '@baidu/one-ui';
+import { Select, Tooltip, PopLayer, Menu } from '@baidu/one-ui';
 
 import BackIcon from '../../assets/imgs/ic_topback.svg';
 import ArrowIcon from '../../assets/imgs/ic_arrow_white.svg';
@@ -19,7 +19,9 @@ import {
 } from '../../stores';
 
 const GraphManagementSidebar: React.FC = observer(() => {
-  const [match, params] = useRoute('/graph-management/:id/:category');
+  const [match, params] = useRoute(
+    '/graph-management/:id/:category/:subCategory?'
+  );
 
   const graphManagementStore = useContext(GraphManagementStoreContext);
   const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);

@@ -1,0 +1,44 @@
+.import-tasks {
+  &-upload-wrapper {
+    padding: 0px 16px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 250px);
+  }
+
+  &-upload-drag-area {
+    width: 400px;
+    height: 200px;
+    padding: 83px 73px;
+    border: 1px dashed #979797;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    color: #666;
+
+    &:hover {
+      border: 1px dashed #2b65ff;
+    }
+  }
+
+  &-upload-file-list {
+    margin-top: 30px;
+    width: 400px;
+    max-height: calc(100vh - 512px);
+    font-size: 14px;
+    line-height: 20px;
+    color: #333;
+  }
+
+  &-upload-file-info {
+    margin-top: 23px;
+  }
+
+  &-manipulation-wrapper {
+    display: flex;
+    justify-content: center;
+  }
+}

@@ -4,7 +4,8 @@ import { AppBar } from './common';
 import {
   GraphManagement,
   DataAnalyze,
-  MetadataConfigs
+  MetadataConfigs,
+  ImportTasks
 } from './graph-management';
 import GraphManagementSidebar from './graph-management/GraphManagementSidebar';
 
@@ -20,6 +21,10 @@ const App: React.FC = () => {
       <Route
         path="/graph-management/:id/metadata-configs"
         component={MetadataConfigs}
+      />
+      <Route
+        path="/graph-management/:id/data-import/import-tasks"
+        component={ImportTasks}
       />
       <Route path="/graph-management" component={GraphManagement} />
       <Route path="/" component={GraphManagement} />
