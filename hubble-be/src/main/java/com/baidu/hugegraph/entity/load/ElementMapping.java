@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.entity.load;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.baidu.hugegraph.annotation.MergeProperty;
@@ -44,13 +46,42 @@ public abstract class ElementMapping implements Mergeable {
 
     @MergeProperty
     @JsonProperty("field_mapping")
-    private Map<String, String> mappingFields;
+    private List<FieldMappingItem> fieldMappings;
 
     @MergeProperty
     @JsonProperty("value_mapping")
-    private Map<String, Map<String, Object>> mappingValues;
+    private List<ValueMappingItem> valueMappings;
 
     @MergeProperty
     @JsonProperty("null_values")
     private NullValues nullValues;
+
+    public Map<String, String> filedMappingToMap() {
+        Map<String, String> map = new LinkedHashMap<>();
+        if (this.fieldMappings == null) {
+            return map;
+        }
+        for (FieldMappingItem item : this.fieldMappings) {
+            map.put(item.getColumnName(), item.getMappedName());
+        }
+        return map;
+    }
+
+    public Map<String, Map<String, Object>> valueMappingToMap() {
+        Map<String, Map<String, Object>> map = new LinkedHashMap<>();
+        if (this.valueMappings == null) {
+            return map;
+        }
+        for (ValueMappingItem item : this.valueMappings) {
+            String columnName = item.getColumnName();
+            Map<String, Object> valueMap = new LinkedHashMap<>();
+            List<ValueMappingItem.ValueItem> values = item.getValues();
+            for (ValueMappingItem.ValueItem valueItem : values) {
+                valueMap.put(valueItem.getColumnValue(),
+                             valueItem.getMappedValue());
+            }
+            map.put(columnName, valueMap);
+        }
+        return map;
+    }
 }

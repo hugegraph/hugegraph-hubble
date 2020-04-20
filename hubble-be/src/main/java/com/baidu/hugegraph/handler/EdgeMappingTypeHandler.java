@@ -23,7 +23,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.Set;
 
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
@@ -35,38 +35,36 @@ import com.baidu.hugegraph.loader.util.JsonUtil;
 
 @MappedTypes(value = {EdgeMapping.class})
 @MappedJdbcTypes(value = {JdbcType.VARCHAR})
-public class EdgeMappingTypeHandler
-       extends BaseTypeHandler<Map<String, EdgeMapping>> {
+public class EdgeMappingTypeHandler extends BaseTypeHandler<Set<EdgeMapping>> {
 
     @Override
     public void setNonNullParameter(PreparedStatement preparedStatement,
-                                    int columnIndex,
-                                    Map<String, EdgeMapping> mappings,
+                                    int columnIndex, Set<EdgeMapping> mappings,
                                     JdbcType jdbcType) throws SQLException {
         preparedStatement.setString(columnIndex, JsonUtil.toJson(mappings));
     }
 
     @Override
-    public Map<String, EdgeMapping> getNullableResult(ResultSet resultSet,
-                                                      String columnName)
-                                                      throws SQLException {
+    public Set<EdgeMapping> getNullableResult(ResultSet resultSet,
+                                              String columnName)
+                                              throws SQLException {
         String json = resultSet.getString(columnName);
-        return JsonUtil.convertMap(json, String.class, EdgeMapping.class);
+        return JsonUtil.convertSet(json, EdgeMapping.class);
     }
 
     @Override
-    public Map<String, EdgeMapping> getNullableResult(ResultSet resultSet,
-                                                      int columnIndex)
-                                                      throws SQLException {
+    public Set<EdgeMapping> getNullableResult(ResultSet resultSet,
+                                              int columnIndex)
+                                              throws SQLException {
         String json = resultSet.getString(columnIndex);
-        return JsonUtil.convertMap(json, String.class, EdgeMapping.class);
+        return JsonUtil.convertSet(json, EdgeMapping.class);
     }
 
     @Override
-    public Map<String, EdgeMapping> getNullableResult(
-                                    CallableStatement callableStatement,
-                                    int columnIndex) throws SQLException {
+    public Set<EdgeMapping> getNullableResult(
+                            CallableStatement callableStatement,
+                            int columnIndex) throws SQLException {
         String json = callableStatement.getString(columnIndex);
-        return JsonUtil.convertMap(json, String.class, EdgeMapping.class);
+        return JsonUtil.convertSet(json, EdgeMapping.class);
     }
 }

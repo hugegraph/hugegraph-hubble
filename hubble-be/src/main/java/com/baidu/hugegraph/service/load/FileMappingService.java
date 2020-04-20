@@ -101,10 +101,21 @@ public class FileMappingService {
         return this.mapper.deleteById(id);
     }
 
-    public FileUploadResult uploadFile(MultipartFile srcFile, File destFile) {
+    public FileUploadResult uploadFile(MultipartFile srcFile, int index,
+                                       String dirPath) {
+        // File all parts saved path
+        File dir = new File(dirPath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        // Current part saved path
         String fileName = srcFile.getOriginalFilename();
-        log.debug("Upload file {} length {}", fileName, srcFile.getSize());
+        File destFile = new File(dirPath, fileName + "-" + index);
+        if (destFile.exists()) {
+            destFile.delete();
+        }
 
+        log.debug("Upload file {} length {}", fileName, srcFile.getSize());
         FileUploadResult result = new FileUploadResult();
         result.setName(fileName);
         result.setSize(srcFile.getSize());
@@ -121,7 +132,8 @@ public class FileMappingService {
         return result;
     }
 
-    public boolean tryMergePartFiles(File dir, int total) {
+    public boolean tryMergePartFiles(String dirPath, int total) {
+        File dir = new File(dirPath);
         File[] partFiles = dir.listFiles();
         if (partFiles == null) {
             throw new InternalException("The part files can't be null");

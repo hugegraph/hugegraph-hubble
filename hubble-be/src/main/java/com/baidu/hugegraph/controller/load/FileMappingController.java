@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.controller.load;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,10 +95,10 @@ public class FileMappingController extends BaseController {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
 
+        this.service.deleteDiskFile(mapping);
         if (this.service.remove(id) != 1) {
             throw new InternalException("entity.delete.failed", mapping);
         }
-        this.service.deleteDiskFile(mapping);
     }
 
     @DeleteMapping
@@ -156,7 +155,7 @@ public class FileMappingController extends BaseController {
         }
 
         newEntity.setId(HubbleUtil.generateSimpleId());
-        mapping.getVertexMappings().put(newEntity.getId(), newEntity);
+        mapping.getVertexMappings().add(newEntity);
         if (this.service.update(mapping) != 1) {
             throw new InternalException("entity.update.failed", mapping);
         }
@@ -179,12 +178,12 @@ public class FileMappingController extends BaseController {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
 
-        Map<String, VertexMapping> vertexMappings = mapping.getVertexMappings();
-        Ex.check(vertexMappings.containsKey(vmId),
+        VertexMapping vertexMapping = mapping.getVertexMapping(vmId);
+        Ex.check(vertexMapping != null,
                  "load.file-mapping.vertex-mapping.not-exist.id", vmId);
 
         newEntity.setId(vmId);
-        vertexMappings.put(vmId, newEntity);
+        mapping.getVertexMappings().add(newEntity);
         if (this.service.update(mapping) != 1) {
             throw new InternalException("entity.update.failed", mapping);
         }
@@ -199,8 +198,9 @@ public class FileMappingController extends BaseController {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
 
-        VertexMapping oldEntity = mapping.getVertexMappings().remove(vmid);
-        if (oldEntity == null) {
+        VertexMapping vertexMapping = mapping.getVertexMapping(vmid);
+        boolean removed = mapping.getVertexMappings().remove(vertexMapping);
+        if (!removed) {
             throw new ExternalException(
                       "load.file-mapping.vertex-mapping.not-exist.id", vmid);
         }
@@ -232,7 +232,7 @@ public class FileMappingController extends BaseController {
         }
 
         newEntity.setId(HubbleUtil.generateSimpleId());
-        mapping.getEdgeMappings().put(newEntity.getId(), newEntity);
+        mapping.getEdgeMappings().add(newEntity);
         if (this.service.update(mapping) != 1) {
             throw new InternalException("entity.update.failed", mapping);
         }
@@ -261,12 +261,12 @@ public class FileMappingController extends BaseController {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
 
-        Map<String, EdgeMapping> edgeMappings = mapping.getEdgeMappings();
-        Ex.check(edgeMappings.containsKey(emId),
+        EdgeMapping edgeMapping = mapping.getEdgeMapping(emId);
+        Ex.check(edgeMapping != null,
                  "load.file-mapping.edge-mapping.not-exist.id", emId);
 
         newEntity.setId(emId);
-        edgeMappings.put(emId, newEntity);
+        mapping.getEdgeMappings().add(newEntity);
         if (this.service.update(mapping) != 1) {
             throw new InternalException("entity.update.failed", mapping);
         }
@@ -281,8 +281,9 @@ public class FileMappingController extends BaseController {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
 
-        EdgeMapping oldEntity = mapping.getEdgeMappings().remove(emid);
-        if (oldEntity == null) {
+        EdgeMapping edgeMapping = mapping.getEdgeMapping(emid);
+        boolean removed = mapping.getEdgeMappings().remove(edgeMapping);
+        if (!removed) {
             throw new ExternalException(
                       "load.file-mapping.edge-mapping.not-exist.id", emid);
         }

@@ -24,13 +24,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
 
+import org.apache.commons.io.IOUtils;
+
+import com.baidu.hugegraph.exception.InternalException;
+
 public final class FileUtil {
 
-    public static long countLines(String path) throws IOException {
+    public static long countLines(String path) {
         return countLines(new File(path));
     }
 
-    public static long countLines(File file) throws IOException {
+    public static long countLines(File file) {
         if (!file.exists()) {
             throw new IllegalArgumentException(String.format(
                       "The file %s doesn't exist", file));
@@ -42,9 +46,12 @@ public final class FileUtil {
             lineReader = new LineNumberReader(fileReader);
             lineReader.skip(fileLength);
             return lineReader.getLineNumber();
+        } catch (IOException e) {
+            throw new InternalException("Failed to count lines of file %s",
+                                        file);
         } finally {
             if (lineReader != null) {
-                lineReader.close();
+                IOUtils.closeQuietly(lineReader);
             }
         }
     }

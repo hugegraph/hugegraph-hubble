@@ -121,14 +121,14 @@ public class LoadTask implements Runnable {
         this.fileId = mapping.getId();
         this.options = options;
         if (mapping.getVertexMappings() != null) {
-            this.vertices = mapping.getVertexMappings().values().stream()
+            this.vertices = mapping.getVertexMappings().stream()
                                    .map(ElementMapping::getLabel)
                                    .collect(Collectors.toSet());
         } else {
             this.vertices = new HashSet<>();
         }
         if (mapping.getEdgeMappings() != null) {
-            this.edges = mapping.getEdgeMappings().values().stream()
+            this.edges = mapping.getEdgeMappings().stream()
                                 .map(ElementMapping::getLabel)
                                 .collect(Collectors.toSet());
         } else {

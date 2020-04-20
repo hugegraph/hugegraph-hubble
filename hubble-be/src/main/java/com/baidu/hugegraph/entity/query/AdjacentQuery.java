@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.entity.query;
 
 import java.util.List;
+import java.util.Set;
 
 import com.baidu.hugegraph.structure.constant.Direction;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -49,6 +50,12 @@ public class AdjacentQuery {
 
     @JsonProperty("conditions")
     private List<Condition> conditions;
+
+    @JsonProperty("adjacent_vertices")
+    private Set<String> adjacentVertices;
+
+    @JsonProperty("adjacent_edges")
+    private Set<String> adjacentEdges;
 
     @Data
     @NoArgsConstructor

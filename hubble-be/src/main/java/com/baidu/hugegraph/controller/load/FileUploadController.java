@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -65,52 +66,30 @@ public class FileUploadController {
                                    @RequestParam("file") MultipartFile file,
                                    @RequestParam("total") int total,
                                    @RequestParam("index") int index) {
-        // Now allowed to upload empty file
-        Ex.check(!file.isEmpty(), "load.upload.file.cannot-be-empty");
-        String location = this.config.get(HubbleOptions.UPLOAD_FILE_LOCATION);
-        this.ensureLocationExist(location, CONN_PREIFX + connId);
-        // Difficult: how to determine whether the file is csv or text
-        log.info("File content type: {}", file.getContentType());
-
+        this.checkFileValid(connId, file);
         // vertex_person.csv
         String fileName = file.getOriginalFilename();
-        FileMapping oldMapping = this.service.get(connId, fileName);
-        Ex.check(oldMapping == null, "There exist file with same name");
 
+        String location = this.config.get(HubbleOptions.UPLOAD_FILE_LOCATION);
+        this.ensureLocationExist(location, CONN_PREIFX + connId);
         // Before merge: upload-files/conn-1/verson_person.csv/part-1
         // After merge: upload-files/conn-1/file-mapping-1/verson_person.csv
         String dirPath = Paths.get(location, CONN_PREIFX + connId, fileName)
                               .toString();
-        // File all parts saved path
-        File dir = new File(dirPath);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        // Current part saved path
-        File curPartFile = new File(dirPath, fileName + "-" + index);
-        if (curPartFile.exists()) {
-            curPartFile.delete();
-        }
         // Check destFile exist
-//        Ex.check(!destFile.exists(), "load.upload.file.existed", fileName);
-        FileUploadResult result = this.service.uploadFile(file, curPartFile);
+        // Ex.check(!destFile.exists(), "load.upload.file.existed", fileName);
+        FileUploadResult result = this.service.uploadFile(file, index, dirPath);
         if (result.getStatus() == FileUploadResult.Status.FAILURE) {
             return result;
         }
         // Determine whether all the parts have been uploaded, then merge them
-        boolean merged = this.service.tryMergePartFiles(dir, total);
+        boolean merged = this.service.tryMergePartFiles(dirPath, total);
         if (merged) {
             // Save file mapping
             FileMapping mapping = new FileMapping(connId, fileName, dirPath);
             // Read column names and values then fill it
             this.service.extractColumns(mapping);
-            try {
-                // TODO: maybe can get this info with tryMergePartFiles()
-                mapping.setTotalLines(FileUtil.countLines(mapping.getPath()));
-            } catch (IOException e) {
-                throw new InternalException("Failed to count lines of file %s",
-                                            mapping.getPath());
-            }
+            mapping.setTotalLines(FileUtil.countLines(mapping.getPath()));
             // Will generate mapping id
             if (this.service.save(mapping) != 1) {
                 throw new InternalException("entity.insert.failed", mapping);
@@ -127,24 +106,43 @@ public class FileUploadController {
         return result;
     }
 
-    /**
-     * TODO：需要组织好文件的路径，以及考虑是否删除文件映射
-     */
     @DeleteMapping
     public Map<String, Boolean> delete(@PathVariable("connId") int connId,
                                        @RequestParam("names")
                                        List<String> fileNames) {
         Ex.check(fileNames.size() > 0, "load.upload.files.at-least-one");
-        String location = this.config.get(HubbleOptions.UPLOAD_FILE_LOCATION);
         Map<String, Boolean> result = new LinkedHashMap<>();
         for (String fileName : fileNames) {
-            String path = Paths.get(location, String.valueOf(connId), fileName)
-                               .toString();
-            File destFile = new File(path);
+            FileMapping mapping = this.service.get(connId, fileName);
+            Ex.check(mapping != null, "load.file-mapping.not-exist.name",
+                     fileName);
+            File destFile = new File(mapping.getPath());
             boolean deleted = destFile.delete();
+            if (deleted) {
+                if (this.service.remove(mapping.getId()) != 1) {
+                    throw new InternalException("entity.delete.failed", mapping);
+                }
+            }
             result.put(fileName, deleted);
         }
         return result;
+    }
+
+    private void checkFileValid(int connId, MultipartFile file) {
+        // Now allowed to upload empty file
+        Ex.check(!file.isEmpty(), "load.upload.file.cannot-be-empty");
+        // Difficult: how to determine whether the file is csv or text
+        log.info("File content type: {}", file.getContentType());
+
+        String fileName = file.getOriginalFilename();
+        String format = FilenameUtils.getExtension(fileName);
+        List<String> formatWhiteList = this.config.get(
+                                       HubbleOptions.UPLOAD_FILE_FORMAT_LIST);
+        Ex.check(formatWhiteList.contains(format),
+                 "load.upload.file.format.unsupported");
+
+        FileMapping oldMapping = this.service.get(connId, fileName);
+        Ex.check(oldMapping == null, "load.upload.file.existed", fileName);
     }
 
     private void ensureLocationExist(String location, String connPath) {

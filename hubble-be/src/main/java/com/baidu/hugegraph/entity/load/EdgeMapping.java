@@ -26,11 +26,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@EqualsAndHashCode(callSuper = true)
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -44,4 +42,18 @@ public class EdgeMapping extends ElementMapping {
     @MergeProperty
     @JsonProperty("target_fields")
     private List<String> targetFields;
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof EdgeMapping)) {
+            return false;
+        }
+        EdgeMapping other = (EdgeMapping) object;
+        return this.getId().equals(other.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getId().hashCode();
+    }
 }

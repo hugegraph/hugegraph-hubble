@@ -23,7 +23,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.Set;
 
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
@@ -36,37 +36,37 @@ import com.baidu.hugegraph.loader.util.JsonUtil;
 @MappedTypes(value = {VertexMapping.class})
 @MappedJdbcTypes(value = {JdbcType.VARCHAR})
 public class VertexMappingTypeHandler
-       extends BaseTypeHandler<Map<String, VertexMapping>> {
+       extends BaseTypeHandler<Set<VertexMapping>> {
 
     @Override
     public void setNonNullParameter(PreparedStatement preparedStatement,
                                     int columnIndex,
-                                    Map<String, VertexMapping> mappings,
+                                    Set<VertexMapping> mappings,
                                     JdbcType jdbcType) throws SQLException {
         preparedStatement.setString(columnIndex, JsonUtil.toJson(mappings));
     }
 
     @Override
-    public Map<String, VertexMapping> getNullableResult(ResultSet resultSet,
-                                                        String columnName)
-                                                        throws SQLException {
+    public Set<VertexMapping> getNullableResult(ResultSet resultSet,
+                                                String columnName)
+                                                throws SQLException {
         String json = resultSet.getString(columnName);
-        return JsonUtil.convertMap(json, String.class, VertexMapping.class);
+        return JsonUtil.convertSet(json, VertexMapping.class);
     }
 
     @Override
-    public Map<String, VertexMapping> getNullableResult(ResultSet resultSet,
-                                                        int columnIndex)
-                                                        throws SQLException {
+    public Set<VertexMapping> getNullableResult(ResultSet resultSet,
+                                                int columnIndex)
+                                                throws SQLException {
         String json = resultSet.getString(columnIndex);
-        return JsonUtil.convertMap(json, String.class, VertexMapping.class);
+        return JsonUtil.convertSet(json, VertexMapping.class);
     }
 
     @Override
-    public Map<String, VertexMapping> getNullableResult(
-                                      CallableStatement callableStatement,
-                                      int columnIndex) throws SQLException {
+    public Set<VertexMapping> getNullableResult(
+                              CallableStatement callableStatement,
+                              int columnIndex) throws SQLException {
         String json = callableStatement.getString(columnIndex);
-        return JsonUtil.convertMap(json, String.class, VertexMapping.class);
+        return JsonUtil.convertSet(json, VertexMapping.class);
     }
 }

@@ -146,7 +146,7 @@ public class HubbleOptions extends OptionHolder {
             new ConfigOption<>(
                     "gremlin.batch_query_ids",
                     "The ids count for every batch.",
-                    rangeInt(1, 500),
+                    rangeInt(1, 250),
                     100
             );
 
@@ -164,6 +164,14 @@ public class HubbleOptions extends OptionHolder {
                     "The location of uploaded files.",
                     disallowEmpty(),
                     "./upload-files"
+            );
+
+    public static final ConfigListOption<String> UPLOAD_FILE_FORMAT_LIST =
+            new ConfigListOption<>(
+                    "upload_file.format_list",
+                    "The format white list available for uploading file.",
+                    null,
+                    "csv"
             );
 
     public static final ConfigOption<Integer> UPLOAD_SINGLE_FILE_SIZE_LIMIT =

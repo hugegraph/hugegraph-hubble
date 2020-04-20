@@ -19,37 +19,25 @@
 
 package com.baidu.hugegraph.entity.load;
 
-import java.util.List;
-
 import com.baidu.hugegraph.annotation.MergeProperty;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VertexMapping extends ElementMapping {
+public class FieldMappingItem {
 
     @MergeProperty
-    @JsonProperty("id_fields")
-    private List<String> idFields;
+    @JsonProperty("column_name")
+    private String columnName;
 
-    @Override
-    public boolean equals(Object object) {
-        if (!(object instanceof VertexMapping)) {
-            return false;
-        }
-        VertexMapping other = (VertexMapping) object;
-        return this.getId().equals(other.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getId().hashCode();
-    }
+    @MergeProperty
+    @JsonProperty("mapped_name")
+    private String mappedName;
 }

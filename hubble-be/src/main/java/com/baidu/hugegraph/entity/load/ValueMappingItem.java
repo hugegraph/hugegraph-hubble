@@ -26,30 +26,35 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VertexMapping extends ElementMapping {
+public class ValueMappingItem {
 
     @MergeProperty
-    @JsonProperty("id_fields")
-    private List<String> idFields;
+    @JsonProperty("column_name")
+    private String columnName;
 
-    @Override
-    public boolean equals(Object object) {
-        if (!(object instanceof VertexMapping)) {
-            return false;
-        }
-        VertexMapping other = (VertexMapping) object;
-        return this.getId().equals(other.getId());
-    }
+    @MergeProperty
+    @JsonProperty("values")
+    private List<ValueItem> values;
 
-    @Override
-    public int hashCode() {
-        return this.getId().hashCode();
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ValueItem {
+
+        @MergeProperty
+        @JsonProperty("column_value")
+        private String columnValue;
+
+        @MergeProperty
+        @JsonProperty("mapped_value")
+        private String mappedValue;
     }
 }

@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `graph_connection` (
     `graph` VARCHAR(48) NOT NULL,
     `host` VARCHAR(48) NOT NULL DEFAULT 'localhost',
     `port` INT NOT NULL DEFAULT '8080',
+    `timeout` INT NOT NULL,
     `username` VARCHAR(48),
     `password` VARCHAR(48),
     `enabled` BOOLEAN NOT NULL DEFAULT true,

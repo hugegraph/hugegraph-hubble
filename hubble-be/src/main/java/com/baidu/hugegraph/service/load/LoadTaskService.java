@@ -340,10 +340,10 @@ public class LoadTaskService {
         int connId = connection.getId();
         List<com.baidu.hugegraph.loader.mapping.VertexMapping> vMappings =
                 new ArrayList<>();
-        for (VertexMapping mapping : fileMapping.getVertexMappings().values()) {
+        for (VertexMapping mapping : fileMapping.getVertexMappings()) {
             VertexLabelEntity vl = this.vlService.get(mapping.getLabel(), connId);
             List<String> idFields = mapping.getIdFields();
-            Map<String, String> fieldMappings = mapping.getMappingFields();
+            Map<String, String> fieldMappings = mapping.filedMappingToMap();
             com.baidu.hugegraph.loader.mapping.VertexMapping vMapping;
             if (vl.getIdStrategy().isCustomize()) {
                 Ex.check(idFields.size() == 1,
@@ -370,7 +370,7 @@ public class LoadTaskService {
             // set field_mapping
             vMapping.mappingFields(fieldMappings);
             // set value_mapping
-            vMapping.mappingValues(mapping.getMappingValues());
+            vMapping.mappingValues(mapping.valueMappingToMap());
             // set selected
             vMapping.selectedFields().addAll(idFields);
             vMapping.selectedFields().addAll(fieldMappings.keySet());
@@ -391,7 +391,7 @@ public class LoadTaskService {
         int connId = connection.getId();
         List<com.baidu.hugegraph.loader.mapping.EdgeMapping> eMappings =
                 new ArrayList<>();
-        for (EdgeMapping mapping : fileMapping.getEdgeMappings().values()) {
+        for (EdgeMapping mapping : fileMapping.getEdgeMappings()) {
             List<String> sourceFields = mapping.getSourceFields();
             List<String> targetFields = mapping.getTargetFields();
             EdgeLabelEntity el = this.elService.get(mapping.getLabel(), connId);
@@ -399,7 +399,7 @@ public class LoadTaskService {
                                                        connId);
             VertexLabelEntity tvl = this.vlService.get(el.getTargetLabel(),
                                                        connId);
-            Map<String, String> fieldMappings = mapping.getMappingFields();
+            Map<String, String> fieldMappings = mapping.filedMappingToMap();
             if (svl.getIdStrategy().isPrimaryKey()) {
                 List<String> primaryKeys = svl.getPrimaryKeys();
                 Ex.check(sourceFields.size() >= 1 &&
@@ -431,7 +431,7 @@ public class LoadTaskService {
             // set field_mapping
             eMapping.mappingFields(fieldMappings);
             // set value_mapping
-            eMapping.mappingValues(mapping.getMappingValues());
+            eMapping.mappingValues(mapping.valueMappingToMap());
             // set selected
             eMapping.selectedFields().addAll(sourceFields);
             eMapping.selectedFields().addAll(targetFields);
