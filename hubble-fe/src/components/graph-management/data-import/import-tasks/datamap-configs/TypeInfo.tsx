@@ -173,7 +173,7 @@ const TypeInfo: React.FC<TypeInfoProps> = observer(({ type, mapIndex }) => {
                 />
                 <div ref={deleteWrapperRef}>
                   <p>{t('data-configs.manipulations.hints.delete-confirm')}</p>
-                  <p>{t('data-configs.manipulations.hints.delete-warning')}</p>
+                  <p>{t('data-configs.manipulations.hints.warning')}</p>
                   <div
                     style={{
                       display: 'flex',
@@ -186,6 +186,13 @@ const TypeInfo: React.FC<TypeInfoProps> = observer(({ type, mapIndex }) => {
                       type="primary"
                       size="medium"
                       style={{ width: 60, marginRight: 12 }}
+                      onClick={() => {
+                        type === 'vertex'
+                          ? dataMapStore.deleteVertexMap(mapIndex)
+                          : dataMapStore.deleteEdgeMap(mapIndex);
+
+                        switchDeletePop(false);
+                      }}
                     >
                       {t('data-configs.type.info.delete')}
                     </Button>

@@ -61,7 +61,9 @@ export class DataMapStore {
     updateFileConfig: 'standby',
     fetchDataMaps: 'standby',
     updateVertexMap: 'standby',
-    updateEdgeMap: 'standby'
+    updateEdgeMap: 'standby',
+    deleteVertexMap: 'standby',
+    deleteEdgeMap: 'standby'
   };
 
   @observable errorInfo = {
@@ -78,6 +80,14 @@ export class DataMapStore {
       message: ''
     },
     updateEdgeMap: {
+      code: NaN,
+      message: ''
+    },
+    deleteVertexMap: {
+      code: NaN,
+      message: ''
+    },
+    deleteEdgeMap: {
       code: NaN,
       message: ''
     }
@@ -832,7 +842,7 @@ export class DataMapStore {
 
           result = yield axios
             .put(
-              `${baseUrl}/${this.dataImportRootStore.currentId}/file-mappings/${fileId}/vertex-mappings${this.editedVertexMap?.id}`,
+              `${baseUrl}/${this.dataImportRootStore.currentId}/file-mappings/${fileId}/vertex-mappings/${this.editedVertexMap?.id}`,
               editedVertexMap
             )
             .catch(checkIfLocalNetworkOffline);
@@ -841,7 +851,7 @@ export class DataMapStore {
         case 'delete':
           result = yield axios
             .delete(
-              `${baseUrl}/${this.dataImportRootStore.currentId}/file-mappings/${fileId}/vertex-mappings${this.editedVertexMap?.id}`
+              `${baseUrl}/${this.dataImportRootStore.currentId}/file-mappings/${fileId}/vertex-mappings/${this.editedVertexMap?.id}`
             )
             .catch(checkIfLocalNetworkOffline);
           break;
@@ -902,7 +912,7 @@ export class DataMapStore {
 
           result = yield axios
             .put(
-              `${baseUrl}/${this.dataImportRootStore.currentId}/file-mappings/${fileId}/edge-mapping${this.editedEdgeMap?.id}`,
+              `${baseUrl}/${this.dataImportRootStore.currentId}/file-mappings/${fileId}/edge-mapping/${this.editedEdgeMap?.id}`,
               this.editedEdgeMap
             )
             .catch(checkIfLocalNetworkOffline);
@@ -911,7 +921,7 @@ export class DataMapStore {
         case 'delete':
           result = yield axios
             .delete(
-              `${baseUrl}/${this.dataImportRootStore.currentId}/file-mappings/${fileId}/edge-mapping${this.editedEdgeMap?.id}`
+              `${baseUrl}/${this.dataImportRootStore.currentId}/file-mappings/${fileId}/edge-mapping/${this.editedEdgeMap?.id}`
             )
             .catch(checkIfLocalNetworkOffline);
           break;
@@ -927,6 +937,70 @@ export class DataMapStore {
     } catch (error) {
       this.requestStatus.updateEdgeMap = 'failed';
       this.errorInfo.updateEdgeMap.message = error.message;
+      console.error(error.message);
+    }
+  });
+
+  deleteVertexMap = flow(function* deleteVertexMap(
+    this: DataMapStore,
+    mapIndex: number
+  ) {
+    this.requestStatus.deleteVertexMap = 'pending';
+
+    try {
+      const result: AxiosResponse<responseData<
+        FileMapInfo
+      >> = yield axios
+        .delete<responseData<FileMapInfo>>(
+          `${baseUrl}/${this.dataImportRootStore.currentId}/file-mappings/${
+            this.selectedFileInfo!.id
+          }/vertex-mappings/${
+            this.selectedFileInfo?.vertex_mappings[mapIndex].id
+          }`
+        )
+        .catch(checkIfLocalNetworkOffline);
+
+      if (result.data.status !== 200) {
+        this.errorInfo.deleteVertexMap.code = result.data.status;
+        throw new Error(result.data.message);
+      }
+
+      this.selectedFileInfo!.vertex_mappings = result.data.data.vertex_mappings;
+      this.requestStatus.deleteVertexMap = 'success';
+    } catch (error) {
+      this.requestStatus.deleteVertexMap = 'failed';
+      this.errorInfo.deleteVertexMap.message = error.message;
+      console.error(error.message);
+    }
+  });
+
+  deleteEdgeMap = flow(function* deleteEdgeMap(
+    this: DataMapStore,
+    mapIndex: number
+  ) {
+    this.requestStatus.deleteEdgeMap = 'pending';
+
+    try {
+      const result: AxiosResponse<responseData<
+        FileMapInfo
+      >> = yield axios
+        .delete<responseData<FileMapInfo>>(
+          `${baseUrl}/${this.dataImportRootStore.currentId}/file-mappings/${
+            this.selectedFileInfo!.id
+          }/edge-mappings/${this.selectedFileInfo?.edge_mappings[mapIndex].id}`
+        )
+        .catch(checkIfLocalNetworkOffline);
+
+      if (result.data.status !== 200) {
+        this.errorInfo.deleteEdgeMap.code = result.data.status;
+        throw new Error(result.data.message);
+      }
+
+      this.selectedFileInfo!.edge_mappings = result.data.data.edge_mappings;
+      this.requestStatus.deleteEdgeMap = 'success';
+    } catch (error) {
+      this.requestStatus.deleteEdgeMap = 'failed';
+      this.errorInfo.deleteEdgeMap.message = error.message;
       console.error(error.message);
     }
   });
