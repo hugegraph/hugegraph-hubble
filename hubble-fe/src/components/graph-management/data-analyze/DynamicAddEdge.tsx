@@ -235,7 +235,7 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
             width={420}
             onChange={(value: string) => {
               dataAnalyzeStore.setNewGraphDataConfig('edge', 'label', value);
-              dataAnalyzeStore.syncGraphDataProperties('edge');
+              dataAnalyzeStore.syncNewGraphDataProperties('edge');
               dataAnalyzeStore.initValidateAddGraphDataErrorMessage('edge');
             }}
             dropdownClassName="data-analyze-sidebar-select"

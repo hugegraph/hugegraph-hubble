@@ -304,7 +304,7 @@ export class DataAnalyzeStore {
   }
 
   @action
-  syncGraphDataProperties(type: 'vertex' | 'edge') {
+  syncNewGraphDataProperties(type: 'vertex' | 'edge') {
     const config =
       type === 'vertex' ? this.newGraphNodeConfigs : this.newGraphEdgeConfigs;
     config.properties.nonNullable.clear();
