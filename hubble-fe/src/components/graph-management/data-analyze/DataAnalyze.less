@@ -658,6 +658,66 @@
       & > div:last-child {
         flex-basis: 75%;
       }
+
+      &-disabled {
+        color: #999;
+      }
+    }
+  }
+
+  &-graph-node-edit {
+    font-size: 14px;
+  }
+
+  &-dynamic-add-options {
+    margin-top: 4px;
+    font-size: 14px;
+    line-height: 30px;
+    color: #333;
+  }
+
+  &-dynamic-add-option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 32px;
+
+    & > div:first-child {
+      width: 84px;
+      line-height: 22px;
+      margin-right: 24px;
+      text-align: right;
+    }
+
+    &-with-expand {
+      align-items: flex-start;
+
+      & > div:first-child {
+        line-height: 32px;
+      }
+    }
+
+    &-expands {
+      display: flex;
+      flex-direction: column;
+      width: calc(100% - 180px);
+    }
+
+    &-expand {
+      display: flex;
+      margin-bottom: 32px;
+
+      &:first-child {
+        margin-bottom: 16px;
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      & > div {
+        flex-basis: 50%;
+        line-height: 32px;
+      }
     }
   }
 
@@ -691,7 +751,7 @@
 
   .graph-pop-over {
     width: 126px;
-    height: 104px;
+    // height: 104px;
     padding: 4px 0;
     background: #fff;
     border-radius: 3px;

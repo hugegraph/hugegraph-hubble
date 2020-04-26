@@ -33,3 +33,12 @@ export function generateGraphModeId(
 ): string {
   return `${source}-${id}->${target}`;
 }
+
+export function convertArrayToString(
+  values: any[] | string,
+  separtor: string = ','
+) {
+  return Array.isArray(values)
+    ? values.filter((value) => value !== '').join(separtor)
+    : values;
+}
