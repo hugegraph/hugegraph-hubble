@@ -187,6 +187,7 @@ const DataAnalyzeAddNode: React.FC = observer(() => {
           <Select
             size="medium"
             trigger="click"
+            placeholder="请选择顶点类型"
             value={dataAnalyzeStore.newGraphNodeConfigs.label}
             width={420}
             onChange={(value: string) => {

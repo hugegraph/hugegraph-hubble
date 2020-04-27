@@ -231,6 +231,7 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
           <Select
             size="medium"
             trigger="click"
+            placeholder="请选择边类型"
             value={dataAnalyzeStore.newGraphEdgeConfigs.label}
             width={420}
             onChange={(value: string) => {
@@ -262,7 +263,7 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
                 <Input
                   size="medium"
                   width={420}
-                  placeholder="请输入ID值"
+                  placeholder={`请输入${title === '出边' ? '终点' : '起点'}ID`}
                   errorLocation="layer"
                   errorMessage={
                     dataAnalyzeStore.validateAddGraphEdgeErrorMessage!.id
