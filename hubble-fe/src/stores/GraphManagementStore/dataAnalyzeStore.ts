@@ -645,14 +645,14 @@ export class DataAnalyzeStore {
     key?: string
   ) {
     if (category === 'id') {
-      if (idStrategy === 'CUSTOM_STRING') {
+      if (idStrategy === 'CUSTOMIZE_STRING') {
         this.validateAddGraphNodeErrorMessage!.id =
           initial || !isEmpty(this.newGraphNodeConfigs.id)
             ? ''
             : '非法的数据格式';
       }
 
-      if (idStrategy === 'CUSTOM_NUMBER') {
+      if (idStrategy === 'CUSTOMIZE_NUMBER') {
         this.validateAddGraphNodeErrorMessage!.id =
           initial || !Object.is(Number(this.newGraphNodeConfigs.id), NaN)
             ? ''
@@ -660,7 +660,7 @@ export class DataAnalyzeStore {
         // return !Object.is(Number(value), NaN);
       }
 
-      if (idStrategy === 'CUSTOM_UUID') {
+      if (idStrategy === 'CUSTOMIZE_UUID') {
         this.validateAddGraphNodeErrorMessage!.id =
           initial ||
           /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i.test(
