@@ -654,10 +654,9 @@ export class DataAnalyzeStore {
 
       if (idStrategy === 'CUSTOMIZE_NUMBER') {
         this.validateAddGraphNodeErrorMessage!.id =
-          initial || !Object.is(Number(this.newGraphNodeConfigs.id), NaN)
+          initial || /^\d+$/.test(this.newGraphNodeConfigs.id!)
             ? ''
             : '非法的数据格式';
-        // return !Object.is(Number(value), NaN);
       }
 
       if (idStrategy === 'CUSTOMIZE_UUID') {
