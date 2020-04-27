@@ -18,6 +18,7 @@ const DataAnalyzeInfoDrawer: React.FC = observer(() => {
 
   const premitSave =
     !isEdit ||
+    dataAnalyzeStore.editedSelectedGraphDataProperties.nonNullable.size === 0 ||
     [
       ...dataAnalyzeStore.validateEditableGraphDataPropertyErrorMessage!.nonNullable.values()
     ].includes('');
