@@ -159,13 +159,13 @@ const DataAnalyzeAddNode: React.FC = observer(() => {
               );
 
               Message.success({
-                content: '创建顶点成功',
+                content: '添加成功',
                 size: 'medium',
                 showCloseIcon: false
               });
             } else {
               Message.error({
-                content: '创建顶点失败',
+                content: '添加失败',
                 size: 'medium',
                 showCloseIcon: false
               });
@@ -187,7 +187,7 @@ const DataAnalyzeAddNode: React.FC = observer(() => {
           <Select
             size="medium"
             trigger="click"
-            placeholder="请选择顶点类型"
+            selectorName="请选择顶点类型"
             value={dataAnalyzeStore.newGraphNodeConfigs.label}
             width={420}
             onChange={(value: string) => {

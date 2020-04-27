@@ -196,13 +196,13 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
               );
 
               Message.success({
-                content: `创建${title}成功`,
+                content: `添加成功`,
                 size: 'medium',
                 showCloseIcon: false
               });
             } else {
               Message.error({
-                content: `创建${title}失败`,
+                content: `添加失败`,
                 size: 'medium',
                 showCloseIcon: false
               });
@@ -231,7 +231,7 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
           <Select
             size="medium"
             trigger="click"
-            placeholder="请选择边类型"
+            selectorName="请选择边类型"
             value={dataAnalyzeStore.newGraphEdgeConfigs.label}
             width={420}
             onChange={(value: string) => {
