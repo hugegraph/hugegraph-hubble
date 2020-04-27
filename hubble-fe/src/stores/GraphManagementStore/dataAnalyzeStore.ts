@@ -436,7 +436,6 @@ export class DataAnalyzeStore {
 
   @action
   switchShowScreenInfo(flag: boolean) {
-    console.log('调用了？？');
     this.isShowGraphInfo = flag;
   }
 
@@ -1346,6 +1345,9 @@ export class DataAnalyzeStore {
         : this.selectedGraphLinkData;
 
     const editedProperties: Record<string, string | Array<string>> = {
+      ...Object.fromEntries([
+        ...this.editedSelectedGraphDataProperties.primary
+      ]),
       ...Object.fromEntries([
         ...this.editedSelectedGraphDataProperties.nonNullable
       ]),
