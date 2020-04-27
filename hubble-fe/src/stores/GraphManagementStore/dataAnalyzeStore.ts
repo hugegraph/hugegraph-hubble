@@ -1375,7 +1375,7 @@ export class DataAnalyzeStore {
       >> = yield axios.put<responseData<GraphNode | GraphEdge>>(
         `${baseUrl}/${this.currentId}/graph/${
           this.graphInfoDataSet === 'node' ? 'vertex' : 'edge'
-        }/${id}`,
+        }/${encodeURIComponent(id)}`,
         {
           id,
           label,
