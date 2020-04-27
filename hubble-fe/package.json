@@ -8,7 +8,7 @@
     "url": "https://github.com/hugegraph/hugegraph-hubble"
   },
   "dependencies": {
-    "@baidu/one-ui": "^3.0.14-beta-04",
+    "@baidu/one-ui": "3.0.14-beta-45",
     "@types/classnames": "^2.2.9",
     "@types/codemirror": "^0.0.85",
     "@types/d3": "^5.7.2",

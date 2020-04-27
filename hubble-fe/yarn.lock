@@ -1284,12 +1284,18 @@
   dependencies:
     kolor "^1.1.9"
 
-"@baidu/one-ui@^3.0.14-beta-04":
-  version "3.0.14-beta-37"
-  resolved "http://registry.npm.baidu-int.com/@baidu%2fone-ui/-/one-ui-3.0.14-beta-37.tgz#ff12ff0cd599ba88100c4fb2ac60e23ad923d057"
-  integrity sha512-9k5hg24akUfRDjX5TpHJEuhl39XRtrTlx7+HLdYA+yM5xLwHY1c1U81QZV4NZZ0SC4+jAfiWOndPfFEjYQRrAA==
+"@baidu/one-ui-icon@1.5.0":
+  version "1.5.0"
+  resolved "http://registry.npm.baidu-int.com/@baidu%2fone-ui-icon/-/one-ui-icon-1.5.0.tgz#691b525d4e828c1b94b298dbcb23655482a71db4"
+  integrity sha512-fUQwgRaEhP9sVgMhsSRaeK/6AUbd8TSlOLB4EZ3x+qEYdH3AXxmE6jRaH1k+7jdcFh8fWP44osChJcvYjVfD1Q==
+
+"@baidu/one-ui@3.0.14-beta-45":
+  version "3.0.14-beta-45"
+  resolved "http://registry.npm.baidu-int.com/@baidu%2fone-ui/-/one-ui-3.0.14-beta-45.tgz#6c8f457ea01da8149929ca14f687d9e297ff3dac"
+  integrity sha512-dM57uRDznhRYX4WOOdXnPOfvvwp64Z7ei6oheT7HL3VSb/XhWnwrAGmvzmSSK8ElVwVNOFEOkURiOgISQg3QJA==
   dependencies:
     "@baidu/color-palette" "^0.0.5"
+    "@baidu/one-ui-icon" "1.5.0"
     array-tree-filter "^2.1.0"
     async-validator "^2.0.0"
     classnames "^2.2.5"
@@ -1297,9 +1303,10 @@
     create-react-class "^15.6.3"
     create-react-context "^0.2.3"
     css-animation "^1.4.1"
+    dayjs "^1.8.16"
     dom-closest "^0.2.0"
     dom-scroll-into-view "^1.2.1"
-    less-plugin-dls "^0.16.3"
+    less-plugin-dls "^0.26.0"
     lodash "^4.17.4"
     mini-store "^2.0.0"
     moment "^2.22.2"
@@ -1318,7 +1325,6 @@
     rc-switch "1.6.0"
     rc-tooltip "^3.7.3"
     rc-tree "^1.14.8"
-    rc-upload "^2.6.0"
     rc-util "^4.6.0"
     react-is "^16.8.6"
     react-lifecycles-compat "^3.0.4"
@@ -2535,6 +2541,11 @@ aproba@^1.1.1:
   version "1.2.0"
   resolved "http://registry.npm.baidu-int.com/aproba/-/aproba-1.2.0.tgz#6802e6264efd18c790a1b0d517f0f2627bf2c94a"
   integrity sha1-aALmJk79GMeQobDVF/DyYnvyyUo=
+
+arg@^4.1.1:
+  version "4.1.3"
+  resolved "http://registry.npm.baidu-int.com/arg/-/arg-4.1.3.tgz#269fc7ad5b8e42cb63c896d5666017261c144089"
+  integrity sha1-Jp/HrVuOQstjyJbVZmAXJhwUQIk=
 
 argparse@^1.0.7:
   version "1.0.10"
@@ -4241,6 +4252,11 @@ date-fns@^1.27.2:
   resolved "http://registry.npm.baidu-int.com/date-fns/-/date-fns-1.30.1.tgz#2e71bf0b119153dbb4cc4e88d9ea5acfb50dc05c"
   integrity sha1-LnG/CxGRU9u0zE6I2epaz7UNwFw=
 
+dayjs@^1.8.16:
+  version "1.8.25"
+  resolved "http://registry.npm.baidu-int.com/dayjs/-/dayjs-1.8.25.tgz#d09a8696cee7191bc1289e739f96626391b9c73c"
+  integrity sha1-0JqGls7nGRvBKJ5zn5ZiY5G5xzw=
+
 debug@2.6.9, debug@^2.2.0, debug@^2.3.3, debug@^2.6.0, debug@^2.6.9:
   version "2.6.9"
   resolved "http://registry.npm.baidu-int.com/debug/-/debug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
@@ -4967,6 +4983,11 @@ eslint@^6.6.0:
     text-table "^0.2.0"
     v8-compile-cache "^2.0.3"
 
+esm@^3.2.25:
+  version "3.2.25"
+  resolved "http://registry.npm.baidu-int.com/esm/-/esm-3.2.25.tgz#342c18c29d56157688ba5ce31f8431fbb795cc10"
+  integrity sha1-NCwYwp1WFXaIulzjH4Qx+7eVzBA=
+
 espree@^6.1.2:
   version "6.1.2"
   resolved "http://registry.npm.baidu-int.com/espree/-/espree-6.1.2.tgz#6c272650932b4f91c3714e5e7b5f5e2ecf47262d"
@@ -5219,7 +5240,7 @@ fast-glob@^2.0.2:
     merge2 "^1.2.3"
     micromatch "^3.1.10"
 
-fast-glob@^3.1.1:
+fast-glob@^3.0.4, fast-glob@^3.1.1:
   version "3.2.2"
   resolved "http://registry.npm.baidu-int.com/fast-glob/-/fast-glob-3.2.2.tgz#ade1a9d91148965d4bf7c51f72e1ca662d32e63d"
   integrity sha1-reGp2RFIll1L98UfcuHKZi0y5j0=
@@ -7469,10 +7490,15 @@ less-loader@^5.0.0:
     loader-utils "^1.1.0"
     pify "^4.0.1"
 
-less-plugin-dls@^0.16.3:
-  version "0.16.3"
-  resolved "http://registry.npm.baidu-int.com/less-plugin-dls/-/less-plugin-dls-0.16.3.tgz#b9d280dbbfe84ba9877611e136ca94d39969743f"
-  integrity sha512-z2Q9mWr1Opa+C6JQUXUB8zYpPrNXU5N9i1q+SxnzdiEsuvBIpKj+ruV6t4WbF5RFbL5jjTWkRS7oOTd0EBLpQw==
+less-plugin-dls@^0.26.0:
+  version "0.26.8"
+  resolved "http://registry.npm.baidu-int.com/less-plugin-dls/-/less-plugin-dls-0.26.8.tgz#ce8900de0f743d8392bf7af1d7031c65787b8aca"
+  integrity sha1-zokA3g90PYOSv3rx1wMcZXh7iso=
+  dependencies:
+    arg "^4.1.1"
+    esm "^3.2.25"
+    fast-glob "^3.0.4"
+    pkg-dir "^4.2.0"
 
 less@^3.9.0:
   version "3.11.1"
@@ -9051,7 +9077,7 @@ pkg-dir@^3.0.0:
   dependencies:
     find-up "^3.0.0"
 
-pkg-dir@^4.1.0:
+pkg-dir@^4.1.0, pkg-dir@^4.2.0:
   version "4.2.0"
   resolved "http://registry.npm.baidu-int.com/pkg-dir/-/pkg-dir-4.2.0.tgz#f099133df7ede422e81d1d8448270eeb3e4261f3"
   integrity sha1-8JkTPfft5CLoHR2ESCcO6z5CYfM=
@@ -9946,7 +9972,7 @@ prompts@^2.0.1:
     kleur "^3.0.3"
     sisteransi "^1.0.4"
 
-prop-types@15.x, prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.5.6, prop-types@^15.5.7, prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.1, prop-types@^15.6.2, prop-types@^15.7.2:
+prop-types@15.x, prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.5.6, prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.1, prop-types@^15.6.2, prop-types@^15.7.2:
   version "15.7.2"
   resolved "http://registry.npm.baidu-int.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
   integrity sha1-UsQedbjIfnK52TYOAga5ncv/psU=
@@ -10285,16 +10311,6 @@ rc-trigger@^2.2.2, rc-trigger@^2.3.0, rc-trigger@^2.5.1:
     rc-animate "2.x"
     rc-util "^4.4.0"
     react-lifecycles-compat "^3.0.4"
-
-rc-upload@^2.6.0:
-  version "2.8.0"
-  resolved "http://registry.npm.baidu-int.com/rc-upload/-/rc-upload-2.8.0.tgz#9ab209380113c2c05c24bcbe6cca87e0fac1011e"
-  integrity sha512-FL6Q5XLbcwvGwdSen1rz5UUYlEpcx45/nAWvRA0S7ilelLj1I1/+E1u36c2EDr1Ik8zMKKZpvrbWsAeVMet1xA==
-  dependencies:
-    babel-runtime "6.x"
-    classnames "^2.2.5"
-    prop-types "^15.5.7"
-    warning "4.x"
 
 rc-util@^4.0.4, rc-util@^4.1.0, rc-util@^4.4.0, rc-util@^4.5.0, rc-util@^4.5.1, rc-util@^4.6.0, rc-util@^4.7.0, rc-util@^4.8.0:
   version "4.11.0"
@@ -12717,17 +12733,17 @@ walker@^1.0.7, walker@~1.0.5:
   dependencies:
     makeerror "1.0.x"
 
-warning@4.x, warning@^4.0.2, warning@^4.0.3:
-  version "4.0.3"
-  resolved "http://registry.npm.baidu-int.com/warning/-/warning-4.0.3.tgz#16e9e077eb8a86d6af7d64aa1e05fd85b4678ca3"
-  integrity sha1-Fungd+uKhtavfWSqHgX9hbRnjKM=
-  dependencies:
-    loose-envify "^1.0.0"
-
 warning@^3.0.0:
   version "3.0.0"
   resolved "http://registry.npm.baidu-int.com/warning/-/warning-3.0.0.tgz#32e5377cb572de4ab04753bdf8821c01ed605b7c"
   integrity sha1-MuU3fLVy3kqwR1O9+IIcAe1gW3w=
+  dependencies:
+    loose-envify "^1.0.0"
+
+warning@^4.0.2, warning@^4.0.3:
+  version "4.0.3"
+  resolved "http://registry.npm.baidu-int.com/warning/-/warning-4.0.3.tgz#16e9e077eb8a86d6af7d64aa1e05fd85b4678ca3"
+  integrity sha1-Fungd+uKhtavfWSqHgX9hbRnjKM=
   dependencies:
     loose-envify "^1.0.0"
 
