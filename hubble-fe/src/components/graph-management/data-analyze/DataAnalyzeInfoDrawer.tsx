@@ -88,6 +88,22 @@ const DataAnalyzeInfoDrawer: React.FC = observer(() => {
               }
             }
 
+            if (
+              dataAnalyzeStore.requestStatus.updateGraphProperties === 'success'
+            ) {
+              Message.success({
+                content: '保存成功',
+                size: 'medium',
+                showCloseIcon: false
+              });
+            } else {
+              Message.error({
+                content: '保存失败',
+                size: 'medium',
+                showCloseIcon: false
+              });
+            }
+
             handleDrawerClose();
           }}
         >
