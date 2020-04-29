@@ -92,6 +92,20 @@ const DataAnalyzeAddNode: React.FC = observer(() => {
             const newGraphNodes = await dataAnalyzeStore.addGraphNode();
 
             if (!isUndefined(newGraphNodes)) {
+              const node = dataAnalyzeStore.visDataSet?.nodes.get(
+                newGraphNodes[0].id
+              );
+
+              if (node !== null) {
+                dataAnalyzeStore.visNetwork?.selectNodes([node.id]);
+                dataAnalyzeStore.visNetwork?.focus(node.id, {
+                  animation: true
+                });
+
+                handleDrawerClose();
+                return;
+              }
+
               newGraphNodes.forEach(({ id, label, properties }) => {
                 dataAnalyzeStore.visDataSet?.nodes.add({
                   id,
