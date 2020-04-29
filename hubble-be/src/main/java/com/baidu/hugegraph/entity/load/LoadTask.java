@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.entity.load;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ import com.baidu.hugegraph.loader.HugeGraphLoader;
 import com.baidu.hugegraph.loader.executor.LoadContext;
 import com.baidu.hugegraph.loader.executor.LoadOptions;
 import com.baidu.hugegraph.util.Ex;
+import com.baidu.hugegraph.util.HubbleUtil;
 import com.baidu.hugegraph.util.SerializeUtil;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -53,9 +55,9 @@ import lombok.extern.log4j.Log4j2;
 @AllArgsConstructor
 @Builder
 @TableName(value = "load_task", autoResultMap = true)
-@JsonPropertyOrder({"id", "conn_id", "file_id", "vertices", "edges", "load_rate",
-                    "load_progress", "file_total_lines", "file_read_lines",
-                    "status", "duration"})
+@JsonPropertyOrder({"id", "conn_id", "file_id", "file_name", "vertices", "edges",
+                    "load_rate", "load_progress", "file_total_lines",
+                    "file_read_lines", "status", "duration", "create_time"})
 public class LoadTask implements Runnable {
 
     @TableField(exist = false)
@@ -76,6 +78,11 @@ public class LoadTask implements Runnable {
     @MergeProperty
     @JsonProperty("file_id")
     private Integer fileId;
+
+    @TableField(value = "file_name")
+    @MergeProperty
+    @JsonProperty("file_name")
+    private String fileName;
 
     @TableField(value = "options", typeHandler = JacksonTypeHandler.class)
     @MergeProperty
@@ -113,12 +120,17 @@ public class LoadTask implements Runnable {
     @JsonSerialize(using = SerializeUtil.DurationSerializer.class)
     private Long duration;
 
+    @MergeProperty(useNew = false)
+    @JsonProperty("create_time")
+    private Date createTime;
+
     public LoadTask(LoadOptions options, GraphConnection connection,
                     FileMapping mapping) {
         this.loader = new HugeGraphLoader(options);
         this.id = null;
         this.connId = connection.getId();
         this.fileId = mapping.getId();
+        this.fileName = mapping.getName();
         this.options = options;
         if (mapping.getVertexMappings() != null) {
             this.vertices = mapping.getVertexMappings().stream()
@@ -138,6 +150,7 @@ public class LoadTask implements Runnable {
         this.fileReadLines = 0L;
         this.status = LoadStatus.RUNNING;
         this.duration = 0L;
+        this.createTime = HubbleUtil.nowDate();
     }
 
     @Override
@@ -160,7 +173,7 @@ public class LoadTask implements Runnable {
             }
         }
         this.fileReadLines = this.context().newProgress().totalInputReaded();
-        this.duration = this.context().summary().totalTime();
+        this.duration += this.context().summary().totalTime();
     }
 
     public void restoreContext() {
@@ -179,17 +192,20 @@ public class LoadTask implements Runnable {
             this.fileTotalLines == 0) {
             return 0;
         } else {
-            return (int) (this.fileReadLines / this.fileTotalLines) * 100;
+            return (int) ((double) this.fileReadLines / this.fileTotalLines * 100);
         }
     }
 
     @JsonProperty("load_rate")
-    public float getLoadRate() {
+    public String getLoadRate() {
+        float rate;
         if (this.fileReadLines == null || this.duration == null ||
             this.duration == 0L) {
-            return 0;
+            rate = 0;
         } else {
-            return this.fileReadLines * 1000.0F / this.duration;
+            rate = this.fileReadLines * 1000.0F / this.duration;
+            rate = Math.round(rate * 1000) / 1000.0F;
         }
+        return String.format("%s/s", rate);
     }
 }

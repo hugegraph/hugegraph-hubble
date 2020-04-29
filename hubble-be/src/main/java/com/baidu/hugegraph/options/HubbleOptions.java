@@ -28,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 import com.baidu.hugegraph.config.ConfigListOption;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
+import com.baidu.hugegraph.util.Bytes;
 import com.baidu.hugegraph.util.HubbleUtil;
 
 public class HubbleOptions extends OptionHolder {
@@ -174,19 +175,19 @@ public class HubbleOptions extends OptionHolder {
                     "csv"
             );
 
-    public static final ConfigOption<Integer> UPLOAD_SINGLE_FILE_SIZE_LIMIT =
+    public static final ConfigOption<Long> UPLOAD_SINGLE_FILE_SIZE_LIMIT =
             new ConfigOption<>(
                     "upload_single_file.size.limit",
                     "The single file size(MB) limit.",
                     positiveInt(),
-                    1024
+                    1 * Bytes.GB
             );
 
-    public static final ConfigOption<Integer> UPLOAD_TOTAL_FILE_SIZE_LIMIT =
+    public static final ConfigOption<Long> UPLOAD_TOTAL_FILE_SIZE_LIMIT =
             new ConfigOption<>(
                     "upload_total_file.size.limit",
                     "The total file size(MB) limit.",
                     positiveInt(),
-                    10240
+                    10 * Bytes.GB
             );
 }

@@ -48,6 +48,7 @@ import com.baidu.hugegraph.options.HubbleOptions;
 import com.baidu.hugegraph.service.load.FileMappingService;
 import com.baidu.hugegraph.util.Ex;
 import com.baidu.hugegraph.util.FileUtil;
+import com.baidu.hugegraph.util.HubbleUtil;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -64,11 +65,12 @@ public class FileUploadController {
     @PostMapping
     public FileUploadResult upload(@PathVariable("connId") int connId,
                                    @RequestParam("file") MultipartFile file,
+                                   @RequestParam("name") String fileName,
                                    @RequestParam("total") int total,
                                    @RequestParam("index") int index) {
-        this.checkFileValid(connId, file);
-        // vertex_person.csv
-        String fileName = file.getOriginalFilename();
+        // When front-end use multipart-upload mode,
+        // file.getOriginalFilename() is blob, not actual file name
+        this.checkFileValid(connId, file, fileName);
 
         String location = this.config.get(HubbleOptions.UPLOAD_FILE_LOCATION);
         this.ensureLocationExist(location, CONN_PREIFX + connId);
@@ -90,6 +92,8 @@ public class FileUploadController {
             // Read column names and values then fill it
             this.service.extractColumns(mapping);
             mapping.setTotalLines(FileUtil.countLines(mapping.getPath()));
+            mapping.setTotalSize(FileUtils.sizeOf(new File(mapping.getPath())));
+            mapping.setCreateTime(HubbleUtil.nowDate());
             // Will generate mapping id
             if (this.service.save(mapping) != 1) {
                 throw new InternalException("entity.insert.failed", mapping);
@@ -119,30 +123,50 @@ public class FileUploadController {
             File destFile = new File(mapping.getPath());
             boolean deleted = destFile.delete();
             if (deleted) {
+                log.info("deleted file {}, prepare to remove file mapping {}",
+                         destFile, mapping.getId());
                 if (this.service.remove(mapping.getId()) != 1) {
                     throw new InternalException("entity.delete.failed", mapping);
                 }
+                log.info("removed file mapping {}", mapping.getId());
             }
             result.put(fileName, deleted);
         }
         return result;
     }
 
-    private void checkFileValid(int connId, MultipartFile file) {
+    private void checkFileValid(int connId, MultipartFile file, String fileName) {
         // Now allowed to upload empty file
         Ex.check(!file.isEmpty(), "load.upload.file.cannot-be-empty");
         // Difficult: how to determine whether the file is csv or text
         log.info("File content type: {}", file.getContentType());
 
-        String fileName = file.getOriginalFilename();
         String format = FilenameUtils.getExtension(fileName);
         List<String> formatWhiteList = this.config.get(
                                        HubbleOptions.UPLOAD_FILE_FORMAT_LIST);
         Ex.check(formatWhiteList.contains(format),
                  "load.upload.file.format.unsupported");
 
+        long fileSize = file.getSize();
+        long singleFileSizeLimit = this.config.get(
+                                   HubbleOptions.UPLOAD_SINGLE_FILE_SIZE_LIMIT);
+        Ex.check(fileSize <= singleFileSizeLimit,
+                 "load.upload.file.exceed-single-size",
+                 FileUtils.byteCountToDisplaySize(singleFileSizeLimit));
+
+        // Check is there a file with the same name
         FileMapping oldMapping = this.service.get(connId, fileName);
         Ex.check(oldMapping == null, "load.upload.file.existed", fileName);
+
+        long totalFileSizeLimit = this.config.get(
+                                  HubbleOptions.UPLOAD_TOTAL_FILE_SIZE_LIMIT);
+        List<FileMapping> fileMappings = this.service.listAll();
+        long currentTotalSize = fileMappings.stream()
+                                            .map(FileMapping::getTotalSize)
+                                            .reduce(0L, (Long::sum));
+        Ex.check(fileSize + currentTotalSize <= totalFileSizeLimit,
+                 "load.upload.file.exceed-single-size",
+                 FileUtils.byteCountToDisplaySize(totalFileSizeLimit));
     }
 
     private void ensureLocationExist(String location, String connPath) {

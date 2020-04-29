@@ -23,8 +23,11 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import com.baidu.hugegraph.annotation.MergeProperty;
 import com.baidu.hugegraph.handler.EdgeMappingTypeHandler;
 import com.baidu.hugegraph.handler.VertexMappingTypeHandler;
+import com.baidu.hugegraph.util.HubbleUtil;
+import com.baidu.hugegraph.util.SerializeUtil;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -32,6 +35,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -67,6 +71,11 @@ public class FileMapping {
     @JsonProperty("total_lines")
     private long totalLines;
 
+    @TableField("total_size")
+    @JsonProperty("total_size")
+    @JsonSerialize(using = SerializeUtil.SizeSerializer.class)
+    private long totalSize;
+
     @TableField(value = "file_setting", typeHandler = JacksonTypeHandler.class)
     @JsonProperty("file_setting")
     private FileSetting fileSetting;
@@ -90,8 +99,12 @@ public class FileMapping {
     @JsonProperty("last_access_time")
     private Date lastAccessTime;
 
+    @MergeProperty(useNew = false)
+    @JsonProperty("create_time")
+    private Date createTime;
+
     public FileMapping(int connId, String name, String path) {
-        this(connId, name, path, new Date());
+        this(connId, name, path, HubbleUtil.nowDate());
     }
 
     public FileMapping(int connId, String name, String path,
@@ -105,6 +118,7 @@ public class FileMapping {
         this.edgeMappings = new LinkedHashSet<>();
         this.loadParameter = new LoadParameter();
         this.lastAccessTime = lastAccessTime;
+        this.createTime = HubbleUtil.nowDate();
     }
 
     public VertexMapping getVertexMapping(String vmId) {

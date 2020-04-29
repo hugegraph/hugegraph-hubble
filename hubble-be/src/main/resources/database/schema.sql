@@ -52,11 +52,13 @@ CREATE TABLE IF NOT EXISTS `file_mapping` (
     `name` VARCHAR(128) NOT NULL,
     `path` VARCHAR(256) NOT NULL,
     `total_lines` LONG NOT NULL,
+    `total_size` LONG NOT NULL,
     `file_setting` VARCHAR(65535) NOT NULL,
     `vertex_mappings` VARCHAR(65535) NOT NULL,
     `edge_mappings` VARCHAR(65535) NOT NULL,
     `load_parameter` VARCHAR(65535) NOT NULL,
     `last_access_time` DATETIME(6) NOT NULL,
+    `create_time` DATETIME(6) NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE (`conn_id`, `name`)
 );
@@ -66,6 +68,7 @@ CREATE TABLE IF NOT EXISTS `load_task` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `conn_id` INT NOT NULL,
     `file_id` INT NOT NULL,
+    `file_name` VARCHAR(128) NOT NULL,
     `options` VARCHAR(65535) NOT NULL,
     `vertices` VARCHAR(512) NOT NULL,
     `edges` VARCHAR(512) NOT NULL,
@@ -73,6 +76,7 @@ CREATE TABLE IF NOT EXISTS `load_task` (
     `file_read_lines` LONG NOT NULL,
     `load_status` TINYINT NOT NULL,
     `duration` LONG NOT NULL,
+    `create_time` DATETIME(6) NOT NULL,
     PRIMARY KEY (`id`)
 );
 CREATE INDEX IF NOT EXISTS `load_task_conn_id` ON `load_task`(`conn_id`);

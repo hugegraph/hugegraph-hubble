@@ -42,16 +42,10 @@ public class EdgeEntity implements Identifiable {
     private String label;
 
     @JsonProperty("source")
-    private Object sourceId;
+    private String sourceId;
 
     @JsonProperty("target")
-    private Object targetId;
-
-    @JsonProperty("source_label")
-    private String sourceLabel;
-
-    @JsonProperty("target_label")
-    private String targetLabel;
+    private String targetId;
 
     @JsonProperty("properties")
     private Map<String, Object> properties;

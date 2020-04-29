@@ -143,10 +143,10 @@ public class GremlinQueryService {
             Edge edge = (Edge) objects.get(1);
             Vertex vertex = (Vertex) objects.get(2);
             // Filter vertices and edges that existed in query
-            if (!query.getAdjacentEdges().contains(edge.id())) {
+            if (query.retainEdge(edge)) {
                 edges.add(edge);
             }
-            if (!query.getAdjacentVertices().contains(vertex.id().toString())) {
+            if (query.retainVertex(vertex)) {
                 vertices.add(vertex);
             }
         }

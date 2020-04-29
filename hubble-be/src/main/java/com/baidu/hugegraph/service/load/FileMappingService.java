@@ -81,7 +81,8 @@ public class FileMappingService {
 
     public IPage<FileMapping> list(int connId, int pageNo, int pageSize) {
         QueryWrapper<FileMapping> query = Wrappers.query();
-        query.eq("conn_id", connId).orderByDesc("name");
+        query.eq("conn_id", connId);
+        query.orderByDesc("create_time");
         Page<FileMapping> page = new Page<>(pageNo, pageSize);
         return this.mapper.selectPage(page, query);
     }
@@ -119,9 +120,9 @@ public class FileMappingService {
         FileUploadResult result = new FileUploadResult();
         result.setName(fileName);
         result.setSize(srcFile.getSize());
-        try (InputStream is = srcFile.getInputStream();
-             OutputStream os = new FileOutputStream(destFile)) {
-            IOUtils.copy(is, os);
+        try {
+            // transferTo should accept absolute path
+            srcFile.transferTo(destFile.getAbsoluteFile());
             result.setStatus(FileUploadResult.Status.SUCCESS);
         } catch (Exception e) {
             log.error("Failed to save upload file and insert file mapping " +
@@ -242,7 +243,7 @@ public class FileMappingService {
     public String moveToNextLevelDir(FileMapping mapping) {
         File currFile = new File(mapping.getPath());
         String destPath = Paths.get(currFile.getParentFile().getAbsolutePath(),
-                                    FILE_PREIFX + mapping.getConnId())
+                                    FILE_PREIFX + mapping.getId())
                                .toString();
         File destDir = new File(destPath);
         try {

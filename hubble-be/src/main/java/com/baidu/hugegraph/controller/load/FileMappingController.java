@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.controller.load;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.controller.BaseController;
 import com.baidu.hugegraph.entity.load.EdgeMapping;
+import com.baidu.hugegraph.entity.load.ElementMapping;
 import com.baidu.hugegraph.entity.load.FileMapping;
 import com.baidu.hugegraph.entity.load.FileSetting;
 import com.baidu.hugegraph.entity.load.LoadParameter;
@@ -60,11 +62,11 @@ import lombok.extern.log4j.Log4j2;
 public class FileMappingController extends BaseController {
 
     @Autowired
-    private FileMappingService service;
-    @Autowired
     private VertexLabelService vlService;
     @Autowired
     private EdgeLabelService elService;
+    @Autowired
+    private FileMappingService service;
 
     @GetMapping
     public IPage<FileMapping> list(@PathVariable("connId") int connId,
@@ -143,16 +145,11 @@ public class FileMappingController extends BaseController {
     public FileMapping addVertexMapping(@PathVariable("connId") int connId,
                                         @PathVariable("id") int id,
                                         @RequestBody VertexMapping newEntity) {
-        VertexLabelEntity vl = this.vlService.get(newEntity.getLabel(), connId);
-        Ex.check(!vl.getIdStrategy().isAutomatic(),
-                 "load.file-mapping.vertex-mapping.automatic-id-unsupported");
-        Ex.check(!CollectionUtils.isEmpty(newEntity.getIdFields()),
-                 "load.file-mapping.vertex-mapping.id-fields-cannot-be-empty");
-
         FileMapping mapping = this.service.get(id);
         if (mapping == null) {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
+        this.checkVertexMappingValid(connId, newEntity, mapping);
 
         newEntity.setId(HubbleUtil.generateSimpleId());
         mapping.getVertexMappings().add(newEntity);
@@ -167,23 +164,20 @@ public class FileMappingController extends BaseController {
                                            @PathVariable("id") int id,
                                            @PathVariable("vmid") String vmId,
                                            @RequestBody VertexMapping newEntity) {
-        VertexLabelEntity vl = this.vlService.get(newEntity.getLabel(), connId);
-        Ex.check(!vl.getIdStrategy().isAutomatic(),
-                 "load.file-mapping.vertex-mapping.automatic-id-unsupported");
-        Ex.check(!CollectionUtils.isEmpty(newEntity.getIdFields()),
-                 "load.file-mapping.vertex-mapping.id-fields-cannot-be-empty");
-
         FileMapping mapping = this.service.get(id);
         if (mapping == null) {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
+        this.checkVertexMappingValid(connId, newEntity, mapping);
 
         VertexMapping vertexMapping = mapping.getVertexMapping(vmId);
         Ex.check(vertexMapping != null,
                  "load.file-mapping.vertex-mapping.not-exist.id", vmId);
 
         newEntity.setId(vmId);
-        mapping.getVertexMappings().add(newEntity);
+        Set<VertexMapping> vertexMappings = mapping.getVertexMappings();
+        vertexMappings.remove(vertexMapping);
+        vertexMappings.add(newEntity);
         if (this.service.update(mapping) != 1) {
             throw new InternalException("entity.update.failed", mapping);
         }
@@ -214,22 +208,11 @@ public class FileMappingController extends BaseController {
     public FileMapping addEdgeMapping(@PathVariable("connId") int connId,
                                       @PathVariable("id") int id,
                                       @RequestBody EdgeMapping newEntity) {
-        EdgeLabelEntity el = this.elService.get(newEntity.getLabel(), connId);
-        VertexLabelEntity source = this.vlService.get(el.getSourceLabel(), connId);
-        VertexLabelEntity target = this.vlService.get(el.getTargetLabel(), connId);
-        Ex.check(!source.getIdStrategy().isAutomatic(),
-                 "load.file-mapping.vertex-mapping.automatic-id-unsupported");
-        Ex.check(!target.getIdStrategy().isAutomatic(),
-                 "load.file-mapping.vertex-mapping.automatic-id-unsupported");
-        Ex.check(!CollectionUtils.isEmpty(newEntity.getSourceFields()),
-                 "load.file-mapping.edge-mapping.source-fields-cannot-be-empty");
-        Ex.check(!CollectionUtils.isEmpty(newEntity.getSourceFields()),
-                 "load.file-mapping.edge-mapping.target-fields-cannot-be-empty");
-
         FileMapping mapping = this.service.get(id);
         if (mapping == null) {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
+        this.checkEdgeMappingValid(connId, newEntity, mapping);
 
         newEntity.setId(HubbleUtil.generateSimpleId());
         mapping.getEdgeMappings().add(newEntity);
@@ -244,29 +227,20 @@ public class FileMappingController extends BaseController {
                                          @PathVariable("id") int id,
                                          @PathVariable("emid") String emId,
                                          @RequestBody EdgeMapping newEntity) {
-        EdgeLabelEntity el = this.elService.get(newEntity.getLabel(), connId);
-        VertexLabelEntity source = this.vlService.get(el.getSourceLabel(), connId);
-        VertexLabelEntity target = this.vlService.get(el.getTargetLabel(), connId);
-        Ex.check(!source.getIdStrategy().isAutomatic(),
-                 "load.file-mapping.vertex-mapping.automatic-id-unsupported");
-        Ex.check(!target.getIdStrategy().isAutomatic(),
-                 "load.file-mapping.vertex-mapping.automatic-id-unsupported");
-        Ex.check(!CollectionUtils.isEmpty(newEntity.getSourceFields()),
-                 "load.file-mapping.edge-mapping.source-fields-cannot-be-empty");
-        Ex.check(!CollectionUtils.isEmpty(newEntity.getSourceFields()),
-                 "load.file-mapping.edge-mapping.target-fields-cannot-be-empty");
-
         FileMapping mapping = this.service.get(id);
         if (mapping == null) {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
+        this.checkEdgeMappingValid(connId, newEntity, mapping);
 
         EdgeMapping edgeMapping = mapping.getEdgeMapping(emId);
         Ex.check(edgeMapping != null,
                  "load.file-mapping.edge-mapping.not-exist.id", emId);
 
         newEntity.setId(emId);
-        mapping.getEdgeMappings().add(newEntity);
+        Set<EdgeMapping> edgeMappings = mapping.getEdgeMappings();
+        edgeMappings.remove(edgeMapping);
+        edgeMappings.add(newEntity);
         if (this.service.update(mapping) != 1) {
             throw new InternalException("entity.update.failed", mapping);
         }
@@ -307,6 +281,64 @@ public class FileMappingController extends BaseController {
             if (this.service.update(mapping) != 1) {
                 throw new InternalException("entity.update.failed", mapping);
             }
+        }
+    }
+
+    private void checkVertexMappingValid(int connId, VertexMapping vertexMapping,
+                                         FileMapping fileMapping) {
+        VertexLabelEntity vl = this.vlService.get(vertexMapping.getLabel(),
+                                                  connId);
+        Ex.check(!vl.getIdStrategy().isAutomatic(),
+                 "load.file-mapping.vertex.automatic-id-unsupported");
+
+        Ex.check(!CollectionUtils.isEmpty(vertexMapping.getIdFields()),
+                 "load.file-mapping.vertex.id-fields-cannot-be-empty");
+        FileSetting fileSetting = fileMapping.getFileSetting();
+        List<String> columnNames = fileSetting.getColumnNames();
+        Ex.check(columnNames.containsAll(vertexMapping.getIdFields()),
+                 "load.file-mapping.vertex.id-fields-should-in-column-names",
+                 vertexMapping.getIdFields(), columnNames);
+        this.checkMappingValid(vertexMapping, fileMapping);
+    }
+
+    private void checkEdgeMappingValid(int connId, EdgeMapping edgeMapping,
+                                       FileMapping fileMapping) {
+        EdgeLabelEntity el = this.elService.get(edgeMapping.getLabel(), connId);
+        VertexLabelEntity source = this.vlService.get(el.getSourceLabel(), connId);
+        VertexLabelEntity target = this.vlService.get(el.getTargetLabel(), connId);
+        Ex.check(!source.getIdStrategy().isAutomatic(),
+                 "load.file-mapping.vertex.automatic-id-unsupported");
+        Ex.check(!target.getIdStrategy().isAutomatic(),
+                 "load.file-mapping.vertex.automatic-id-unsupported");
+
+        Ex.check(!CollectionUtils.isEmpty(edgeMapping.getSourceFields()),
+                 "load.file-mapping.edge.source-fields-cannot-be-empty");
+        Ex.check(!CollectionUtils.isEmpty(edgeMapping.getTargetFields()),
+                 "load.file-mapping.edge.target-fields-cannot-be-empty");
+        FileSetting fileSetting = fileMapping.getFileSetting();
+        List<String> columnNames = fileSetting.getColumnNames();
+        Ex.check(columnNames.containsAll(edgeMapping.getSourceFields()),
+                 "load.file-mapping.edge.source-fields-should-in-column-names",
+                 edgeMapping.getSourceFields(), columnNames);
+        Ex.check(columnNames.containsAll(edgeMapping.getTargetFields()),
+                 "load.file-mapping.edge.target-fields-should-in-column-names",
+                 edgeMapping.getTargetFields(), columnNames);
+        this.checkMappingValid(edgeMapping, fileMapping);
+    }
+
+    private void checkMappingValid(ElementMapping elementMapping,
+                                   FileMapping fileMapping) {
+        FileSetting fileSetting = fileMapping.getFileSetting();
+        List<String> columnNames = fileSetting.getColumnNames();
+        if (elementMapping.getFieldMappings() != null) {
+            Set<String> keys = elementMapping.fieldMappingToMap().keySet();
+            Ex.check(columnNames.containsAll(keys),
+                     "load.file-mapping.field.keys-should-in-column-names");
+        }
+        if (elementMapping.getValueMappings() != null) {
+            Set<String> keys = elementMapping.valueMappingToMap().keySet();
+            Ex.check(columnNames.containsAll(keys),
+                     "load.file-mapping.value.keys-should-in-column-names");
         }
     }
 }

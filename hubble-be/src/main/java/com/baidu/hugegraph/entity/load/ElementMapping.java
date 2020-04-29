@@ -56,7 +56,7 @@ public abstract class ElementMapping implements Mergeable {
     @JsonProperty("null_values")
     private NullValues nullValues;
 
-    public Map<String, String> filedMappingToMap() {
+    public Map<String, String> fieldMappingToMap() {
         Map<String, String> map = new LinkedHashMap<>();
         if (this.fieldMappings == null) {
             return map;

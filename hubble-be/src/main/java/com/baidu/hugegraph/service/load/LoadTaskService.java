@@ -20,8 +20,10 @@
 package com.baidu.hugegraph.service.load;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -104,8 +107,13 @@ public class LoadTaskService {
     public IPage<LoadTask> list(int connId, int pageNo, int pageSize) {
         QueryWrapper<LoadTask> query = Wrappers.query();
         query.eq("conn_id", connId);
+        query.orderByDesc("create_time");
         Page<LoadTask> page = new Page<>(pageNo, pageSize);
         return this.mapper.selectPage(page, query);
+    }
+
+    public List<LoadTask> list(int connId, List<Integer> taskIds) {
+        return this.mapper.selectBatchIds(taskIds);
     }
 
     public int count() {
@@ -164,8 +172,9 @@ public class LoadTaskService {
 
     public LoadTask resume(int taskId) {
         LoadTask task = this.get(taskId);
-        Ex.check(task.getStatus() == LoadStatus.PAUSED,
-                 "Can only resume the PAUSED task");
+        Ex.check(task.getStatus() == LoadStatus.PAUSED ||
+                 task.getStatus() == LoadStatus.FAILED,
+                 "Can only resume the PAUSED or FAILED task");
         task.restoreContext();
         task.setStatus(LoadStatus.RUNNING);
         // Set work mode in incrental mode, load from last breakpoint
@@ -219,6 +228,28 @@ public class LoadTaskService {
         }
         this.taskContainer.put(taskId, task);
         return task;
+    }
+
+    public String readLoadFailedReason(FileMapping mapping) {
+        String path = mapping.getPath();
+
+        File parentDir = FileUtils.getFile(path).getParentFile();
+        File failureDataDir = FileUtils.getFile(parentDir, "mapping",
+                                                "failure-data");
+        // list error data file
+        File[] errorFiles = failureDataDir.listFiles((dir, name) -> {
+            return name.endsWith("error");
+        });
+        Ex.check(errorFiles != null && errorFiles.length == 1,
+                 "There should exist one error file, actual is %s",
+                 Arrays.toString(errorFiles));
+        File errorFile = errorFiles[0];
+        try {
+            return FileUtils.readFileToString(errorFile);
+        } catch (IOException e) {
+            throw new InternalException("Failed to read error file %s",
+                                        e, errorFile);
+        }
     }
 
     public void pauseAllTasks() {
@@ -291,6 +322,10 @@ public class LoadTaskService {
         options.maxInsertErrors = parameter.getMaxInsertErrors();
         options.retryTimes = parameter.getRetryTimes();
         options.retryInterval = parameter.getRetryInterval();
+        // Optimized for hubble
+        options.batchInsertThreads = 4;
+        options.singleInsertThreads = 4;
+        options.batchSize = 100;
         return options;
     }
 
@@ -343,7 +378,7 @@ public class LoadTaskService {
         for (VertexMapping mapping : fileMapping.getVertexMappings()) {
             VertexLabelEntity vl = this.vlService.get(mapping.getLabel(), connId);
             List<String> idFields = mapping.getIdFields();
-            Map<String, String> fieldMappings = mapping.filedMappingToMap();
+            Map<String, String> fieldMappings = mapping.fieldMappingToMap();
             com.baidu.hugegraph.loader.mapping.VertexMapping vMapping;
             if (vl.getIdStrategy().isCustomize()) {
                 Ex.check(idFields.size() == 1,
@@ -399,7 +434,7 @@ public class LoadTaskService {
                                                        connId);
             VertexLabelEntity tvl = this.vlService.get(el.getTargetLabel(),
                                                        connId);
-            Map<String, String> fieldMappings = mapping.filedMappingToMap();
+            Map<String, String> fieldMappings = mapping.fieldMappingToMap();
             if (svl.getIdStrategy().isPrimaryKey()) {
                 List<String> primaryKeys = svl.getPrimaryKeys();
                 Ex.check(sourceFields.size() >= 1 &&

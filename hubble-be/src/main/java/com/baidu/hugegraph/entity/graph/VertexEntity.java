@@ -36,7 +36,7 @@ import lombok.NoArgsConstructor;
 public class VertexEntity implements Identifiable {
 
     @JsonProperty("id")
-    private Object id;
+    private String id;
 
     @JsonProperty("label")
     private String label;
