@@ -77,14 +77,57 @@ const DataAnalyzeInfoDrawer: React.FC = observer(() => {
               if (dataAnalyzeStore.graphInfoDataSet === 'node') {
                 dataAnalyzeStore.visDataSet?.nodes.update({
                   id: updatedInfo.id,
-                  properties: updatedInfo.properties
+                  properties: updatedInfo.properties,
+                  title: `
+                    <div class="tooltip-fields">
+                      <div>顶点类型：</div>
+                      <div>${updatedInfo.label}</div>
+                    </div>
+                    <div class="tooltip-fields">
+                      <div>顶点ID：</div>
+                      <div>${updatedInfo.id}</div>
+                    </div>
+                    ${Object.entries(updatedInfo.properties)
+                      .map(([key, value]) => {
+                        return `<div class="tooltip-fields">
+                                  <div>${key}: </div>
+                                  <div>${convertArrayToString(
+                                    value,
+                                    '，'
+                                  )}</div>
+                                </div>`;
+                      })
+                      .join('')}
+                  `
                 });
               }
 
               if (dataAnalyzeStore.graphInfoDataSet === 'edge') {
                 dataAnalyzeStore.visDataSet?.edges.update({
                   id: updatedInfo.id,
-                  properties: updatedInfo.properties
+                  properties: updatedInfo.properties,
+                  title: `
+                      <div class="tooltip-fields">
+                        <div>边类型：</div>
+                        <div>${updatedInfo.label}</div>
+                      </div>
+                      <div class="tooltip-fields">
+                        <div>边ID：</div>
+                        <div>${updatedInfo.id}</div>
+                      </div>
+                      ${Object.entries(updatedInfo.properties)
+                        .map(([key, value]) => {
+                          return `<div class="tooltip-fields">
+                                    <div>${key}: </div>
+                                    <div>${convertArrayToString(
+                                      value,
+                                      '，'
+                                    )}</div>
+                                  </div>
+                                `;
+                        })
+                        .join('')}
+                    `
                 });
               }
             }
@@ -111,7 +154,7 @@ const DataAnalyzeInfoDrawer: React.FC = observer(() => {
           {isEdit ? '保存' : '编辑'}
         </Button>,
         <Button size="medium" style={{ width: 60 }} onClick={handleDrawerClose}>
-          取消
+          关闭
         </Button>
       ]}
     >
