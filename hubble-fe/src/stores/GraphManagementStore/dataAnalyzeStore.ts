@@ -1376,11 +1376,19 @@ export class DataAnalyzeStore {
         `${baseUrl}/${this.currentId}/graph/${
           this.graphInfoDataSet === 'node' ? 'vertex' : 'edge'
         }/${encodeURIComponent(id)}`,
-        {
-          id,
-          label,
-          properties: editedProperties
-        }
+        this.graphInfoDataSet === 'node'
+          ? {
+              id,
+              label,
+              properties: editedProperties
+            }
+          : {
+              id,
+              label,
+              properties: editedProperties,
+              source: this.selectedGraphLinkData.source,
+              target: this.selectedGraphLinkData.target
+            }
       );
 
       if (result.data.status !== 200) {
