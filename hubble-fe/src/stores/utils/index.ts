@@ -50,7 +50,17 @@ export function convertArrayToString(
     : values;
 }
 
-export function validateGraphProperty(type: string, value: string) {
+export function validateGraphProperty(
+  type: string,
+  value: string,
+  premitEmpty: boolean = false
+) {
+  if (premitEmpty) {
+    if (value === '') {
+      return true;
+    }
+  }
+
   switch (type) {
     case 'BOOLEAN':
       return isBoolean(value);

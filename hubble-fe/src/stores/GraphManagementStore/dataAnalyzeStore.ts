@@ -716,7 +716,8 @@ export class DataAnalyzeStore {
         initial ||
         !validateGraphProperty(
           this.valueTypes[key!],
-          this.newGraphNodeConfigs.properties.nullable.get(key!)!
+          this.newGraphNodeConfigs.properties.nullable.get(key!)!,
+          true
         )
       ) {
         this.validateAddGraphNodeErrorMessage?.properties.nullable.set(
@@ -783,7 +784,8 @@ export class DataAnalyzeStore {
         initial ||
         !validateGraphProperty(
           this.valueTypes[key!],
-          this.newGraphEdgeConfigs.properties.nullable.get(key!)!
+          this.newGraphEdgeConfigs.properties.nullable.get(key!)!,
+          true
         )
       ) {
         this.validateAddGraphEdgeErrorMessage?.properties.nullable.set(
@@ -836,19 +838,11 @@ export class DataAnalyzeStore {
     }
 
     if (type === 'nullable') {
-      if (isEmpty(this.editedSelectedGraphDataProperties?.nullable.get(key))) {
-        this.validateEditableGraphDataPropertyErrorMessage?.nullable.set(
-          key,
-          '此项不能为空'
-        );
-
-        return;
-      }
-
       if (
         !validateGraphProperty(
           this.valueTypes[key!],
-          this.editedSelectedGraphDataProperties?.nullable.get(key)
+          this.editedSelectedGraphDataProperties?.nullable.get(key),
+          true
         )
       ) {
         this.validateEditableGraphDataPropertyErrorMessage?.nullable.set(
