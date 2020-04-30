@@ -11,13 +11,24 @@ interface GraphPopoverProps {
   x: number;
   y: number;
   switchIsPopover: (state: boolean) => void;
+  isAfterDragging: boolean;
+  switchAfterDragging: (state: boolean) => void;
   visNetwork: vis.Network | null;
   visGraphNodes: vis.DataSetNodes;
   visGraphEdges: vis.DataSetEdges;
 }
 
 const GraphPopover: React.FC<GraphPopoverProps> = observer(
-  ({ x, y, switchIsPopover, visNetwork, visGraphNodes, visGraphEdges }) => {
+  ({
+    x,
+    y,
+    isAfterDragging,
+    switchAfterDragging,
+    switchIsPopover,
+    visNetwork,
+    visGraphNodes,
+    visGraphEdges
+  }) => {
     const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
     const popoverWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -28,10 +39,15 @@ const GraphPopover: React.FC<GraphPopoverProps> = observer(
           popoverWrapperRef.current &&
           !popoverWrapperRef.current.contains(e.target as Element)
         ) {
+          if (isAfterDragging) {
+            switchAfterDragging(false);
+            return;
+          }
+
           switchIsPopover(false);
         }
       },
-      [switchIsPopover]
+      [switchIsPopover, isAfterDragging]
     );
 
     useEffect(() => {

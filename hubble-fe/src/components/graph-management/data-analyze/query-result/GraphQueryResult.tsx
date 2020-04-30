@@ -39,6 +39,7 @@ const GraphQueryResult: React.FC<GraphQueryResult> = observer(({ hidden }) => {
   const legendWrapper = useRef<HTMLDivElement>(null);
   const [showLoadingGraphs, switchShowLoadingGraphs] = useState(true);
   const [isPopover, switchIsPopover] = useState(false);
+  const [isAfterDragging, switchAfterDragging] = useState(false);
   const [nodeTooltipX, setNodeToolTipX] = useState(0);
   const [nodeTooltipY, setNodeToolTipY] = useState(0);
   const [legendStep, setLegendStep] = useState(0);
@@ -383,6 +384,31 @@ const GraphQueryResult: React.FC<GraphQueryResult> = observer(({ hidden }) => {
           }
         });
 
+        network.on('dragging', () => {
+          const node = dataAnalyzeStore.visDataSet?.nodes.get(
+            dataAnalyzeStore.rightClickedGraphData.id
+          );
+
+          if (node !== null) {
+            const position = network.getPositions(node.id);
+            setNodeToolTipX(network.canvasToDOM(position[node.id]).x);
+            setNodeToolTipY(network.canvasToDOM(position[node.id]).y);
+            switchAfterDragging(true);
+          }
+        });
+
+        network.on('zoom', () => {
+          const node = dataAnalyzeStore.visDataSet?.nodes.get(
+            dataAnalyzeStore.rightClickedGraphData.id
+          );
+
+          if (node !== null) {
+            const position = network.getPositions(node.id);
+            setNodeToolTipX(network.canvasToDOM(position[node.id]).x);
+            setNodeToolTipY(network.canvasToDOM(position[node.id]).y);
+          }
+        });
+
         network.on('dragEnd', (e) => {
           if (!isEmpty(e.nodes)) {
             network.unselectAll();
@@ -608,6 +634,8 @@ const GraphQueryResult: React.FC<GraphQueryResult> = observer(({ hidden }) => {
           <GraphPopOver
             x={nodeTooltipX}
             y={nodeTooltipY}
+            isAfterDragging={isAfterDragging}
+            switchAfterDragging={switchAfterDragging}
             switchIsPopover={switchIsPopover}
             visNetwork={graph}
             visGraphNodes={visGraphNodes}
