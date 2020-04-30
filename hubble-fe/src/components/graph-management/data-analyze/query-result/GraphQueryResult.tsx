@@ -441,7 +441,8 @@ const GraphQueryResult: React.FC<GraphQueryResult> = observer(({ hidden }) => {
         ref={resultWrapper}
         style={{
           zIndex: hidden ? -1 : 0,
-          margin: '-9px'
+          margin: '-9px',
+          overflow: 'hidden'
         }}
       >
         <div
