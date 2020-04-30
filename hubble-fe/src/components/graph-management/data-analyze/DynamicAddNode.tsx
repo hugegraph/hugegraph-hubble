@@ -42,6 +42,9 @@ const DataAnalyzeAddNode: React.FC = observer(() => {
     [
       ...dataAnalyzeStore.validateAddGraphNodeErrorMessage!.properties.nonNullable.values()
     ].every((value) => value === '') &&
+    [
+      ...dataAnalyzeStore.validateAddGraphNodeErrorMessage!.properties.nullable.values()
+    ].every((value) => value === '') &&
     (shouldRevealId
       ? !isEmpty(dataAnalyzeStore.newGraphNodeConfigs.id) &&
         isEmpty(dataAnalyzeStore.validateAddGraphNodeErrorMessage!.id)
@@ -349,6 +352,10 @@ const DataAnalyzeAddNode: React.FC = observer(() => {
                           size="medium"
                           width={190}
                           placeholder="请输入属性值"
+                          errorLocation="layer"
+                          errorMessage={dataAnalyzeStore.validateAddGraphNodeErrorMessage?.properties.nullable.get(
+                            property
+                          )}
                           value={dataAnalyzeStore.newGraphNodeConfigs.properties.nullable.get(
                             property
                           )}
@@ -358,6 +365,21 @@ const DataAnalyzeAddNode: React.FC = observer(() => {
                               'nullable',
                               property,
                               e.value
+                            );
+
+                            dataAnalyzeStore.validateAddGraphNode(
+                              selectedVertexLabel.id_strategy,
+                              false,
+                              'nullable',
+                              property
+                            );
+                          }}
+                          onBlur={() => {
+                            dataAnalyzeStore.validateAddGraphNode(
+                              selectedVertexLabel.id_strategy,
+                              false,
+                              'nullable',
+                              property
                             );
                           }}
                         />

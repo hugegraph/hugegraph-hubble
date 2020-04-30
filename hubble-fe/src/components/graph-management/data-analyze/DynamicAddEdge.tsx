@@ -40,6 +40,9 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
     ].includes('') &&
     [
       ...dataAnalyzeStore.validateAddGraphEdgeErrorMessage!.properties.nonNullable.values()
+    ].every((value) => value === '') &&
+    [
+      ...dataAnalyzeStore.validateAddGraphEdgeErrorMessage!.properties.nullable.values()
     ].every((value) => value === '');
 
   const handleDrawerClose = useCallback(() => {
@@ -361,6 +364,10 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
                           size="medium"
                           width={190}
                           placeholder="请输入属性值"
+                          errorLocation="layer"
+                          errorMessage={dataAnalyzeStore.validateAddGraphEdgeErrorMessage!.properties.nullable.get(
+                            property
+                          )}
                           value={dataAnalyzeStore.newGraphEdgeConfigs.properties.nullable.get(
                             property
                           )}
@@ -370,6 +377,19 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
                               'nullable',
                               property,
                               e.value
+                            );
+
+                            dataAnalyzeStore.validateAddGraphEdge(
+                              'nullable',
+                              false,
+                              property
+                            );
+                          }}
+                          onBlur={() => {
+                            dataAnalyzeStore.validateAddGraphEdge(
+                              'nullable',
+                              false,
+                              property
                             );
                           }}
                         />

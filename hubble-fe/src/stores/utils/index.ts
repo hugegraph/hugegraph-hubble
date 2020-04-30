@@ -1,3 +1,10 @@
+import isInt from 'validator/lib/isInt';
+import isFloat from 'validator/lib/isFloat';
+import isBoolean from 'validator/lib/isBoolean';
+import isISO8601 from 'validator/lib/isISO8601';
+import isUUID from 'validator/lib/isUUID';
+import isEmpty from 'validator/lib/isEmpty';
+
 import {
   VertexTypeProperty,
   MetadataProperty
@@ -41,4 +48,26 @@ export function convertArrayToString(
   return Array.isArray(values)
     ? values.filter((value) => value !== '').join(separtor)
     : values;
+}
+
+export function validateGraphProperty(type: string, value: string) {
+  switch (type) {
+    case 'BOOLEAN':
+      return isBoolean(value);
+    case 'BYTE':
+      return isInt(value) && Number(value) > -128 && Number(value) <= 127;
+    case 'INT':
+    case 'LONG':
+      return isInt(value);
+    case 'FLOAT':
+    case 'DOUBLE':
+      return isFloat(value);
+    case 'TEXT':
+    case 'BLOB':
+      return !isEmpty(value);
+    case 'DATE':
+      return isISO8601(value);
+    case 'UUID':
+      return isUUID(value);
+  }
 }

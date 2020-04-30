@@ -18,10 +18,15 @@ const DataAnalyzeInfoDrawer: React.FC = observer(() => {
 
   const premitSave =
     !isEdit ||
-    dataAnalyzeStore.editedSelectedGraphDataProperties.nonNullable.size === 0 ||
-    [
-      ...dataAnalyzeStore.validateEditableGraphDataPropertyErrorMessage!.nonNullable.values()
-    ].includes('');
+    ((dataAnalyzeStore.editedSelectedGraphDataProperties.nonNullable.size ===
+      0 ||
+      [
+        ...dataAnalyzeStore.validateEditableGraphDataPropertyErrorMessage!.nonNullable.values()
+      ].every((value) => value === '')) &&
+      (dataAnalyzeStore.editedSelectedGraphDataProperties.nullable.size === 0 ||
+        [
+          ...dataAnalyzeStore.validateEditableGraphDataPropertyErrorMessage!.nullable.values()
+        ].every((value) => value === '')));
 
   const graphInfoItemClassName = classnames({
     'data-analyze-graph-node-info-item': true,
@@ -242,10 +247,16 @@ const DataAnalyzeInfoDrawer: React.FC = observer(() => {
                       e.value
                     );
 
-                    dataAnalyzeStore.validateGraphDataEditableProperties(key);
+                    dataAnalyzeStore.validateGraphDataEditableProperties(
+                      'nonNullable',
+                      key
+                    );
                   }}
                   onBlur={() => {
-                    dataAnalyzeStore.validateGraphDataEditableProperties(key);
+                    dataAnalyzeStore.validateGraphDataEditableProperties(
+                      'nonNullable',
+                      key
+                    );
                   }}
                 />
               </div>
@@ -275,6 +286,10 @@ const DataAnalyzeInfoDrawer: React.FC = observer(() => {
                     size="medium"
                     width={268}
                     placeholder="请输入属性值"
+                    errorLocation="layer"
+                    errorMessage={dataAnalyzeStore.validateEditableGraphDataPropertyErrorMessage!.nullable.get(
+                      key
+                    )}
                     value={dataAnalyzeStore.editedSelectedGraphDataProperties.nullable.get(
                       key
                     )}
@@ -283,6 +298,17 @@ const DataAnalyzeInfoDrawer: React.FC = observer(() => {
                         'nullable',
                         key,
                         e.value
+                      );
+
+                      dataAnalyzeStore.validateGraphDataEditableProperties(
+                        'nullable',
+                        key
+                      );
+                    }}
+                    onBlur={() => {
+                      dataAnalyzeStore.validateGraphDataEditableProperties(
+                        'nullable',
+                        key
                       );
                     }}
                   />

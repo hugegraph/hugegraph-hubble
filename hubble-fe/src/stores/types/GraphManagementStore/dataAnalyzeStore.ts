@@ -44,6 +44,7 @@ export interface NewGraphData {
 
 export interface EditableProperties {
   nonNullable: Map<string, string>;
+  nullable: Map<string, string>;
 }
 
 export interface QueryResult {

@@ -3,6 +3,8 @@ import { observable, action, flow, computed, runInAction } from 'mobx';
 import axios, { AxiosResponse } from 'axios';
 import { isUndefined, cloneDeep, isEmpty, remove } from 'lodash-es';
 import vis from 'vis-network';
+import isInt from 'validator/lib/isInt';
+import isUUID from 'validator/lib/isUUID';
 
 import {
   GraphData,
@@ -16,7 +18,11 @@ import {
   createGraphEditableProperties,
   createNewGraphDataConfig
 } from '../factory/dataAnalyzeStore';
-import { checkIfLocalNetworkOffline } from '../utils';
+import {
+  checkIfLocalNetworkOffline,
+  convertArrayToString,
+  validateGraphProperty
+} from '../utils';
 
 import { baseUrl, responseData, dict } from '../types/common';
 import {
@@ -188,7 +194,7 @@ export class DataAnalyzeStore {
                 .map(([key, value]) => {
                   return `<div class="tooltip-fields">
                             <div>${key}: </div>
-                            <div>${value}</div>
+                            <div>${convertArrayToString(value, '，')}</div>
                           </div>`;
                 })
                 .join('')}
@@ -245,7 +251,7 @@ export class DataAnalyzeStore {
           .map(([key, value]) => {
             return `<div class="tooltip-fields">
                       <div>${key}: </div>
-                      <div>${value}</div>
+                      <div>${convertArrayToString(value, '，')}</div>
                     </div>`;
           })
           .join('')}
@@ -366,7 +372,7 @@ export class DataAnalyzeStore {
           if (selectedGraphDataPropertKeys.includes(name)) {
             this.editedSelectedGraphDataProperties.primary.set(
               name,
-              selectedGraphData.properties[name]
+              convertArrayToString(selectedGraphData.properties[name])
             );
 
             remove(selectedGraphDataPropertKeys, (key) => key === name);
@@ -380,7 +386,7 @@ export class DataAnalyzeStore {
           if (selectedGraphDataPropertKeys.includes(name)) {
             this.editedSelectedGraphDataProperties.nonNullable.set(
               name,
-              selectedGraphData.properties[name]
+              convertArrayToString(selectedGraphData.properties[name])
             );
           }
 
@@ -393,7 +399,7 @@ export class DataAnalyzeStore {
           if (selectedGraphDataPropertKeys.includes(name)) {
             this.editedSelectedGraphDataProperties.nullable.set(
               name,
-              selectedGraphData.properties[name]
+              convertArrayToString(selectedGraphData.properties[name])
             );
           }
         });
@@ -625,7 +631,8 @@ export class DataAnalyzeStore {
   @action
   initValidateEditGraphDataPropertiesErrorMessage() {
     this.validateEditableGraphDataPropertyErrorMessage = {
-      nonNullable: new Map()
+      nonNullable: new Map(),
+      nullable: new Map()
     };
 
     this.editedSelectedGraphDataProperties.nonNullable.forEach((value, key) => {
@@ -633,6 +640,10 @@ export class DataAnalyzeStore {
         key,
         ''
       );
+    });
+
+    this.editedSelectedGraphDataProperties.nullable.forEach((value, key) => {
+      this.validateEditableGraphDataPropertyErrorMessage!.nullable.set(key, '');
     });
   }
 
@@ -653,17 +664,14 @@ export class DataAnalyzeStore {
 
       if (idStrategy === 'CUSTOMIZE_NUMBER') {
         this.validateAddGraphNodeErrorMessage!.id =
-          initial || /^\d+$/.test(this.newGraphNodeConfigs.id!)
+          initial || isInt(this.newGraphNodeConfigs.id!)
             ? ''
             : '非法的数据格式';
       }
 
       if (idStrategy === 'CUSTOMIZE_UUID') {
         this.validateAddGraphNodeErrorMessage!.id =
-          initial ||
-          /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i.test(
-            String(this.newGraphNodeConfigs.id)
-          )
+          initial || isUUID(String(this.newGraphNodeConfigs.id), 4)
             ? ''
             : '非法的数据格式';
       }
@@ -672,22 +680,54 @@ export class DataAnalyzeStore {
     if (category === 'nonNullable') {
       if (
         initial ||
-        !isEmpty(this.newGraphNodeConfigs.properties.nonNullable.get(key!))
+        isEmpty(this.newGraphNodeConfigs.properties.nonNullable.get(key!))
       ) {
-        this.validateAddGraphNodeErrorMessage?.properties.nonNullable.set(
-          key!,
-          ''
-        );
-      } else {
         this.validateAddGraphNodeErrorMessage?.properties.nonNullable.set(
           key!,
           '此项不能为空'
         );
+
+        return;
       }
+
+      if (
+        initial ||
+        !validateGraphProperty(
+          this.valueTypes[key!],
+          this.newGraphNodeConfigs.properties.nonNullable.get(key!)!
+        )
+      ) {
+        this.validateAddGraphNodeErrorMessage?.properties.nonNullable.set(
+          key!,
+          '非法的数据格式'
+        );
+
+        return;
+      }
+
+      this.validateAddGraphNodeErrorMessage?.properties.nonNullable.set(
+        key!,
+        ''
+      );
     }
 
     if (category === 'nullable') {
-      // return true;
+      if (
+        initial ||
+        !validateGraphProperty(
+          this.valueTypes[key!],
+          this.newGraphNodeConfigs.properties.nullable.get(key!)!
+        )
+      ) {
+        this.validateAddGraphNodeErrorMessage?.properties.nullable.set(
+          key!,
+          '非法的数据格式'
+        );
+
+        return;
+      }
+
+      this.validateAddGraphNodeErrorMessage?.properties.nullable.set(key!, '');
     }
   }
 
@@ -707,33 +747,120 @@ export class DataAnalyzeStore {
     if (category === 'nonNullable') {
       if (
         initial ||
-        !isEmpty(this.newGraphEdgeConfigs.properties.nonNullable.get(key!))
+        isEmpty(this.newGraphEdgeConfigs.properties.nonNullable.get(key!))
       ) {
-        this.validateAddGraphEdgeErrorMessage?.properties.nonNullable.set(
-          key!,
-          ''
-        );
-      } else {
         this.validateAddGraphEdgeErrorMessage?.properties.nonNullable.set(
           key!,
           '此项不能为空'
         );
+
+        return;
       }
+
+      if (
+        initial ||
+        !validateGraphProperty(
+          this.valueTypes[key!],
+          this.newGraphEdgeConfigs.properties.nonNullable.get(key!)!
+        )
+      ) {
+        this.validateAddGraphEdgeErrorMessage?.properties.nonNullable.set(
+          key!,
+          '非法的数据格式'
+        );
+
+        return;
+      }
+
+      this.validateAddGraphEdgeErrorMessage?.properties.nonNullable.set(
+        key!,
+        ''
+      );
     }
 
     if (category === 'nullable') {
-      // return true;
+      if (
+        initial ||
+        !validateGraphProperty(
+          this.valueTypes[key!],
+          this.newGraphEdgeConfigs.properties.nullable.get(key!)!
+        )
+      ) {
+        this.validateAddGraphEdgeErrorMessage?.properties.nullable.set(
+          key!,
+          '非法的数据格式'
+        );
+
+        return;
+      }
+
+      this.validateAddGraphEdgeErrorMessage?.properties.nullable.set(key!, '');
     }
   }
 
   @action
-  validateGraphDataEditableProperties(key: string) {
-    this.validateEditableGraphDataPropertyErrorMessage?.nonNullable.set(
-      key,
-      this.editedSelectedGraphDataProperties?.nonNullable.get(key) === ''
-        ? '此项不能为空'
-        : ''
-    );
+  validateGraphDataEditableProperties(
+    type: 'nonNullable' | 'nullable',
+    key: string
+  ) {
+    if (type === 'nonNullable') {
+      if (
+        isEmpty(this.editedSelectedGraphDataProperties?.nonNullable.get(key))
+      ) {
+        this.validateEditableGraphDataPropertyErrorMessage?.nonNullable.set(
+          key,
+          '此项不能为空'
+        );
+
+        return;
+      }
+
+      if (
+        !validateGraphProperty(
+          this.valueTypes[key!],
+          this.editedSelectedGraphDataProperties?.nonNullable.get(key)
+        )
+      ) {
+        this.validateEditableGraphDataPropertyErrorMessage?.nonNullable.set(
+          key,
+          '非法的数据格式'
+        );
+
+        return;
+      }
+
+      this.validateEditableGraphDataPropertyErrorMessage?.nonNullable.set(
+        key,
+        ''
+      );
+    }
+
+    if (type === 'nullable') {
+      if (isEmpty(this.editedSelectedGraphDataProperties?.nullable.get(key))) {
+        this.validateEditableGraphDataPropertyErrorMessage?.nullable.set(
+          key,
+          '此项不能为空'
+        );
+
+        return;
+      }
+
+      if (
+        !validateGraphProperty(
+          this.valueTypes[key!],
+          this.editedSelectedGraphDataProperties?.nullable.get(key)
+        )
+      ) {
+        this.validateEditableGraphDataPropertyErrorMessage?.nullable.set(
+          key,
+          '非法的数据格式'
+        );
+
+        return;
+      }
+
+      this.validateEditableGraphDataPropertyErrorMessage?.nullable.set(key, '');
+    }
   }
 
   @action
