@@ -249,7 +249,7 @@ export class DataImportRootStore {
 
     try {
       const result = yield axios.delete(
-        `${baseUrl}/1/upload-file?${fileNames
+        `${baseUrl}/${this.currentId}/upload-file?${fileNames
           .map((fileName) => `names=${fileName}`)
           .join('&')}`
       );
