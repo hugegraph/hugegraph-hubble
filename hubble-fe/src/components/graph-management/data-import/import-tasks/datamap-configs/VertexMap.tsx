@@ -214,7 +214,6 @@ const VertexMap: React.FC<VertexMapProps> = observer(
             </Select>
           )}
         </div>
-
         {!isUndefined(selectedVertex) && (
           <div className="import-tasks-data-options">
             <span className="import-tasks-data-options-title in-card">

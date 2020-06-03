@@ -468,7 +468,6 @@ const ImportManipulations: React.FC<ImportManipulationsProps> = observer(
           serverDataImportStore.pauseImport(
             serverDataImportStore.importTasks[taskIndex].id
           );
-
           break;
         case t('server-data-import.import-details.manipulations.abort'):
           serverDataImportStore.abortImport(

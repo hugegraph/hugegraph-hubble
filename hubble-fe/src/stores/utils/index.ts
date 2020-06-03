@@ -41,6 +41,15 @@ export function generateGraphModeId(
   return `${source}-${id}->${target}`;
 }
 
+export function convertArrayToString(
+  values: any[] | any,
+  separtor: string = ','
+) {
+  return Array.isArray(values)
+    ? values.filter((value) => value !== '').join(separtor)
+    : String(values);
+}
+
 export function validateGraphProperty(
   type: string,
   value: string,
