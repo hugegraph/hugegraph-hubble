@@ -1,5 +1,4 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { isEmpty, size } from 'lodash-es';
 import { useTranslation } from 'react-i18next';
@@ -170,12 +169,6 @@ const TypeConfigs: React.FC = observer(() => {
               <div className="import-tasks-data-map-tooltip-text">
                 {t('data-configs.type.hint.no-vertex-or-edge-mapping')}
               </div>
-              {/* <div className="import-tasks-data-map-tooltip-text">
-                vertex_person.csv
-              </div>
-              <div className="import-tasks-data-map-tooltip-text">
-                users.csv
-              </div> */}
               {invalidFileMaps.map(({ name }) => (
                 <div className="import-tasks-data-map-tooltip-text">{name}</div>
               ))}
@@ -191,15 +184,7 @@ const TypeConfigs: React.FC = observer(() => {
               <Button
                 type="primary"
                 size="medium"
-                disabled={
-                  // isEmpty(dataMapStore.selectedFileInfo!.vertex_mappings) &&
-                  // isEmpty(dataMapStore.selectedFileInfo!.edge_mappings)
-                  // dataMapStore.fileMapInfos.some(
-                  //   ({ vertex_mappings, edge_mappings }) =>
-                  //     isEmpty(vertex_mappings) && isEmpty(edge_mappings)
-                  // )
-                  size(invalidFileMaps) !== 0
-                }
+                disabled={size(invalidFileMaps) !== 0}
                 onClick={() => {
                   dataImportRootStore.setCurrentStep(3);
                 }}
@@ -209,19 +194,6 @@ const TypeConfigs: React.FC = observer(() => {
             </div>
           )}
         </TooltipTrigger>
-        {/* <Button
-          type="primary"
-          size="medium"
-          disabled={
-            isEmpty(dataMapStore.selectedFileInfo!.vertex_mappings) &&
-            isEmpty(dataMapStore.selectedFileInfo!.edge_mappings)
-          }
-          onClick={() => {
-            dataImportRootStore.setCurrentStep(3);
-          }}
-        >
-          {t('data-configs.manipulations.next')}
-        </Button> */}
       </div>
     </div>
   );

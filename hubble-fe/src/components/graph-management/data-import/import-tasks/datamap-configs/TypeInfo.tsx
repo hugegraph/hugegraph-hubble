@@ -16,10 +16,7 @@ import VertexMap from './VertexMap';
 import EdgeMap from './EdgeMap';
 
 import ArrowIcon from '../../../../../assets/imgs/ic_arrow_16.svg';
-import {
-  VertexType,
-  EdgeType
-} from '../../../../../stores/types/GraphManagementStore/metadataConfigsStore';
+import { VertexType } from '../../../../../stores/types/GraphManagementStore/metadataConfigsStore';
 
 export interface TypeInfoProps {
   type: 'vertex' | 'edge';
@@ -66,13 +63,7 @@ const TypeInfo: React.FC<TypeInfoProps> = observer(({ type, mapIndex }) => {
   }
 
   const handleImgClickExpand = () => {
-    // disable expand when other <TypeInfo /> is expanded
-    // if (!isExpand && dataMapStore.isExpandTypeConfig) {
-    //   return;
-    // }
-
     switchExpand(!isExpand);
-    // dataMapStore.switchEditTypeConfig(!dataMapStore.isExpandTypeConfig);
 
     if (Boolean(checkOrEdit)) {
       if (checkOrEdit === 'edit') {

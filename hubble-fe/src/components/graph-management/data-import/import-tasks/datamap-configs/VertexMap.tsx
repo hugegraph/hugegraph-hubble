@@ -20,11 +20,10 @@ export interface VertexMapProps {
   checkOrEdit: 'check' | 'edit' | boolean;
   onCancelCreateVertex: () => void;
   vertexMapIndex?: number;
-  label?: string;
 }
 
 const VertexMap: React.FC<VertexMapProps> = observer(
-  ({ checkOrEdit, onCancelCreateVertex, label, vertexMapIndex }) => {
+  ({ checkOrEdit, onCancelCreateVertex, vertexMapIndex }) => {
     const dataImportRootStore = useContext(DataImportRootStoreContext);
     const { dataMapStore } = dataImportRootStore;
     const [isAddMapping, switchAddMapping] = useState(false);

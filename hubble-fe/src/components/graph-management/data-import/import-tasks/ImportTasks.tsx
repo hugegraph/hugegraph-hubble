@@ -21,12 +21,8 @@ const ImportTasks: React.FC = observer(() => {
   const graphManagementStore = useContext(GraphManagementStoreContext);
   const dataImportRootStore = useContext(DataImportRootStoreContext);
   const { dataMapStore, serverDataImportStore } = dataImportRootStore;
-  // const [currentStep, setCurrentStep] = useState(3);
-  const [match, params] = useRoute(
-    '/graph-management/:id/data-import/import-tasks'
-  );
+  const [, params] = useRoute('/graph-management/:id/data-import/import-tasks');
   const { t } = useTranslation();
-  const [_, setLocation] = useLocation();
 
   const steps = useMemo(
     () => [
@@ -51,11 +47,7 @@ const ImportTasks: React.FC = observer(() => {
     dataImportRootStore.fetchVertexTypeList();
     dataImportRootStore.fetchEdgeTypeList();
     dataMapStore.fetchDataMaps();
-    // dataMapStore.setSelectedFileId(dataMapStore.fileMapInfos[0].id);
-    // dataMapStore.setSelectedFileInfo();
-    // serverDataImportStore.syncImportConfigs(
-    //   dataMapStore.fileMapInfos[0].load_parameter
-    // );
+
     return () => {
       dataImportRootStore.dispose();
       dataMapStore.dispose();

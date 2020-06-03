@@ -29,7 +29,6 @@ const commonInputProps = {
 };
 
 const ImportConfigs: React.FC = observer(() => {
-  // const [isExpand, switchExpand] = useState(true);
   const dataImportRootStore = useContext(DataImportRootStoreContext);
   const { serverDataImportStore, dataMapStore } = dataImportRootStore;
   const { t } = useTranslation();

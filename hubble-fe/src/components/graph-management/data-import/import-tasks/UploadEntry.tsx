@@ -1,6 +1,5 @@
 import React, { useContext, useCallback, useRef } from 'react';
 import { observer } from 'mobx-react';
-import { useLocation } from 'wouter';
 import classnames from 'classnames';
 import { isEmpty, size, isUndefined, range } from 'lodash-es';
 import { DndProvider, useDrop, DropTargetMonitor } from 'react-dnd';
@@ -24,7 +23,6 @@ const MAX_CONCURRENT_UPLOAD = 5;
 const UploadEntry: React.FC = observer(() => {
   const dataImportRootStore = useContext(DataImportRootStoreContext);
   const { dataMapStore, serverDataImportStore } = dataImportRootStore;
-  const [_, setLocation] = useLocation();
   const { t } = useTranslation();
 
   return (
@@ -616,6 +614,8 @@ export const FileDropZone: React.FC = observer(() => {
       }
     }
 
+    // select same file will not trigger onChange on input[type="file"]
+    // need to reset its value here
     e.target.value = '';
   };
 

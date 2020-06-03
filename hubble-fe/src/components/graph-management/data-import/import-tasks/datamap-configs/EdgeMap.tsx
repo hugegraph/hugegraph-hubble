@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { observer } from 'mobx-react';
-import { isUndefined, isEmpty, size, cloneDeep, uniqBy } from 'lodash-es';
+import { isUndefined, isEmpty, size, cloneDeep } from 'lodash-es';
 import { useTranslation } from 'react-i18next';
 import classnames from 'classnames';
 import { Input, Select, Checkbox } from '@baidu/one-ui';
@@ -22,16 +22,14 @@ export interface EdgeMapProps {
   checkOrEdit: 'check' | 'edit' | boolean;
   onCancelCreateEdge: () => void;
   edgeMapIndex?: number;
-  label?: string;
 }
 
 const EdgeMap: React.FC<EdgeMapProps> = observer(
-  ({ checkOrEdit, onCancelCreateEdge, label, edgeMapIndex }) => {
+  ({ checkOrEdit, onCancelCreateEdge, edgeMapIndex }) => {
     const dataImportRootStore = useContext(DataImportRootStoreContext);
     const { dataMapStore } = dataImportRootStore;
     const [isAddMapping, switchAddMapping] = useState(false);
     const [isExpandAdvance, switchExpandAdvance] = useState(false);
-    // const [extraNullValues, setExtraNullValues] = useState<string[]>([]);
     const { t } = useTranslation();
 
     const isCheck = checkOrEdit === 'check';

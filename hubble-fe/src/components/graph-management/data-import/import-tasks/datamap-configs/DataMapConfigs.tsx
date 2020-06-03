@@ -1,6 +1,5 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { observer } from 'mobx-react';
-import { useTranslation } from 'react-i18next';
 import { Menu } from '@baidu/one-ui';
 
 import { DataImportRootStoreContext } from '../../../../../stores';
@@ -12,11 +11,6 @@ import './DataMapConfigs.less';
 const DataMapConfigs: React.FC = observer(() => {
   const dataImportRootStore = useContext(DataImportRootStoreContext);
   const { dataMapStore, serverDataImportStore } = dataImportRootStore;
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    // dataMapStore.setSelectedFileId(dataMapStore.fileMapInfos[0].id);
-  }, []);
 
   return (
     <div className="import-tasks-step-wrapper">
