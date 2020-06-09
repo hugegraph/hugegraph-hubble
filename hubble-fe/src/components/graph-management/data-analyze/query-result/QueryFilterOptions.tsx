@@ -7,6 +7,11 @@ import { Message } from '@baidu/one-ui';
 import { DataAnalyzeStoreContext } from '../../../../stores';
 import { convertArrayToString } from '../../../../stores/utils';
 
+import {
+  GraphNode,
+  GraphEdge
+} from '../../../../stores/types/GraphManagementStore/dataAnalyzeStore';
+
 const getRuleOptions = (ruleType: string = '') => {
   switch (ruleType.toLowerCase()) {
     case 'float':
@@ -30,8 +35,8 @@ const getRuleOptions = (ruleType: string = '') => {
 
 const QueryFilterOptions: React.FC<{
   visNetwork: vis.Network | null;
-  visGraphNodes: vis.DataSetNodes;
-  visGraphEdges: vis.DataSetEdges;
+  visGraphNodes: vis.data.DataSet<GraphNode> | null;
+  visGraphEdges: vis.data.DataSet<GraphEdge> | null;
 }> = observer(({ visNetwork, visGraphNodes, visGraphEdges }) => {
   const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
   const line = dataAnalyzeStore.filteredGraphQueryOptions.line;
@@ -211,7 +216,7 @@ const QueryFilterOptions: React.FC<{
               ) {
                 dataAnalyzeStore.expandedGraphData.data.graph_view.vertices.forEach(
                   ({ id, label, properties }) => {
-                    visGraphNodes.add({
+                    visGraphNodes!.add({
                       id,
                       label: id.length <= 15 ? id : id.slice(0, 15) + '...',
                       vLabel: label,
@@ -275,7 +280,7 @@ const QueryFilterOptions: React.FC<{
 
                 dataAnalyzeStore.expandedGraphData.data.graph_view.edges.forEach(
                   (edge) => {
-                    visGraphEdges.add({
+                    visGraphEdges!.add({
                       ...edge,
                       from: edge.source,
                       to: edge.target,

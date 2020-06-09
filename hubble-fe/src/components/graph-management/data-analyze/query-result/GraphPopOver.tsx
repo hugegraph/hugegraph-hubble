@@ -6,6 +6,10 @@ import { Message } from '@baidu/one-ui';
 
 import { DataAnalyzeStoreContext } from '../../../../stores';
 import { convertArrayToString } from '../../../../stores/utils';
+import {
+  GraphNode,
+  GraphEdge
+} from '../../../../stores/types/GraphManagementStore/dataAnalyzeStore';
 
 interface GraphPopoverProps {
   x: number;
@@ -14,8 +18,8 @@ interface GraphPopoverProps {
   isAfterDragging: boolean;
   switchAfterDragging: (state: boolean) => void;
   visNetwork: vis.Network | null;
-  visGraphNodes: vis.DataSetNodes;
-  visGraphEdges: vis.DataSetEdges;
+  visGraphNodes: vis.data.DataSet<GraphNode> | null;
+  visGraphEdges: vis.data.DataSet<GraphEdge> | null;
 }
 
 const GraphPopover: React.FC<GraphPopoverProps> = observer(
@@ -87,7 +91,7 @@ const GraphPopover: React.FC<GraphPopoverProps> = observer(
                 ) {
                   dataAnalyzeStore.expandedGraphData.data.graph_view.vertices.forEach(
                     ({ id, label, properties }) => {
-                      visGraphNodes.add({
+                      visGraphNodes!.add({
                         id,
                         label: id.length <= 15 ? id : id.slice(0, 15) + '...',
                         vLabel: label,
@@ -150,7 +154,7 @@ const GraphPopover: React.FC<GraphPopoverProps> = observer(
 
                   dataAnalyzeStore.expandedGraphData.data.graph_view.edges.forEach(
                     (edge) => {
-                      visGraphEdges.add({
+                      visGraphEdges!.add({
                         ...edge,
                         from: edge.source,
                         to: edge.target,
@@ -215,7 +219,7 @@ const GraphPopover: React.FC<GraphPopoverProps> = observer(
               className="graph-pop-over-item"
               onClick={() => {
                 if (visNetwork !== null) {
-                  visGraphNodes.remove([
+                  visGraphNodes!.remove([
                     dataAnalyzeStore.rightClickedGraphData.id
                   ]);
                   dataAnalyzeStore.hideGraphNode(

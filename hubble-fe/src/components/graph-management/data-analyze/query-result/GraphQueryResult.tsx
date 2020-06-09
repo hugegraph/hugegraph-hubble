@@ -8,7 +8,7 @@ import React, {
 import { observer } from 'mobx-react';
 import { size, isUndefined, isEmpty } from 'lodash-es';
 import { saveAs } from 'file-saver';
-import vis from 'vis-network';
+import vis, { DataSet } from 'vis-network';
 import 'vis-network/styles/vis-network.min.css';
 import { Message, Tooltip } from '@baidu/one-ui';
 
@@ -16,6 +16,11 @@ import QueryFilterOptions from './QueryFilterOptions';
 import GraphPopOver from './GraphPopOver';
 import { DataAnalyzeStoreContext } from '../../../../stores';
 import { convertArrayToString } from '../../../../stores/utils';
+
+import {
+  GraphNode,
+  GraphEdge
+} from '../../../../stores/types/GraphManagementStore/dataAnalyzeStore';
 
 import ZoomInIcon from '../../../../assets/imgs/ic_fangda_16.svg';
 import ZoomOutIcon from '../../../../assets/imgs/ic_suoxiao_16.svg';
@@ -30,6 +35,9 @@ import AddNodeIcon from '../../../../assets/imgs/ic_add_node.svg';
 export interface GraphQueryResult {
   hidden: boolean;
 }
+
+console.log('wtf is the vis: ', vis);
+console.log('wtf is the DataSet: ', DataSet);
 
 const GraphQueryResult: React.FC<GraphQueryResult> = observer(({ hidden }) => {
   const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
@@ -46,12 +54,12 @@ const GraphQueryResult: React.FC<GraphQueryResult> = observer(({ hidden }) => {
   const [legendWidth, setlegendWitdh] = useState(0);
 
   const [graph, setGraph] = useState<vis.Network | null>(null);
-  const [visGraphNodes, setVisGraphNodes] = useState<vis.DataSetNodes | null>(
-    null
-  );
-  const [visGraphEdges, setVisGraphEdges] = useState<vis.DataSetNodes | null>(
-    null
-  );
+  const [visGraphNodes, setVisGraphNodes] = useState<vis.data.DataSet<
+    GraphNode
+  > | null>(null);
+  const [visGraphEdges, setVisGraphEdges] = useState<vis.data.DataSet<
+    GraphEdge
+  > | null>(null);
 
   const redrawGraphs = useCallback(() => {
     if (graph) {
