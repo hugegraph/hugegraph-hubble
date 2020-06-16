@@ -121,20 +121,6 @@ public class LoadTaskController extends BaseController {
         }
     }
 
-//    @PostMapping("start")
-//    public LoadTask start(@PathVariable("connId") int connId,
-//                          @RequestParam("file_mapping_id") int fileId) {
-//        GraphConnection connection = this.connService.get(connId);
-//        if (connection == null) {
-//            throw new ExternalException("graph-connection.not-exist.id", connId);
-//        }
-//        FileMapping fileMapping = this.fmService.get(fileId);
-//        if (fileMapping == null) {
-//            throw new ExternalException("file-mapping.not-exist.id", fileId);
-//        }
-//        return this.service.start(connection, fileMapping);
-//    }
-
     @PostMapping("start")
     public List<LoadTask> start(@PathVariable("connId") int connId,
                                 @RequestParam("file_mapping_ids")

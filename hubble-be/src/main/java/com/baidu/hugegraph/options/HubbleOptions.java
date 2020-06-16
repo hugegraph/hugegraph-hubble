@@ -177,7 +177,7 @@ public class HubbleOptions extends OptionHolder {
 
     public static final ConfigOption<Long> UPLOAD_SINGLE_FILE_SIZE_LIMIT =
             new ConfigOption<>(
-                    "upload_single_file.size.limit",
+                    "upload_file.single_file_size_limit",
                     "The single file size(MB) limit.",
                     positiveInt(),
                     1 * Bytes.GB
@@ -185,7 +185,7 @@ public class HubbleOptions extends OptionHolder {
 
     public static final ConfigOption<Long> UPLOAD_TOTAL_FILE_SIZE_LIMIT =
             new ConfigOption<>(
-                    "upload_total_file.size.limit",
+                    "upload_file.total_file_size_limit",
                     "The total file size(MB) limit.",
                     positiveInt(),
                     10 * Bytes.GB

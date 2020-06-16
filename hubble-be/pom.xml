@@ -116,8 +116,8 @@
                     <artifactId>log4j-slf4j-impl</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>hugegraph-common</artifactId>
                     <groupId>com.baidu.hugegraph</groupId>
+                    <artifactId>hugegraph-common</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

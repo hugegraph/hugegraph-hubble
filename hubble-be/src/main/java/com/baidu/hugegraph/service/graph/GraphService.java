@@ -35,6 +35,9 @@ import com.baidu.hugegraph.entity.schema.PropertyKeyEntity;
 import com.baidu.hugegraph.entity.schema.SchemaLabelEntity;
 import com.baidu.hugegraph.entity.schema.VertexLabelEntity;
 import com.baidu.hugegraph.exception.ExternalException;
+import com.baidu.hugegraph.loader.source.InputSource;
+import com.baidu.hugegraph.loader.source.file.FileSource;
+import com.baidu.hugegraph.loader.util.DataTypeUtil;
 import com.baidu.hugegraph.service.HugeClientPoolService;
 import com.baidu.hugegraph.service.schema.EdgeLabelService;
 import com.baidu.hugegraph.service.schema.PropertyKeyService;
@@ -44,7 +47,6 @@ import com.baidu.hugegraph.structure.constant.IdStrategy;
 import com.baidu.hugegraph.structure.graph.Edge;
 import com.baidu.hugegraph.structure.graph.Vertex;
 import com.baidu.hugegraph.structure.schema.PropertyKey;
-import com.baidu.hugegraph.util.DataTypeUtil;
 import com.baidu.hugegraph.util.Ex;
 import com.google.common.collect.ImmutableSet;
 
@@ -116,6 +118,7 @@ public class GraphService {
         GraphManager graph = client.graph();
         EdgeHolder edgeHolder = this.buildEdge(connId, entity);
         // TODO: client should add updateEdge()
+        graph.removeEdge(entity.getId());
         return graph.addEdge(edgeHolder.edge);
     }
 
@@ -178,7 +181,9 @@ public class GraphService {
             assert propertyKey != null;
             Object value;
             try {
-                value = DataTypeUtil.convert(rawValue, propertyKey);
+                // DataTypeUtil.convert in loader need param InputSource
+                InputSource source = new FileSource();
+                value = DataTypeUtil.convert(rawValue, propertyKey, source);
             } catch (IllegalArgumentException e) {
                 throw new ExternalException("graph.property.convert.failed",
                                             e, key, rawValue);
