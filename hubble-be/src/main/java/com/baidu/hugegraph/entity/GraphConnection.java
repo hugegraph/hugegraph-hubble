@@ -94,11 +94,11 @@ public class GraphConnection implements Identifiable, Mergeable {
 
     @TableField(exist = false)
     @MergeProperty(useNew = false)
-    @JsonProperty("trustFile")
-    private String trustFile;
+    @JsonProperty("truststore_file")
+    private String trustStoreFile;
 
     @TableField(exist = false)
     @MergeProperty(useNew = false)
-    @JsonProperty("trustPassword")
-    private String trustPassword;
+    @JsonProperty("truststore_password")
+    private String trustStorePassword;
 }

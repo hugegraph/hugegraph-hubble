@@ -41,8 +41,8 @@ public final class HugeClientUtil {
         int timeout = connection.getTimeout();
         String protocol = (connection.getProtocol() == null) ? "http" :
                           connection.getProtocol();
-        String trustStoreFile = connection.getTrustFile();
-        String trustStorePassword = connection.getTrustPassword();
+        String trustStoreFile = connection.getTrustStoreFile();
+        String trustStorePassword = connection.getTrustStorePassword();
 
         String url = UriComponentsBuilder.newInstance()
                                          .scheme("http")

@@ -196,7 +196,7 @@ public class HubbleOptions extends OptionHolder {
             new ConfigOption<>(
                     "server.protocol",
                     "The Protocol of HugeGraph-Server,allowed values are: " +
-                         "http or https",
+                    "http or https",
                     allowValues("http","https"),
                     "http"
             );
@@ -205,7 +205,7 @@ public class HubbleOptions extends OptionHolder {
             new ConfigOption<>(
                     "ssl.client_truststore_file",
                     "The path of client truststore file used when https " +
-                         "protocol is enabled",
+                    "protocol is enabled",
                     null,
                     ""
             );
@@ -214,7 +214,7 @@ public class HubbleOptions extends OptionHolder {
             new ConfigOption<>(
                     "ssl.client_truststore_password",
                     "The password of the path of the client truststore " +
-                          "file used when the https protocol is enabled",
+                    "file used when the https protocol is enabled",
                     null,
                     ""
             );
