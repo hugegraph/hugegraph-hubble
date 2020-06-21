@@ -39,6 +39,10 @@ public final class HugeClientUtil {
         String username = connection.getUsername();
         String password = connection.getPassword();
         int timeout = connection.getTimeout();
+        String protocol = (connection.getProtocol() == null) ? "http" :
+                          connection.getProtocol();
+        String trustStoreFile = connection.getTrustFile();
+        String trustStorePassword = connection.getTrustPassword();
 
         String url = UriComponentsBuilder.newInstance()
                                          .scheme("http")
@@ -46,10 +50,15 @@ public final class HugeClientUtil {
                                          .toUriString();
         HugeClient client;
         try {
-            if (username != null) {
-                client = new HugeClient(url, graph, username, password, timeout);
+            if (protocol.equals("https")) {
+                client = new HugeClient(url, graph, username, password, timeout,
+                                        protocol, trustStoreFile, trustStorePassword);
             } else {
-                client = new HugeClient(url, graph, timeout);
+                if (username != null) {
+                    client = new HugeClient(url, graph, username, password, timeout);
+                } else {
+                    client = new HugeClient(url, graph, timeout);
+                }
             }
         } catch (IllegalStateException e) {
             String message = e.getMessage();

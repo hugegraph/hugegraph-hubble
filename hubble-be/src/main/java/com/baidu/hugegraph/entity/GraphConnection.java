@@ -25,6 +25,7 @@ import com.baidu.hugegraph.annotation.MergeProperty;
 import com.baidu.hugegraph.common.Identifiable;
 import com.baidu.hugegraph.common.Mergeable;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -85,4 +86,19 @@ public class GraphConnection implements Identifiable, Mergeable {
     @MergeProperty(useNew = false)
     @JsonProperty("create_time")
     private Date createTime;
+
+    @TableField(exist = false)
+    @MergeProperty(useNew = false)
+    @JsonProperty("protocol")
+    private String protocol;
+
+    @TableField(exist = false)
+    @MergeProperty(useNew = false)
+    @JsonProperty("trustFile")
+    private String trustFile;
+
+    @TableField(exist = false)
+    @MergeProperty(useNew = false)
+    @JsonProperty("trustPassword")
+    private String trustPassword;
 }
