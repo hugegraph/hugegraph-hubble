@@ -10,7 +10,7 @@ import { size, isUndefined, isEmpty, cloneDeep } from 'lodash-es';
 import { saveAs } from 'file-saver';
 import vis from 'vis-network';
 import 'vis-network/styles/vis-network.min.css';
-import { Message } from '@baidu/one-ui';
+import { Message, Tooltip } from '@baidu/one-ui';
 
 import QueryFilterOptions from './QueryFilterOptions';
 import GraphPopOver from './GraphPopOver';
@@ -277,6 +277,8 @@ const GraphQueryResult: React.FC<GraphQueryResult> = observer(({ hidden }) => {
             switchIsPopover(true);
 
             network.selectNodes([nodeId]);
+            // setNodeToolTipX(e.pointer.canvas.x);
+            // setNodeToolTipY(e.pointer.canvas.y);
             setNodeToolTipX(e.pointer.DOM.x);
             setNodeToolTipY(e.pointer.DOM.y);
             dataAnalyzeStore.setVisCurrentCoordinates({
