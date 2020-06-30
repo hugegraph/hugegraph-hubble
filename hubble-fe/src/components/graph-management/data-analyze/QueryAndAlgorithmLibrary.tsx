@@ -11,13 +11,14 @@ import CodeMirror from 'codemirror';
 import classnames from 'classnames';
 import { Button, Tooltip, Alert } from '@baidu/one-ui';
 import TooltipTrigger from 'react-popper-tooltip';
-
 import 'codemirror/lib/codemirror.css';
 import 'react-popper-tooltip/dist/styles.css';
 import 'codemirror/addon/display/placeholder';
 
 import Favorite from './common/Favorite';
 import { DataAnalyzeStoreContext } from '../../../stores';
+import { useMultiKeyPress } from '../../../hooks';
+
 import ArrowIcon from '../../../assets/imgs/ic_arrow_16.svg';
 
 const styles = {
@@ -39,6 +40,26 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
   const [isFavoritePop, switchFavoritePop] = useState(false);
   const codeContainer = useRef<HTMLTextAreaElement>(null);
   const codeEditor = useRef<CodeMirror.Editor>();
+  const keyPressed = useMultiKeyPress();
+
+  const isDisabledExec =
+    dataAnalyzeStore.codeEditorText.length === 0 ||
+    !codeRegexp.test(dataAnalyzeStore.codeEditorText) ||
+    dataAnalyzeStore.requestStatus.fetchGraphs === 'pending';
+
+  const isQueryShortcut = () => {
+    const isMacOS = navigator.platform.includes('Mac');
+
+    if (isMacOS) {
+      return keyPressed.has('MetaLeft') || keyPressed.has('MetaRight');
+    } else {
+      return (
+        keyPressed.has('Control') ||
+        keyPressed.has('ControlLeft') ||
+        keyPressed.has('ControlRight')
+      );
+    }
+  };
 
   const handleCodeExpandChange = useCallback(
     (flag: boolean) => () => {
@@ -123,6 +144,18 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
     }
   }, [dataAnalyzeStore]);
 
+  useEffect(() => {
+    if (keyPressed.has('Tab') && codeEditor.current) {
+      codeEditor.current.focus();
+    }
+
+    if (keyPressed.size === 2 && keyPressed.has('Enter') && !isDisabledExec) {
+      if (isQueryShortcut()) {
+        handleQueryExecution();
+      }
+    }
+  }, [keyPressed]);
+
   const codeEditWrapperClassName = classnames({
     'query-tab-code-edit': true,
     hide: !isCodeExpand,
@@ -200,11 +233,7 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
               <Button
                 type="primary"
                 style={styles.primaryButton}
-                disabled={
-                  dataAnalyzeStore.codeEditorText.length === 0 ||
-                  !codeRegexp.test(dataAnalyzeStore.codeEditorText) ||
-                  dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                }
+                disabled={isDisabledExec}
                 onClick={handleQueryExecution}
               >
                 {dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
