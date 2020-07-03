@@ -26,6 +26,7 @@ p {
 
 body {
   background: #f2f2f2;
+  // prettier-ignore
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -46,6 +47,7 @@ body {
 }
 
 code {
+  // prettier-ignore
   font-family:
     source-code-pro,
     Menlo,
@@ -94,6 +96,7 @@ code {
 
 // Modal titles
 .new-fc-one-modal-title {
+  // prettier-ignore
   font-family:
     'PingFangSC-Medium',
     'Microsoft YaHei',
@@ -114,6 +117,7 @@ code {
 }
 
 // z-index input errorlayer in Drawer should be higher
+// prettier-ignore
 .new-fc-one-drawer-content-wrapper .new-fc-one-input-error.new-fc-one-input-error-layer {
   z-index: 1041;
 }
@@ -137,6 +141,16 @@ code {
   }
 }
 
+// text in <Switch />
+.new-fc-one-switch-inner {
+  margin-right: 0;
+}
+
+.new-fc-one-switch-checked .new-fc-one-switch-inner {
+  margin-left: 0;
+}
+
+// override radio button primary color
 .new-fc-one-radio-button-wrapper-checked {
   border: 1px solid @primary-color;
   background-color: @primary-color;
@@ -153,4 +167,10 @@ code {
 .new-fc-one-menu-horizontal-box .new-fc-one-menu-item-selected:hover {
   color: @primary-hover-color;
   border-color: @primary-hover-color;
+}
+
+// <Select /> mutliselect icon issue solution
+.new-fc-one-select-selection__choice__remove svg.icon-close {
+  width: 8px;
+  height: 8px;
 }
