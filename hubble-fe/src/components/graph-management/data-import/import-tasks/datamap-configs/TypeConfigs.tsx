@@ -4,10 +4,10 @@ import { isEmpty, size } from 'lodash-es';
 import { useTranslation } from 'react-i18next';
 import classnames from 'classnames';
 import { Button } from '@baidu/one-ui';
-import TooltipTrigger from 'react-popper-tooltip';
 
 import { DataImportRootStoreContext } from '../../../../../stores';
 
+import { Tooltip } from '../../../../common';
 import TypeInfo from './TypeInfo';
 import VertexMap from './VertexMap';
 import EdgeMap from './EdgeMap';
@@ -138,7 +138,7 @@ const TypeConfigs: React.FC = observer(() => {
             {t('data-configs.manipulations.previous')}
           </Button>
         )}
-        <TooltipTrigger
+        <Tooltip
           trigger="hover"
           placement="top-start"
           modifiers={{
@@ -146,54 +146,31 @@ const TypeConfigs: React.FC = observer(() => {
               offset: '0, 10'
             }
           }}
-          tooltip={({
-            arrowRef,
-            tooltipRef,
-            getArrowProps,
-            getTooltipProps,
-            placement
-          }) => (
-            <div
-              {...getTooltipProps({
-                ref: tooltipRef,
-                className: nextButtonTooltipClassName
-              })}
-            >
-              <div
-                {...getArrowProps({
-                  ref: arrowRef,
-                  className: 'tooltip-arrow',
-                  'data-placement': placement
-                })}
-              />
+          tooltipWrapperProps={{
+            className: nextButtonTooltipClassName
+          }}
+          tooltipWrapper={
+            <>
               <div className="import-tasks-data-map-tooltip-text">
                 {t('data-configs.type.hint.no-vertex-or-edge-mapping')}
               </div>
               {invalidFileMaps.map(({ name }) => (
                 <div className="import-tasks-data-map-tooltip-text">{name}</div>
               ))}
-            </div>
-          )}
+            </>
+          }
         >
-          {({ getTriggerProps, triggerRef }) => (
-            <div
-              {...getTriggerProps({
-                ref: triggerRef
-              })}
-            >
-              <Button
-                type="primary"
-                size="medium"
-                disabled={size(invalidFileMaps) !== 0}
-                onClick={() => {
-                  dataImportRootStore.setCurrentStep(3);
-                }}
-              >
-                {t('data-configs.manipulations.next')}
-              </Button>
-            </div>
-          )}
-        </TooltipTrigger>
+          <Button
+            type="primary"
+            size="medium"
+            disabled={size(invalidFileMaps) !== 0}
+            onClick={() => {
+              dataImportRootStore.setCurrentStep(3);
+            }}
+          >
+            {t('data-configs.manipulations.next')}
+          </Button>
+        </Tooltip>
       </div>
     </div>
   );

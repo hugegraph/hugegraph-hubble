@@ -19,8 +19,8 @@ import {
   Message
 } from '@baidu/one-ui';
 import { isEmpty, isUndefined, cloneDeep } from 'lodash-es';
-import TooltipTrigger from 'react-popper-tooltip';
 
+import { Tooltip } from '../../../common';
 import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
 
 import NewEdgeType from './NewEdgeType';
@@ -312,99 +312,81 @@ const EdgeTypeList: React.FC = observer(() => {
             >
               编辑
             </span>
-            <TooltipTrigger
+            <Tooltip
+              placement="bottom-end"
               tooltipShown={index === deletePopIndex}
-              placement="bottom"
-              tooltip={({
-                arrowRef,
-                tooltipRef,
-                getArrowProps,
-                getTooltipProps,
-                placement
-              }) => (
-                <div
-                  {...getTooltipProps({
-                    ref: tooltipRef,
-                    className: 'metadata-properties-tooltips'
-                  })}
-                >
+              modifiers={{
+                offset: {
+                  offset: '0, 10'
+                }
+              }}
+              tooltipWrapperProps={{
+                className: 'metadata-properties-tooltips'
+              }}
+              tooltipWrapper={
+                <div ref={deleteWrapperRef}>
+                  <p>确认删除此边类型？</p>
+                  <p>删除后无法恢复，请谨慎操作。</p>
                   <div
-                    {...getArrowProps({
-                      ref: arrowRef,
-                      className: 'tooltip-arrow',
-                      'data-placement': placement
-                    })}
-                  />
-                  <div ref={deleteWrapperRef}>
-                    <p>确认删除此边类型？</p>
-                    <p>删除后无法恢复，请谨慎操作。</p>
+                    style={{
+                      display: 'flex',
+                      marginTop: 12,
+                      color: '#2b65ff',
+                      cursor: 'pointer'
+                    }}
+                  >
                     <div
-                      style={{
-                        display: 'flex',
-                        marginTop: 12,
-                        color: '#2b65ff',
-                        cursor: 'pointer'
+                      style={{ marginRight: 16, cursor: 'pointer' }}
+                      onClick={async () => {
+                        setDeletePopIndex(null);
+                        await edgeTypeStore.deleteEdgeType([index]);
+
+                        if (
+                          edgeTypeStore.requestStatus.deleteEdgeType ===
+                          'success'
+                        ) {
+                          Message.success({
+                            content: '已删除未使用项',
+                            size: 'medium',
+                            showCloseIcon: false
+                          });
+
+                          edgeTypeStore.fetchEdgeTypeList();
+                        }
+
+                        if (
+                          edgeTypeStore.requestStatus.deleteEdgeType ===
+                          'failed'
+                        ) {
+                          Message.error({
+                            content: edgeTypeStore.errorMessage,
+                            size: 'medium',
+                            showCloseIcon: false
+                          });
+                        }
                       }}
                     >
-                      <div
-                        style={{ marginRight: 16, cursor: 'pointer' }}
-                        onClick={async () => {
-                          setDeletePopIndex(null);
-                          await edgeTypeStore.deleteEdgeType([index]);
-
-                          if (
-                            edgeTypeStore.requestStatus.deleteEdgeType ===
-                            'success'
-                          ) {
-                            Message.success({
-                              content: '已删除未使用项',
-                              size: 'medium',
-                              showCloseIcon: false
-                            });
-
-                            edgeTypeStore.fetchEdgeTypeList();
-                          }
-
-                          if (
-                            edgeTypeStore.requestStatus.deleteEdgeType ===
-                            'failed'
-                          ) {
-                            Message.error({
-                              content: edgeTypeStore.errorMessage,
-                              size: 'medium',
-                              showCloseIcon: false
-                            });
-                          }
-                        }}
-                      >
-                        确认
-                      </div>
-                      <div
-                        onClick={() => {
-                          setDeletePopIndex(null);
-                        }}
-                      >
-                        取消
-                      </div>
+                      确认
+                    </div>
+                    <div
+                      onClick={() => {
+                        setDeletePopIndex(null);
+                      }}
+                    >
+                      取消
                     </div>
                   </div>
                 </div>
-              )}
+              }
+              childrenProps={{
+                className: 'metadata-properties-manipulation',
+                onClick() {
+                  setDeletePopIndex(index);
+                }
+              }}
             >
-              {({ getTriggerProps, triggerRef }) => (
-                <span
-                  {...getTriggerProps({
-                    ref: triggerRef,
-                    className: 'metadata-properties-manipulation',
-                    onClick() {
-                      setDeletePopIndex(index);
-                    }
-                  })}
-                >
-                  删除
-                </span>
-              )}
-            </TooltipTrigger>
+              删除
+            </Tooltip>
           </div>
         );
       }
@@ -1268,123 +1250,102 @@ const EdgeTypeList: React.FC = observer(() => {
                                 </span>
 
                                 {isEditEdge && (
-                                  <TooltipTrigger
+                                  <Tooltip
+                                    placement="bottom-end"
                                     tooltipShown={
                                       index === deleteExistPopIndexInDrawer
                                     }
-                                    placement="bottom-end"
-                                    tooltip={({
-                                      arrowRef,
-                                      tooltipRef,
-                                      getArrowProps,
-                                      getTooltipProps,
-                                      placement
-                                    }) => (
-                                      <div
-                                        {...getTooltipProps({
-                                          ref: tooltipRef,
-                                          className:
-                                            'metadata-properties-tooltips',
-                                          style: { zIndex: 1041 }
-                                        })}
-                                      >
+                                    modifiers={{
+                                      offset: {
+                                        offset: '0, 10'
+                                      }
+                                    }}
+                                    tooltipWrapperProps={{
+                                      className: 'metadata-properties-tooltips',
+                                      style: { zIndex: 1041 }
+                                    }}
+                                    tooltipWrapper={
+                                      <div ref={deleteWrapperInDrawerRef}>
+                                        <p
+                                          style={{
+                                            width: 200,
+                                            lineHeight: '28px'
+                                          }}
+                                        >
+                                          确认删除此属性？
+                                        </p>
+                                        <p
+                                          style={{
+                                            width: 200,
+                                            lineHeight: '28px'
+                                          }}
+                                        >
+                                          删除索引后，无法根据此属性索引进行查询，请谨慎操作。
+                                        </p>
                                         <div
-                                          {...getArrowProps({
-                                            ref: arrowRef,
-                                            className: 'tooltip-arrow',
-                                            'data-placement': placement
-                                          })}
-                                        />
-                                        <div ref={deleteWrapperInDrawerRef}>
-                                          <p
-                                            style={{
-                                              width: 200,
-                                              lineHeight: '28px'
-                                            }}
-                                          >
-                                            确认删除此属性？
-                                          </p>
-                                          <p
-                                            style={{
-                                              width: 200,
-                                              lineHeight: '28px'
-                                            }}
-                                          >
-                                            删除索引后，无法根据此属性索引进行查询，请谨慎操作。
-                                          </p>
+                                          style={{
+                                            display: 'flex',
+                                            marginTop: 12,
+                                            color: '#2b65ff',
+                                            cursor: 'pointer'
+                                          }}
+                                        >
                                           <div
                                             style={{
-                                              display: 'flex',
-                                              marginTop: 12,
-                                              color: '#2b65ff',
+                                              marginRight: 16,
                                               cursor: 'pointer'
                                             }}
+                                            onClick={() => {
+                                              const removedPropertyIndex = cloneDeep(
+                                                edgeTypeStore
+                                                  .editedSelectedEdgeType
+                                                  .remove_property_indexes
+                                              );
+
+                                              removedPropertyIndex.push(
+                                                edgeTypeStore.selectedEdgeType!
+                                                  .property_indexes[index].name
+                                              );
+
+                                              edgeTypeStore.mutateEditedSelectedEdgeType(
+                                                {
+                                                  ...edgeTypeStore.editedSelectedEdgeType,
+                                                  remove_property_indexes: removedPropertyIndex
+                                                }
+                                              );
+
+                                              setDeleteExistPopIndexInDrawer(
+                                                null
+                                              );
+                                              edgeTypeStore.validateEditEdgeType(
+                                                true
+                                              );
+                                            }}
                                           >
-                                            <div
-                                              style={{
-                                                marginRight: 16,
-                                                cursor: 'pointer'
-                                              }}
-                                              onClick={() => {
-                                                const removedPropertyIndex = cloneDeep(
-                                                  edgeTypeStore
-                                                    .editedSelectedEdgeType
-                                                    .remove_property_indexes
-                                                );
-
-                                                removedPropertyIndex.push(
-                                                  edgeTypeStore.selectedEdgeType!
-                                                    .property_indexes[index]
-                                                    .name
-                                                );
-
-                                                edgeTypeStore.mutateEditedSelectedEdgeType(
-                                                  {
-                                                    ...edgeTypeStore.editedSelectedEdgeType,
-                                                    remove_property_indexes: removedPropertyIndex
-                                                  }
-                                                );
-
-                                                setDeleteExistPopIndexInDrawer(
-                                                  null
-                                                );
-                                                edgeTypeStore.validateEditEdgeType(
-                                                  true
-                                                );
-                                              }}
-                                            >
-                                              确认
-                                            </div>
-                                            <div
-                                              onClick={() => {
-                                                setDeleteExistPopIndexInDrawer(
-                                                  null
-                                                );
-                                              }}
-                                            >
-                                              取消
-                                            </div>
+                                            确认
+                                          </div>
+                                          <div
+                                            onClick={() => {
+                                              setDeleteExistPopIndexInDrawer(
+                                                null
+                                              );
+                                            }}
+                                          >
+                                            取消
                                           </div>
                                         </div>
                                       </div>
-                                    )}
-                                  >
-                                    {({ getTriggerProps, triggerRef }) => (
-                                      <img
-                                        {...getTriggerProps({
-                                          ref: triggerRef,
-                                          src: CloseIcon,
-                                          alt: 'close',
-                                          style: { cursor: 'pointer' },
-                                          onClick() {
-                                            setDeleteExistPopIndexInDrawer(
-                                              index
-                                            );
-                                          }
-                                        })}
-                                      />
-                                    )}
-                                  </TooltipTrigger>
+                                    }
+                                    childrenProps={{
+                                      src: CloseIcon,
+                                      alt: 'close',
+                                      style: { cursor: 'pointer' },
+                                      onClick() {
+                                        setDeleteExistPopIndexInDrawer(index);
+                                      }
+                                    }}
+                                    childrenWrapperElement="img"
+                                  />
                                 )}
                               </div>
                             </div>
@@ -1607,120 +1568,102 @@ const EdgeTypeList: React.FC = observer(() => {
                                       ))}
                                 </Select>
 
-                                <TooltipTrigger
+                                <Tooltip
+                                  placement="bottom-end"
                                   tooltipShown={
                                     index === deleteAddedPopIndexInDrawer
                                   }
-                                  placement="bottom-end"
-                                  tooltip={({
-                                    arrowRef,
-                                    tooltipRef,
-                                    getArrowProps,
-                                    getTooltipProps,
-                                    placement
-                                  }) => (
-                                    <div
-                                      {...getTooltipProps({
-                                        ref: tooltipRef,
-                                        className:
-                                          'metadata-properties-tooltips',
-                                        style: { zIndex: 1041 }
-                                      })}
-                                    >
+                                  modifiers={{
+                                    offset: {
+                                      offset: '0, 10'
+                                    }
+                                  }}
+                                  tooltipWrapperProps={{
+                                    className: 'metadata-properties-tooltips',
+                                    style: { zIndex: 1041 }
+                                  }}
+                                  tooltipWrapper={
+                                    <div ref={deleteWrapperInDrawerRef}>
+                                      <p
+                                        style={{
+                                          width: 200,
+                                          lineHeight: '28px'
+                                        }}
+                                      >
+                                        确认删除此属性？
+                                      </p>
+                                      <p
+                                        style={{
+                                          width: 200,
+                                          lineHeight: '28px'
+                                        }}
+                                      >
+                                        删除索引后，无法根据此属性索引进行查询，请谨慎操作。
+                                      </p>
                                       <div
-                                        {...getArrowProps({
-                                          ref: arrowRef,
-                                          className: 'tooltip-arrow',
-                                          'data-placement': placement
-                                        })}
-                                      />
-                                      <div ref={deleteWrapperInDrawerRef}>
-                                        <p
-                                          style={{
-                                            width: 200,
-                                            lineHeight: '28px'
-                                          }}
-                                        >
-                                          确认删除此属性？
-                                        </p>
-                                        <p
-                                          style={{
-                                            width: 200,
-                                            lineHeight: '28px'
-                                          }}
-                                        >
-                                          删除索引后，无法根据此属性索引进行查询，请谨慎操作。
-                                        </p>
+                                        style={{
+                                          display: 'flex',
+                                          marginTop: 12,
+                                          color: '#2b65ff',
+                                          cursor: 'pointer'
+                                        }}
+                                      >
                                         <div
                                           style={{
-                                            display: 'flex',
-                                            marginTop: 12,
-                                            color: '#2b65ff',
+                                            marginRight: 16,
                                             cursor: 'pointer'
                                           }}
+                                          onClick={() => {
+                                            const appendPropertyIndexes = cloneDeep(
+                                              edgeTypeStore.editedSelectedEdgeType!
+                                                .append_property_indexes
+                                            );
+
+                                            appendPropertyIndexes.splice(
+                                              index,
+                                              1
+                                            );
+
+                                            edgeTypeStore.mutateEditedSelectedEdgeType(
+                                              {
+                                                ...edgeTypeStore.editedSelectedEdgeType,
+                                                append_property_indexes: appendPropertyIndexes
+                                              }
+                                            );
+
+                                            setDeleteAddedPopIndexInDrawer(
+                                              null
+                                            );
+                                            edgeTypeStore.validateEditEdgeType(
+                                              true
+                                            );
+                                          }}
                                         >
-                                          <div
-                                            style={{
-                                              marginRight: 16,
-                                              cursor: 'pointer'
-                                            }}
-                                            onClick={() => {
-                                              const appendPropertyIndexes = cloneDeep(
-                                                edgeTypeStore.editedSelectedEdgeType!
-                                                  .append_property_indexes
-                                              );
-
-                                              appendPropertyIndexes.splice(
-                                                index,
-                                                1
-                                              );
-
-                                              edgeTypeStore.mutateEditedSelectedEdgeType(
-                                                {
-                                                  ...edgeTypeStore.editedSelectedEdgeType,
-                                                  append_property_indexes: appendPropertyIndexes
-                                                }
-                                              );
-
-                                              setDeleteAddedPopIndexInDrawer(
-                                                null
-                                              );
-                                              edgeTypeStore.validateEditEdgeType(
-                                                true
-                                              );
-                                            }}
-                                          >
-                                            确认
-                                          </div>
-                                          <div
-                                            onClick={() => {
-                                              edgeTypeStore.resetEditedSelectedEdgeType();
-                                              setDeleteAddedPopIndexInDrawer(
-                                                null
-                                              );
-                                            }}
-                                          >
-                                            取消
-                                          </div>
+                                          确认
+                                        </div>
+                                        <div
+                                          onClick={() => {
+                                            edgeTypeStore.resetEditedSelectedEdgeType();
+                                            setDeleteAddedPopIndexInDrawer(
+                                              null
+                                            );
+                                          }}
+                                        >
+                                          取消
                                         </div>
                                       </div>
                                     </div>
-                                  )}
-                                >
-                                  {({ getTriggerProps, triggerRef }) => (
-                                    <img
-                                      {...getTriggerProps({
-                                        ref: triggerRef,
-                                        src: CloseIcon,
-                                        alt: 'close',
-                                        style: { cursor: 'pointer' },
-                                        onClick() {
-                                          setDeleteAddedPopIndexInDrawer(index);
-                                        }
-                                      })}
-                                    />
-                                  )}
-                                </TooltipTrigger>
+                                  }
+                                  childrenProps={{
+                                    src: CloseIcon,
+                                    alt: 'close',
+                                    style: { cursor: 'pointer' },
+                                    onClick() {
+                                      setDeleteAddedPopIndexInDrawer(index);
+                                    }
+                                  }}
+                                  childrenWrapperElement="img"
+                                />
                               </div>
                             </div>
                           );

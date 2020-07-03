@@ -1,3 +1,4 @@
 import AppBar from './AppBar';
+import Tooltip from './Tooltip';
 
-export { AppBar };
+export { AppBar, Tooltip };

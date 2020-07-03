@@ -9,8 +9,8 @@ import { observer } from 'mobx-react';
 import { isUndefined } from 'lodash-es';
 import { Input, Button, Table, Modal, Select, Message } from '@baidu/one-ui';
 import Highlighter from 'react-highlight-words';
-import TooltipTrigger from 'react-popper-tooltip';
 
+import { Tooltip } from '../../../common';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore';
 import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
 import AddIcon from '../../../../assets/imgs/ic_add.svg';
@@ -22,8 +22,13 @@ import './MetadataProperties.less';
 import ReuseProperties from './ReuseProperties';
 
 const styles = {
-  marginLeft: '12px',
-  width: 78
+  button: {
+    marginLeft: '12px',
+    width: 78
+  },
+  extraMargin: {
+    marginRight: 4
+  }
 };
 
 const dataTypeOptions = [
@@ -222,7 +227,7 @@ const MetadataProperties: React.FC = observer(() => {
               }}
               dropdownClassName="data-analyze-sidebar-select"
             >
-              {dataTypeOptions.map(option => {
+              {dataTypeOptions.map((option) => {
                 return (
                   <Select.Option value={option} key={option}>
                     {option}
@@ -263,7 +268,7 @@ const MetadataProperties: React.FC = observer(() => {
               }}
               dropdownClassName="data-analyze-sidebar-select"
             >
-              {cardinalityOptions.map(option => {
+              {cardinalityOptions.map((option) => {
                 return (
                   <Select.Option value={option} key={option}>
                     {option}
@@ -339,6 +344,7 @@ const MetadataProperties: React.FC = observer(() => {
               </span>
               <span
                 className="metadata-properties-manipulation"
+                style={styles.extraMargin}
                 onClick={() => {
                   metadataPropertyStore.switchIsCreateNewProperty(false);
                   metadataPropertyStore.resetNewProperties();
@@ -356,120 +362,102 @@ const MetadataProperties: React.FC = observer(() => {
         }
 
         return (
-          <TooltipTrigger
+          <Tooltip
+            placement="bottom-end"
             tooltipShown={index === popIndex}
-            placement="bottom"
-            tooltip={({
-              arrowRef,
-              tooltipRef,
-              getArrowProps,
-              getTooltipProps,
-              placement
-            }) => (
-              <div
-                {...getTooltipProps({
-                  ref: tooltipRef,
-                  className: 'metadata-properties-tooltips'
-                })}
-              >
-                <div
-                  {...getArrowProps({
-                    ref: arrowRef,
-                    className: 'tooltip-arrow',
-                    'data-placement': placement
-                  })}
-                />
-                <div ref={deleteWrapperRef}>
-                  {metadataPropertyStore.metadataPropertyUsingStatus &&
-                  metadataPropertyStore.metadataPropertyUsingStatus[
-                    records.name
-                  ] ? (
-                    <p style={{ width: 200 }}>
-                      当前属性数据正在使用中，不可删除。
-                    </p>
-                  ) : (
-                    <>
-                      <p>确认删除此属性？</p>
-                      <p>删除后无法恢复，请谨慎操作。</p>
+            modifiers={{
+              offset: {
+                offset: '0, 10'
+              }
+            }}
+            tooltipWrapperProps={{
+              className: 'metadata-properties-tooltips'
+            }}
+            tooltipWrapper={
+              <div ref={deleteWrapperRef}>
+                {metadataPropertyStore.metadataPropertyUsingStatus &&
+                metadataPropertyStore.metadataPropertyUsingStatus[
+                  records.name
+                ] ? (
+                  <p style={{ width: 200 }}>
+                    当前属性数据正在使用中，不可删除。
+                  </p>
+                ) : (
+                  <>
+                    <p>确认删除此属性？</p>
+                    <p>删除后无法恢复，请谨慎操作。</p>
+                    <div
+                      style={{
+                        display: 'flex',
+                        marginTop: 12,
+                        color: '#2b65ff',
+                        cursor: 'pointer'
+                      }}
+                    >
                       <div
-                        style={{
-                          display: 'flex',
-                          marginTop: 12,
-                          color: '#2b65ff',
-                          cursor: 'pointer'
+                        style={{ marginRight: 16, cursor: 'pointer' }}
+                        onClick={async () => {
+                          setPopIndex(null);
+
+                          await metadataPropertyStore.deleteMetadataProperty([
+                            index
+                          ]);
+
+                          if (
+                            metadataPropertyStore.requestStatus
+                              .deleteMetadataProperty === 'success'
+                          ) {
+                            Message.success({
+                              content: '已删除未使用项',
+                              size: 'medium',
+                              showCloseIcon: false
+                            });
+
+                            metadataPropertyStore.fetchMetadataPropertyList();
+                          }
+
+                          if (
+                            metadataPropertyStore.requestStatus
+                              .deleteMetadataProperty === 'failed'
+                          ) {
+                            Message.error({
+                              content: metadataPropertyStore.errorMessage,
+                              size: 'medium',
+                              showCloseIcon: false
+                            });
+                          }
                         }}
                       >
-                        <div
-                          style={{ marginRight: 16, cursor: 'pointer' }}
-                          onClick={async () => {
-                            setPopIndex(null);
-
-                            await metadataPropertyStore.deleteMetadataProperty([
-                              index
-                            ]);
-
-                            if (
-                              metadataPropertyStore.requestStatus
-                                .deleteMetadataProperty === 'success'
-                            ) {
-                              Message.success({
-                                content: '已删除未使用项',
-                                size: 'medium',
-                                showCloseIcon: false
-                              });
-
-                              metadataPropertyStore.fetchMetadataPropertyList();
-                            }
-
-                            if (
-                              metadataPropertyStore.requestStatus
-                                .deleteMetadataProperty === 'failed'
-                            ) {
-                              Message.error({
-                                content: metadataPropertyStore.errorMessage,
-                                size: 'medium',
-                                showCloseIcon: false
-                              });
-                            }
-                          }}
-                        >
-                          确认
-                        </div>
-                        <div
-                          onClick={() => {
-                            setPopIndex(null);
-                          }}
-                        >
-                          取消
-                        </div>
+                        确认
                       </div>
-                    </>
-                  )}
-                </div>
+                      <div
+                        onClick={() => {
+                          setPopIndex(null);
+                        }}
+                      >
+                        取消
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
-            )}
-          >
-            {({ getTriggerProps, triggerRef }) => (
-              <span
-                {...getTriggerProps({
-                  ref: triggerRef,
-                  className: 'metadata-properties-manipulation',
-                  async onClick() {
-                    await metadataPropertyStore.checkIfUsing([index]);
+            }
+            childrenProps={{
+              className: 'metadata-properties-manipulation',
+              style: styles.extraMargin,
+              async onClick() {
+                await metadataPropertyStore.checkIfUsing([index]);
 
-                    if (
-                      metadataPropertyStore.requestStatus.checkIfUsing ===
-                      'success'
-                    ) {
-                      setPopIndex(index);
-                    }
-                  }
-                })}
-              >
-                删除
-              </span>
-            )}
-          </TooltipTrigger>
+                if (
+                  metadataPropertyStore.requestStatus.checkIfUsing === 'success'
+                ) {
+                  setPopIndex(index);
+                }
+              }
+            }}
+          >
+            删除
+          </Tooltip>
         );
       }
     }
@@ -568,7 +556,7 @@ const MetadataProperties: React.FC = observer(() => {
             <Button
               type="primary"
               size="medium"
-              style={styles}
+              style={styles.button}
               disabled={
                 metadataPropertyStore.isCreateNewProperty ||
                 selectedRowKeys.length !== 0
@@ -581,7 +569,7 @@ const MetadataProperties: React.FC = observer(() => {
             </Button>
             <Button
               size="medium"
-              style={styles}
+              style={styles.button}
               disabled={metadataPropertyStore.isCreateNewProperty}
               onClick={() => {
                 mutateSelectedRowKeys([]);
