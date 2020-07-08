@@ -666,7 +666,7 @@ const VertexMap: React.FC<VertexMapProps> = observer(
                           : dataMapStore.newVertexType.null_values.checked
                       }
                     >
-                      <Checkbox value="NULL">Nullable</Checkbox>
+                      <Checkbox value="NULL">NULL/null</Checkbox>
                       <Checkbox value={''}>
                         {t(
                           'data-configs.type.vertex.advance.nullable-list.empty'

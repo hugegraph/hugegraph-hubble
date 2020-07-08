@@ -808,7 +808,7 @@ const EdgeMap: React.FC<EdgeMapProps> = observer(
                           : dataMapStore.newEdgeType.null_values.checked
                       }
                     >
-                      <Checkbox value="NULL">Nullable</Checkbox>
+                      <Checkbox value="NULL">NULL/null</Checkbox>
                       <Checkbox value={''}>
                         {t(
                           'data-configs.type.edge.advance.nullable-list.empty'
