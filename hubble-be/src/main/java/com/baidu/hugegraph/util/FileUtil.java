@@ -49,6 +49,12 @@ public final class FileUtil {
         try {
             FileReader fileReader = new FileReader(file);
             lineReader = new LineNumberReader(fileReader);
+            /*
+             * The last character may be an EOL or a non-EOL character.
+             * If it is the EOL, need to add 1 line; if it is the non-EOL,
+             * also need to add 1 line, because the next character means the EOF
+             * and should also be counted as a line.
+             */
             lineReader.skip(fileLength - 1);
             return lineReader.getLineNumber() + 1;
         } catch (IOException e) {
