@@ -41,7 +41,7 @@ public final class HugeClientUtil {
         String username = connection.getUsername();
         String password = connection.getPassword();
         int timeout = connection.getTimeout();
-        String protocol = (connection.getProtocol() == null) ?
+        String protocol = connection.getProtocol() == null ?
                           DEFAULT_PROTOCOL :
                           connection.getProtocol();
         String trustStoreFile = connection.getTrustStoreFile();
