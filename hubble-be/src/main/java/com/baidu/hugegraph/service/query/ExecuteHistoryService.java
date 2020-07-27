@@ -27,9 +27,14 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.baidu.hugegraph.config.HugeConfig;
+import com.baidu.hugegraph.driver.HugeClient;
+import com.baidu.hugegraph.entity.enums.AsyncTaskStatus;
+import com.baidu.hugegraph.entity.enums.ExecuteType;
 import com.baidu.hugegraph.entity.query.ExecuteHistory;
 import com.baidu.hugegraph.mapper.query.ExecuteHistoryMapper;
 import com.baidu.hugegraph.options.HubbleOptions;
+import com.baidu.hugegraph.service.HugeClientPoolService;
+import com.baidu.hugegraph.structure.Task;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -45,8 +50,15 @@ public class ExecuteHistoryService {
     private HugeConfig config;
     @Autowired
     private ExecuteHistoryMapper mapper;
+    @Autowired
+    private HugeClientPoolService poolService;
+
+    private HugeClient getClient(int connId) {
+        return this.poolService.getOrCreate(connId);
+    }
 
     public IPage<ExecuteHistory> list(int connId, long current, long pageSize) {
+        HugeClient client = this.getClient(connId);
         QueryWrapper<ExecuteHistory> query = Wrappers.query();
         query.eq("conn_id", connId).orderByDesc("create_time");
         Page<ExecuteHistory> page = new Page<>(current, pageSize);
@@ -57,11 +69,39 @@ public class ExecuteHistoryService {
             log.debug("Execute history total records: {}", results.getTotal());
             results.setTotal(limit);
         }
+        // Get the status of successful execution of asynchronous tasks
+        results.getRecords().forEach((p) -> {
+            if (p.getType().equals(ExecuteType.GREMLIN_ASYNC)) {
+                try {
+                    Task task = client.task().get(p.getAsyncId());
+                    p.setDuration(task.updateTime() - task.createTime());
+                    p.setAsyncStatus(AsyncTaskStatus.valueOf(task.status().toUpperCase()));
+                } catch (Exception e) {
+                    p.setDuration(0L);
+                    p.setAsyncStatus(AsyncTaskStatus.UNKNOWN);
+                }
+
+            }
+        });
         return results;
     }
 
-    public ExecuteHistory get(int id) {
-        return this.mapper.selectById(id);
+
+    public ExecuteHistory get(int connId, int id) {
+        HugeClient client = this.getClient(connId);
+        ExecuteHistory history = this.mapper.selectById(id);
+        if (history.getType().equals(ExecuteType.GREMLIN_ASYNC)) {
+            try {
+                Task task = client.task().get(history.getAsyncId());
+                history.setDuration(task.updateTime() - task.createTime());
+                history.setAsyncStatus(AsyncTaskStatus.valueOf(task.status().toUpperCase()));
+            } catch (Exception e) {
+                history.setDuration(0L);
+                history.setAsyncStatus(AsyncTaskStatus.UNKNOWN);
+            }
+
+        }
+        return history;
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -75,7 +115,12 @@ public class ExecuteHistoryService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public int remove(int id) {
+    public int remove(int connId, int id) {
+        ExecuteHistory history = this.mapper.selectById(id);
+        HugeClient client = this.getClient(connId);
+        if (history.getType().equals(ExecuteType.GREMLIN_ASYNC)) {
+            client.task().delete(history.getAsyncId());
+        }
         return this.mapper.deleteById(id);
     }
 
