@@ -7,17 +7,16 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react';
 import { isUndefined } from 'lodash-es';
+import { motion } from 'framer-motion';
 import { Input, Button, Table, Modal, Select, Message } from '@baidu/one-ui';
 import Highlighter from 'react-highlight-words';
 
-import { Tooltip } from '../../../common';
+import { Tooltip, LoadingDataView } from '../../../common';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore';
 import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
 import AddIcon from '../../../../assets/imgs/ic_add.svg';
 import CloseIcon from '../../../../assets/imgs/ic_close_16.svg';
 import WhiteCloseIcon from '../../../../assets/imgs/ic_close_white.svg';
-import LoadingBackIcon from '../../../../assets/imgs/ic_loading_back.svg';
-import LoadingFrontIcon from '../../../../assets/imgs/ic_loading_front.svg';
 import './MetadataProperties.less';
 import ReuseProperties from './ReuseProperties';
 
@@ -46,6 +45,24 @@ const dataTypeOptions = [
 
 const cardinalityOptions = ['single', 'list', 'set'];
 
+const variants = {
+  initial: {
+    opacity: 0
+  },
+  animate: {
+    opacity: 1,
+    transition: {
+      duration: 0.7
+    }
+  },
+  exit: {
+    opacity: 0,
+    transition: {
+      duration: 0.3
+    }
+  }
+};
+
 const MetadataProperties: React.FC = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const metadataConfigsRootStore = useContext(MetadataConfigsRootStore);
@@ -56,6 +73,10 @@ const MetadataProperties: React.FC = observer(() => {
   const [isShowModal, switchShowModal] = useState(false);
   const [popIndex, setPopIndex] = useState<number | null>(null);
   const deleteWrapperRef = useRef<HTMLDivElement>(null);
+
+  const isLoading =
+    preLoading ||
+    metadataPropertyStore.requestStatus.fetchMetadataPropertyList === 'pending';
 
   const printError = () => {
     Message.error({
@@ -511,212 +532,214 @@ const MetadataProperties: React.FC = observer(() => {
     };
   }, [handleOutSideClick]);
 
-  if (metadataPropertyStore.currentTabStatus === 'empty') {
-    return <EmptyPropertyHints />;
-  }
+  // if (metadataPropertyStore.currentTabStatus === 'empty') {
+  //   return <EmptyPropertyHints />;
+  // }
 
   if (metadataPropertyStore.currentTabStatus === 'reuse') {
     return <ReuseProperties />;
   }
 
   return (
-    <div className="metadata-configs-content-wrapper metadata-properties">
-      {preLoading ||
-      metadataPropertyStore.requestStatus.fetchMetadataPropertyList ===
-        'pending' ? (
-        <div className="metadata-configs-content-loading-wrapper">
-          <div className="metadata-configs-content-loading-bg">
-            <img
-              className="metadata-configs-content-loading-back"
-              src={LoadingBackIcon}
-              alt="加载背景"
-            />
-            <img
-              className="metadata-configs-content-loading-front"
-              src={LoadingFrontIcon}
-              alt="加载 spinner"
-            />
-          </div>
-          <span>数据加载中...</span>
-        </div>
-      ) : (
-        <>
-          <div className="metadata-configs-content-header">
-            <Input.Search
-              size="medium"
-              width={200}
-              placeholder="请输入搜索关键字"
-              value={metadataPropertyStore.searchWords}
-              onChange={handleSearchChange}
-              onSearch={handleSearch}
-              onClearClick={handleClearSearch}
-              isShowDropDown={false}
-              disabled={selectedRowKeys.length !== 0}
-            />
-            <Button
-              type="primary"
-              size="medium"
-              style={styles.button}
-              disabled={
-                metadataPropertyStore.isCreateNewProperty ||
-                selectedRowKeys.length !== 0
-              }
-              onClick={() => {
-                metadataPropertyStore.switchIsCreateNewProperty(true);
-              }}
-            >
-              创建
-            </Button>
-            <Button
-              size="medium"
-              style={styles.button}
-              disabled={metadataPropertyStore.isCreateNewProperty}
-              onClick={() => {
-                mutateSelectedRowKeys([]);
-                metadataPropertyStore.changeCurrentTabStatus('reuse');
-              }}
-            >
-              复用
-            </Button>
-          </div>
-          {selectedRowKeys.length !== 0 && (
-            <div className="metadata-properties-selected-reveals">
-              <div>已选{selectedRowKeys.length}项</div>
-              <Button
-                onClick={() => {
-                  switchShowModal(true);
-                  metadataPropertyStore.checkIfUsing(selectedRowKeys);
-                }}
-              >
-                批量删除
-              </Button>
-              <img
-                src={WhiteCloseIcon}
-                alt="关闭"
-                onClick={() => {
-                  mutateSelectedRowKeys([]);
-                }}
-              />
-            </div>
-          )}
-          <Table
-            columns={columnConfigs}
-            rowSelection={{
-              selectedRowKeys,
-              onChange: handleSelectedTableRow
-            }}
-            onSortClick={handleSortClick}
-            dataSource={
-              metadataPropertyStore.isCreateNewProperty
-                ? metadataPropertyStore.reunionMetadataProperty
-                : metadataPropertyStore.metadataProperties
-            }
-            pagination={{
-              hideOnSinglePage: false,
-              pageNo:
-                metadataPropertyStore.metadataPropertyPageConfig.pageNumber,
-              pageSize: 10,
-              showSizeChange: false,
-              showPageJumper: false,
-              total: metadataPropertyStore.metadataPropertyPageConfig.pageTotal,
-              onPageNoChange: handlePageChange
-            }}
+    <motion.div
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      variants={variants}
+    >
+      <div className="metadata-configs-content-wrapper metadata-properties">
+        <div className="metadata-configs-content-header">
+          <Input.Search
+            size="medium"
+            width={200}
+            placeholder="请输入搜索关键字"
+            value={metadataPropertyStore.searchWords}
+            onChange={handleSearchChange}
+            onSearch={handleSearch}
+            onClearClick={handleClearSearch}
+            isShowDropDown={false}
+            disabled={isLoading || selectedRowKeys.length !== 0}
           />
-          <Modal
-            visible={isShowModal}
-            needCloseIcon={false}
-            okText="删除"
-            cancelText="取消"
-            onOk={batchDeleteProperties}
-            buttonSize="medium"
-            onCancel={() => {
-              switchShowModal(false);
+          <Button
+            type="primary"
+            size="medium"
+            style={styles.button}
+            disabled={
+              isLoading ||
+              metadataPropertyStore.isCreateNewProperty ||
+              selectedRowKeys.length !== 0
+            }
+            onClick={() => {
+              metadataPropertyStore.switchIsCreateNewProperty(true);
             }}
           >
-            <div className="metadata-properties-modal">
-              <div className="metadata-title metadata-properties-modal-title">
-                <span>确认删除</span>
-                <img
-                  src={CloseIcon}
-                  alt="关闭"
-                  onClick={() => {
-                    switchShowModal(false);
-                  }}
-                />
-              </div>
-              <div className="metadata-properties-modal-description">
-                使用中属性不可删除，确认删除以下未使用属性？
-              </div>
-              <Table
-                columns={[
-                  {
-                    title: '属性名称',
-                    dataIndex: 'name',
-                    render(text: string, records: Record<string, any>) {
-                      return (
-                        <span
-                          style={{ color: records.status ? '#999' : '#333' }}
-                        >
-                          {text}
-                        </span>
-                      );
-                    }
-                  },
-                  {
-                    title: '状态',
-                    dataIndex: 'status',
-                    render(isUsing: boolean) {
-                      return (
-                        <div
-                          className={
-                            isUsing
-                              ? 'property-status-is-using'
-                              : 'property-status-not-used'
-                          }
-                        >
-                          {isUsing ? '使用中' : '未使用'}
-                        </div>
-                      );
-                    }
-                  }
-                ]}
-                dataSource={selectedRowKeys
-                  .map((rowNumber: number) => {
-                    // data in selectedRowKeys[index] could be non-exist in circustance that response data length don't match
-                    // so pointer(index) could out of bounds
-                    if (
-                      !isUndefined(
-                        metadataPropertyStore.metadataProperties[rowNumber]
-                      )
-                    ) {
-                      const name =
-                        metadataPropertyStore.metadataProperties[rowNumber]
-                          .name;
-
-                      return {
-                        name,
-                        status:
-                          metadataPropertyStore.metadataPropertyUsingStatus !==
-                            null &&
-                          metadataPropertyStore.metadataPropertyUsingStatus[
-                            name
-                          ]
-                      };
-                    }
-
-                    return {
-                      name: '',
-                      status: false
-                    };
-                  })
-                  .filter(({ name }) => name !== '')}
-                pagination={false}
+            创建
+          </Button>
+          <Button
+            size="medium"
+            style={styles.button}
+            disabled={isLoading || metadataPropertyStore.isCreateNewProperty}
+            onClick={() => {
+              mutateSelectedRowKeys([]);
+              metadataPropertyStore.changeCurrentTabStatus('reuse');
+            }}
+          >
+            复用
+          </Button>
+        </div>
+        {selectedRowKeys.length !== 0 && (
+          <div className="metadata-properties-selected-reveals">
+            <div>已选{selectedRowKeys.length}项</div>
+            <Button
+              onClick={() => {
+                switchShowModal(true);
+                metadataPropertyStore.checkIfUsing(selectedRowKeys);
+              }}
+            >
+              批量删除
+            </Button>
+            <img
+              src={WhiteCloseIcon}
+              alt="关闭"
+              onClick={() => {
+                mutateSelectedRowKeys([]);
+              }}
+            />
+          </div>
+        )}
+        <Table
+          columns={columnConfigs}
+          locale={{
+            emptyText: (
+              <LoadingDataView
+                isLoading={isLoading}
+                emptyView={
+                  metadataPropertyStore.isSearched.status ? (
+                    <span>无结果</span>
+                  ) : (
+                    <EmptyPropertyHints />
+                  )
+                }
+              />
+            )
+          }}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: handleSelectedTableRow
+          }}
+          onSortClick={handleSortClick}
+          dataSource={
+            isLoading
+              ? []
+              : metadataPropertyStore.isCreateNewProperty
+              ? metadataPropertyStore.reunionMetadataProperty
+              : metadataPropertyStore.metadataProperties
+          }
+          pagination={
+            isLoading
+              ? null
+              : {
+                  hideOnSinglePage: false,
+                  pageNo:
+                    metadataPropertyStore.metadataPropertyPageConfig.pageNumber,
+                  pageSize: 10,
+                  showSizeChange: false,
+                  showPageJumper: false,
+                  total:
+                    metadataPropertyStore.metadataPropertyPageConfig.pageTotal,
+                  onPageNoChange: handlePageChange
+                }
+          }
+        />
+        <Modal
+          visible={isShowModal}
+          needCloseIcon={false}
+          okText="删除"
+          cancelText="取消"
+          onOk={batchDeleteProperties}
+          buttonSize="medium"
+          onCancel={() => {
+            switchShowModal(false);
+          }}
+        >
+          <div className="metadata-properties-modal">
+            <div className="metadata-title metadata-properties-modal-title">
+              <span>确认删除</span>
+              <img
+                src={CloseIcon}
+                alt="关闭"
+                onClick={() => {
+                  switchShowModal(false);
+                }}
               />
             </div>
-          </Modal>
-        </>
-      )}
-    </div>
+            <div className="metadata-properties-modal-description">
+              使用中属性不可删除，确认删除以下未使用属性？
+            </div>
+            <Table
+              columns={[
+                {
+                  title: '属性名称',
+                  dataIndex: 'name',
+                  render(text: string, records: Record<string, any>) {
+                    return (
+                      <span style={{ color: records.status ? '#999' : '#333' }}>
+                        {text}
+                      </span>
+                    );
+                  }
+                },
+                {
+                  title: '状态',
+                  dataIndex: 'status',
+                  render(isUsing: boolean) {
+                    return (
+                      <div
+                        className={
+                          isUsing
+                            ? 'property-status-is-using'
+                            : 'property-status-not-used'
+                        }
+                      >
+                        {isUsing ? '使用中' : '未使用'}
+                      </div>
+                    );
+                  }
+                }
+              ]}
+              dataSource={selectedRowKeys
+                .map((rowNumber: number) => {
+                  // data in selectedRowKeys[index] could be non-exist in circustance that response data length don't match
+                  // so pointer(index) could out of bounds
+                  if (
+                    !isUndefined(
+                      metadataPropertyStore.metadataProperties[rowNumber]
+                    )
+                  ) {
+                    const name =
+                      metadataPropertyStore.metadataProperties[rowNumber].name;
+
+                    return {
+                      name,
+                      status:
+                        metadataPropertyStore.metadataPropertyUsingStatus !==
+                          null &&
+                        metadataPropertyStore.metadataPropertyUsingStatus[name]
+                    };
+                  }
+
+                  return {
+                    name: '',
+                    status: false
+                  };
+                })
+                .filter(({ name }) => name !== '')}
+              pagination={false}
+            />
+          </div>
+        </Modal>
+      </div>
+    </motion.div>
   );
 });
 
@@ -724,56 +747,56 @@ const EmptyPropertyHints: React.FC = observer(() => {
   const { metadataPropertyStore } = useContext(MetadataConfigsRootStore);
 
   return (
+    // <div
+    //   className="metadata-configs-content-wrapper"
+    //   style={{
+    //     height: 'calc(100vh - 201px)',
+    //     display: 'flex',
+    //     justifyContent: 'center',
+    //     alignItems: 'center'
+    //   }}
+    // >
     <div
-      className="metadata-configs-content-wrapper"
       style={{
-        height: 'calc(100vh - 201px)',
         display: 'flex',
-        justifyContent: 'center',
+        flexDirection: 'column',
         alignItems: 'center'
       }}
     >
+      <img src={AddIcon} alt="Add new property" />
+      <div style={{ marginTop: 8, fontSize: 14 }}>
+        您暂时还没有任何属性，立即创建
+      </div>
       <div
         style={{
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center'
+          justifyContent: 'space-between',
+          marginTop: 24
         }}
       >
-        <img src={AddIcon} alt="Add new property" />
-        <div style={{ marginTop: 8, fontSize: 14 }}>
-          您暂时还没有任何属性，立即创建
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginTop: 24
+        <Button
+          type="primary"
+          size="large"
+          style={{ width: 112, marginRight: 16 }}
+          onClick={() => {
+            metadataPropertyStore.switchIsCreateNewProperty(true);
+            metadataPropertyStore.changeCurrentTabStatus('list');
           }}
         >
-          <Button
-            type="primary"
-            size="large"
-            style={{ width: 112, marginRight: 16 }}
-            onClick={() => {
-              metadataPropertyStore.switchIsCreateNewProperty(true);
-              metadataPropertyStore.changeCurrentTabStatus('list');
-            }}
-          >
-            创建属性
-          </Button>
-          <Button
-            size="large"
-            style={{ width: 144 }}
-            onClick={() => {
-              metadataPropertyStore.changeCurrentTabStatus('reuse');
-            }}
-          >
-            复用已有属性
-          </Button>
-        </div>
+          创建属性
+        </Button>
+        <Button
+          size="large"
+          style={{ width: 144 }}
+          onClick={() => {
+            metadataPropertyStore.changeCurrentTabStatus('reuse');
+          }}
+        >
+          复用已有属性
+        </Button>
       </div>
     </div>
+    // </div>
   );
 });
 

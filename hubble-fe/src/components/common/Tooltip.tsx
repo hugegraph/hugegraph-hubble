@@ -1,4 +1,4 @@
-import React, { ReactHTML } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react';
 import TooltipTrigger, { Trigger } from 'react-popper-tooltip';
 import 'react-popper-tooltip/dist/styles.css';
@@ -12,6 +12,7 @@ export interface TooltipProps {
   modifiers?: Modifiers;
   tooltipWrapper: React.ReactNode;
   tooltipWrapperProps?: any;
+  tooltipArrowClassName?: string;
   childrenWrapperElement?: 'div' | 'span' | 'img';
   childrenProps?: any;
   children?: React.ReactNode;
@@ -26,6 +27,7 @@ const Tooltip: React.FC<TooltipProps> = observer(
     children,
     tooltipWrapper,
     tooltipWrapperProps,
+    tooltipArrowClassName,
     childrenWrapperElement = 'span',
     childrenProps
   }) => (
@@ -50,7 +52,7 @@ const Tooltip: React.FC<TooltipProps> = observer(
           <div
             {...getArrowProps({
               ref: arrowRef,
-              className: 'tooltip-arrow',
+              className: 'tooltip-arrow ' + (tooltipArrowClassName || ''),
               'data-placement': placement
             })}
           />

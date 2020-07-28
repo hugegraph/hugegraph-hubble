@@ -28,12 +28,17 @@ const TypeConfigs: React.FC = observer(() => {
     isEmpty(dataMapStore.selectedFileInfo?.vertex_mappings) &&
     isEmpty(dataMapStore.selectedFileInfo?.edge_mappings);
 
-  const invalidFileMaps = dataMapStore.fileMapInfos.filter(
-    ({ name, vertex_mappings, edge_mappings }) =>
-      dataImportRootStore.successFileUploadTaskNames.includes(name) &&
-      isEmpty(vertex_mappings) &&
-      isEmpty(edge_mappings)
-  );
+  const invalidFileMaps = !dataMapStore.isIrregularProcess
+    ? dataMapStore.fileMapInfos.filter(
+        ({ name, vertex_mappings, edge_mappings }) =>
+          dataImportRootStore.successFileUploadTaskNames.includes(name) &&
+          isEmpty(vertex_mappings) &&
+          isEmpty(edge_mappings)
+      )
+    : dataMapStore.fileMapInfos.filter(
+        ({ vertex_mappings, edge_mappings }) =>
+          isEmpty(vertex_mappings) && isEmpty(edge_mappings)
+      );
 
   const expandClassName = classnames({
     'import-tasks-step-content-header-expand': isExpand,
@@ -81,7 +86,7 @@ const TypeConfigs: React.FC = observer(() => {
           className={expandClassName}
           onClick={handleExpand}
         />
-        {!shouldRevealInitalButtons && (
+        {!dataMapStore.readOnly && !shouldRevealInitalButtons && (
           <TypeConfigMapCreations
             onCreateVertex={handleCreate('vertex', true)}
             onCreateEdge={handleCreate('edge', true)}
@@ -94,7 +99,7 @@ const TypeConfigs: React.FC = observer(() => {
           />
         )}
       </div>
-      {shouldRevealInitalButtons && (
+      {!dataMapStore.readOnly && shouldRevealInitalButtons && (
         <TypeConfigMapCreations
           onCreateVertex={handleCreate('vertex', true)}
           onCreateEdge={handleCreate('edge', true)}
@@ -126,52 +131,61 @@ const TypeConfigs: React.FC = observer(() => {
             .reverse()}
         </>
       )}
-      <div className="import-tasks-data-map-manipulations">
-        {!serverDataImportStore.isServerStartImport && (
-          <Button
-            size="medium"
-            style={{ marginRight: 16 }}
-            onClick={() => {
-              dataImportRootStore.setCurrentStep(1);
+      {!dataMapStore.readOnly && (
+        <div className="import-tasks-data-map-manipulations">
+          {!serverDataImportStore.isServerStartImport && (
+            <Button
+              size="medium"
+              style={{ marginRight: 16 }}
+              onClick={() => {
+                dataImportRootStore.setCurrentStep(1);
+              }}
+              disabled={
+                // disable previous when it's irregular process
+                dataMapStore.isIrregularProcess ||
+                serverDataImportStore.isIrregularProcess
+              }
+            >
+              {t('data-configs.manipulations.previous')}
+            </Button>
+          )}
+          <Tooltip
+            trigger="hover"
+            placement="top-start"
+            modifiers={{
+              offset: {
+                offset: '0, 10'
+              }
             }}
-          >
-            {t('data-configs.manipulations.previous')}
-          </Button>
-        )}
-        <Tooltip
-          trigger="hover"
-          placement="top-start"
-          modifiers={{
-            offset: {
-              offset: '0, 10'
+            tooltipWrapperProps={{
+              className: nextButtonTooltipClassName
+            }}
+            tooltipWrapper={
+              <>
+                <div className="import-tasks-data-map-tooltip-text">
+                  {t('data-configs.type.hint.no-vertex-or-edge-mapping')}
+                </div>
+                {invalidFileMaps.map(({ name }) => (
+                  <div className="import-tasks-data-map-tooltip-text">
+                    {name}
+                  </div>
+                ))}
+              </>
             }
-          }}
-          tooltipWrapperProps={{
-            className: nextButtonTooltipClassName
-          }}
-          tooltipWrapper={
-            <>
-              <div className="import-tasks-data-map-tooltip-text">
-                {t('data-configs.type.hint.no-vertex-or-edge-mapping')}
-              </div>
-              {invalidFileMaps.map(({ name }) => (
-                <div className="import-tasks-data-map-tooltip-text">{name}</div>
-              ))}
-            </>
-          }
-        >
-          <Button
-            type="primary"
-            size="medium"
-            disabled={size(invalidFileMaps) !== 0}
-            onClick={() => {
-              dataImportRootStore.setCurrentStep(3);
-            }}
           >
-            {t('data-configs.manipulations.next')}
-          </Button>
-        </Tooltip>
-      </div>
+            <Button
+              type="primary"
+              size="medium"
+              disabled={size(invalidFileMaps) !== 0}
+              onClick={() => {
+                dataImportRootStore.setCurrentStep(3);
+              }}
+            >
+              {t('data-configs.manipulations.next')}
+            </Button>
+          </Tooltip>
+        </div>
+      )}
     </div>
   );
 });

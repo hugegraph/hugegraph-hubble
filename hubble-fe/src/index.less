@@ -64,6 +64,46 @@ code {
   padding: 28px 24px 24px;
 }
 
+.tooltips-dark {
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border-color: transparent;
+  padding: 4px 8px;
+  color: #fff;
+  line-height: 18px;
+  font-size: 12px;
+  max-width: 240px;
+  word-wrap: break-word;
+
+  // override tooltip-arrow
+  .tooltip-arrow {
+    height: 5.65px;
+    width: 5.65px;
+    position: absolute;
+
+    &::after {
+      border-style: initial;
+    }
+  }
+
+  .tooltip-arrow[data-placement*='bottom'] {
+    margin-top: -0.3rem;
+  }
+
+  .tooltip-arrow[data-placement*='bottom']::before {
+    border-color: transparent transparent rgba(0, 0, 0, 0.8) transparent;
+    border-width: 0 0.5rem 0.4rem 0.5rem;
+    position: absolute;
+    top: -1px;
+  }
+
+  .tooltip-arrow[data-placement*='bottom']::after {
+    border-color: transparent transparent rgba(0, 0, 0, 0.8) transparent;
+    // border-color: rgba(0, 0, 0, 0.8);
+    border-width: 0 0.5rem 0.4rem 0.5rem;
+  }
+}
+
 .no-line-break {
   overflow: hidden;
   text-overflow: ellipsis;

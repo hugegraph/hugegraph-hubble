@@ -510,7 +510,7 @@ const NewVertexType: React.FC = observer(() => {
         >
           <span style={{ marginRight: 5 }}>索引信息</span>
           <Tooltip
-            placement="right"
+            placement="bottom"
             title="开启索引会影响使用性能，请按需开启"
             type="dark"
           >

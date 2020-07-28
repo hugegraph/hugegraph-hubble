@@ -1476,19 +1476,36 @@ const VertexMap: React.FC<VertexMapProps> = observer(
               !dataMapStore.allowAddPropertyMapping('vertex') ||
               !dataMapStore.isValidateSave
             }
-            onCreate={() => {
+            onCreate={async () => {
               dataMapStore.switchAddNewTypeConfig(false);
               dataMapStore.switchEditTypeConfig(false);
 
-              isEdit
-                ? dataMapStore.updateVertexMap(
-                    'upgrade',
-                    dataMapStore.selectedFileId
-                  )
-                : dataMapStore.updateVertexMap(
-                    'add',
-                    dataMapStore.selectedFileId
-                  );
+              // really weird! if import task comes from import-manager
+              // datamapStore.fileMapInfos cannot be updated in <TypeConfigs />
+              // though it's already re-rendered
+              if (dataMapStore.isIrregularProcess) {
+                isEdit
+                  ? await dataMapStore.updateVertexMap(
+                      'upgrade',
+                      dataMapStore.selectedFileId
+                    )
+                  : await dataMapStore.updateVertexMap(
+                      'add',
+                      dataMapStore.selectedFileId
+                    );
+
+                dataMapStore.fetchDataMaps();
+              } else {
+                isEdit
+                  ? dataMapStore.updateVertexMap(
+                      'upgrade',
+                      dataMapStore.selectedFileId
+                    )
+                  : dataMapStore.updateVertexMap(
+                      'add',
+                      dataMapStore.selectedFileId
+                    );
+              }
 
               onCancelCreateVertex();
               dataMapStore.resetNewMap('vertex');
