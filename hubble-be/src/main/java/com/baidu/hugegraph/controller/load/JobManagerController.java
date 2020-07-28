@@ -146,6 +146,9 @@ public class JobManagerController {
                              @RequestBody JobManager newEntity) {
         Ex.check(newEntity.getJobName().length() <= 48,
                  "job.manager.job-name.reached-limit");
+        Ex.check(newEntity.getJobName() != null, () ->
+                        Constant.COMMON_NAME_PATTERN.matcher(newEntity.getJobName()).matches(),
+                "job.manager.job-name.unmatch-regex");
         Ex.check(newEntity.getJobRemarks().length() <= 200,
                  "job.manager.job-remarks.reached-limit");
         // Check exist Job Manager with this id
