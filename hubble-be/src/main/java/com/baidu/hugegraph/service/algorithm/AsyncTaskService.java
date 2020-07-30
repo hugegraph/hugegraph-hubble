@@ -70,7 +70,7 @@ public class AsyncTaskService {
                 continue;
             }
             if (!content.isEmpty() &&
-               !(content.contains(node.id() + "") || content.contains(node.name()))) {
+               !(content.equals(node.id() + "") || content.equals(node.name()))) {
                 continue;
             }
             result.add(node);

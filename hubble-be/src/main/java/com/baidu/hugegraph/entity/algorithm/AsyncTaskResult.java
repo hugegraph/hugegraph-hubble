@@ -15,8 +15,12 @@ import lombok.NoArgsConstructor;
 public class AsyncTaskResult {
 
     @MergeProperty
-    @JsonProperty("task_id")
-    private Integer taskId;
+    @JsonProperty("id")
+    private Integer id;
+
+    @MergeProperty
+    @JsonProperty("task_name")
+    private String taskName;
 
     @MergeProperty
     @JsonProperty("task_progress")
@@ -27,8 +31,12 @@ public class AsyncTaskResult {
     private String taskStatus;
 
     @MergeProperty
-    @JsonProperty("task_name")
-    private String taskName;
+    @JsonProperty("task_create")
+    private Long taskCreate;
+
+    @MergeProperty
+    @JsonProperty("task_update")
+    private Long taskUpdate;
 
     @MergeProperty
     @JsonProperty("task_type")
@@ -36,13 +44,17 @@ public class AsyncTaskResult {
 
     @MergeProperty
     @JsonProperty("task_result")
-    private Object taskResult;
+    private String taskResult;
 
     @MergeProperty
-    @JsonProperty("task_create")
-    private Long taskCreate;
+    @JsonProperty("task_retries")
+    private Integer taskRetries;
 
     @MergeProperty
-    @JsonProperty("task_update")
-    private Long taskUpdate;
+    @JsonProperty("task_callable")
+    private String taskCallable;
+
+    @MergeProperty
+    @JsonProperty("task_input")
+    private String taskInput;
 }

@@ -25,11 +25,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.hugegraph.common.Constant;
+import com.baidu.hugegraph.controller.BaseController;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.service.algorithm.AsyncTaskService;
 import com.baidu.hugegraph.structure.Task;
@@ -40,7 +42,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @RestController
 @RequestMapping(Constant.API_VERSION + "graph-connections/{connId}/algorithm/async-task")
-public class AsyncTaskController {
+public class AsyncTaskController extends BaseController {
 
     private final AsyncTaskService service;
 
@@ -49,20 +51,20 @@ public class AsyncTaskController {
         this.service = service;
     }
 
-    @DeleteMapping("{id}")
-    public void delete(@PathVariable("connId") int connId,
-                       @PathVariable("id") int id) {
-        Task task = this.service.get(connId, id);
-        if (task == null) {
-            throw new ExternalException("async.task.not-exist.id", id);
-        }
-        this.service.remove(connId, id);
-    }
-
     @GetMapping("{id}")
     public Task get(@PathVariable("connId") int connId,
                          @PathVariable("id") int id) {
        Task task = this.service.get(connId, id);
+        if (task == null) {
+            throw new ExternalException("async.task.not-exist.id", id);
+        }
+        return task;
+    }
+
+    @PostMapping("cancel/{id}")
+    public Task cancel(@PathVariable("connId") int connId,
+                       @PathVariable("id") int id) {
+        Task task = this.service.cancel(connId, id);
         if (task == null) {
             throw new ExternalException("async.task.not-exist.id", id);
         }
@@ -98,5 +100,17 @@ public class AsyncTaskController {
                                           defaultValue = "")
                                           String status) {
         return this.service.list(connId, pageNo, pageSize, content, type, status);
+    }
+
+    @DeleteMapping
+    public void delete(@PathVariable("connId") int connId,
+                       @RequestParam("ids") List<Integer> ids) {
+        for (int id : ids) {
+            Task task = this.service.get(connId, id);
+            if (task == null) {
+                throw new ExternalException("async.task.not-exist.id", id);
+            }
+            this.service.remove(connId, id);
+        }
     }
 }
