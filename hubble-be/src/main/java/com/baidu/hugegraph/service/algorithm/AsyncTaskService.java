@@ -20,6 +20,8 @@
 package com.baidu.hugegraph.service.algorithm;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -70,11 +72,12 @@ public class AsyncTaskService {
                 continue;
             }
             if (!content.isEmpty() &&
-               !(content.equals(node.id() + "") || content.equals(node.name()))) {
+               !(content.equals(node.id() + "") || node.name().contains(content))) {
                 continue;
             }
             result.add(node);
         }
+        Collections.sort(result, Comparator.comparing(Task::createTime).reversed());
         return PageUtil.page(result, pageNo, pageSize);
     }
 

@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.service.query;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -74,7 +76,8 @@ public class ExecuteHistoryService {
             if (p.getType().equals(ExecuteType.GREMLIN_ASYNC)) {
                 try {
                     Task task = client.task().get(p.getAsyncId());
-                    p.setDuration(task.updateTime() - task.createTime());
+                    long endDate = task.updateTime() > 0 ? task.updateTime() : new Date().getTime();
+                    p.setDuration(endDate - task.createTime());
                     p.setAsyncStatus(AsyncTaskStatus.valueOf(task.status().toUpperCase()));
                 } catch (Exception e) {
                     p.setDuration(0L);
