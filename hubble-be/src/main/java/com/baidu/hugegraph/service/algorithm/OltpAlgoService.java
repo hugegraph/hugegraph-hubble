@@ -56,7 +56,6 @@ public class OltpAlgoService {
         Date createTime = HubbleUtil.nowDate();
         TableView tableView = this.BuildPathTableView(result);
         GraphView graphView = this.BuildPathGraphView(result);
-
         // Insert execute history
         ExecuteStatus status = ExecuteStatus.SUCCESS;
         ExecuteHistory history;

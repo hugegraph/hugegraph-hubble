@@ -232,7 +232,7 @@ public class GraphConnectionController extends BaseController {
         Ex.check((StringUtils.isEmpty(newEntity.getUsername()) &&
                  StringUtils.isEmpty(newEntity.getPassword())) ||
                  (!StringUtils.isEmpty(newEntity.getUsername()) &&
-                 StringUtils.isEmpty(newEntity.getPassword())),
+                 !StringUtils.isEmpty(newEntity.getPassword())),
                  "graph-connection.username-or-password.must-be-same-status");
 
         Ex.check(newEntity.getCreateTime() == null,
