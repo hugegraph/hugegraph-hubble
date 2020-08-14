@@ -18,7 +18,7 @@ import CheckAndEditVertex from './CheckAndEditVertex';
 import CheckAndEditEdge from './CheckAndEditEdge';
 import CheckProperty from './CheckProperty';
 
-import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore';
+import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
 import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
 import { generateGraphModeId } from '../../../../stores/utils';
 

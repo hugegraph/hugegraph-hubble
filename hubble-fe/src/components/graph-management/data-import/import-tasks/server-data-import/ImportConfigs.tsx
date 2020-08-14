@@ -564,6 +564,8 @@ const ImportManipulations: React.FC<ImportManipulationsProps> = observer(
           break;
         case t('server-data-import.import-details.manipulations.failed-cause'):
           serverDataImportStore.checkErrorLogs(
+            dataImportRootStore.currentId!,
+            dataImportRootStore.currentJobId!,
             serverDataImportStore.importTasks[taskIndex].id
           );
           break;
@@ -621,7 +623,7 @@ const ImportManipulations: React.FC<ImportManipulationsProps> = observer(
                 target="_blank"
                 className="import-tasks-manipulation"
                 key={manipulation}
-                href={`/graph-management/${dataImportRootStore.currentId}/data-import/import-tasks/${serverDataImportStore.importTasks[taskIndex].id}/error-log`}
+                href={`/graph-management/${dataImportRootStore.currentId}/data-import/${dataImportRootStore.currentJobId}/import-tasks/${serverDataImportStore.importTasks[taskIndex].id}/error-log`}
                 style={{ marginRight: 8, textDecoration: 'none' }}
                 onClick={() => {
                   handleClickManipulation(manipulation);

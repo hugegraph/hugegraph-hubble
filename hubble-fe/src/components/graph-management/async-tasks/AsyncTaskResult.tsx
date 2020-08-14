@@ -26,17 +26,21 @@ const TaskErrorLogs: React.FC = observer(() => {
     <section className="async-task-result">
       {!isNull(asyncTasksStore.singleAsyncTask) &&
         (asyncTasksStore.singleAsyncTask.task_status === 'success' ? (
-          <ReactJsonView
-            src={
-              !isNull(asyncTasksStore.singleAsyncTask)
-                ? JSON.parse(asyncTasksStore.singleAsyncTask!.task_result)
-                : []
-            }
-            name={false}
-            displayObjectSize={false}
-            displayDataTypes={false}
-            groupArraysAfterLength={50}
-          />
+          typeof asyncTasksStore.singleAsyncTask!.task_result === 'object' ? (
+            <ReactJsonView
+              src={
+                !isNull(asyncTasksStore.singleAsyncTask)
+                  ? JSON.parse(asyncTasksStore.singleAsyncTask!.task_result)
+                  : []
+              }
+              name={false}
+              displayObjectSize={false}
+              displayDataTypes={false}
+              groupArraysAfterLength={50}
+            />
+          ) : (
+            asyncTasksStore.singleAsyncTask!.task_result
+          )
         ) : (
           <div className="async-task-result-error">
             {asyncTasksStore.singleAsyncTask!.task_result}
