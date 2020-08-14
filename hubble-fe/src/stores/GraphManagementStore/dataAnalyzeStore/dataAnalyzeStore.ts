@@ -1324,11 +1324,25 @@ export class DataAnalyzeStore {
 
     if (!isUndefined(algorithmConfigs)) {
       switch (algorithmConfigs.type) {
-        case 'shortest-path':
+        case 'shortest-path': {
+          if (
+            this.algorithmAnalyzerStore.shortestPathAlgorithmParams.label ===
+            '__all__'
+          ) {
+            const clonedParams: ShortestPathAlgorithmParams = cloneDeep(
+              this.algorithmAnalyzerStore.shortestPathAlgorithmParams
+            );
+
+            delete clonedParams.label;
+            params = clonedParams;
+            break;
+          }
+
           params = this.algorithmAnalyzerStore.shortestPathAlgorithmParams;
           break;
-        default:
-          params = this.algorithmAnalyzerStore.shortestPathAlgorithmParams;
+        }
+        // default:
+        //   params = this.algorithmAnalyzerStore.shortestPathAlgorithmParams;
       }
     }
 

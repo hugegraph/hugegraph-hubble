@@ -42,8 +42,13 @@ const ImportConfigs: React.FC<ImportConfigsProps> = observer(({ height }) => {
     {
       title: t('server-data-import.import-details.column-titles.file-name'),
       dataIndex: 'file_name',
+      width: '10%',
       render(text: string) {
-        return <div className="no-line-break">{text}</div>;
+        return (
+          <div className="no-line-break" title={text}>
+            {text}
+          </div>
+        );
       }
     },
     {
@@ -89,9 +94,14 @@ const ImportConfigs: React.FC<ImportConfigsProps> = observer(({ height }) => {
     {
       title: t('server-data-import.import-details.column-titles.import-speed'),
       dataIndex: 'load_rate',
+      width: '12%',
       align: 'center',
       render(text: string) {
-        return <div className="no-line-break">{text}</div>;
+        return (
+          <div className="no-line-break" title={text}>
+            {text}
+          </div>
+        );
       }
     },
     {
@@ -99,7 +109,7 @@ const ImportConfigs: React.FC<ImportConfigsProps> = observer(({ height }) => {
         'server-data-import.import-details.column-titles.import-progress'
       ),
       dataIndex: 'load_progress',
-      width: '40%',
+      width: '35%',
       render(progress: number, rowData: Record<string, any>) {
         return (
           <div
@@ -124,10 +134,13 @@ const ImportConfigs: React.FC<ImportConfigsProps> = observer(({ height }) => {
     {
       title: t('server-data-import.import-details.column-titles.status'),
       dataIndex: 'status',
-      width: '5%',
+      width: '10%',
       render(text: string) {
         return (
-          <div className="no-line-break">
+          <div
+            className="no-line-break"
+            title={t(`server-data-import.import-details.status.${text}`)}
+          >
             {t(`server-data-import.import-details.status.${text}`)}
           </div>
         );
@@ -137,8 +150,13 @@ const ImportConfigs: React.FC<ImportConfigsProps> = observer(({ height }) => {
       title: t('server-data-import.import-details.column-titles.time-consumed'),
       dataIndex: 'duration',
       align: 'right',
+      width: '8%',
       render(text: string) {
-        return <div className="no-line-break">{text}</div>;
+        return (
+          <div className="no-line-break" title={text}>
+            {text}
+          </div>
+        );
       }
     },
     {

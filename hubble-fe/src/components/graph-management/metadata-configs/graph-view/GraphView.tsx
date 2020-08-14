@@ -269,6 +269,7 @@ const GraphDataView: React.FC = observer(() => {
               }
 
               vertexTypeStore.selectVertexType(index);
+
               // check also needs style infos
               vertexTypeStore.mutateEditedSelectedVertexType({
                 ...vertexTypeStore.editedSelectedVertexType,

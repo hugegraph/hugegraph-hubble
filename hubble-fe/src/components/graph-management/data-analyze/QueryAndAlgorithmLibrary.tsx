@@ -58,9 +58,6 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
     <>
       <div className="query-tab-index-wrapper">
         <div
-          // onClick={() => {
-          //   dataAnalyzeStore.setCurrentTab('gremlin-analyze');
-          // }}
           onClick={handleTabChange('gremlin-analyze')}
           className={
             dataAnalyzeStore.currentTab === 'gremlin-analyze'
@@ -71,9 +68,6 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
           {t('data-analyze.category.gremlin-analyze')}
         </div>
         <div
-          // onClick={() => {
-          //   dataAnalyzeStore.setCurrentTab('algorithm-analyze');
-          // }}
           onClick={handleTabChange('algorithm-analyze')}
           className={
             dataAnalyzeStore.currentTab === 'algorithm-analyze'
@@ -496,6 +490,9 @@ export const AlgorithmQuery: React.FC = observer(() => {
                     );
                   }}
                 >
+                  <Select.Option value="__all__" key="__all__">
+                    {t('data-analyze.algorithm-forms.shortest-path.pre-value')}
+                  </Select.Option>
                   {dataAnalyzeStore.edgeTypes.map(({ name }) => (
                     <Select.Option value={name} key={name}>
                       {name}
@@ -838,21 +835,6 @@ export const AlgorithmQuery: React.FC = observer(() => {
               >
                 {t('data-analyze.manipulations.execution')}
               </Button>
-              {/* <Button
-                style={styles.primaryButton}
-                disabled={
-                  !isValidExec ||
-                  dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                }
-                onClick={() => {
-                  dataAnalyzeStore.setFavoritePopUp('addFavorite');
-                  dataAnalyzeStore.resetFavoriteRequestStatus('add');
-                  dataAnalyzeStore.resetFavoriteRequestStatus('edit');
-                  // switchFavoritePop(true);
-                }}
-              >
-                {t('data-analyze.manipulations.favorite')}
-              </Button> */}
               <Button
                 style={styles.primaryButton}
                 disabled={
@@ -863,10 +845,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
                   // temp solution
                   algorithmAnalyzerStore.mutateShortestPathParams(
                     'label',
-                    // notice edge types could be empty
-                    isEmpty(dataAnalyzeStore.edgeTypes)
-                      ? ''
-                      : dataAnalyzeStore.edgeTypes[0].name
+                    '__all__'
                   );
                 }}
               >
@@ -879,14 +858,6 @@ export const AlgorithmQuery: React.FC = observer(() => {
   };
 
   useEffect(() => {
-    // temp solution, waiting back-end add 'all' option
-    if (!isEmpty(dataAnalyzeStore.edgeTypes)) {
-      algorithmAnalyzerStore.mutateShortestPathParams(
-        'label',
-        dataAnalyzeStore.edgeTypes[0].name
-      );
-    }
-
     return () => {
       algorithmAnalyzerStore.dispose();
     };

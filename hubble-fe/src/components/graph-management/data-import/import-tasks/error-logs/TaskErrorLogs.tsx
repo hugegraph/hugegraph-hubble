@@ -22,7 +22,11 @@ const TaskErrorLogs: React.FC = observer(() => {
 
   return (
     <section className="task-error-logs">
-      <div>{serverDataImportStore.errorLogs}</div>
+      <div>
+        {serverDataImportStore.requestStatus.checkErrorLogs === 'failed'
+          ? serverDataImportStore.errorInfo.checkErrorLogs.message
+          : serverDataImportStore.errorLogs}
+      </div>
     </section>
   );
 });

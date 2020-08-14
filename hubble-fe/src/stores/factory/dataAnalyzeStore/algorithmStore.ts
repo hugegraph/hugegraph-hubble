@@ -19,7 +19,7 @@ export function createShortestPathDefaultParams() {
     target: '',
     direction: 'BOTH',
     max_depth: '',
-    label: '',
+    label: '__all__',
     max_degree: '10000',
     skip_degree: '0',
     capacity: '10000000',

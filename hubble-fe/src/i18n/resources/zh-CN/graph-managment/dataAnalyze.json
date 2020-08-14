@@ -44,6 +44,7 @@
           "skipDegree": "超级顶点度数:",
           "capacity": "访问顶点最大值:"
         },
+        "pre-value": "全部",
         "placeholder": {
           "input-source-id": "请输入起点ID",
           "input-target-id": "请输入终点ID",
