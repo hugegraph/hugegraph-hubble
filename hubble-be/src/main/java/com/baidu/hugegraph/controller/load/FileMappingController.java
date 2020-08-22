@@ -130,6 +130,7 @@ public class FileMappingController extends BaseController {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
 
+        newEntity.escapeDelimiterIfNeeded();
         FileSetting oldEntity = mapping.getFileSetting();
         FileSetting entity = this.mergeEntity(oldEntity, newEntity);
         mapping.setFileSetting(entity);
