@@ -21,8 +21,6 @@ package com.baidu.hugegraph.entity.load;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.baidu.hugegraph.annotation.MergeProperty;
 import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.common.Mergeable;
@@ -77,10 +75,16 @@ public class FileSetting implements Mergeable {
     @JsonProperty("list_format")
     private ListFormat listFormat = new ListFormat();
 
-    public void escapeDelimiterIfNeeded() {
+    public void unescapeDelimiterIfNeeded() {
         if ("\\t".equals(this.delimiter)) {
-            this.delimiter = StringUtils.replace(delimiter, "\\t", "\t");
+            this.delimiter = "\t";
             this.format = "TEXT";
+        }
+    }
+
+    public void escapeDelimiterIfNeeded() {
+        if ("\t".equals(this.delimiter)) {
+            this.delimiter = "\\t";
         }
     }
 }

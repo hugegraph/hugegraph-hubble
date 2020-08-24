@@ -129,8 +129,8 @@ public class FileMappingController extends BaseController {
         if (mapping == null) {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
-
-        newEntity.escapeDelimiterIfNeeded();
+        // unescape \\t to \t
+        newEntity.unescapeDelimiterIfNeeded();
         FileSetting oldEntity = mapping.getFileSetting();
         FileSetting entity = this.mergeEntity(oldEntity, newEntity);
         mapping.setFileSetting(entity);
@@ -139,6 +139,8 @@ public class FileMappingController extends BaseController {
         if (this.service.update(mapping) != 1) {
             throw new InternalException("entity.update.failed", mapping);
         }
+        // escape \t to \\t
+        mapping.getFileSetting().escapeDelimiterIfNeeded();
         return mapping;
     }
 
