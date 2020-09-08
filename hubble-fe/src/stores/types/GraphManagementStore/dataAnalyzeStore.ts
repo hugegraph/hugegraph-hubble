@@ -115,3 +115,26 @@ export interface ShortestPathAlgorithmParams {
   capacity: string;
   limit: string;
 }
+
+export interface LoopDetectionParams {
+  source: string;
+  direction: string;
+  max_depth: string;
+  label: string;
+  has_source: string;
+  max_degree: string;
+  max_capacity: string;
+  capacity: string;
+}
+
+export interface FocusDetectionParams {
+  source: string;
+  target: string;
+  direction: string;
+  max_depth: string;
+  label: string;
+  has_source: string;
+  max_degree: string;
+  max_capacity: string;
+  capacity: string;
+}

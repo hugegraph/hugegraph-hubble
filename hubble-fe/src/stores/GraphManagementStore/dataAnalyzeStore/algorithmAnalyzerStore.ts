@@ -7,11 +7,15 @@ import {
   initializeRequestStatus,
   initializeErrorInfo,
   createShortestPathDefaultParams,
-  createValidateShortestPathParamsErrorMessage
+  createValidateShortestPathParamsErrorMessage,
+  createLoopDetectionDefaultParams,
+  createValidateLoopDetectionParamsErrorMessage,
+  createFocusDetectionDefaultParams,
+  createValidateFocusDetectionParamsErrorMessage
 } from '../../factory/dataAnalyzeStore/algorithmStore';
 import i18next from '../../../i18n';
 
-import type { ShortestPathAlgorithmParams } from '../../types/GraphManagementStore/dataAnalyzeStore';
+import type { ShortestPathAlgorithmParams, LoopDetectionParams, FocusDetectionParams } from '../../types/GraphManagementStore/dataAnalyzeStore';
 
 export class AlgorithmAnalyzerStore {
   dataAnalyzeStore: DataAnalyzeStore;
@@ -31,6 +35,18 @@ export class AlgorithmAnalyzerStore {
 
   @observable
   validateShortestPathParamsErrorMessage: ShortestPathAlgorithmParams = createValidateShortestPathParamsErrorMessage();
+
+  @observable
+  loopDetectionParams: LoopDetectionParams = createLoopDetectionDefaultParams();
+
+  @observable
+  validateLoopDetectionParamsErrorMessage: any = createValidateLoopDetectionParamsErrorMessage();
+
+  @observable
+  focusDetectionParams: FocusDetectionParams =  createFocusDetectionDefaultParams();
+
+  @observable
+  validateFocusDetectionParamsErrorMessage: any = createValidateFocusDetectionParamsErrorMessage();
 
   @action
   switchCollapse(flag: boolean) {
@@ -126,11 +142,181 @@ export class AlgorithmAnalyzerStore {
   }
 
   @action
+  mutateLoopDetectionParams<T extends keyof LoopDetectionParams>(
+    key: T,
+    value: LoopDetectionParams[T]
+  ) {
+    this.loopDetectionParams[key] = value;
+  }
+
+  @action
+  validateLoopDetectionParams<T extends keyof LoopDetectionParams>(
+    key: T
+  ) {
+    const value = this.loopDetectionParams[key];
+
+    switch (key) {
+      case 'source':
+        if (isEmpty(value)) {
+          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
+          );
+
+          return;
+        }
+        break;
+      case 'max_depth':
+        if (isEmpty(value)) {
+          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
+          );
+
+          return;
+        }
+
+        if (!isInt(value, { min: 1 })) {
+          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
+          );
+
+          return;
+        }
+
+        break;
+      case 'max_degree':
+        if (!isInt(value, { min: 1 })) {
+          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
+          );
+
+          return;
+        }
+
+        break;
+      case 'max_capacity':
+        if (!isInt(value, { min: 0 })) {
+          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path.validations.integer-only'
+          );
+
+          return;
+        }
+
+        break;
+      case 'capacity':
+        if (!isInt(value, { min: 1 })) {
+          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
+          );
+
+          return;
+        }
+
+        break;
+    }
+
+    this.validateLoopDetectionParamsErrorMessage[key] = '';
+  }
+
+  @action
+  resetLoopDetectionParams() {
+    this.loopDetectionParams = createLoopDetectionDefaultParams();
+  }
+
+  @action
+  mutateFocusDetectionParams<T extends keyof FocusDetectionParams>(
+    key: T,
+    value: FocusDetectionParams[T]
+  ) {
+    this.focusDetectionParams[key] = value;
+  }
+
+  @action
+  validateFocusDetectionParams<T extends keyof FocusDetectionParams>(
+    key: T
+  ) {
+    const value = this.focusDetectionParams[key];
+
+    switch (key) {
+      case 'source':
+        if (isEmpty(value)) {
+          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
+          );
+
+          return;
+        }
+        break;
+      case 'max_depth':
+        if (isEmpty(value)) {
+          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
+          );
+
+          return;
+        }
+
+        if (!isInt(value, { min: 1 })) {
+          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
+          );
+
+          return;
+        }
+
+        break;
+      case 'max_degree':
+        if (!isInt(value, { min: 1 })) {
+          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
+          );
+
+          return;
+        }
+
+        break;
+      case 'max_capacity':
+        if (!isInt(value, { min: 0 })) {
+          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path.validations.integer-only'
+          );
+
+          return;
+        }
+
+        break;
+      case 'capacity':
+        if (!isInt(value, { min: 1 })) {
+          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
+          );
+
+          return;
+        }
+
+        break;
+    }
+
+    this.validateFocusDetectionParamsErrorMessage[key] = '';
+  }
+
+  @action
+  resetFocusDetectionParams() {
+    this.focusDetectionParams = createFocusDetectionDefaultParams();
+  }
+
+  @action
   dispose() {
     this.requestStatus = initializeRequestStatus();
     this.errorInfo = initializeErrorInfo();
     this.currentAlgorithm = '';
     this.shortestPathAlgorithmParams = createShortestPathDefaultParams();
     this.validateShortestPathParamsErrorMessage = createValidateShortestPathParamsErrorMessage();
+
+    this.loopDetectionParams = createLoopDetectionDefaultParams();
+    this.validateLoopDetectionParamsErrorMessage = createValidateLoopDetectionParamsErrorMessage();
+
+    this.focusDetectionParams = createFocusDetectionDefaultParams();
+    this.validateFocusDetectionParamsErrorMessage = createValidateFocusDetectionParamsErrorMessage();
   }
 }

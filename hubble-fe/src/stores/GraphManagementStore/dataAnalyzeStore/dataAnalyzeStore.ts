@@ -13,8 +13,9 @@ import {
   createGraphNode,
   createGraphEdge,
   createGraphEditableProperties,
-  createNewGraphDataConfig
+  createNewGraphDataConfig,
 } from '../../factory/dataAnalyzeStore/dataAnalyzeStore';
+import {Algorithm} from '../../factory/dataAnalyzeStore/algorithmStore'; 
 import {
   checkIfLocalNetworkOffline,
   convertArrayToString,
@@ -45,7 +46,9 @@ import type {
   FavoriteQuery,
   FavoriteQueryResponse,
   EditableProperties,
-  ShortestPathAlgorithmParams
+  ShortestPathAlgorithmParams,
+  LoopDetectionParams,
+  FocusDetectionParams
 } from '../../types/GraphManagementStore/dataAnalyzeStore';
 import type {
   VertexTypeListResponse,
@@ -1320,11 +1323,11 @@ export class DataAnalyzeStore {
     this.requestStatus.fetchGraphs = 'pending';
     this.isLoadingGraph = true;
 
-    let params: ShortestPathAlgorithmParams | null = null;
+    let params: ShortestPathAlgorithmParams | LoopDetectionParams | FocusDetectionParams | null = null;
 
     if (!isUndefined(algorithmConfigs)) {
       switch (algorithmConfigs.type) {
-        case 'shortest-path': {
+        case Algorithm.shortestPath: {
           if (
             this.algorithmAnalyzerStore.shortestPathAlgorithmParams.label ===
             '__all__'
@@ -1339,6 +1342,24 @@ export class DataAnalyzeStore {
           }
 
           params = this.algorithmAnalyzerStore.shortestPathAlgorithmParams;
+          break;
+        }
+
+        case Algorithm.loopDetection: {
+          if (
+            this.algorithmAnalyzerStore.loopDetectionParams.label ===
+            '__all__'
+          ) {
+            const clonedParams: LoopDetectionParams = cloneDeep(
+              this.algorithmAnalyzerStore.loopDetectionParams
+            );
+
+            delete clonedParams.label;
+            params = clonedParams;
+            break;
+          }
+
+          params = this.algorithmAnalyzerStore.loopDetectionParams;
           break;
         }
         // default:

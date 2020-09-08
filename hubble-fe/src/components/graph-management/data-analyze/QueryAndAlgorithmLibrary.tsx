@@ -30,10 +30,13 @@ import Favorite from './common/Favorite';
 import { DataAnalyzeStoreContext } from '../../../stores';
 import { useMultiKeyPress } from '../../../hooks';
 
+import LoopDetection from './algorithm/LoopDetection';
+import FocusDetection from './algorithm/FocusDetection';
 import ArrowIcon from '../../../assets/imgs/ic_arrow_16.svg';
 import QuestionMarkIcon from '../../../assets/imgs/ic_question_mark.svg';
+import {Algorithm} from '../../../stores/factory/dataAnalyzeStore/algorithmStore';
 
-const styles = {
+export const styles = {
   primaryButton: {
     width: 72,
     marginLeft: 12
@@ -44,6 +47,12 @@ const styles = {
 };
 
 const codeRegexp = /[A-Za-z0-9]+/;
+
+const algorithmWhiteList: string[] = [
+  Algorithm.shortestPath,
+  Algorithm.loopDetection,
+  Algorithm.focusDetection
+];
 
 const QueryAndAlgorithmLibrary: React.FC = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
@@ -408,14 +417,14 @@ export const AlgorithmQuery: React.FC = observer(() => {
 
   const handleChangeAlgorithm = (algorithm: string) => () => {
     // disable other algorithm now
-    if (algorithm === 'shortest-path') {
+    if (algorithmWhiteList.includes(algorithm)) {
       algorithmAnalyzerStore.changeCurrentAlgorithm(algorithm);
     }
   };
 
   const renderForms = () => {
     switch (algorithmAnalyzerStore.currentAlgorithm) {
-      case 'shortest-path':
+      case Algorithm.shortestPath:
         return (
           <div className="query-tab-content-form">
             <div className="query-tab-content-form-row">
@@ -827,7 +836,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
                   const timerId = dataAnalyzeStore.addTempExecLog();
                   await dataAnalyzeStore.fetchGraphs({
                     url: 'shortpath',
-                    type: 'shortest-path'
+                    type: Algorithm.shortestPath
                   });
                   await dataAnalyzeStore.fetchExecutionLogs();
                   window.clearTimeout(timerId);
@@ -854,7 +863,11 @@ export const AlgorithmQuery: React.FC = observer(() => {
             </div>
           </div>
         );
-    }
+        case Algorithm.loopDetection:
+          return <LoopDetection />
+        case Algorithm.focusDetection:
+          return <FocusDetection />
+      }
   };
 
   useEffect(() => {
@@ -908,15 +921,15 @@ export const AlgorithmQuery: React.FC = observer(() => {
         <>
           <div className="query-tab-content-menu">
             {[
-              'loop-detection',
-              'focus-detection',
-              'shortest-path',
-              'shortest-path-all',
-              'relative-path-or-all-path'
+              Algorithm.loopDetection,
+              Algorithm.focusDetection,
+              Algorithm.shortestPath,
+              Algorithm.shortestPathAll,
+              Algorithm.relativePathOrAllPath
             ].map((algorithm) => (
               <span
                 className={
-                  algorithm === 'shortest-path'
+                  algorithmWhiteList.includes(algorithm)
                     ? ''
                     : 'query-tab-content-menu-item-disabled'
                 }
@@ -928,11 +941,11 @@ export const AlgorithmQuery: React.FC = observer(() => {
           </div>
           <div className="query-tab-content-menu">
             {[
-              'model-similarity-algorithm',
-              'real-time-recommendation',
-              'k-step-neighbor',
-              'k-hop-algorithm',
-              'custom-path'
+              Algorithm.modelSimilarityAlgorithm,
+              Algorithm.realTimeRecommendation,
+              Algorithm.kStepNeighbor,
+              Algorithm.kHopAlgorithm,
+              Algorithm.customPath
             ].map((algorithm) => (
               <span
                 className="query-tab-content-menu-item-disabled"
@@ -944,11 +957,11 @@ export const AlgorithmQuery: React.FC = observer(() => {
           </div>
           <div className="query-tab-content-menu">
             {[
-              'custom-intersection-detection',
-              'radiographic-inspection',
-              'common-neighbor',
-              'weighted-shortest-path',
-              'single-source-weighted-path'
+              Algorithm.customIntersectionDetection,
+              Algorithm.radiographicInspection,
+              Algorithm.commonNeighbor,
+              Algorithm.weightedShortestPath,
+              Algorithm.singleSourceWeightedPath
             ].map((algorithm) => (
               <span
                 className="query-tab-content-menu-item-disabled"
@@ -960,8 +973,8 @@ export const AlgorithmQuery: React.FC = observer(() => {
           </div>
           <div className="query-tab-content-menu">
             {[
-              'jaccard-similarity',
-              'personal-rank-recommendation-algorithm'
+              Algorithm.jaccardSimilarity,
+              Algorithm.personalRankRecommendationAlgorithm
             ].map((algorithm) => (
               <span
                 className="query-tab-content-menu-item-disabled"

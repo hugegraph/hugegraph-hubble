@@ -61,6 +61,62 @@
           "integer-only": "请填写大于等于0的整数",
           "postive-integer-only": "请填写大于0的整数"
         }
+      },
+      "loop-detection": {
+        "options": {
+          "source": "起点ID:",
+          "direction": "方向:",
+          "max_depth": "最大步数:",
+          "label": "边类型:",
+          "max_degree": "最大度数:",
+          "has_source": "环路包含起点:",
+          "capacity": "访问顶点最大值:",
+          "max_capacity": "返回可达路径最大值:"
+        },
+        "pre-value": "全部",
+        "placeholder": {
+          "input-source-id": "请输入起点ID",
+          "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer": "请填写大于0的整数",
+          "no-edge-types": "无边类型"
+        },
+        "hint": {
+          "max-depth": "为保证性能，建议不超过10步，推荐5步",
+          "skip-degree": "填写查询过程中需要跳过的顶点的最小的边数目，即当顶点的边数目大于超级顶点度数时，跳过该顶点，可用于规避超级点"
+        },
+        "validations": {
+          "no-empty": "该项不能为空",
+          "integer-only": "请填写大于等于0的整数",
+          "postive-integer-only": "请填写大于0的整数"
+        }
+      },
+      "focus-detection": {
+        "options": {
+          "source": "起点ID:",
+          "target": "终点ID:",
+          "direction": "方向:",
+          "max_depth": "最大步数:",
+          "label": "边类型:",
+          "max_degree": "最大度数:",
+          "capacity": "返回交点最大值:",
+          "max_capacity": "访问顶点最大值:"
+        },
+        "pre-value": "全部",
+        "placeholder": {
+          "input-source-id": "请输入起点ID",
+          "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer": "请填写大于0的整数",
+          "no-edge-types": "无边类型"
+        },
+        "hint": {
+          "max-depth": "为保证性能，建议不超过10步，推荐5步",
+          "skip-degree": "填写查询过程中需要跳过的顶点的最小的边数目，即当顶点的边数目大于超级顶点度数时，跳过该顶点，可用于规避超级点"
+        },
+        "validations": {
+          "no-empty": "该项不能为空",
+          "integer-only": "请填写大于等于0的整数",
+          "postive-integer-only": "请填写大于0的整数"
+        }
       }
     },
     "exec-logs": {
