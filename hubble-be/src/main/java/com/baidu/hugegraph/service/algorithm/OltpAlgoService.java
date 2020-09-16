@@ -115,7 +115,6 @@ public class OltpAlgoService {
                 return GraphView.EMPTY;
             }
         }
-
         return new GraphView(vertices.values(), new ArrayList<>());
     }
 }
