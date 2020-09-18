@@ -79,10 +79,13 @@ public class JobManagerController {
                     "job.manager.job-name.unmatch-regex");
             Ex.check(entity.getJobRemarks().length() <= 200,
                     "job.manager.job-remarks.reached-limit");
+            Ex.check(entity.getJobRemarks() != null, () ->
+                            Constant.COMMON_NAME_PATTERN.matcher(entity.getJobRemarks()).matches(),
+                    "job.manager.job-name.unmatch-regex");
             Ex.check(this.service.count() < LIMIT,
                     "job.manager.reached-limit", LIMIT);
             if (this.service.getTask(entity.getJobName()) != null) {
-                throw new InternalException("文件名不能重复!");
+                throw new InternalException("任务名不能重复!");
             }
             entity.setConnId(connId);
             entity.setJobStatus(JobManagerStatus.DEFAULT);
