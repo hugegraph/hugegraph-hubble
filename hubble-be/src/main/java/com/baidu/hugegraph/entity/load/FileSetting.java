@@ -78,6 +78,8 @@ public class FileSetting implements Mergeable {
     public void unescapeDelimiterIfNeeded() {
         if ("\\t".equals(this.delimiter)) {
             this.delimiter = "\t";
+        }
+        if (!",".equals(this.delimiter)) {
             this.format = "TEXT";
         }
     }
