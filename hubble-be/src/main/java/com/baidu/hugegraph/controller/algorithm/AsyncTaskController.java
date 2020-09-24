@@ -53,7 +53,7 @@ public class AsyncTaskController extends BaseController {
 
     @GetMapping("{id}")
     public Task get(@PathVariable("connId") int connId,
-                         @PathVariable("id") int id) {
+                    @PathVariable("id") int id) {
        Task task = this.service.get(connId, id);
         if (task == null) {
             throw new ExternalException("async.task.not-exist.id", id);
