@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.controller.load;
 
 import static com.baidu.hugegraph.service.load.FileMappingService.CONN_PREIFX;
+import static com.baidu.hugegraph.service.load.FileMappingService.JOB_PREIFX;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,11 +82,12 @@ public class FileUploadController {
         this.checkFileValid(connId, jobId, jobEntity, file, fileName);
 
         String location = this.config.get(HubbleOptions.UPLOAD_FILE_LOCATION);
-        this.ensureLocationExist(location, CONN_PREIFX + connId + jobId);
+        this.ensureLocationExist(location, CONN_PREIFX + connId + "/" +
+                                 JOB_PREIFX + jobId);
         // Before merge: upload-files/conn-1/verson_person.csv/part-1
         // After merge: upload-files/conn-1/file-mapping-1/verson_person.csv
-        String dirPath = Paths.get(location, CONN_PREIFX + connId + jobId, fileName)
-                              .toString();
+        String dirPath = Paths.get(location, CONN_PREIFX + connId + "/" +
+                                   JOB_PREIFX +  jobId, fileName).toString();
         // Check destFile exist
         // Ex.check(!destFile.exists(), "load.upload.file.existed", fileName);
         FileUploadResult result = this.service.uploadFile(file, index, dirPath);

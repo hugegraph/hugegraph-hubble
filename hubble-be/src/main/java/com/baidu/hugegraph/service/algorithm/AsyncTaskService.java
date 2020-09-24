@@ -65,17 +65,16 @@ public class AsyncTaskService {
         }
         List<Task> list = client.task().list(status);
         List<Task> result = new ArrayList<>();
-        Iterator<Task> nodes = list.iterator();
-        while (nodes.hasNext()) {
-            Task node = nodes.next();
-            if (!type.isEmpty() && !type.equals(node.type())) {
+        Iterator<Task> tasks = list.iterator();
+        while (tasks.hasNext()) {
+            Task task = tasks.next();
+            if (!type.isEmpty() && !type.equals(task.type())) {
                 continue;
             }
-            if (!content.isEmpty() &&
-               !(content.equals(node.id() + "") || node.name().contains(content))) {
+            if (!content.isEmpty() && !(task.name().contains(content))) {
                 continue;
             }
-            result.add(node);
+            result.add(task);
         }
         Collections.sort(result, Comparator.comparing(Task::createTime).reversed());
         return PageUtil.page(result, pageNo, pageSize);

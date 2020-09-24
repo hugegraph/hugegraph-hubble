@@ -60,6 +60,7 @@ import lombok.extern.log4j.Log4j2;
 public class FileMappingService {
 
     public static final String CONN_PREIFX = "graph-connection-";
+    public static final String JOB_PREIFX = "job-";
     public static final String FILE_PREIFX = "file-mapping-";
 
     @Autowired

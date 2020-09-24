@@ -185,7 +185,7 @@ public class LoadTaskController extends BaseController {
         jobEntity.setUpdateTime( HubbleUtil.nowDate());
         if (this.jobService.update(jobEntity) != 1) {
             throw new InternalException("job-manager.entity.update.failed",
-                    jobEntity);
+                                        jobEntity);
         }
         return task;
     }
@@ -208,7 +208,7 @@ public class LoadTaskController extends BaseController {
         jobEntity.setUpdateTime( HubbleUtil.nowDate());
         if (this.jobService.update(jobEntity) != 1) {
             throw new InternalException("job-manager.entity.update.failed",
-                    jobEntity);
+                                        jobEntity);
         }
         return task;
     }
@@ -231,7 +231,7 @@ public class LoadTaskController extends BaseController {
         jobEntity.setUpdateTime( HubbleUtil.nowDate());
         if (this.jobService.update(jobEntity) != 1) {
             throw new InternalException("job-manager.entity.update.failed",
-                    jobEntity);
+                                        jobEntity);
         }
         return task;
     }
@@ -254,7 +254,7 @@ public class LoadTaskController extends BaseController {
         jobEntity.setUpdateTime( HubbleUtil.nowDate());
         if (this.jobService.update(jobEntity) != 1) {
             throw new InternalException("job-manager.entity.update.failed",
-                    jobEntity);
+                                        jobEntity);
         }
         return task;
     }

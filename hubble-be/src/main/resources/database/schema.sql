@@ -26,11 +26,11 @@ CREATE TABLE IF NOT EXISTS `graph_connection` (
 CREATE TABLE IF NOT EXISTS `execute_history` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `conn_id` INT NOT NULL,
-    `async_id` LONG NOT NULL DEFAULT 0 COMMENT '异步任务执行id',
+    `async_id` LONG NOT NULL DEFAULT 0,
     `execute_type` TINYINT NOT NULL,
     `content` VARCHAR(65535) NOT NULL,
     `execute_status` TINYINT NOT NULL,
-    `async_status` TINYINT NOT NULL DEFAULT 0 COMMENT '异步任务状态',
+    `async_status` TINYINT NOT NULL DEFAULT 0,
     `duration` LONG NOT NULL,
     `create_time` DATETIME(6) NOT NULL,
     PRIMARY KEY (`id`)
@@ -51,14 +51,14 @@ CREATE INDEX IF NOT EXISTS `gremlin_collection_conn_id` ON `gremlin_collection`(
 CREATE TABLE IF NOT EXISTS `file_mapping` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `conn_id` INT NOT NULL,
-    `job_id` INT NOT NULL DEFAULT 0 COMMENT 'job_id',
+    `job_id` INT NOT NULL DEFAULT 0,
     `name` VARCHAR(128) NOT NULL,
     `path` VARCHAR(256) NOT NULL,
     `total_lines` LONG NOT NULL,
     `total_size` LONG NOT NULL,
-    `file_status` TINYINT NOT NULL DEFAULT 0 COMMENT '文件上传状态',
-    `file_total`  LONG NOT NULL DEFAULT 0 COMMENT '文件分片总数',
-    `file_index`  VARCHAR(5000) NOT NULL DEFAULT '' COMMENT '文件分片',
+    `file_status` TINYINT NOT NULL DEFAULT 0,
+    `file_total`  LONG NOT NULL DEFAULT 0,
+    `file_index`  VARCHAR(5000) NOT NULL DEFAULT '',
     `file_setting` VARCHAR(65535) NOT NULL,
     `vertex_mappings` VARCHAR(65535) NOT NULL,
     `edge_mappings` VARCHAR(65535) NOT NULL,
@@ -73,7 +73,7 @@ CREATE INDEX IF NOT EXISTS `file_mapping_conn_id` ON `file_mapping`(`conn_id`);
 CREATE TABLE IF NOT EXISTS `load_task` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `conn_id` INT NOT NULL,
-    `job_id` INT NOT NULL DEFAULT 0 COMMENT 'job_id',
+    `job_id` INT NOT NULL DEFAULT 0,
     `file_id` INT NOT NULL,
     `file_name` VARCHAR(128) NOT NULL,
     `options` VARCHAR(65535) NOT NULL,
@@ -88,31 +88,31 @@ CREATE TABLE IF NOT EXISTS `load_task` (
 );
 
 CREATE TABLE IF NOT EXISTS `job_manager` (
-    `id` INT NOT NULL AUTO_INCREMENT COMMENT '自增id',
-    `conn_id` INT NOT NULL DEFAULT 0 COMMENT '图连接',
-    `job_name` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '任务名称',
-    `job_remarks` VARCHAR(200) NOT NULL DEFAULT '' COMMENT '任务备注',
-    `job_size` LONG NOT NULL DEFAULT 0 COMMENT '大小单位byte',
-    `job_status` TINYINT NOT NULL DEFAULT 0 COMMENT '任务状态',
-    `job_duration` LONG NOT NULL DEFAULT 0 COMMENT '导入总耗时',
-    `update_time` DATETIME(6) NOT NULL COMMENT '更新任务时间',
-    `create_time` DATETIME(6) NOT NULL COMMENT '创建时间',
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `conn_id` INT NOT NULL DEFAULT 0,
+    `job_name` VARCHAR(100) NOT NULL DEFAULT '',
+    `job_remarks` VARCHAR(200) NOT NULL DEFAULT '',
+    `job_size` LONG NOT NULL DEFAULT 0,
+    `job_status` TINYINT NOT NULL DEFAULT 0,
+    `job_duration` LONG NOT NULL DEFAULT 0,
+    `update_time` DATETIME(6) NOT NULL,
+    `create_time` DATETIME(6) NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE (`job_name`)
 );
 
 CREATE TABLE IF NOT EXISTS `async_task` (
-    `id` INT NOT NULL AUTO_INCREMENT COMMENT '自增id',
-    `conn_id` INT NOT NULL DEFAULT 0 COMMENT '图连接',
-    `task_id` INT NOT NULL DEFAULT 0 COMMENT '任务id',
-    `task_name` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '任务名称',
-    `task_reason` VARCHAR(200) NOT NULL DEFAULT '' COMMENT '任务失败原因',
-    `task_type` TINYINT NOT NULL DEFAULT 0 COMMENT '任务类型',
-    `algorithm_name` VARCHAR(48) NOT NULL DEFAULT '' COMMENT '算法名称',
-    `task_content` VARCHAR(65535) NOT NULL DEFAULT '' COMMENT '执行内容',
-    `task_status` TINYINT NOT NULL DEFAULT 0 COMMENT '任务状态',
-    `task_duration` LONG NOT NULL DEFAULT 0 COMMENT '导入总耗时',
-    `create_time`  DATETIME(6)  NOT NULL COMMENT '创建时间',
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `conn_id` INT NOT NULL DEFAULT 0,
+    `task_id` INT NOT NULL DEFAULT 0,
+    `task_name` VARCHAR(100) NOT NULL DEFAULT '',
+    `task_reason` VARCHAR(200) NOT NULL DEFAULT '',
+    `task_type` TINYINT NOT NULL DEFAULT 0,
+    `algorithm_name` VARCHAR(48) NOT NULL DEFAULT '',
+    `task_content` VARCHAR(65535) NOT NULL DEFAULT '',
+    `task_status` TINYINT NOT NULL DEFAULT 0,
+    `task_duration` LONG NOT NULL DEFAULT 0,
+    `create_time`  DATETIME(6)  NOT NULL,
     PRIMARY KEY (`id`)
 );
 

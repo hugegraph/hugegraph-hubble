@@ -80,8 +80,8 @@ public class JobManagerController {
             Ex.check(entity.getJobRemarks().length() <= 200,
                     "job.manager.job-remarks.reached-limit");
             Ex.check(entity.getJobRemarks() != null, () ->
-                            Constant.COMMON_NAME_PATTERN.matcher(entity.getJobRemarks()).matches(),
-                    "job.manager.job-name.unmatch-regex");
+                     Constant.COMMON_REMARK_PATTERN.matcher(entity.getJobRemarks()).matches(),
+                    "job.manager.job-remarks.unmatch-regex");
             Ex.check(this.service.count() < LIMIT,
                     "job.manager.reached-limit", LIMIT);
             if (this.service.getTask(entity.getJobName()) != null) {
@@ -130,17 +130,17 @@ public class JobManagerController {
     @GetMapping
     public IPage<JobManager> list(@PathVariable("connId") int connId,
                                   @RequestParam(name = "page_no",
-                                          required = false,
-                                          defaultValue = "1")
-                                          int pageNo,
+                                                required = false,
+                                                defaultValue = "1")
+                                                int pageNo,
                                   @RequestParam(name = "page_size",
-                                          required = false,
-                                          defaultValue = "10")
-                                          int pageSize,
+                                                required = false,
+                                                defaultValue = "10")
+                                                int pageSize,
                                   @RequestParam(name = "content",
-                                          required = false,
-                                          defaultValue = "")
-                                          String content) {
+                                                required = false,
+                                                defaultValue = "")
+                                                String content) {
         return this.service.list(connId, pageNo, pageSize, content);
     }
 
@@ -150,9 +150,9 @@ public class JobManagerController {
         Ex.check(newEntity.getJobName().length() <= 48,
                  "job.manager.job-name.reached-limit");
         Ex.check(newEntity.getJobName() != null, () ->
-                        Constant.COMMON_NAME_PATTERN
+                 Constant.COMMON_NAME_PATTERN
                                 .matcher(newEntity.getJobName()).matches(),
-                "job.manager.job-name.unmatch-regex");
+                 "job.manager.job-name.unmatch-regex");
         Ex.check(newEntity.getJobRemarks().length() <= 200,
                  "job.manager.job-remarks.reached-limit");
         // Check exist Job Manager with this id

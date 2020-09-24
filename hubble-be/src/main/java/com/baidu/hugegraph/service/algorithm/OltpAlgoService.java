@@ -54,8 +54,8 @@ public class OltpAlgoService {
         JsonView jsonView = new JsonView();
         jsonView.setData(result.objects());
         Date createTime = HubbleUtil.nowDate();
-        TableView tableView = this.BuildPathTableView(result);
-        GraphView graphView = this.BuildPathGraphView(result);
+        TableView tableView = this.buildPathTableView(result);
+        GraphView graphView = this.buildPathGraphView(result);
         // Insert execute history
         ExecuteStatus status = ExecuteStatus.SUCCESS;
         ExecuteHistory history;
@@ -67,15 +67,14 @@ public class OltpAlgoService {
             throw new InternalException("entity.insert.failed", history);
         }
         return GremlinResult.builder()
-                .type(GremlinResult.Type.PATH)
-                .jsonView(jsonView)
-                .tableView(tableView)
-                .graphView(graphView)
-                .build();
+                            .type(GremlinResult.Type.PATH)
+                            .jsonView(jsonView)
+                            .tableView(tableView)
+                            .graphView(graphView)
+                            .build();
     }
 
-
-    private TableView BuildPathTableView(Path result) {
+    private TableView buildPathTableView(Path result) {
         List<Object> elements = result.objects();
         List<Object> paths = new ArrayList<>(elements.size());
         List<Object> ids = new ArrayList<>();
@@ -92,13 +91,7 @@ public class OltpAlgoService {
         return new TableView(TableView.PATH_HEADER, paths);
     }
 
-    /**
-     * TODO
-     *
-     * @param result
-     * @return
-     */
-    private GraphView BuildPathGraphView(Path result) {
+    private GraphView buildPathGraphView(Path result) {
         Map<Object, Vertex> vertices = new HashMap<>();
         Map<String, Edge> edges = new HashMap<>();
 

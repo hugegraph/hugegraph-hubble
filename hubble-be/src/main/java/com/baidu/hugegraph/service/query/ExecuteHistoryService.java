@@ -83,7 +83,6 @@ public class ExecuteHistoryService {
                     p.setDuration(0L);
                     p.setAsyncStatus(AsyncTaskStatus.UNKNOWN);
                 }
-
             }
         });
         return results;

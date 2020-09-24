@@ -73,7 +73,7 @@ public class GremlinQueryController extends GremlinController {
         // Insert execute history
         ExecuteStatus status = ExecuteStatus.RUNNING;
         ExecuteHistory history;
-        history = new ExecuteHistory(null, connId,0L, ExecuteType.GREMLIN,
+        history = new ExecuteHistory(null, connId, 0L, ExecuteType.GREMLIN,
                                      query.getContent(), status, AsyncTaskStatus.UNKNOWN,
                                      -1L, createTime);
         int rows = this.historyService.save(history);

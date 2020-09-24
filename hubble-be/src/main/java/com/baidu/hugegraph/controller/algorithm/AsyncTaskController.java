@@ -80,13 +80,13 @@ public class AsyncTaskController extends BaseController {
     @GetMapping
     public IPage<Task> list(@PathVariable("connId") int connId,
                             @RequestParam(name = "page_no",
-                                         required = false,
-                                         defaultValue = "1")
-                                         int pageNo,
+                                          required = false,
+                                          defaultValue = "1")
+                                          int pageNo,
                             @RequestParam(name = "page_size",
-                                         required = false,
-                                         defaultValue = "10")
-                                         int pageSize,
+                                          required = false,
+                                          defaultValue = "10")
+                                          int pageSize,
                             @RequestParam(name = "content",
                                           required = false,
                                           defaultValue = "")
