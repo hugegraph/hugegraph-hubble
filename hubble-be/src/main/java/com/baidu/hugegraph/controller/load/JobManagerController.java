@@ -22,6 +22,7 @@ package com.baidu.hugegraph.controller.load;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.datanucleus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -76,12 +77,12 @@ public class JobManagerController {
                     "job.manager.job-name.reached-limit");
             Ex.check(entity.getJobName() != null, () ->
                      Constant.COMMON_NAME_PATTERN.matcher(entity.getJobName()).matches(),
-                    "job.manager.job-name.unmatch-regex");
+                                                          "job.manager.job-name.unmatch-regex");
             Ex.check(entity.getJobRemarks().length() <= 200,
                     "job.manager.job-remarks.reached-limit");
-            Ex.check(entity.getJobRemarks() != null, () ->
+            Ex.check(!StringUtils.isEmpty(entity.getJobRemarks()), () ->
                      Constant.COMMON_REMARK_PATTERN.matcher(entity.getJobRemarks()).matches(),
-                    "job.manager.job-remarks.unmatch-regex");
+                                                            "job.manager.job-remarks.unmatch-regex");
             Ex.check(this.service.count() < LIMIT,
                     "job.manager.reached-limit", LIMIT);
             if (this.service.getTask(entity.getJobName()) != null) {
@@ -151,7 +152,7 @@ public class JobManagerController {
                  "job.manager.job-name.reached-limit");
         Ex.check(newEntity.getJobName() != null, () ->
                  Constant.COMMON_NAME_PATTERN
-                                .matcher(newEntity.getJobName()).matches(),
+                         .matcher(newEntity.getJobName()).matches(),
                  "job.manager.job-name.unmatch-regex");
         Ex.check(newEntity.getJobRemarks().length() <= 200,
                  "job.manager.job-remarks.reached-limit");
