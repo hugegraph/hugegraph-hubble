@@ -100,7 +100,7 @@ public class JobManagerService {
                     p.setJobStatus(status);
                     if (this.update(p) != 1) {
                         throw new InternalException("job-manager.entity.update.failed",
-                                p);
+                                                    p);
                     }
                 }
             }

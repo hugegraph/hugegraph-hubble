@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.driver.TraverserManager;
-import com.baidu.hugegraph.entity.algorithm.ShortPath;
+import com.baidu.hugegraph.entity.algorithm.ShortestPath;
 import com.baidu.hugegraph.entity.enums.AsyncTaskStatus;
 import com.baidu.hugegraph.entity.enums.ExecuteStatus;
 import com.baidu.hugegraph.entity.enums.ExecuteType;
@@ -44,7 +44,7 @@ public class OltpAlgoService {
         return this.poolService.getOrCreate(connId);
     }
 
-    public GremlinResult shortPath(int connId, ShortPath body) {
+    public GremlinResult shortestPath(int connId, ShortestPath body) {
         HugeClient client = this.getClient(connId);
         TraverserManager traverser = client.traverser();
         Path result = traverser.shortestPath(body.getSource(), body.getTarget(),

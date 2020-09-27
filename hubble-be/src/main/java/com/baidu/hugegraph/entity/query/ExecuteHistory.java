@@ -21,12 +21,9 @@ package com.baidu.hugegraph.entity.query;
 
 import java.util.Date;
 
-import javax.ws.rs.DefaultValue;
-
 import com.baidu.hugegraph.annotation.MergeProperty;
 import com.baidu.hugegraph.common.Identifiable;
 import com.baidu.hugegraph.common.Mergeable;
-import com.baidu.hugegraph.entity.algorithm.AsyncTask;
 import com.baidu.hugegraph.entity.enums.AsyncTaskStatus;
 import com.baidu.hugegraph.entity.enums.ExecuteStatus;
 import com.baidu.hugegraph.entity.enums.ExecuteType;

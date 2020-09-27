@@ -132,11 +132,9 @@ public class GremlinQueryService {
         log.debug("The original gremlin ==> {}", query.getContent());
         String gremlin = this.optimize(query.getContent());
         log.debug("The optimized gremlin ==> {}", gremlin);
-        // Execute gremlin query
-
+        // Execute optimized gremlin query
         GremlinRequest request = new GremlinRequest(gremlin);
         return client.gremlin().executeAsTask(request);
-        // Scan data, vote the result type
     }
 
     public GremlinResult expandVertex(int connId, AdjacentQuery query) {

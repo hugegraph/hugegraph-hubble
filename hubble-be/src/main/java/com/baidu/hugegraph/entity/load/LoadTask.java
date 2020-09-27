@@ -114,7 +114,7 @@ public class LoadTask implements Runnable {
     @JsonProperty("file_read_lines")
     private Long fileReadLines;
 
-    @TableField("`load_status`")
+    @TableField("load_status")
     @MergeProperty
     @JsonProperty("status")
     private LoadStatus status;

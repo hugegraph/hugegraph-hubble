@@ -103,7 +103,7 @@ public class GremlinQueryController extends GremlinController {
 
     @PostMapping("async-task")
     public ExecuteStatus executeAsyncTask(@PathVariable("connId") int connId,
-                                 @RequestBody GremlinQuery query) {
+                                          @RequestBody GremlinQuery query) {
         this.checkParamsValid(query);
 
         Date createTime = HubbleUtil.nowDate();

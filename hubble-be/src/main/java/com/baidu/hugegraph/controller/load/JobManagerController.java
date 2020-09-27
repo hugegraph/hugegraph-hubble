@@ -74,19 +74,19 @@ public class JobManagerController {
                              @RequestBody JobManager entity) {
         synchronized (this.service) {
             Ex.check(entity.getJobName().length() <= 48,
-                    "job.manager.job-name.reached-limit");
+                     "job.manager.job-name.reached-limit");
             Ex.check(entity.getJobName() != null, () ->
                      Constant.COMMON_NAME_PATTERN.matcher(entity.getJobName()).matches(),
                                                           "job.manager.job-name.unmatch-regex");
             Ex.check(entity.getJobRemarks().length() <= 200,
-                    "job.manager.job-remarks.reached-limit");
+                     "job.manager.job-remarks.reached-limit");
             Ex.check(!StringUtils.isEmpty(entity.getJobRemarks()), () ->
                      Constant.COMMON_REMARK_PATTERN.matcher(entity.getJobRemarks()).matches(),
                                                             "job.manager.job-remarks.unmatch-regex");
             Ex.check(this.service.count() < LIMIT,
-                    "job.manager.reached-limit", LIMIT);
+                     "job.manager.reached-limit", LIMIT);
             if (this.service.getTask(entity.getJobName()) != null) {
-                throw new InternalException("任务名不能重复!");
+                throw new InternalException("job.manager.name.repeated");
             }
             entity.setConnId(connId);
             entity.setJobStatus(JobManagerStatus.DEFAULT);

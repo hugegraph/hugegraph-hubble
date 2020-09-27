@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.hugegraph.common.Constant;
-import com.baidu.hugegraph.entity.algorithm.ShortPath;
+import com.baidu.hugegraph.entity.algorithm.ShortestPath;
 import com.baidu.hugegraph.entity.query.GremlinResult;
 import com.baidu.hugegraph.service.algorithm.OltpAlgoService;
 
@@ -41,9 +41,9 @@ public class OltpAlgoController {
     @Autowired
     private OltpAlgoService service;
 
-    @PostMapping("shortpath")
+    @PostMapping("shortestPath")
     public GremlinResult shortPath(@PathVariable("connId") int connId,
-                                   @RequestBody ShortPath body) {
-        return this.service.shortPath(connId, body);
+                                   @RequestBody ShortestPath body) {
+        return this.service.shortestPath(connId, body);
     }
 }

@@ -87,7 +87,7 @@ public class FileUploadController {
         // Before merge: upload-files/conn-1/verson_person.csv/part-1
         // After merge: upload-files/conn-1/file-mapping-1/verson_person.csv
         String dirPath = Paths.get(location, CONN_PREIFX + connId + "/" +
-                                   JOB_PREIFX +  jobId, fileName).toString();
+                                   JOB_PREIFX + jobId, fileName).toString();
         // Check destFile exist
         // Ex.check(!destFile.exists(), "load.upload.file.existed", fileName);
         FileUploadResult result = this.service.uploadFile(file, index, dirPath);

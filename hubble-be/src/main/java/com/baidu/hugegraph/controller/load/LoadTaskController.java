@@ -108,9 +108,9 @@ public class LoadTaskController extends BaseController {
                            @RequestBody LoadTask entity) {
         JobManager jobEntity = this.jobService.get(jobId);
         Ex.check(jobEntity != null,
-                "job-manager.not-exist.id", jobId);
+                 "job-manager.not-exist.id", jobId);
         Ex.check(jobEntity.getJobStatus() == JobManagerStatus.SETTING,
-                "load.task.create.no-permission" );
+                 "load.task.create.no-permission" );
         synchronized(this.service) {
             Ex.check(this.service.count() < LIMIT,
                      "load.task.reached-limit", LIMIT);
@@ -145,10 +145,10 @@ public class LoadTaskController extends BaseController {
         }
         JobManager jobEntity = this.jobService.get(jobId);
         Ex.check(jobEntity != null,
-                "job-manager.not-exist.id", jobId);
+                 "job-manager.not-exist.id", jobId);
         Ex.check((jobEntity.getJobStatus() == JobManagerStatus.SETTING ||
-                 jobEntity.getJobStatus() == JobManagerStatus.IMPORTING),
-                "load.task.start.no-permission" );
+                  jobEntity.getJobStatus() == JobManagerStatus.IMPORTING),
+                  "load.task.start.no-permission" );
 
         List<LoadTask> tasks = new ArrayList<>();
         for (Integer fileId: fileIds) {
@@ -162,7 +162,7 @@ public class LoadTaskController extends BaseController {
         jobEntity.setUpdateTime( HubbleUtil.nowDate());
         if (this.jobService.update(jobEntity) != 1) {
             throw new InternalException("job-manager.entity.update.failed",
-                    jobEntity);
+                                        jobEntity);
         }
         return tasks;
     }
@@ -177,9 +177,9 @@ public class LoadTaskController extends BaseController {
         }
         JobManager jobEntity = this.jobService.get(jobId);
         Ex.check(jobEntity != null,
-                "job-manager.not-exist.id", jobId);
+                 "job-manager.not-exist.id", jobId);
         Ex.check(jobEntity.getJobStatus() == JobManagerStatus.IMPORTING,
-                "load.task.pause.no-permission");
+                 "load.task.pause.no-permission");
         LoadTask task = this.service.pause(taskId);
         jobEntity.setJobStatus(JobManagerStatus.IMPORTING);
         jobEntity.setUpdateTime( HubbleUtil.nowDate());
@@ -200,9 +200,9 @@ public class LoadTaskController extends BaseController {
         }
         JobManager jobEntity = this.jobService.get(jobId);
         Ex.check(jobEntity != null,
-                "job-manager.not-exist.id", jobId);
+                 "job-manager.not-exist.id", jobId);
         Ex.check(jobEntity.getJobStatus() == JobManagerStatus.IMPORTING,
-                "load.task.pause.no-permission");
+                 "load.task.pause.no-permission");
         LoadTask task = this.service.resume(taskId);
         jobEntity.setJobStatus(JobManagerStatus.IMPORTING);
         jobEntity.setUpdateTime( HubbleUtil.nowDate());
@@ -223,9 +223,9 @@ public class LoadTaskController extends BaseController {
         }
         JobManager jobEntity = this.jobService.get(jobId);
         Ex.check(jobEntity != null,
-                "job-manager.not-exist.id", jobId);
+                 "job-manager.not-exist.id", jobId);
         Ex.check(jobEntity.getJobStatus() == JobManagerStatus.IMPORTING,
-                "load.task.pause.no-permission");
+                 "load.task.pause.no-permission");
         LoadTask task = this.service.stop(taskId);
         jobEntity.setJobStatus(JobManagerStatus.IMPORTING);
         jobEntity.setUpdateTime( HubbleUtil.nowDate());
@@ -246,9 +246,9 @@ public class LoadTaskController extends BaseController {
         }
         JobManager jobEntity = this.jobService.get(jobId);
         Ex.check(jobEntity != null,
-                "job-manager.not-exist.id", jobId);
+                 "job-manager.not-exist.id", jobId);
         Ex.check(jobEntity.getJobStatus() == JobManagerStatus.IMPORTING,
-                "load.task.pause.no-permission");
+                 "load.task.pause.no-permission");
         LoadTask task = this.service.retry(taskId);
         jobEntity.setJobStatus(JobManagerStatus.IMPORTING);
         jobEntity.setUpdateTime( HubbleUtil.nowDate());
@@ -269,7 +269,7 @@ public class LoadTaskController extends BaseController {
         }
         JobManager jobEntity = this.jobService.get(jobId);
         Ex.check(jobEntity != null,
-                "job-manager.not-exist.id", jobId);
+                 "job-manager.not-exist.id", jobId);
         Integer fileId = task.getFileId();
         FileMapping mapping = this.fmService.get(fileId);
         String reason = this.service.readLoadFailedReason(mapping);

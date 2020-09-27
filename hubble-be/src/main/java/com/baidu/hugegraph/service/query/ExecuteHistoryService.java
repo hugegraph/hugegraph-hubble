@@ -101,7 +101,6 @@ public class ExecuteHistoryService {
                 history.setDuration(0L);
                 history.setAsyncStatus(AsyncTaskStatus.UNKNOWN);
             }
-
         }
         return history;
     }

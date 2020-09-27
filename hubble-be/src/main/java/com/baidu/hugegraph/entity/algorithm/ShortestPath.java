@@ -31,7 +31,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ShortPath {
+public class ShortestPath {
 
     @JsonProperty("source")
     private Object source;
@@ -56,5 +56,4 @@ public class ShortPath {
 
     @JsonProperty("capacity")
     private long capacity;
-
 }
