@@ -8,7 +8,6 @@ import React, {
 import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import CodeMirror from 'codemirror';
-import { isEmpty } from 'lodash-es';
 import { useTranslation } from 'react-i18next';
 import classnames from 'classnames';
 import {
@@ -32,9 +31,14 @@ import { useMultiKeyPress } from '../../../hooks';
 
 import LoopDetection from './algorithm/LoopDetection';
 import FocusDetection from './algorithm/FocusDetection';
+import ShortestPathAll from './algorithm/ShortestPathAll';
+import AllPath from './algorithm/AllPath';
+import ModelSimilarity from './algorithm/ModelSimilarity';
+import NeighborRank from './algorithm/NeighborRank';
+
 import ArrowIcon from '../../../assets/imgs/ic_arrow_16.svg';
 import QuestionMarkIcon from '../../../assets/imgs/ic_question_mark.svg';
-import {Algorithm} from '../../../stores/factory/dataAnalyzeStore/algorithmStore';
+import { Algorithm } from '../../../stores/factory/dataAnalyzeStore/algorithmStore';
 
 export const styles = {
   primaryButton: {
@@ -51,7 +55,11 @@ const codeRegexp = /[A-Za-z0-9]+/;
 const algorithmWhiteList: string[] = [
   Algorithm.shortestPath,
   Algorithm.loopDetection,
-  Algorithm.focusDetection
+  Algorithm.focusDetection,
+  Algorithm.shortestPathAll,
+  Algorithm.allPath,
+  Algorithm.modelSimilarity,
+  Algorithm.neighborRankRecommendation
 ];
 
 const QueryAndAlgorithmLibrary: React.FC = observer(() => {
@@ -76,7 +84,7 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
         >
           {t('data-analyze.category.gremlin-analyze')}
         </div>
-        <div
+        {/* <div
           onClick={handleTabChange('algorithm-analyze')}
           className={
             dataAnalyzeStore.currentTab === 'algorithm-analyze'
@@ -85,12 +93,12 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
           }
         >
           {t('data-analyze.category.algorithm-analyze')}
-        </div>
+        </div> */}
       </div>
       {dataAnalyzeStore.currentTab === 'gremlin-analyze' && <GremlinQuery />}
-      {dataAnalyzeStore.currentTab === 'algorithm-analyze' && (
+      {/* {dataAnalyzeStore.currentTab === 'algorithm-analyze' && (
         <AlgorithmQuery />
-      )}
+      )} */}
     </>
   );
 });
@@ -315,7 +323,7 @@ export const GremlinQuery: React.FC = observer(() => {
               trigger={['click']}
               title={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                  ? '执行中'
+                  ? '执行中　'
                   : dataAnalyzeStore.queryMode === 'query'
                   ? '执行查询'
                   : '执行任务'
@@ -323,6 +331,7 @@ export const GremlinQuery: React.FC = observer(() => {
               onHandleMenuClick={(e: any) => {
                 dataAnalyzeStore.setQueryMode(e.key);
               }}
+              overlayClassName="improve-zindex"
               onClickButton={handleQueryExecution}
               size="small"
               type="primary"
@@ -863,11 +872,19 @@ export const AlgorithmQuery: React.FC = observer(() => {
             </div>
           </div>
         );
-        case Algorithm.loopDetection:
-          return <LoopDetection />
-        case Algorithm.focusDetection:
-          return <FocusDetection />
-      }
+      case Algorithm.loopDetection:
+        return <LoopDetection />;
+      case Algorithm.focusDetection:
+        return <FocusDetection />;
+      case Algorithm.shortestPathAll:
+        return <ShortestPathAll />;
+      case Algorithm.allPath:
+        return <AllPath />;
+      case Algorithm.modelSimilarity:
+        return <ModelSimilarity />;
+      case Algorithm.neighborRankRecommendation:
+        return <NeighborRank />;
+    }
   };
 
   useEffect(() => {
@@ -925,7 +942,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
               Algorithm.focusDetection,
               Algorithm.shortestPath,
               Algorithm.shortestPathAll,
-              Algorithm.relativePathOrAllPath
+              Algorithm.allPath
             ].map((algorithm) => (
               <span
                 className={
@@ -941,15 +958,19 @@ export const AlgorithmQuery: React.FC = observer(() => {
           </div>
           <div className="query-tab-content-menu">
             {[
-              Algorithm.modelSimilarityAlgorithm,
+              Algorithm.modelSimilarity,
+              Algorithm.neighborRankRecommendation,
               Algorithm.realTimeRecommendation,
               Algorithm.kStepNeighbor,
-              Algorithm.kHopAlgorithm,
-              Algorithm.customPath
+              Algorithm.kHop
             ].map((algorithm) => (
               <span
-                className="query-tab-content-menu-item-disabled"
-                onClick={() => {}}
+                className={
+                  algorithmWhiteList.includes(algorithm)
+                    ? ''
+                    : 'query-tab-content-menu-item-disabled'
+                }
+                onClick={handleChangeAlgorithm(algorithm)}
               >
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
@@ -957,15 +978,19 @@ export const AlgorithmQuery: React.FC = observer(() => {
           </div>
           <div className="query-tab-content-menu">
             {[
+              Algorithm.customPath,
               Algorithm.customIntersectionDetection,
               Algorithm.radiographicInspection,
               Algorithm.commonNeighbor,
-              Algorithm.weightedShortestPath,
-              Algorithm.singleSourceWeightedPath
+              Algorithm.weightedShortestPath
             ].map((algorithm) => (
               <span
-                className="query-tab-content-menu-item-disabled"
-                onClick={() => {}}
+                className={
+                  algorithmWhiteList.includes(algorithm)
+                    ? ''
+                    : 'query-tab-content-menu-item-disabled'
+                }
+                onClick={handleChangeAlgorithm(algorithm)}
               >
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
@@ -973,11 +998,16 @@ export const AlgorithmQuery: React.FC = observer(() => {
           </div>
           <div className="query-tab-content-menu">
             {[
+              Algorithm.singleSourceWeightedPath,
               Algorithm.jaccardSimilarity,
-              Algorithm.personalRankRecommendationAlgorithm
+              Algorithm.personalRankRecommendation
             ].map((algorithm) => (
               <span
-                className="query-tab-content-menu-item-disabled"
+                className={
+                  algorithmWhiteList.includes(algorithm)
+                    ? ''
+                    : 'query-tab-content-menu-item-disabled'
+                }
                 onClick={() => {}}
               >
                 {t(`data-analyze.algorithm-list.${algorithm}`)}

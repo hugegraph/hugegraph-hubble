@@ -13,9 +13,9 @@ import {
   createGraphNode,
   createGraphEdge,
   createGraphEditableProperties,
-  createNewGraphDataConfig,
+  createNewGraphDataConfig
 } from '../../factory/dataAnalyzeStore/dataAnalyzeStore';
-import {Algorithm} from '../../factory/dataAnalyzeStore/algorithmStore'; 
+import { Algorithm } from '../../factory/dataAnalyzeStore/algorithmStore';
 import {
   checkIfLocalNetworkOffline,
   convertArrayToString,
@@ -48,7 +48,12 @@ import type {
   EditableProperties,
   ShortestPathAlgorithmParams,
   LoopDetectionParams,
-  FocusDetectionParams
+  FocusDetectionParams,
+  ShortestPathAllAlgorithmParams,
+  AllPathAlgorithmParams,
+  ModelSimilarityParams,
+  NeighborRankParams,
+  NeighborRankRule
 } from '../../types/GraphManagementStore/dataAnalyzeStore';
 import type {
   VertexTypeListResponse,
@@ -65,6 +70,21 @@ const ruleMap: RuleMap = {
   小于等于: 'lte',
   True: 'eq',
   False: 'eq'
+};
+
+const monthMaps: Record<string, string> = {
+  Jan: '01',
+  Feb: '02',
+  Mar: '03',
+  Apr: '04',
+  May: '05',
+  Jun: '06',
+  Jul: '07',
+  Aug: '08',
+  Sep: '09',
+  Oct: '10',
+  Nov: '11',
+  Dec: '12'
 };
 
 export class DataAnalyzeStore {
@@ -116,6 +136,7 @@ export class DataAnalyzeStore {
 
   // datas
   @observable.ref idList: { id: number; name: string }[] = [];
+  @observable.ref properties: ValueTypes[] = [];
   @observable.ref valueTypes: Record<string, string> = {};
   @observable.ref vertexTypes: VertexType[] = [];
   @observable.ref edgeTypes: EdgeType[] = [];
@@ -619,7 +640,8 @@ export class DataAnalyzeStore {
   @action
   addTempExecLog() {
     const date = new Date();
-    const time = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+    const [week, month, day, year, time] = date.toString().split(' ');
+    const timeString = `${year}-${monthMaps[month]}-${day} ${time}`;
 
     const tempData: ExecutionLogs = {
       id: NaN,
@@ -627,8 +649,8 @@ export class DataAnalyzeStore {
       type: 'GREMLIN',
       content: this.codeEditorText,
       status: 'RUNNING',
-      duration: '0',
-      create_time: time
+      duration: '0ms',
+      create_time: timeString
     };
 
     this.executionLogData = [tempData].concat(
@@ -637,7 +659,8 @@ export class DataAnalyzeStore {
 
     return window.setInterval(() => {
       this.executionLogData[0].duration =
-        String(Number(this.executionLogData[0].duration) + 10) + 'ms';
+        String(Number(this.executionLogData[0].duration.split('ms')[0]) + 10) +
+        'ms';
 
       runInAction(() => {
         this.executionLogData = this.executionLogData.slice();
@@ -1037,6 +1060,8 @@ export class DataAnalyzeStore {
       canvasY: ''
     };
 
+    this.properties = [];
+
     this.isSearched = {
       status: false,
       value: ''
@@ -1122,6 +1147,8 @@ export class DataAnalyzeStore {
         this.errorInfo.fetchValueTypes.code = result.data.status;
         throw new Error(result.data.message);
       }
+
+      this.properties = result.data.data.records;
 
       result.data.data.records.forEach(
         ({ name, data_type }: Record<string, string>) => {
@@ -1323,10 +1350,50 @@ export class DataAnalyzeStore {
     this.requestStatus.fetchGraphs = 'pending';
     this.isLoadingGraph = true;
 
-    let params: ShortestPathAlgorithmParams | LoopDetectionParams | FocusDetectionParams | null = null;
+    let params:
+      | LoopDetectionParams
+      | FocusDetectionParams
+      | ShortestPathAlgorithmParams
+      | ShortestPathAllAlgorithmParams
+      | AllPathAlgorithmParams
+      | ModelSimilarityParams
+      | NeighborRankParams
+      | null = null;
 
     if (!isUndefined(algorithmConfigs)) {
       switch (algorithmConfigs.type) {
+        case Algorithm.loopDetection: {
+          if (
+            this.algorithmAnalyzerStore.loopDetectionParams.label === '__all__'
+          ) {
+            const clonedParams: LoopDetectionParams = cloneDeep(
+              this.algorithmAnalyzerStore.loopDetectionParams
+            );
+
+            delete clonedParams.label;
+            params = clonedParams;
+            break;
+          }
+
+          params = this.algorithmAnalyzerStore.loopDetectionParams;
+          break;
+        }
+        case Algorithm.focusDetection: {
+          if (
+            this.algorithmAnalyzerStore.loopDetectionParams.label === '__all__'
+          ) {
+            const clonedParams: FocusDetectionParams = cloneDeep(
+              this.algorithmAnalyzerStore.focusDetectionParams
+            );
+
+            delete clonedParams.label;
+            params = clonedParams;
+            break;
+          }
+
+          params = this.algorithmAnalyzerStore.focusDetectionParams;
+          break;
+        }
         case Algorithm.shortestPath: {
           if (
             this.algorithmAnalyzerStore.shortestPathAlgorithmParams.label ===
@@ -1345,13 +1412,13 @@ export class DataAnalyzeStore {
           break;
         }
 
-        case Algorithm.loopDetection: {
+        case Algorithm.shortestPathAll: {
           if (
-            this.algorithmAnalyzerStore.loopDetectionParams.label ===
+            this.algorithmAnalyzerStore.shortestPathAllParams.label ===
             '__all__'
           ) {
-            const clonedParams: LoopDetectionParams = cloneDeep(
-              this.algorithmAnalyzerStore.loopDetectionParams
+            const clonedParams: ShortestPathAllAlgorithmParams = cloneDeep(
+              this.algorithmAnalyzerStore.shortestPathAllParams
             );
 
             delete clonedParams.label;
@@ -1359,9 +1426,95 @@ export class DataAnalyzeStore {
             break;
           }
 
-          params = this.algorithmAnalyzerStore.loopDetectionParams;
+          params = this.algorithmAnalyzerStore.shortestPathAllParams;
           break;
         }
+
+        case Algorithm.allPath: {
+          if (this.algorithmAnalyzerStore.allPathParams.label === '__all__') {
+            const clonedParams: AllPathAlgorithmParams = cloneDeep(
+              this.algorithmAnalyzerStore.allPathParams
+            );
+
+            delete clonedParams.label;
+            params = clonedParams;
+            break;
+          }
+
+          params = this.algorithmAnalyzerStore.allPathParams;
+          break;
+        }
+
+        case Algorithm.modelSimilarity: {
+          const {
+            source,
+            vertexType,
+            vertexProperty,
+            direction,
+            least_neighbor,
+            similarity,
+            label,
+            max_similar,
+            least_similar,
+            property_filter,
+            least_property_number,
+            max_degree,
+            skip_degree,
+            capacity,
+            limit,
+            return_common_connection,
+            return_complete_info
+          } = this.algorithmAnalyzerStore.modelSimilarityParams;
+
+          const convertedParams = {
+            sources: {
+              ids: [source],
+              label: vertexType,
+              properties: vertexProperty
+            },
+            label,
+            direction,
+            min_neighbors: least_neighbor,
+            alpha: similarity,
+            min_similars: least_similar,
+            top: max_similar,
+            group_property: property_filter,
+            min_groups: least_property_number,
+            max_degree,
+            capacity,
+            limit,
+            with_intermediary: return_common_connection,
+            with_vertex: return_complete_info
+          };
+
+          if (label === '__all__') {
+            delete convertedParams.label;
+          }
+
+          // @ts-ignore
+          params = convertedParams;
+          break;
+        }
+
+        case Algorithm.neighborRankRecommendation: {
+          const clonedNeighborRankParams = cloneDeep(
+            this.algorithmAnalyzerStore.neighborRankParams
+          );
+
+          clonedNeighborRankParams.steps.forEach((step, index) => {
+            delete step.uuid;
+
+            if (step.label === '__all__') {
+              const clonedStep: NeighborRankRule = cloneDeep(step);
+              delete clonedStep.label;
+              clonedNeighborRankParams.steps[index] = clonedStep;
+            }
+          });
+
+          params = clonedNeighborRankParams;
+          break;
+        }
+
         // default:
         //   params = this.algorithmAnalyzerStore.shortestPathAlgorithmParams;
       }

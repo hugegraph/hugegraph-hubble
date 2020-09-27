@@ -7,19 +7,16 @@ import { Tooltip as CustomTooltip } from '../../../common';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
+import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
 
-const FocusDetection = observer(() => {
+const ShortestPathAll = observer(() => {
   const { t } = useTranslation();
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
 
-  const isValidExec =
-    Object.values(
-      algorithmAnalyzerStore.validateFocusDetectionParamsErrorMessage
-    ).every((value) => value === '') &&
-    algorithmAnalyzerStore.focusDetectionParams.source !== '' &&
-    algorithmAnalyzerStore.focusDetectionParams.target !== '' &&
-    algorithmAnalyzerStore.focusDetectionParams.max_depth !== '';
+  const isValidExec = !Object.values(
+    algorithmAnalyzerStore.shortestPathAllParams
+  ).some((value) => value === '');
 
   return (
     <div className="query-tab-content-form">
@@ -28,7 +25,9 @@ const FocusDetection = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.focus-detection.options.source')}
+              {t(
+                'data-analyze.algorithm-forms.shortest-path-all.options.source'
+              )}
             </span>
           </div>
           <Input
@@ -36,25 +35,25 @@ const FocusDetection = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.focus-detection.placeholder.input-source-id'
+              'data-analyze.algorithm-forms.shortest-path-all.placeholder.input-source-id'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateFocusDetectionParamsErrorMessage
+              algorithmAnalyzerStore.validateShortestPathAllParamsErrorMessage
                 .source
             }
-            value={algorithmAnalyzerStore.focusDetectionParams.source}
+            value={algorithmAnalyzerStore.shortestPathAllParams.source}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateFocusDetectionParams(
+              algorithmAnalyzerStore.mutateShortestPathAllParams(
                 'source',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateFocusDetectionParams('source');
+              algorithmAnalyzerStore.validateShortestPathAllParams('source');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateFocusDetectionParams('source');
+                algorithmAnalyzerStore.validateShortestPathAllParams('source');
               }
             }}
           />
@@ -62,24 +61,29 @@ const FocusDetection = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.focus-detection.options.label')}
+              {t(
+                'data-analyze.algorithm-forms.shortest-path-all.options.label'
+              )}
             </span>
           </div>
           <Select
             size="medium"
             trigger="click"
-            value={algorithmAnalyzerStore.focusDetectionParams.label}
+            value={algorithmAnalyzerStore.shortestPathAllParams.label}
             notFoundContent={t(
-              'data-analyze.algorithm-forms.focus-detection.placeholder.no-edge-types'
+              'data-analyze.algorithm-forms.shortest-path-all.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             width={400}
             onChange={(value: string) => {
-              algorithmAnalyzerStore.mutateFocusDetectionParams('label', value);
+              algorithmAnalyzerStore.mutateShortestPathAllParams(
+                'label',
+                value
+              );
             }}
           >
             <Select.Option value="__all__" key="__all__">
-              {t('data-analyze.algorithm-forms.focus-detection.pre-value')}
+              {t('data-analyze.algorithm-forms.shortest-path-all.pre-value')}
             </Select.Option>
             {dataAnalyzeStore.edgeTypes.map(({ name }) => (
               <Select.Option value={name} key={name}>
@@ -94,42 +98,8 @@ const FocusDetection = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.focus-detection.options.target')}
-            </span>
-          </div>
-          <Input
-            width={400}
-            size="medium"
-            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            placeholder={t(
-              'data-analyze.algorithm-forms.focus-detection.placeholder.input-target-id'
-            )}
-            errorLocation="layer"
-            errorMessage={
-              algorithmAnalyzerStore.validateFocusDetectionParamsErrorMessage
-                .target
-            }
-            value={algorithmAnalyzerStore.focusDetectionParams.target}
-            onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateFocusDetectionParams(
-                'target',
-                e.value as string
-              );
-
-              algorithmAnalyzerStore.validateFocusDetectionParams('target');
-            }}
-            originInputProps={{
-              onBlur() {
-                algorithmAnalyzerStore.validateFocusDetectionParams('target');
-              }
-            }}
-          />
-        </div>
-        <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
-            <span>
               {t(
-                'data-analyze.algorithm-forms.focus-detection.options.max_degree'
+                'data-analyze.algorithm-forms.shortest-path-all.options.target'
               )}
             </span>
           </div>
@@ -138,25 +108,63 @@ const FocusDetection = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.focus-detection.placeholder.input-integer'
+              'data-analyze.algorithm-forms.shortest-path-all.placeholder.input-source-id'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateFocusDetectionParamsErrorMessage
+              algorithmAnalyzerStore.validateShortestPathAllParamsErrorMessage
+                .target
+            }
+            value={algorithmAnalyzerStore.shortestPathAllParams.target}
+            onChange={(e: any) => {
+              algorithmAnalyzerStore.mutateShortestPathAllParams(
+                'target',
+                e.value as string
+              );
+
+              algorithmAnalyzerStore.validateShortestPathAllParams('target');
+            }}
+            originInputProps={{
+              onBlur() {
+                algorithmAnalyzerStore.validateShortestPathAllParams('target');
+              }
+            }}
+          />
+        </div>
+        <div className="query-tab-content-form-item">
+          <div className="query-tab-content-form-item-title">
+            <span>
+              {t(
+                'data-analyze.algorithm-forms.shortest-path-all.options.max_degree'
+              )}
+            </span>
+          </div>
+          <Input
+            width={400}
+            size="medium"
+            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
+            placeholder={t(
+              'data-analyze.algorithm-forms.shortest-path-all.placeholder.input-integer'
+            )}
+            errorLocation="layer"
+            errorMessage={
+              algorithmAnalyzerStore.validateShortestPathAllParamsErrorMessage
                 .max_degree
             }
-            value={algorithmAnalyzerStore.focusDetectionParams.max_degree}
+            value={algorithmAnalyzerStore.shortestPathAllParams.max_degree}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateFocusDetectionParams(
+              algorithmAnalyzerStore.mutateShortestPathAllParams(
                 'max_degree',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateFocusDetectionParams('max_degree');
+              algorithmAnalyzerStore.validateShortestPathAllParams(
+                'max_degree'
+              );
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateFocusDetectionParams(
+                algorithmAnalyzerStore.validateShortestPathAllParams(
                   'max_degree'
                 );
               }
@@ -170,15 +178,15 @@ const FocusDetection = observer(() => {
             <i>*</i>
             <span>
               {t(
-                'data-analyze.algorithm-forms.focus-detection.options.direction'
+                'data-analyze.algorithm-forms.shortest-path-all.options.direction'
               )}
             </span>
           </div>
           <Radio.Group
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            value={algorithmAnalyzerStore.focusDetectionParams.direction}
+            value={algorithmAnalyzerStore.shortestPathAllParams.direction}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              algorithmAnalyzerStore.mutateFocusDetectionParams(
+              algorithmAnalyzerStore.mutateShortestPathAllParams(
                 'direction',
                 e.target.value
               );
@@ -192,7 +200,9 @@ const FocusDetection = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.focus-detection.options.limit')}
+              {t(
+                'data-analyze.algorithm-forms.shortest-path-all.options.capacity'
+              )}
             </span>
           </div>
           <Input
@@ -200,25 +210,27 @@ const FocusDetection = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.focus-detection.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.shortest-path-all.placeholder.input-positive-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateFocusDetectionParamsErrorMessage
-                .limit
+              algorithmAnalyzerStore.validateShortestPathAllParamsErrorMessage
+                .capacity
             }
-            value={algorithmAnalyzerStore.focusDetectionParams.limit}
+            value={algorithmAnalyzerStore.shortestPathAllParams.capacity}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateFocusDetectionParams(
-                'limit',
+              algorithmAnalyzerStore.mutateShortestPathAllParams(
+                'capacity',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateFocusDetectionParams('limit');
+              algorithmAnalyzerStore.validateShortestPathAllParams('capacity');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateFocusDetectionParams('limit');
+                algorithmAnalyzerStore.validateShortestPathAllParams(
+                  'capacity'
+                );
               }
             }}
           />
@@ -230,7 +242,7 @@ const FocusDetection = observer(() => {
             <i>*</i>
             <span>
               {t(
-                'data-analyze.algorithm-forms.focus-detection.options.max_depth'
+                'data-analyze.algorithm-forms.shortest-path-all.options.max_depth'
               )}
             </span>
             <CustomTooltip
@@ -248,7 +260,7 @@ const FocusDetection = observer(() => {
                 }
               }}
               tooltipWrapper={t(
-                'data-analyze.algorithm-forms.focus-detection.hint.max-depth'
+                'data-analyze.algorithm-forms.shortest-path-all.hint.max-depth'
               )}
               childrenProps={{
                 src: QuestionMarkIcon,
@@ -265,25 +277,25 @@ const FocusDetection = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.focus-detection.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.shortest-path-all.placeholder.input-positive-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateFocusDetectionParamsErrorMessage
+              algorithmAnalyzerStore.validateShortestPathAllParamsErrorMessage
                 .max_depth
             }
-            value={algorithmAnalyzerStore.focusDetectionParams.max_depth}
+            value={algorithmAnalyzerStore.shortestPathAllParams.max_depth}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateFocusDetectionParams(
+              algorithmAnalyzerStore.mutateShortestPathAllParams(
                 'max_depth',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateFocusDetectionParams('max_depth');
+              algorithmAnalyzerStore.validateShortestPathAllParams('max_depth');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateFocusDetectionParams(
+                algorithmAnalyzerStore.validateShortestPathAllParams(
                   'max_depth'
                 );
               }
@@ -294,34 +306,64 @@ const FocusDetection = observer(() => {
           <div className="query-tab-content-form-item-title">
             <span>
               {t(
-                'data-analyze.algorithm-forms.focus-detection.options.capacity'
+                'data-analyze.algorithm-forms.shortest-path-all.options.skip_degree'
               )}
             </span>
+            <CustomTooltip
+              trigger="hover"
+              placement="bottom-start"
+              modifiers={{
+                offset: {
+                  offset: '0, 8'
+                }
+              }}
+              tooltipWrapperProps={{
+                className: 'tooltips-dark',
+                style: {
+                  zIndex: 7
+                }
+              }}
+              tooltipWrapper={t(
+                'data-analyze.algorithm-forms.shortest-path-all.hint.skip-degree'
+              )}
+              childrenProps={{
+                src: QuestionMarkIcon,
+                alt: 'hint',
+                style: {
+                  marginLeft: 5
+                }
+              }}
+              childrenWrapperElement="img"
+            />
           </div>
           <Input
             width={400}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.focus-detection.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.shortest-path-all.placeholder.input-positive-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateFocusDetectionParamsErrorMessage
-                .capacity
+              algorithmAnalyzerStore.validateShortestPathAllParamsErrorMessage
+                .skip_degree
             }
-            value={algorithmAnalyzerStore.focusDetectionParams.capacity}
+            value={algorithmAnalyzerStore.shortestPathAllParams.skip_degree}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateFocusDetectionParams(
-                'capacity',
+              algorithmAnalyzerStore.mutateShortestPathAllParams(
+                'skip_degree',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateFocusDetectionParams('capacity');
+              algorithmAnalyzerStore.validateShortestPathAllParams(
+                'skip_degree'
+              );
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateFocusDetectionParams('capacity');
+                algorithmAnalyzerStore.validateShortestPathAllParams(
+                  'skip_degree'
+                );
               }
             }}
           />
@@ -344,8 +386,8 @@ const FocusDetection = observer(() => {
 
             const timerId = dataAnalyzeStore.addTempExecLog();
             await dataAnalyzeStore.fetchGraphs({
-              url: 'crosspoints',
-              type: 'focus-detection'
+              url: 'allshortpath',
+              type: Algorithm.shortestPathAll
             });
             await dataAnalyzeStore.fetchExecutionLogs();
             window.clearTimeout(timerId);
@@ -357,7 +399,7 @@ const FocusDetection = observer(() => {
           style={styles.primaryButton}
           disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
           onClick={() => {
-            algorithmAnalyzerStore.resetFocusDetectionParams();
+            algorithmAnalyzerStore.resetShortestPathAllParams();
           }}
         >
           {t('data-analyze.manipulations.reset')}
@@ -367,4 +409,4 @@ const FocusDetection = observer(() => {
   );
 });
 
-export default FocusDetection;
+export default ShortestPathAll;
