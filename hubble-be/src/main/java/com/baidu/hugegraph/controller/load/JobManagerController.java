@@ -194,6 +194,9 @@ public class JobManagerController {
             reasonResult.setReason(reason);
             reasonResults.add(reasonResult);
         });
-        return Response.builder().status(Constant.STATUS_OK).data(reasonResults).build();
+        return Response.builder()
+                       .status(Constant.STATUS_OK)
+                       .data(reasonResults)
+                       .build();
     }
 }

@@ -87,10 +87,10 @@ public class FileUploadController {
         this.ensureLocationExist(location, path);
         // Before merge: upload-files/conn-1/verson_person.csv/part-1
         // After merge: upload-files/conn-1/file-mapping-1/verson_person.csv
-        String dirPath = Paths.get(location, path, fileName).toString();
+        String filePath = Paths.get(location, path, fileName).toString();
         // Check destFile exist
         // Ex.check(!destFile.exists(), "load.upload.file.existed", fileName);
-        FileUploadResult result = this.service.uploadFile(file, index, dirPath);
+        FileUploadResult result = this.service.uploadFile(file, index, filePath);
         if (result.getStatus() == FileUploadResult.Status.FAILURE) {
             return result;
         }
@@ -105,7 +105,7 @@ public class FileUploadController {
                 throw new InternalException("entity.update.failed", mapping);
             }
         } else {
-            mapping = new FileMapping(connId, fileName, dirPath);
+            mapping = new FileMapping(connId, fileName, filePath);
             mapping.setJobId(jobId);
             mapping.setFileStatus(FileMappingStatus.UPLOADING);
             mapping.setFileIndex(String.valueOf(index));
@@ -116,10 +116,10 @@ public class FileUploadController {
         }
        Integer mapId = mapping.getId();
         // Determine whether all the parts have been uploaded, then merge them
-        boolean merged = this.service.tryMergePartFiles(dirPath, total);
+        boolean merged = this.service.tryMergePartFiles(filePath, total);
         if (merged) {
             // Save file mapping
-            mapping = new FileMapping(connId, fileName, dirPath);
+            mapping = new FileMapping(connId, fileName, filePath);
             // Read column names and values then fill it
             this.service.extractColumns(mapping);
             mapping.setId(mapId);
