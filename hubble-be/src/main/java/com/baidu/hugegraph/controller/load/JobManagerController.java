@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.common.Response;
 import com.baidu.hugegraph.entity.enums.JobManagerStatus;
+import com.baidu.hugegraph.entity.enums.LoadStatus;
 import com.baidu.hugegraph.entity.load.FileMapping;
 import com.baidu.hugegraph.entity.load.JobManager;
 import com.baidu.hugegraph.entity.load.JobManagerReasonResult;
@@ -58,6 +59,7 @@ import lombok.extern.log4j.Log4j2;
 public class JobManagerController {
 
     private static final int LIMIT = 500;
+
     private final JobManagerService service;
     @Autowired
     private FileMappingService fmService;
@@ -170,7 +172,7 @@ public class JobManagerController {
     }
 
     @GetMapping("{id}/reason")
-    public Response reason(@PathVariable("connId") int jobId,
+    public Response reason(@PathVariable("connId") int connId,
                            @PathVariable("id") int id) {
         JobManager job = this.service.get(id);
         if (job == null) {
@@ -178,17 +180,20 @@ public class JobManagerController {
         }
         List<LoadTask> tasks = taskService.batchTasks(job.getId());
         List<JobManagerReasonResult> reasonResults = new ArrayList<>();
-        tasks.forEach((p) -> {
+        tasks.forEach(task -> {
             JobManagerReasonResult reasonResult = new JobManagerReasonResult();
-            int fileId = p.getFileId();
-            FileMapping mapping = this.fmService.get(fileId);
-            String reason = this.taskService.readLoadFailedReason(mapping);
-            reasonResult.setTaskId(p.getJobId());
-            reasonResult.setFileId(p.getFileId());
-            reasonResult.setFileName(p.getFileName());
+            int fileId = task.getFileId();
+            String reason = "";
+            if (task.getStatus() == LoadStatus.FAILED) {
+                FileMapping mapping = this.fmService.get(fileId);
+                reason = this.taskService.readLoadFailedReason(mapping);
+            }
+            reasonResult.setTaskId(task.getJobId());
+            reasonResult.setFileId(task.getFileId());
+            reasonResult.setFileName(task.getFileName());
             reasonResult.setReason(reason);
             reasonResults.add(reasonResult);
         });
-        return Response.builder().status(200).data(reasonResults).build();
+        return Response.builder().status(Constant.STATUS_OK).data(reasonResults).build();
     }
 }
