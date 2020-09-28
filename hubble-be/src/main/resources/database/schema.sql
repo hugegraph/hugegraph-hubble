@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS `job_manager` (
     `update_time` DATETIME(6) NOT NULL,
     `create_time` DATETIME(6) NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE (`job_name`)
+    UNIQUE (`job_name`, `conn_id`)
 );
 
 CREATE TABLE IF NOT EXISTS `async_task` (

@@ -71,7 +71,8 @@ public class AsyncTaskService {
             if (!type.isEmpty() && !type.equals(task.type())) {
                 continue;
             }
-            if (!content.isEmpty() && !(task.name().contains(content))) {
+            if (!content.isEmpty() &&
+                !(content.equals(task.id() + "") || task.name().contains(content))) {
                 continue;
             }
             result.add(task);
