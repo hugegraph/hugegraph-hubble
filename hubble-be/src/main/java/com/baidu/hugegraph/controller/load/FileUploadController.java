@@ -82,12 +82,12 @@ public class FileUploadController {
         this.checkFileValid(connId, jobId, jobEntity, file, fileName);
 
         String location = this.config.get(HubbleOptions.UPLOAD_FILE_LOCATION);
-        this.ensureLocationExist(location, CONN_PREIFX + connId + "/" +
-                                 JOB_PREIFX + jobId);
+        String path = Paths.get(CONN_PREIFX + connId, JOB_PREIFX + jobId)
+                           .toString();
+        this.ensureLocationExist(location, path);
         // Before merge: upload-files/conn-1/verson_person.csv/part-1
         // After merge: upload-files/conn-1/file-mapping-1/verson_person.csv
-        String dirPath = Paths.get(location, CONN_PREIFX + connId + "/" +
-                                   JOB_PREIFX + jobId, fileName).toString();
+        String dirPath = Paths.get(location, path, fileName).toString();
         // Check destFile exist
         // Ex.check(!destFile.exists(), "load.upload.file.existed", fileName);
         FileUploadResult result = this.service.uploadFile(file, index, dirPath);
@@ -179,7 +179,7 @@ public class FileUploadController {
                 jobEntity.setJobSize(jobSize);
                 if (this.jobService.update(jobEntity) != 1) {
                     throw new InternalException("job-manager.entity.update.failed",
-                            jobEntity);
+                                                jobEntity);
                 }
             }
             result.put(fileName, deleted);
@@ -191,10 +191,10 @@ public class FileUploadController {
     private void checkFileValid(int connId, int jobId, JobManager jobEntity,
                                 MultipartFile file, String fileName) {
         Ex.check(jobEntity != null,
-                "job-manager.not-exist.id", jobId);
-        Ex.check((jobEntity.getJobStatus() == JobManagerStatus.DEFAULT ||
-                  jobEntity.getJobStatus() == JobManagerStatus.SETTING),
-                "load.upload.file.no-permission" );
+                 "job-manager.not-exist.id", jobId);
+        Ex.check(jobEntity.getJobStatus() == JobManagerStatus.DEFAULT ||
+                 jobEntity.getJobStatus() == JobManagerStatus.SETTING,
+                 "load.upload.file.no-permission" );
         // Now allowed to upload empty file
         Ex.check(!file.isEmpty(), "load.upload.file.cannot-be-empty");
         // Difficult: how to determine whether the file is csv or text
@@ -216,8 +216,8 @@ public class FileUploadController {
         // Check is there a file with the same name
         FileMapping oldMapping = this.service.get(connId, jobId, fileName);
         Ex.check(oldMapping == null ||
-                oldMapping.getFileStatus() == FileMappingStatus.UPLOADING,
-                "load.upload.file.existed", fileName);
+                 oldMapping.getFileStatus() == FileMappingStatus.UPLOADING,
+                 "load.upload.file.existed", fileName);
 
         long totalFileSizeLimit = this.config.get(
                                   HubbleOptions.UPLOAD_TOTAL_FILE_SIZE_LIMIT);

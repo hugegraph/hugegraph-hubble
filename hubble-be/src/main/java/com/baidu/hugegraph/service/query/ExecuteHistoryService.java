@@ -19,7 +19,8 @@
 
 package com.baidu.hugegraph.service.query;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoField;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -37,6 +38,7 @@ import com.baidu.hugegraph.mapper.query.ExecuteHistoryMapper;
 import com.baidu.hugegraph.options.HubbleOptions;
 import com.baidu.hugegraph.service.HugeClientPoolService;
 import com.baidu.hugegraph.structure.Task;
+import com.baidu.hugegraph.util.HubbleUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -72,11 +74,12 @@ public class ExecuteHistoryService {
             results.setTotal(limit);
         }
         // Get the status of successful execution of asynchronous tasks
+        Instant now = HubbleUtil.nowTime();
         results.getRecords().forEach((p) -> {
             if (p.getType().equals(ExecuteType.GREMLIN_ASYNC)) {
                 try {
                     Task task = client.task().get(p.getAsyncId());
-                    long endDate = task.updateTime() > 0 ? task.updateTime() : new Date().getTime();
+                    long endDate = task.updateTime() > 0 ? task.updateTime() : now.getLong(ChronoField.INSTANT_SECONDS);
                     p.setDuration(endDate - task.createTime());
                     p.setAsyncStatus(AsyncTaskStatus.valueOf(task.status().toUpperCase()));
                 } catch (Exception e) {

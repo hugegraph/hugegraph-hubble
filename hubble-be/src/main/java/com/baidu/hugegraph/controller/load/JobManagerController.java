@@ -86,7 +86,7 @@ public class JobManagerController {
             Ex.check(this.service.count() < LIMIT,
                      "job.manager.reached-limit", LIMIT);
             if (this.service.getTask(entity.getJobName()) != null) {
-                throw new InternalException("job.manager.name.repeated");
+                throw new InternalException("job.manager.job-name.repeated");
             }
             entity.setConnId(connId);
             entity.setJobStatus(JobManagerStatus.DEFAULT);

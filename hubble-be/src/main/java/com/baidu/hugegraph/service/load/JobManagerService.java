@@ -105,8 +105,8 @@ public class JobManagerService {
                 }
             }
             Date endDate = (p.getJobStatus() == JobManagerStatus.FAILED ||
-                            p.getJobStatus() == JobManagerStatus.SUCCESS) ?
-                            p.getUpdateTime() : HubbleUtil.nowDate();
+                           p.getJobStatus() == JobManagerStatus.SUCCESS) ?
+                           p.getUpdateTime() : HubbleUtil.nowDate();
             p.setJobDuration(endDate.getTime() - p.getCreateTime().getTime());
         });
         return list;

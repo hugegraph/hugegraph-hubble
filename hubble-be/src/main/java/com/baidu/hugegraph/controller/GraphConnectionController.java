@@ -230,10 +230,10 @@ public class GraphConnectionController extends BaseController {
                  "graph-connection.port.must-be-in-range", "[1, 65535]", port);
 
         Ex.check((StringUtils.isEmpty(newEntity.getUsername()) &&
-                 StringUtils.isEmpty(newEntity.getPassword())) ||
-                 (!StringUtils.isEmpty(newEntity.getUsername()) &&
-                 !StringUtils.isEmpty(newEntity.getPassword())),
-                 "graph-connection.username-or-password.must-be-same-status");
+                  StringUtils.isEmpty(newEntity.getPassword())) ||
+                  (!StringUtils.isEmpty(newEntity.getUsername()) &&
+                  !StringUtils.isEmpty(newEntity.getPassword())),
+                  "graph-connection.username-or-password.must-be-same-status");
 
         Ex.check(newEntity.getCreateTime() == null,
                  "common.param.must-be-null", "create_time");
