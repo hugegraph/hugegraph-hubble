@@ -59,9 +59,10 @@ public class JobManagerService {
         return this.mapper.selectById(id);
     }
 
-    public JobManager getTask(String job_name) {
+    public JobManager getTask(String job_name, int connId) {
         QueryWrapper<JobManager> query = Wrappers.query();
         query.eq("job_name", job_name);
+        query.eq("conn_id", connId);
         return this.mapper.selectOne(query);
     }
 
@@ -85,7 +86,9 @@ public class JobManagerService {
                 Iterator<LoadTask> loadTasks = tasks.iterator();
                 while (loadTasks.hasNext()) {
                     LoadTask loadTask = loadTasks.next();
-                    if (loadTask.getStatus().inRunning()) {
+                    if (loadTask.getStatus().inRunning() ||
+                        loadTask.getStatus() == LoadStatus.PAUSED ||
+                        loadTask.getStatus() == LoadStatus.STOPPED) {
                         status = JobManagerStatus.IMPORTING;
                         break;
                     }

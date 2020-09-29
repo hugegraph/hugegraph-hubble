@@ -71,9 +71,11 @@ public class AsyncTaskService {
             if (!type.isEmpty() && !type.equals(task.type())) {
                 continue;
             }
-            if (!content.isEmpty() &&
-                !(content.equals(task.id() + "") || task.name().contains(content))) {
-                continue;
+            if (!content.isEmpty()) {
+                String task_id = String.valueOf(task.id());
+                if (!content.equals(task_id) && !task.name().contains(content)) {
+                    continue;
+                }
             }
             result.add(task);
         }

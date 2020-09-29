@@ -87,7 +87,7 @@ public class JobManagerController {
                                                             "job.manager.job-remarks.unmatch-regex");
             Ex.check(this.service.count() < LIMIT,
                      "job.manager.reached-limit", LIMIT);
-            if (this.service.getTask(entity.getJobName()) != null) {
+            if (this.service.getTask(entity.getJobName(), connId) != null) {
                 throw new InternalException("job.manager.job-name.repeated");
             }
             entity.setConnId(connId);
