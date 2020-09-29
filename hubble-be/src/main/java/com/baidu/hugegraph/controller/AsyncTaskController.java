@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.controller.algorithm;
+package com.baidu.hugegraph.controller;
 
 import java.util.List;
 
@@ -41,7 +41,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RestController
-@RequestMapping(Constant.API_VERSION + "graph-connections/{connId}/algorithm/async-task")
+@RequestMapping(Constant.API_VERSION + "graph-connections/{connId}/async-tasks")
 public class AsyncTaskController extends BaseController {
 
     private final AsyncTaskService service;
