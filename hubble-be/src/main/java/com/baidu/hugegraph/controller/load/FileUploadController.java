@@ -25,14 +25,18 @@ import static com.baidu.hugegraph.service.load.FileMappingService.JOB_PREIFX;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.baidu.hugegraph.common.Constant;
+import com.baidu.hugegraph.common.Response;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.entity.enums.FileMappingStatus;
 import com.baidu.hugegraph.entity.enums.JobManagerStatus;
@@ -69,15 +74,31 @@ public class FileUploadController {
     @Autowired
     private JobManagerService jobService;
 
+    private final Map<String, ReadWriteLock> uploadingTokenLocks;
+
+    public FileUploadController() {
+        this.uploadingTokenLocks = new ConcurrentHashMap<>();
+    }
+
+    @GetMapping("token")
+    public Response fileToken(@PathVariable("connId") int connId,
+                              @PathVariable("jobId") int jobId,
+                              @RequestParam("name") String fileName) {
+        String token = this.service.generateFileToken(fileName);
+        this.uploadingTokenLocks.put(token, new ReentrantReadWriteLock());
+        return Response.builder().status(Constant.STATUS_OK).data(token).build();
+    }
+
     @PostMapping
     public FileUploadResult upload(@PathVariable("connId") int connId,
                                    @PathVariable("jobId") int jobId,
                                    @RequestParam("file") MultipartFile file,
                                    @RequestParam("name") String fileName,
+                                   @RequestParam("token") String token,
                                    @RequestParam("total") int total,
                                    @RequestParam("index") int index) {
-        // When front-end use multipart-upload mode,
-        // file.getOriginalFilename() is blob, not actual file name
+        this.checkTotalAndIndexValid(total, index);
+        this.checkFileNameMatchToken(fileName, token);
         JobManager jobEntity = this.jobService.get(jobId);
         this.checkFileValid(connId, jobId, jobEntity, file, fileName);
 
@@ -88,105 +109,137 @@ public class FileUploadController {
         // Before merge: upload-files/conn-1/verson_person.csv/part-1
         // After merge: upload-files/conn-1/file-mapping-1/verson_person.csv
         String filePath = Paths.get(location, path, fileName).toString();
-        // Check destFile exist
-        // Ex.check(!destFile.exists(), "load.upload.file.existed", fileName);
-        FileUploadResult result = this.service.uploadFile(file, index, filePath);
-        if (result.getStatus() == FileUploadResult.Status.FAILURE) {
+        // Check this file deleted before
+        ReadWriteLock lock = this.uploadingTokenLocks.get(token);
+        if (lock == null) {
+            FileUploadResult result = new FileUploadResult();
+            // Current part saved path
+            String partName = file.getOriginalFilename();
+            result.setName(partName);
+            result.setSize(file.getSize());
+            result.setStatus(FileUploadResult.Status.FAILURE);
+            result.setCause("File has been deleted");
             return result;
         }
-        // Verify the existence of fragmented files
-        FileMapping mapping = this.service.get(connId, jobId, fileName);
-        if (mapping != null) {
-            mapping.setJobId(jobId);
-            mapping.setFileStatus(FileMappingStatus.UPLOADING);
-            mapping.setFileIndex(mapping.getFileIndex() + "," + index);
-            mapping.setFileTotal(total);
-            if (this.service.update(mapping) != 1) {
-                throw new InternalException("entity.update.failed", mapping);
-            }
-        } else {
-            mapping = new FileMapping(connId, fileName, filePath);
-            mapping.setJobId(jobId);
-            mapping.setFileStatus(FileMappingStatus.UPLOADING);
-            mapping.setFileIndex(String.valueOf(index));
-            mapping.setFileTotal(total);
-            if (this.service.save(mapping) != 1) {
-                throw new InternalException("entity.insert.failed", mapping);
-            }
-        }
-       Integer mapId = mapping.getId();
-        // Determine whether all the parts have been uploaded, then merge them
-        boolean merged = this.service.tryMergePartFiles(filePath, total);
-        if (merged) {
-            // Save file mapping
-            mapping = new FileMapping(connId, fileName, filePath);
-            // Read column names and values then fill it
-            this.service.extractColumns(mapping);
-            mapping.setId(mapId);
-            mapping.setFileStatus(FileMappingStatus.COMPLETED);
-            mapping.setTotalLines(FileUtil.countLines(mapping.getPath()));
-            mapping.setTotalSize(FileUtils.sizeOf(new File(mapping.getPath())));
-            mapping.setCreateTime(HubbleUtil.nowDate());
-            // Will generate mapping id
 
-            // Move to the directory corresponding to the file mapping Id
-            String newPath = this.service.moveToNextLevelDir(mapping);
-            // Update file mapping stored path
-            mapping.setPath(newPath);
-            if (this.service.update(mapping) != 1) {
-                throw new InternalException("entity.update.failed", mapping);
+        lock.readLock().lock();
+        try {
+            FileUploadResult result = this.service.uploadFile(file, token,
+                                                              index, filePath);
+            if (result.getStatus() == FileUploadResult.Status.FAILURE) {
+                return result;
             }
-            // Update Job Manager size
-            long jobSize = jobEntity.getJobSize() + mapping.getTotalSize();
+            synchronized (this.service) {
+                // Verify the existence of fragmented files
+                FileMapping mapping = this.service.get(connId, jobId, fileName);
+                if (mapping == null) {
+                    mapping = new FileMapping(connId, fileName, filePath);
+                    mapping.setJobId(jobId);
+                    mapping.setFileStatus(FileMappingStatus.UPLOADING);
+                    mapping.setFileIndex(String.valueOf(index));
+                    mapping.setFileTotal(total);
+                    if (this.service.save(mapping) != 1) {
+                        throw new InternalException("entity.insert.failed",
+                                                    mapping);
+                    }
+                } else {
+                    if (mapping.getFileStatus() == FileMappingStatus.COMPLETED) {
+                        result.setId(mapping.getId());
+                        return result;
+                    }
+                }
+                Integer mappingId = mapping.getId();
+                // Determine whether all the parts have been uploaded, then merge them
+                boolean merged = this.service.tryMergePartFiles(filePath, total);
+                if (!merged) {
+                    return result;
+                }
+                // Save file mapping
+                mapping = new FileMapping(connId, fileName, filePath);
+                // Read column names and values then fill it
+                this.service.extractColumns(mapping);
+                mapping.setId(mappingId);
+                mapping.setFileStatus(FileMappingStatus.COMPLETED);
+                mapping.setTotalLines(FileUtil.countLines(mapping.getPath()));
+                mapping.setTotalSize(FileUtils.sizeOf(new File(mapping.getPath())));
+                mapping.setCreateTime(HubbleUtil.nowDate());
+
+                // Move to the directory corresponding to the file mapping Id
+                String newPath = this.service.moveToNextLevelDir(mapping);
+                // Update file mapping stored path
+                mapping.setPath(newPath);
+                if (this.service.update(mapping) != 1) {
+                    throw new InternalException("entity.update.failed", mapping);
+                }
+                // Update Job Manager size
+                long jobSize = jobEntity.getJobSize() + mapping.getTotalSize();
+                jobEntity.setJobSize(jobSize);
+                jobEntity.setJobStatus(JobManagerStatus.SETTING);
+                if (this.jobService.update(jobEntity) != 1) {
+                    throw new InternalException("entity.update.failed", jobEntity);
+                }
+                result.setId(mapping.getId());
+            }
+            return result;
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    @DeleteMapping
+    public Boolean delete(@PathVariable("connId") int connId,
+                          @PathVariable("jobId") int jobId,
+                          @RequestParam("name") String fileName,
+                          @RequestParam("token") String token) {
+        JobManager jobEntity = this.jobService.get(jobId);
+        Ex.check(jobEntity != null,
+                 "job-manager.not-exist.id", jobId);
+        Ex.check(jobEntity.getJobStatus() == JobManagerStatus.DEFAULT ||
+                 jobEntity.getJobStatus() == JobManagerStatus.SETTING,
+                 "deleted.file.no-permission");
+        FileMapping mapping = this.service.get(connId, fileName);
+        Ex.check(mapping != null, "load.file-mapping.not-exist.name", fileName);
+
+        ReadWriteLock lock = this.uploadingTokenLocks.get(token);
+        if (lock == null) {
+            throw new InternalException("Can't find lock of file %s with " +
+                                        "token %s", fileName, token);
+        }
+        lock.writeLock().lock();
+        try {
+            this.service.deleteDiskFile(mapping);
+            this.uploadingTokenLocks.remove(token);
+
+            if (this.service.remove(mapping.getId()) != 1) {
+                throw new InternalException("entity.delete.failed", mapping);
+            }
+            log.info("removed file mapping {}", mapping.getId());
+            long jobSize = jobEntity.getJobSize() - mapping.getTotalSize();
             jobEntity.setJobSize(jobSize);
-            jobEntity.setJobStatus(JobManagerStatus.SETTING);
             if (this.jobService.update(jobEntity) != 1) {
                 throw new InternalException("job-manager.entity.update.failed",
                                             jobEntity);
             }
-            result.setId(mapping.getId());
+            return true;
+        } finally {
+            lock.writeLock().unlock();
         }
-        return result;
     }
 
-    @DeleteMapping
-    public Map<String, Boolean> delete(@PathVariable("connId") int connId,
-                                       @PathVariable("jobId") int jobId,
-                                       @RequestParam("names")
-                                       List<String> fileNames) {
-
-        JobManager jobEntity = this.jobService.get(jobId);
-        Ex.check(jobEntity != null,
-                 "job-manager.not-exist.id", jobId);
-        Ex.check(jobEntity.getJobStatus() == JobManagerStatus.SETTING,
-                 "deleted.file.no-permission" );
-        Ex.check(fileNames.size() > 0, "load.upload.files.at-least-one");
-        Map<String, Boolean> result = new LinkedHashMap<>();
-        for (String fileName : fileNames) {
-            FileMapping mapping = this.service.get(connId, fileName);
-            Ex.check(mapping != null, "load.file-mapping.not-exist.name",
-                     fileName);
-            File destFile = new File(mapping.getPath());
-            boolean deleted = destFile.delete();
-            if (deleted) {
-                log.info("deleted file {}, prepare to remove file mapping {}",
-                         destFile, mapping.getId());
-                if (this.service.remove(mapping.getId()) != 1) {
-                    throw new InternalException("entity.delete.failed", mapping);
-                }
-                log.info("removed file mapping {}", mapping.getId());
-                long jobSize = jobEntity.getJobSize() - mapping.getTotalSize();
-                jobEntity.setJobSize(jobSize);
-                if (this.jobService.update(jobEntity) != 1) {
-                    throw new InternalException("job-manager.entity.update.failed",
-                                                jobEntity);
-                }
-            }
-            result.put(fileName, deleted);
+    private void checkTotalAndIndexValid(int total, int index) {
+        if (total <= 0) {
+            throw new InternalException("The request params 'total' must > 0");
         }
-        return result;
+        if (index < 0) {
+            throw new InternalException("The request params 'index' must >= 0");
+        }
     }
 
+    private void checkFileNameMatchToken(String fileName, String token) {
+        String md5Prefix = HubbleUtil.md5(fileName);
+        Ex.check(StringUtils.isNotEmpty(token) && token.startsWith(md5Prefix),
+                 "load.upload.file.name-token.unmatch");
+    }
 
     private void checkFileValid(int connId, int jobId, JobManager jobEntity,
                                 MultipartFile file, String fileName) {
@@ -194,11 +247,11 @@ public class FileUploadController {
                  "job-manager.not-exist.id", jobId);
         Ex.check(jobEntity.getJobStatus() == JobManagerStatus.DEFAULT ||
                  jobEntity.getJobStatus() == JobManagerStatus.SETTING,
-                 "load.upload.file.no-permission" );
+                 "load.upload.file.no-permission");
         // Now allowed to upload empty file
         Ex.check(!file.isEmpty(), "load.upload.file.cannot-be-empty");
         // Difficult: how to determine whether the file is csv or text
-        log.info("File content type: {}", file.getContentType());
+        log.debug("File content type: {}", file.getContentType());
 
         String format = FilenameUtils.getExtension(fileName);
         List<String> formatWhiteList = this.config.get(

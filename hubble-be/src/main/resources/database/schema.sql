@@ -80,9 +80,10 @@ CREATE TABLE IF NOT EXISTS `load_task` (
     `vertices` VARCHAR(512) NOT NULL,
     `edges` VARCHAR(512) NOT NULL,
     `file_total_lines` LONG NOT NULL,
-    `file_read_lines` LONG NOT NULL,
     `load_status` TINYINT NOT NULL,
-    `duration` LONG NOT NULL,
+    `file_read_lines` LONG NOT NULL,
+    `last_duration` LONG NOT NULL,
+    `curr_duration` LONG NOT NULL,
     `create_time` DATETIME(6) NOT NULL,
     PRIMARY KEY (`id`)
 );

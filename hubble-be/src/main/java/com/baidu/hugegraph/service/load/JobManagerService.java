@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.service.load;
 
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,9 +58,9 @@ public class JobManagerService {
         return this.mapper.selectById(id);
     }
 
-    public JobManager getTask(String job_name, int connId) {
+    public JobManager getTask(String jobName, int connId) {
         QueryWrapper<JobManager> query = Wrappers.query();
-        query.eq("job_name", job_name);
+        query.eq("job_name", jobName);
         query.eq("conn_id", connId);
         return this.mapper.selectOne(query);
     }
@@ -83,9 +82,7 @@ public class JobManagerService {
             if (p.getJobStatus() == JobManagerStatus.IMPORTING) {
                 List<LoadTask> tasks = this.taskService.taskListByJob(p.getId());
                 JobManagerStatus status = JobManagerStatus.SUCCESS;
-                Iterator<LoadTask> loadTasks = tasks.iterator();
-                while (loadTasks.hasNext()) {
-                    LoadTask loadTask = loadTasks.next();
+                for (LoadTask loadTask : tasks) {
                     if (loadTask.getStatus().inRunning() ||
                         loadTask.getStatus() == LoadStatus.PAUSED ||
                         loadTask.getStatus() == LoadStatus.STOPPED) {
@@ -107,8 +104,8 @@ public class JobManagerService {
                     }
                 }
             }
-            Date endDate = (p.getJobStatus() == JobManagerStatus.FAILED ||
-                           p.getJobStatus() == JobManagerStatus.SUCCESS) ?
+            Date endDate = p.getJobStatus() == JobManagerStatus.FAILED ||
+                           p.getJobStatus() == JobManagerStatus.SUCCESS ?
                            p.getUpdateTime() : HubbleUtil.nowDate();
             p.setJobDuration(endDate.getTime() - p.getCreateTime().getTime());
         });

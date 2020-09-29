@@ -22,7 +22,7 @@ package com.baidu.hugegraph.controller.load;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.datanucleus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -78,13 +78,15 @@ public class JobManagerController {
             Ex.check(entity.getJobName().length() <= 48,
                      "job.manager.job-name.reached-limit");
             Ex.check(entity.getJobName() != null, () ->
-                     Constant.COMMON_NAME_PATTERN.matcher(entity.getJobName()).matches(),
-                                                          "job.manager.job-name.unmatch-regex");
+                     Constant.COMMON_NAME_PATTERN.matcher(
+                     entity.getJobName()).matches(),
+                     "job.manager.job-name.unmatch-regex");
             Ex.check(entity.getJobRemarks().length() <= 200,
                      "job.manager.job-remarks.reached-limit");
             Ex.check(!StringUtils.isEmpty(entity.getJobRemarks()), () ->
-                     Constant.COMMON_REMARK_PATTERN.matcher(entity.getJobRemarks()).matches(),
-                                                            "job.manager.job-remarks.unmatch-regex");
+                     Constant.COMMON_REMARK_PATTERN.matcher(
+                     entity.getJobRemarks()).matches(),
+                     "job.manager.job-remarks.unmatch-regex");
             Ex.check(this.service.count() < LIMIT,
                      "job.manager.reached-limit", LIMIT);
             if (this.service.getTask(entity.getJobName(), connId) != null) {
@@ -153,8 +155,8 @@ public class JobManagerController {
         Ex.check(newEntity.getJobName().length() <= 48,
                  "job.manager.job-name.reached-limit");
         Ex.check(newEntity.getJobName() != null, () ->
-                 Constant.COMMON_NAME_PATTERN
-                         .matcher(newEntity.getJobName()).matches(),
+                 Constant.COMMON_NAME_PATTERN.matcher(
+                 newEntity.getJobName()).matches(),
                  "job.manager.job-name.unmatch-regex");
         Ex.check(newEntity.getJobRemarks().length() <= 200,
                  "job.manager.job-remarks.reached-limit");
@@ -178,7 +180,7 @@ public class JobManagerController {
         if (job == null) {
             throw new ExternalException("job.manager.not-exist.id", id);
         }
-        List<LoadTask> tasks = taskService.batchTasks(job.getId());
+        List<LoadTask> tasks = this.taskService.batchTasks(job.getId());
         List<JobManagerReasonResult> reasonResults = new ArrayList<>();
         tasks.forEach(task -> {
             JobManagerReasonResult reasonResult = new JobManagerReasonResult();

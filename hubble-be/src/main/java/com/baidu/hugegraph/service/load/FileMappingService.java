@@ -48,6 +48,7 @@ import com.baidu.hugegraph.entity.load.FileUploadResult;
 import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.mapper.load.FileMappingMapper;
 import com.baidu.hugegraph.util.Ex;
+import com.baidu.hugegraph.util.HubbleUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -112,31 +113,38 @@ public class FileMappingService {
         return this.mapper.deleteById(id);
     }
 
-    public FileUploadResult uploadFile(MultipartFile srcFile, int index,
-                                       String dirPath) {
+    public String generateFileToken(String fileName) {
+        return HubbleUtil.md5(fileName) + "-" +
+               HubbleUtil.nowTime().getEpochSecond();
+    }
+
+    public FileUploadResult uploadFile(MultipartFile srcFile, String token,
+                                       int index, String dirPath) {
+        FileUploadResult result = new FileUploadResult();
+        // Current part saved path
+        String partName = srcFile.getOriginalFilename();
+        result.setName(partName);
+        result.setSize(srcFile.getSize());
+
+        File destFile = new File(dirPath, partName + "-" + index);
         // File all parts saved path
         File dir = new File(dirPath);
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        // Current part saved path
-        String fileName = srcFile.getOriginalFilename();
-        File destFile = new File(dirPath, fileName + "-" + index);
         if (destFile.exists()) {
             destFile.delete();
         }
 
-        log.debug("Upload file {} length {}", fileName, srcFile.getSize());
-        FileUploadResult result = new FileUploadResult();
-        result.setName(fileName);
-        result.setSize(srcFile.getSize());
+        log.debug("Uploading file {} length {}", partName, srcFile.getSize());
         try {
             // transferTo should accept absolute path
             srcFile.transferTo(destFile.getAbsoluteFile());
             result.setStatus(FileUploadResult.Status.SUCCESS);
+            log.info("Uploaded file part {}-{}", partName, index);
         } catch (Exception e) {
-            log.error("Failed to save upload file and insert file mapping " +
-                      "record", e);
+            log.error("Failed to save upload file and insert " +
+                      "file mapping record", e);
             result.setStatus(FileUploadResult.Status.FAILURE);
             result.setCause(e.getMessage());
         }
@@ -160,7 +168,9 @@ public class FileMappingService {
                 // Rename file to dest file
                 FileUtils.moveFile(partFiles[0], newFile);
             } catch (IOException e) {
-                throw new InternalException("load.upload.move-file.failed");
+                log.error("Failed to rename file from {} to {}",
+                          partFiles[0], newFile, e);
+                throw new InternalException("load.upload.move-file.failed", e);
             }
         } else {
             Arrays.sort(partFiles, (o1, o2) -> {
@@ -178,19 +188,23 @@ public class FileMappingService {
                     try (InputStream is = new FileInputStream(partFile)) {
                         IOUtils.copy(is, os);
                     } catch (IOException e) {
+                        log.error("Failed copy file stream from {} to {}",
+                                  partFile, newFile, e);
                         throw new InternalException(
-                                  "load.upload.merge-file.failed");
+                                  "load.upload.merge-file.failed", e);
                     }
                 }
             } catch (IOException e) {
-                throw new InternalException("load.upload.merge-file.failed");
+                log.error(e);
+                throw new InternalException("load.upload.merge-file.failed", e);
             }
         }
         // Delete origin directory
         try {
             FileUtils.forceDelete(dir);
         } catch (IOException e) {
-            throw new InternalException("load.upload.delete-temp-dir.failed");
+            log.error("Failed to force delete file {}", dir, e);
+            throw new InternalException("load.upload.delete-temp-dir.failed", e);
         }
         // Rename file to dest file
         if (!newFile.renameTo(destFile)) {
@@ -268,15 +282,27 @@ public class FileMappingService {
 
     public void deleteDiskFile(FileMapping mapping) {
         File file = new File(mapping.getPath());
-        File parentDir = file.getParentFile();
-        log.info("Prepare to delete directory {}", parentDir);
-        try {
-            FileUtils.forceDelete(parentDir);
-        } catch (IOException e) {
-            throw new InternalException("Failed to delete directory " +
-                                        "corresponded to the file id %s, " +
-                                        "please delete it manually",
-                                        e, mapping.getId());
+        if (file.isDirectory()) {
+            log.info("Prepare to delete directory {}", file);
+            try {
+                FileUtils.forceDelete(file);
+            } catch (IOException e) {
+                throw new InternalException("Failed to delete directory " +
+                                            "corresponded to the file id %s, " +
+                                            "please delete it manually",
+                                            e, mapping.getId());
+            }
+        } else {
+            File parentDir = file.getParentFile();
+            log.info("Prepare to delete directory {}", parentDir);
+            try {
+                FileUtils.forceDelete(parentDir);
+            } catch (IOException e) {
+                throw new InternalException("Failed to delete parent directory " +
+                                            "corresponded to the file id %s, " +
+                                            "please delete it manually",
+                                            e, mapping.getId());
+            }
         }
     }
 }

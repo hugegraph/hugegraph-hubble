@@ -165,7 +165,7 @@ public class HubbleOptions extends OptionHolder {
                     "upload_file.location",
                     "The location of uploaded files.",
                     disallowEmpty(),
-                    "./upload-files"
+                    "upload-files"
             );
 
     public static final ConfigListOption<String> UPLOAD_FILE_FORMAT_LIST =

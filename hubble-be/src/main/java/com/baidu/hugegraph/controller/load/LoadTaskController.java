@@ -107,11 +107,10 @@ public class LoadTaskController extends BaseController {
                            @PathVariable("jobId") int jobId,
                            @RequestBody LoadTask entity) {
         JobManager jobEntity = this.jobService.get(jobId);
-        Ex.check(jobEntity != null,
-                 "job-manager.not-exist.id", jobId);
+        Ex.check(jobEntity != null, "job-manager.not-exist.id", jobId);
         Ex.check(jobEntity.getJobStatus() == JobManagerStatus.SETTING,
-                 "load.task.create.no-permission" );
-        synchronized(this.service) {
+                 "load.task.create.no-permission");
+        synchronized (this.service) {
             Ex.check(this.service.count() < LIMIT,
                      "load.task.reached-limit", LIMIT);
             entity.setConnId(connId);
@@ -144,11 +143,10 @@ public class LoadTaskController extends BaseController {
             throw new ExternalException("graph-connection.not-exist.id", connId);
         }
         JobManager jobEntity = this.jobService.get(jobId);
-        Ex.check(jobEntity != null,
-                 "job-manager.not-exist.id", jobId);
-        Ex.check((jobEntity.getJobStatus() == JobManagerStatus.SETTING ||
-                  jobEntity.getJobStatus() == JobManagerStatus.IMPORTING),
-                  "load.task.start.no-permission" );
+        Ex.check(jobEntity != null, "job-manager.not-exist.id", jobId);
+        Ex.check(jobEntity.getJobStatus() == JobManagerStatus.SETTING ||
+                 jobEntity.getJobStatus() == JobManagerStatus.IMPORTING,
+                 "load.task.start.no-permission");
 
         List<LoadTask> tasks = new ArrayList<>();
         for (Integer fileId: fileIds) {
@@ -176,13 +174,12 @@ public class LoadTaskController extends BaseController {
             throw new ExternalException("graph-connection.not-exist.id", connId);
         }
         JobManager jobEntity = this.jobService.get(jobId);
-        Ex.check(jobEntity != null,
-                 "job-manager.not-exist.id", jobId);
+        Ex.check(jobEntity != null, "job-manager.not-exist.id", jobId);
         Ex.check(jobEntity.getJobStatus() == JobManagerStatus.IMPORTING,
                  "load.task.pause.no-permission");
         LoadTask task = this.service.pause(taskId);
         jobEntity.setJobStatus(JobManagerStatus.IMPORTING);
-        jobEntity.setUpdateTime( HubbleUtil.nowDate());
+        jobEntity.setUpdateTime(HubbleUtil.nowDate());
         if (this.jobService.update(jobEntity) != 1) {
             throw new InternalException("job-manager.entity.update.failed",
                                         jobEntity);
@@ -199,13 +196,12 @@ public class LoadTaskController extends BaseController {
             throw new ExternalException("graph-connection.not-exist.id", connId);
         }
         JobManager jobEntity = this.jobService.get(jobId);
-        Ex.check(jobEntity != null,
-                 "job-manager.not-exist.id", jobId);
+        Ex.check(jobEntity != null, "job-manager.not-exist.id", jobId);
         Ex.check(jobEntity.getJobStatus() == JobManagerStatus.IMPORTING,
                  "load.task.pause.no-permission");
         LoadTask task = this.service.resume(taskId);
         jobEntity.setJobStatus(JobManagerStatus.IMPORTING);
-        jobEntity.setUpdateTime( HubbleUtil.nowDate());
+        jobEntity.setUpdateTime(HubbleUtil.nowDate());
         if (this.jobService.update(jobEntity) != 1) {
             throw new InternalException("job-manager.entity.update.failed",
                                         jobEntity);
@@ -222,8 +218,7 @@ public class LoadTaskController extends BaseController {
             throw new ExternalException("graph-connection.not-exist.id", connId);
         }
         JobManager jobEntity = this.jobService.get(jobId);
-        Ex.check(jobEntity != null,
-                 "job-manager.not-exist.id", jobId);
+        Ex.check(jobEntity != null, "job-manager.not-exist.id", jobId);
         Ex.check(jobEntity.getJobStatus() == JobManagerStatus.IMPORTING,
                  "load.task.pause.no-permission");
         LoadTask task = this.service.stop(taskId);
@@ -245,8 +240,7 @@ public class LoadTaskController extends BaseController {
             throw new ExternalException("graph-connection.not-exist.id", connId);
         }
         JobManager jobEntity = this.jobService.get(jobId);
-        Ex.check(jobEntity != null,
-                 "job-manager.not-exist.id", jobId);
+        Ex.check(jobEntity != null, "job-manager.not-exist.id", jobId);
         Ex.check(jobEntity.getJobStatus() == JobManagerStatus.IMPORTING,
                  "load.task.pause.no-permission");
         LoadTask task = this.service.retry(taskId);
@@ -268,11 +262,13 @@ public class LoadTaskController extends BaseController {
             throw new ExternalException("load.task.not-exist.id", id);
         }
         JobManager jobEntity = this.jobService.get(jobId);
-        Ex.check(jobEntity != null,
-                 "job-manager.not-exist.id", jobId);
+        Ex.check(jobEntity != null, "job-manager.not-exist.id", jobId);
         Integer fileId = task.getFileId();
         FileMapping mapping = this.fmService.get(fileId);
         String reason = this.service.readLoadFailedReason(mapping);
-        return Response.builder().status(200).data(reason).build();
+        return Response.builder()
+                       .status(Constant.STATUS_OK)
+                       .data(reason)
+                       .build();
     }
 }

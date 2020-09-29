@@ -79,9 +79,11 @@ public class ExecuteHistoryService {
             if (p.getType().equals(ExecuteType.GREMLIN_ASYNC)) {
                 try {
                     Task task = client.task().get(p.getAsyncId());
-                    long endDate = task.updateTime() > 0 ? task.updateTime() : now.getLong(ChronoField.INSTANT_SECONDS);
+                    long endDate = task.updateTime() > 0 ? task.updateTime() :
+                                   now.getLong(ChronoField.INSTANT_SECONDS);
                     p.setDuration(endDate - task.createTime());
-                    p.setAsyncStatus(AsyncTaskStatus.valueOf(task.status().toUpperCase()));
+                    p.setAsyncStatus(AsyncTaskStatus.valueOf(
+                                     task.status().toUpperCase()));
                 } catch (Exception e) {
                     p.setDuration(0L);
                     p.setAsyncStatus(AsyncTaskStatus.UNKNOWN);
@@ -99,7 +101,8 @@ public class ExecuteHistoryService {
             try {
                 Task task = client.task().get(history.getAsyncId());
                 history.setDuration(task.updateTime() - task.createTime());
-                history.setAsyncStatus(AsyncTaskStatus.valueOf(task.status().toUpperCase()));
+                history.setAsyncStatus(AsyncTaskStatus.valueOf(
+                                       task.status().toUpperCase()));
             } catch (Exception e) {
                 history.setDuration(0L);
                 history.setAsyncStatus(AsyncTaskStatus.UNKNOWN);

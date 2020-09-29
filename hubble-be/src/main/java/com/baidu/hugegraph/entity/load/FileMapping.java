@@ -20,8 +20,10 @@
 package com.baidu.hugegraph.entity.load;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.baidu.hugegraph.annotation.MergeProperty;
 import com.baidu.hugegraph.entity.enums.FileMappingStatus;
@@ -156,5 +158,27 @@ public class FileMapping {
             }
         }
         return null;
+    }
+
+    @JsonIgnore
+    public Set<String> getVertexMappingLabels() {
+        if (this.getVertexMappings() != null) {
+            return this.getVertexMappings().stream()
+                       .map(ElementMapping::getLabel)
+                       .collect(Collectors.toSet());
+        } else {
+            return new HashSet<>();
+        }
+    }
+
+    @JsonIgnore
+    public Set<String> getEdgeMappingLabels() {
+        if (this.getEdgeMappings() != null) {
+            return this.getEdgeMappings().stream()
+                       .map(ElementMapping::getLabel)
+                       .collect(Collectors.toSet());
+        } else {
+            return new HashSet<>();
+        }
     }
 }
