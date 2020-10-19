@@ -71,12 +71,6 @@ public class FileMappingService {
         return this.mapper.selectById(id);
     }
 
-    public FileMapping get(int connId, String fileName) {
-        QueryWrapper<FileMapping> query = Wrappers.query();
-        query.eq("conn_id", connId).eq("name", fileName);
-        return this.mapper.selectOne(query);
-    }
-
     public FileMapping get(int connId, int jobId, String fileName) {
         QueryWrapper<FileMapping> query = Wrappers.query();
         query.eq("conn_id", connId)
@@ -141,7 +135,7 @@ public class FileMappingService {
             // transferTo should accept absolute path
             srcFile.transferTo(destFile.getAbsoluteFile());
             result.setStatus(FileUploadResult.Status.SUCCESS);
-            log.info("Uploaded file part {}-{}", partName, index);
+            log.debug("Uploaded file part {}-{}", partName, index);
         } catch (Exception e) {
             log.error("Failed to save upload file and insert " +
                       "file mapping record", e);
@@ -188,14 +182,15 @@ public class FileMappingService {
                     try (InputStream is = new FileInputStream(partFile)) {
                         IOUtils.copy(is, os);
                     } catch (IOException e) {
-                        log.error("Failed copy file stream from {} to {}",
+                        log.error("Failed to copy file stream from {} to {}",
                                   partFile, newFile, e);
                         throw new InternalException(
                                   "load.upload.merge-file.failed", e);
                     }
                 }
             } catch (IOException e) {
-                log.error(e);
+                log.error("Failed to copy all file-parts stream to {}",
+                          newFile, e);
                 throw new InternalException("load.upload.merge-file.failed", e);
             }
         }

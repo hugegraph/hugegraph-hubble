@@ -58,11 +58,15 @@ public class LoadTask implements Runnable {
 
     @TableField(exist = false)
     @JsonIgnore
-    public transient final Lock lock = new ReentrantLock();
+    private transient final Lock lock = new ReentrantLock();
 
     @TableField(exist = false)
     @JsonIgnore
     private transient volatile HugeGraphLoader loader;
+
+    @TableField(exist = false)
+    @JsonIgnore
+    private transient volatile boolean finished;
 
     @TableId(type = IdType.AUTO)
     @MergeProperty(useNew = false)
@@ -138,6 +142,7 @@ public class LoadTask implements Runnable {
     public LoadTask(LoadOptions options, GraphConnection connection,
                     FileMapping mapping) {
         this.loader = new HugeGraphLoader(options);
+        this.finished = false;
         this.id = null;
         this.connId = connection.getId();
         this.jobId = mapping.getJobId();
@@ -179,19 +184,29 @@ public class LoadTask implements Runnable {
             this.lastDuration += this.context().summary().totalTime();
             this.currDuration = 0L;
         } finally {
+            this.finished = true;
             this.lock.unlock();
         }
     }
 
+    public void lock() {
+        this.lock.lock();
+    }
+
+    public void unlock() {
+        this.lock.unlock();
+    }
+
     public void stop() {
         this.context().stopLoading();
-        while (this.status.inRunning()) {
+        while (!this.finished) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ignored) {
                 // pass
             }
         }
+        this.loader = null;
         log.info("LoadTask {} stopped", this.id);
     }
 

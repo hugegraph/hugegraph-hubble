@@ -25,7 +25,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -92,10 +91,10 @@ public class LoadTaskService {
     @Autowired
     private HugeConfig config;
 
-    private Map<Integer, LoadTask> taskContainer;
+    private Map<Integer, LoadTask> runningTaskContainer;
 
     public LoadTaskService() {
-        this.taskContainer = new ConcurrentHashMap<>();
+        this.runningTaskContainer = new ConcurrentHashMap<>();
     }
 
     public LoadTask get(int id) {
@@ -147,7 +146,7 @@ public class LoadTaskService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public int remove(int id) {
-        this.taskContainer.remove(id);
+        this.runningTaskContainer.remove(id);
         return this.mapper.deleteById(id);
     }
 
@@ -166,26 +165,27 @@ public class LoadTaskService {
         // executed in other threads
         this.taskExecutor.execute(task, () -> this.update(task));
         // Save current load task
-        this.taskContainer.put(task.getId(), task);
+        this.runningTaskContainer.put(task.getId(), task);
         return task;
     }
 
     public LoadTask pause(int taskId) {
-        LoadTask task = this.taskContainer.get(taskId);
+        LoadTask task = this.runningTaskContainer.get(taskId);
         Ex.check(task.getStatus() == LoadStatus.RUNNING,
                  "Can only pause the RUNNING task");
-        task.lock.lock();
+        // Mark status as paused, should set before context.stopLoading()
+        task.setStatus(LoadStatus.PAUSED);
+        // Let HugeGraphLoader stop
+        task.stop();
+
+        task.lock();
         try {
-            // Mark status as paused, should set before context.stopLoading()
-            task.setStatus(LoadStatus.PAUSED);
-            // Let HugeGraphLoader stop
-            task.stop();
-            if (update(task) != 1) {
+            if (this.update(task) != 1) {
                 throw new InternalException("entity.update.failed", task);
             }
-            this.taskContainer.remove(taskId);
+            this.runningTaskContainer.remove(taskId);
         } finally {
-            task.lock.unlock();
+            task.unlock();
         }
         return task;
     }
@@ -195,25 +195,25 @@ public class LoadTaskService {
         Ex.check(task.getStatus() == LoadStatus.PAUSED ||
                  task.getStatus() == LoadStatus.FAILED,
                  "Can only resume the PAUSED or FAILED task");
+        task.lock();
         // Set work mode in incrental mode, load from last breakpoint
         task.getOptions().incrementalMode = true;
         task.restoreContext();
-        task.lock.lock();
         try {
             task.setStatus(LoadStatus.RUNNING);
             if (this.update(task) != 1) {
                 throw new InternalException("entity.update.failed", task);
             }
             this.taskExecutor.execute(task, () -> this.update(task));
-            this.taskContainer.put(taskId, task);
+            this.runningTaskContainer.put(taskId, task);
         } finally {
-            task.lock.unlock();
+            task.unlock();
         }
         return task;
     }
 
     public LoadTask stop(int taskId) {
-        LoadTask task = this.taskContainer.get(taskId);
+        LoadTask task = this.runningTaskContainer.get(taskId);
         if (task == null) {
             task = this.get(taskId);
             task.restoreContext();
@@ -221,17 +221,18 @@ public class LoadTaskService {
         Ex.check(task.getStatus() == LoadStatus.RUNNING ||
                  task.getStatus() == LoadStatus.PAUSED,
                  "Can only stop the RUNNING or PAUSED task");
-        task.lock.lock();
+        // Mark status as stopped
+        task.setStatus(LoadStatus.STOPPED);
+        task.stop();
+
+        task.lock();
         try {
-            // Mark status as stopped
-            task.setStatus(LoadStatus.STOPPED);
-            task.stop();
-            if (update(task) != 1) {
+            if (this.update(task) != 1) {
                 throw new InternalException("entity.update.failed", task);
             }
-            this.taskContainer.remove(taskId);
+            this.runningTaskContainer.remove(taskId);
         } finally {
-            task.lock.unlock();
+            task.unlock();
         }
         return task;
     }
@@ -241,10 +242,10 @@ public class LoadTaskService {
         Ex.check(task.getStatus() == LoadStatus.FAILED ||
                  task.getStatus() == LoadStatus.STOPPED,
                  "Can only retry the FAILED or STOPPED task");
+        task.lock();
         // Set work mode in normal mode, load from begin
         task.getOptions().incrementalMode = false;
         task.restoreContext();
-        task.lock.lock();
         try {
             task.setStatus(LoadStatus.RUNNING);
             task.setLastDuration(0L);
@@ -253,9 +254,9 @@ public class LoadTaskService {
                 throw new InternalException("entity.update.failed", task);
             }
             this.taskExecutor.execute(task, () -> this.update(task));
-            this.taskContainer.put(taskId, task);
+            this.runningTaskContainer.put(taskId, task);
         } finally {
-            task.lock.unlock();
+            task.unlock();
         }
         return task;
     }
@@ -298,24 +299,35 @@ public class LoadTaskService {
     @Scheduled(fixedDelay = 1 * 1000)
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateLoadTaskProgress() {
-        Iterator<Map.Entry<Integer, LoadTask>> iter;
-        iter = this.taskContainer.entrySet().iterator();
-        iter.forEachRemaining(entry -> {
-            LoadTask task = entry.getValue();
-            task.lock.lock();
+        for (LoadTask task : this.runningTaskContainer.values()) {
+            if (!task.getStatus().inRunning()) {
+                continue;
+            }
+            task.lock();
             try {
                 if (task.getStatus().inRunning()) {
                     LoadContext context = task.context();
-                    task.setFileReadLines(context.newProgress().totalInputReaded());
+                    long readLines = context.newProgress().totalInputReaded();
+                    if (readLines == 0L) {
+                        /*
+                         * When the Context is just constructed, newProgress
+                         * is empty. Only after parsing is started will use
+                         * oldProgress and incrementally update newProgress,
+                         * if get totalInputReaded value during this process,
+                         * it will return 0, so need read it from oldProgress
+                         */
+                        readLines = context.oldProgress().totalInputReaded();
+                    }
+                    task.setFileReadLines(readLines);
                     task.setCurrDuration(context.summary().totalTime());
                     if (this.update(task) != 1) {
                         throw new InternalException("entity.update.failed", task);
                     }
                 }
             } finally {
-                task.lock.unlock();
+                task.unlock();
             }
-        });
+        }
     }
 
     private LoadTask buildLoadTask(GraphConnection connection,

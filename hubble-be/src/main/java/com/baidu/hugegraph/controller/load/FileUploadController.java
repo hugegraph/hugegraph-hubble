@@ -25,6 +25,7 @@ import static com.baidu.hugegraph.service.load.FileMappingService.JOB_PREIFX;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,7 +46,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.baidu.hugegraph.common.Constant;
-import com.baidu.hugegraph.common.Response;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.entity.enums.FileMappingStatus;
 import com.baidu.hugegraph.entity.enums.JobManagerStatus;
@@ -56,6 +56,7 @@ import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.options.HubbleOptions;
 import com.baidu.hugegraph.service.load.FileMappingService;
 import com.baidu.hugegraph.service.load.JobManagerService;
+import com.baidu.hugegraph.util.CollectionUtil;
 import com.baidu.hugegraph.util.Ex;
 import com.baidu.hugegraph.util.FileUtil;
 import com.baidu.hugegraph.util.HubbleUtil;
@@ -81,12 +82,21 @@ public class FileUploadController {
     }
 
     @GetMapping("token")
-    public Response fileToken(@PathVariable("connId") int connId,
-                              @PathVariable("jobId") int jobId,
-                              @RequestParam("name") String fileName) {
-        String token = this.service.generateFileToken(fileName);
-        this.uploadingTokenLocks.put(token, new ReentrantReadWriteLock());
-        return Response.builder().status(Constant.STATUS_OK).data(token).build();
+    public Map<String, String> fileToken(@PathVariable("connId") int connId,
+                                         @PathVariable("jobId") int jobId,
+                                         @RequestParam("names")
+                                         List<String> fileNames) {
+        Ex.check(CollectionUtil.allUnique(fileNames),
+                 "load.upload.file.duplicate-name");
+        Map<String, String> tokens = new HashMap<>();
+        for (String fileName : fileNames) {
+            String token = this.service.generateFileToken(fileName);
+            Ex.check(!this.uploadingTokenLocks.containsKey(token),
+                     "load.upload.file.token.existed");
+            this.uploadingTokenLocks.put(token, new ReentrantReadWriteLock());
+            tokens.put(fileName, token);
+        }
+        return tokens;
     }
 
     @PostMapping
@@ -145,6 +155,8 @@ public class FileUploadController {
                 } else {
                     if (mapping.getFileStatus() == FileMappingStatus.COMPLETED) {
                         result.setId(mapping.getId());
+                        // Remove uploading file token
+                        this.uploadingTokenLocks.remove(token);
                         return result;
                     }
                 }
@@ -179,6 +191,8 @@ public class FileUploadController {
                     throw new InternalException("entity.update.failed", jobEntity);
                 }
                 result.setId(mapping.getId());
+                // Remove uploading file token
+                this.uploadingTokenLocks.remove(token);
             }
             return result;
         } finally {
@@ -192,37 +206,37 @@ public class FileUploadController {
                           @RequestParam("name") String fileName,
                           @RequestParam("token") String token) {
         JobManager jobEntity = this.jobService.get(jobId);
-        Ex.check(jobEntity != null,
-                 "job-manager.not-exist.id", jobId);
+        Ex.check(jobEntity != null, "job-manager.not-exist.id", jobId);
         Ex.check(jobEntity.getJobStatus() == JobManagerStatus.DEFAULT ||
                  jobEntity.getJobStatus() == JobManagerStatus.SETTING,
                  "deleted.file.no-permission");
-        FileMapping mapping = this.service.get(connId, fileName);
+        FileMapping mapping = this.service.get(connId, jobId, fileName);
         Ex.check(mapping != null, "load.file-mapping.not-exist.name", fileName);
 
         ReadWriteLock lock = this.uploadingTokenLocks.get(token);
-        if (lock == null) {
-            throw new InternalException("Can't find lock of file %s with " +
-                                        "token %s", fileName, token);
+        if (lock != null) {
+            lock.writeLock().lock();
         }
-        lock.writeLock().lock();
         try {
             this.service.deleteDiskFile(mapping);
-            this.uploadingTokenLocks.remove(token);
-
+            log.info("Prepare to remove file mapping {}", mapping.getId());
             if (this.service.remove(mapping.getId()) != 1) {
                 throw new InternalException("entity.delete.failed", mapping);
             }
-            log.info("removed file mapping {}", mapping.getId());
             long jobSize = jobEntity.getJobSize() - mapping.getTotalSize();
             jobEntity.setJobSize(jobSize);
             if (this.jobService.update(jobEntity) != 1) {
                 throw new InternalException("job-manager.entity.update.failed",
                                             jobEntity);
             }
+            if (lock != null) {
+                this.uploadingTokenLocks.remove(token);
+            }
             return true;
         } finally {
-            lock.writeLock().unlock();
+            if (lock != null) {
+                lock.writeLock().unlock();
+            }
         }
     }
 
@@ -243,8 +257,7 @@ public class FileUploadController {
 
     private void checkFileValid(int connId, int jobId, JobManager jobEntity,
                                 MultipartFile file, String fileName) {
-        Ex.check(jobEntity != null,
-                 "job-manager.not-exist.id", jobId);
+        Ex.check(jobEntity != null, "job-manager.not-exist.id", jobId);
         Ex.check(jobEntity.getJobStatus() == JobManagerStatus.DEFAULT ||
                  jobEntity.getJobStatus() == JobManagerStatus.SETTING,
                  "load.upload.file.no-permission");
