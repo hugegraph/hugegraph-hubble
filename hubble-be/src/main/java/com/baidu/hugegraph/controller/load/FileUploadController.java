@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,7 +49,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.entity.enums.FileMappingStatus;
-import com.baidu.hugegraph.entity.enums.JobManagerStatus;
+import com.baidu.hugegraph.entity.enums.JobStatus;
 import com.baidu.hugegraph.entity.load.FileMapping;
 import com.baidu.hugegraph.entity.load.FileUploadResult;
 import com.baidu.hugegraph.entity.load.JobManager;
@@ -111,6 +112,12 @@ public class FileUploadController {
         this.checkFileNameMatchToken(fileName, token);
         JobManager jobEntity = this.jobService.get(jobId);
         this.checkFileValid(connId, jobId, jobEntity, file, fileName);
+        if (jobEntity.getJobStatus() == JobStatus.DEFAULT) {
+            jobEntity.setJobStatus(JobStatus.UPLOADING);
+            if (this.jobService.update(jobEntity) != 1) {
+                throw new InternalException("entity.update.failed", jobEntity);
+            }
+        }
 
         String location = this.config.get(HubbleOptions.UPLOAD_FILE_LOCATION);
         String path = Paths.get(CONN_PREIFX + connId, JOB_PREIFX + jobId)
@@ -134,8 +141,8 @@ public class FileUploadController {
 
         lock.readLock().lock();
         try {
-            FileUploadResult result = this.service.uploadFile(file, token,
-                                                              index, filePath);
+            FileUploadResult result = this.service.uploadFile(file, index,
+                                                              filePath);
             if (result.getStatus() == FileUploadResult.Status.FAILURE) {
                 return result;
             }
@@ -186,7 +193,6 @@ public class FileUploadController {
                 // Update Job Manager size
                 long jobSize = jobEntity.getJobSize() + mapping.getTotalSize();
                 jobEntity.setJobSize(jobSize);
-                jobEntity.setJobStatus(JobManagerStatus.SETTING);
                 if (this.jobService.update(jobEntity) != 1) {
                     throw new InternalException("entity.update.failed", jobEntity);
                 }
@@ -207,8 +213,9 @@ public class FileUploadController {
                           @RequestParam("token") String token) {
         JobManager jobEntity = this.jobService.get(jobId);
         Ex.check(jobEntity != null, "job-manager.not-exist.id", jobId);
-        Ex.check(jobEntity.getJobStatus() == JobManagerStatus.DEFAULT ||
-                 jobEntity.getJobStatus() == JobManagerStatus.SETTING,
+        Ex.check(jobEntity.getJobStatus() == JobStatus.UPLOADING ||
+                 jobEntity.getJobStatus() == JobStatus.MAPPING ||
+                 jobEntity.getJobStatus() == JobStatus.SETTING,
                  "deleted.file.no-permission");
         FileMapping mapping = this.service.get(connId, jobId, fileName);
         Ex.check(mapping != null, "load.file-mapping.not-exist.name", fileName);
@@ -240,6 +247,17 @@ public class FileUploadController {
         }
     }
 
+    @PutMapping("finish")
+    public JobManager finish(@PathVariable("jobId") int jobId) {
+        JobManager jobEntity = this.jobService.get(jobId);
+        Ex.check(jobEntity != null, "job-manager.not-exist.id", jobId);
+        Ex.check(jobEntity.getJobStatus() == JobStatus.UPLOADING,
+                 "job.manager.status.unexpected",
+                 JobStatus.UPLOADING, jobEntity.getJobStatus());
+        jobEntity.setJobStatus(JobStatus.MAPPING);
+        return jobEntity;
+    }
+
     private void checkTotalAndIndexValid(int total, int index) {
         if (total <= 0) {
             throw new InternalException("The request params 'total' must > 0");
@@ -258,8 +276,10 @@ public class FileUploadController {
     private void checkFileValid(int connId, int jobId, JobManager jobEntity,
                                 MultipartFile file, String fileName) {
         Ex.check(jobEntity != null, "job-manager.not-exist.id", jobId);
-        Ex.check(jobEntity.getJobStatus() == JobManagerStatus.DEFAULT ||
-                 jobEntity.getJobStatus() == JobManagerStatus.SETTING,
+        Ex.check(jobEntity.getJobStatus() == JobStatus.DEFAULT ||
+                 jobEntity.getJobStatus() == JobStatus.UPLOADING ||
+                 jobEntity.getJobStatus() == JobStatus.MAPPING ||
+                 jobEntity.getJobStatus() == JobStatus.SETTING,
                  "load.upload.file.no-permission");
         // Now allowed to upload empty file
         Ex.check(!file.isEmpty(), "load.upload.file.cannot-be-empty");

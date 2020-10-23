@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.baidu.hugegraph.entity.enums.JobManagerStatus;
+import com.baidu.hugegraph.entity.enums.JobStatus;
 import com.baidu.hugegraph.entity.enums.LoadStatus;
 import com.baidu.hugegraph.entity.load.JobManager;
 import com.baidu.hugegraph.entity.load.LoadTask;
@@ -79,24 +79,24 @@ public class JobManagerService {
         Page<JobManager> page = new Page<>(pageNo, pageSize);
         IPage<JobManager> list = this.mapper.selectPage(page, query);
         list.getRecords().forEach((p) -> {
-            if (p.getJobStatus() == JobManagerStatus.IMPORTING) {
+            if (p.getJobStatus() == JobStatus.LOADING) {
                 List<LoadTask> tasks = this.taskService.taskListByJob(p.getId());
-                JobManagerStatus status = JobManagerStatus.SUCCESS;
+                JobStatus status = JobStatus.SUCCESS;
                 for (LoadTask loadTask : tasks) {
                     if (loadTask.getStatus().inRunning() ||
                         loadTask.getStatus() == LoadStatus.PAUSED ||
                         loadTask.getStatus() == LoadStatus.STOPPED) {
-                        status = JobManagerStatus.IMPORTING;
+                        status = JobStatus.LOADING;
                         break;
                     }
                     if (loadTask.getStatus() == LoadStatus.FAILED) {
-                        status = JobManagerStatus.FAILED;
+                        status = JobStatus.FAILED;
                         break;
                     }
                 }
 
-                if (status == JobManagerStatus.SUCCESS ||
-                    status == JobManagerStatus.FAILED) {
+                if (status == JobStatus.SUCCESS ||
+                    status == JobStatus.FAILED) {
                     p.setJobStatus(status);
                     if (this.update(p) != 1) {
                         throw new InternalException("job-manager.entity.update.failed",
@@ -104,8 +104,8 @@ public class JobManagerService {
                     }
                 }
             }
-            Date endDate = p.getJobStatus() == JobManagerStatus.FAILED ||
-                           p.getJobStatus() == JobManagerStatus.SUCCESS ?
+            Date endDate = p.getJobStatus() == JobStatus.FAILED ||
+                           p.getJobStatus() == JobStatus.SUCCESS ?
                            p.getUpdateTime() : HubbleUtil.nowDate();
             p.setJobDuration(endDate.getTime() - p.getCreateTime().getTime());
         });

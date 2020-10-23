@@ -37,10 +37,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.controller.BaseController;
+import com.baidu.hugegraph.entity.enums.JobStatus;
 import com.baidu.hugegraph.entity.load.EdgeMapping;
 import com.baidu.hugegraph.entity.load.ElementMapping;
 import com.baidu.hugegraph.entity.load.FileMapping;
 import com.baidu.hugegraph.entity.load.FileSetting;
+import com.baidu.hugegraph.entity.load.JobManager;
 import com.baidu.hugegraph.entity.load.LoadParameter;
 import com.baidu.hugegraph.entity.load.VertexMapping;
 import com.baidu.hugegraph.entity.schema.EdgeLabelEntity;
@@ -48,6 +50,7 @@ import com.baidu.hugegraph.entity.schema.VertexLabelEntity;
 import com.baidu.hugegraph.exception.ExternalException;
 import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.service.load.FileMappingService;
+import com.baidu.hugegraph.service.load.JobManagerService;
 import com.baidu.hugegraph.service.schema.EdgeLabelService;
 import com.baidu.hugegraph.service.schema.VertexLabelService;
 import com.baidu.hugegraph.util.Ex;
@@ -67,6 +70,8 @@ public class FileMappingController extends BaseController {
     private EdgeLabelService elService;
     @Autowired
     private FileMappingService service;
+    @Autowired
+    private JobManagerService jobService;
 
     @GetMapping
     public IPage<FileMapping> list(@PathVariable("connId") int connId,
@@ -284,6 +289,17 @@ public class FileMappingController extends BaseController {
                 throw new InternalException("entity.update.failed", mapping);
             }
         }
+    }
+
+    @PutMapping("finish")
+    public JobManager finish(@PathVariable("jobId") int jobId) {
+        JobManager jobEntity = this.jobService.get(jobId);
+        Ex.check(jobEntity != null, "job-manager.not-exist.id", jobId);
+        Ex.check(jobEntity.getJobStatus() == JobStatus.MAPPING,
+                 "job.manager.status.unexpected",
+                 JobStatus.MAPPING, jobEntity.getJobStatus());
+        jobEntity.setJobStatus(JobStatus.SETTING);
+        return jobEntity;
     }
 
     private void checkVertexMappingValid(int connId, VertexMapping vertexMapping,

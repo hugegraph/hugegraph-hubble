@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.common.Response;
-import com.baidu.hugegraph.entity.enums.JobManagerStatus;
+import com.baidu.hugegraph.entity.enums.JobStatus;
 import com.baidu.hugegraph.entity.enums.LoadStatus;
 import com.baidu.hugegraph.entity.load.FileMapping;
 import com.baidu.hugegraph.entity.load.JobManager;
@@ -93,7 +93,7 @@ public class JobManagerController {
                 throw new InternalException("job.manager.job-name.repeated");
             }
             entity.setConnId(connId);
-            entity.setJobStatus(JobManagerStatus.DEFAULT);
+            entity.setJobStatus(JobStatus.DEFAULT);
             entity.setJobDuration(0L);
             entity.setJobSize(0L);
             entity.setUpdateTime(HubbleUtil.nowDate());

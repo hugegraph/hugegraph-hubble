@@ -42,6 +42,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.baidu.hugegraph.entity.enums.FileMappingStatus;
 import com.baidu.hugegraph.entity.load.FileMapping;
 import com.baidu.hugegraph.entity.load.FileSetting;
 import com.baidu.hugegraph.entity.load.FileUploadResult;
@@ -87,6 +88,7 @@ public class FileMappingService {
         QueryWrapper<FileMapping> query = Wrappers.query();
         query.eq("conn_id", connId);
         query.eq("job_id", jobId);
+        query.eq("file_status", FileMappingStatus.COMPLETED.getValue());
         query.orderByDesc("create_time");
         Page<FileMapping> page = new Page<>(pageNo, pageSize);
         return this.mapper.selectPage(page, query);
@@ -112,8 +114,8 @@ public class FileMappingService {
                HubbleUtil.nowTime().getEpochSecond();
     }
 
-    public FileUploadResult uploadFile(MultipartFile srcFile, String token,
-                                       int index, String dirPath) {
+    public FileUploadResult uploadFile(MultipartFile srcFile, int index,
+                                       String dirPath) {
         FileUploadResult result = new FileUploadResult();
         // Current part saved path
         String partName = srcFile.getOriginalFilename();
