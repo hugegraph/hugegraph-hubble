@@ -30,24 +30,33 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.entity.enums.FileMappingStatus;
 import com.baidu.hugegraph.entity.load.FileMapping;
 import com.baidu.hugegraph.entity.load.FileSetting;
 import com.baidu.hugegraph.entity.load.FileUploadResult;
 import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.mapper.load.FileMappingMapper;
+import com.baidu.hugegraph.options.HubbleOptions;
 import com.baidu.hugegraph.util.Ex;
 import com.baidu.hugegraph.util.HubbleUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -66,7 +75,19 @@ public class FileMappingService {
     public static final String FILE_PREIFX = "file-mapping-";
 
     @Autowired
+    private HugeConfig config;
+    @Autowired
     private FileMappingMapper mapper;
+
+    private final Map<String, ReadWriteLock> uploadingTokenLocks;
+
+    public FileMappingService() {
+        this.uploadingTokenLocks = new ConcurrentHashMap<>();
+    }
+
+    public Map<String, ReadWriteLock> getUploadingTokenLocks() {
+        return this.uploadingTokenLocks;
+    }
 
     public FileMapping get(int id) {
         return this.mapper.selectById(id);
@@ -299,6 +320,40 @@ public class FileMappingService {
                                             "corresponded to the file id %s, " +
                                             "please delete it manually",
                                             e, mapping.getId());
+            }
+        }
+    }
+
+    @Async
+    @Scheduled(fixedRate = 10 * 60 * 1000)
+    public void deleteUnfinishedFile() {
+        QueryWrapper<FileMapping> query = Wrappers.query();
+        query.in("file_status", FileMappingStatus.UPLOADING.getValue());
+        List<FileMapping> mappings = this.mapper.selectList(query);
+        long threshold = this.config.get(
+                         HubbleOptions.UPLOAD_FILE_MAX_TIME_CONSUMING) * 1000;
+        Date now = HubbleUtil.nowDate();
+        for (FileMapping mapping : mappings) {
+            Date updateTime = mapping.getUpdateTime();
+            long duration = now.getTime() - updateTime.getTime();
+            if (duration > threshold) {
+                String filePath = mapping.getPath();
+                try {
+                    FileUtils.forceDelete(new File(filePath));
+                } catch (IOException e) {
+                    log.warn("Failed to delete uploading timeout file {}",
+                             filePath, e);
+                }
+                this.remove(mapping.getId());
+                // Delete corresponding uploading tokens
+                Iterator<Map.Entry<String, ReadWriteLock>> iter;
+                iter = this.uploadingTokenLocks.entrySet().iterator();
+                iter.forEachRemaining(entry -> {
+                    String token = entry.getKey();
+                    if (token.startsWith(mapping.getName())) {
+                        iter.remove();
+                    }
+                });
             }
         }
     }

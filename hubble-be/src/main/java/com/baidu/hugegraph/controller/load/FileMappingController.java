@@ -299,6 +299,9 @@ public class FileMappingController extends BaseController {
                  "job.manager.status.unexpected",
                  JobStatus.MAPPING, jobEntity.getJobStatus());
         jobEntity.setJobStatus(JobStatus.SETTING);
+        if (this.jobService.update(jobEntity) != 1) {
+            throw new InternalException("entity.update.failed", jobEntity);
+        }
         return jobEntity;
     }
 

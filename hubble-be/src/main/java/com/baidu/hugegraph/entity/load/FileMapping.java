@@ -89,14 +89,6 @@ public class FileMapping {
     @JsonProperty("file_status")
     private FileMappingStatus fileStatus;
 
-    @TableField("file_total")
-    @JsonProperty("file_total")
-    private long fileTotal;
-
-    @TableField("file_index")
-    @JsonProperty("file_index")
-    private String fileIndex;
-
     @TableField(value = "file_setting", typeHandler = JacksonTypeHandler.class)
     @JsonProperty("file_setting")
     private FileSetting fileSetting;
@@ -116,13 +108,13 @@ public class FileMapping {
     @JsonProperty("load_parameter")
     private LoadParameter loadParameter;
 
-    @TableField("last_access_time")
-    @JsonProperty("last_access_time")
-    private Date lastAccessTime;
-
     @MergeProperty(useNew = false)
     @JsonProperty("create_time")
     private Date createTime;
+
+    @MergeProperty(useNew = false)
+    @JsonProperty("update_time")
+    private Date updateTime;
 
     public FileMapping(int connId, String name, String path) {
         this(connId, name, path, HubbleUtil.nowDate());
@@ -138,8 +130,8 @@ public class FileMapping {
         this.vertexMappings = new LinkedHashSet<>();
         this.edgeMappings = new LinkedHashSet<>();
         this.loadParameter = new LoadParameter();
-        this.lastAccessTime = lastAccessTime;
-        this.createTime = HubbleUtil.nowDate();
+        this.createTime = lastAccessTime;
+        this.updateTime = lastAccessTime;
     }
 
     public VertexMapping getVertexMapping(String vmId) {

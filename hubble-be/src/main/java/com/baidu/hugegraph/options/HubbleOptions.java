@@ -192,6 +192,16 @@ public class HubbleOptions extends OptionHolder {
                     10 * Bytes.GB
             );
 
+    public static final ConfigOption<Long> UPLOAD_FILE_MAX_TIME_CONSUMING =
+            new ConfigOption<>(
+                    "upload_file.max_uploading_time",
+                    "The maximum allowable uploading time(second) for file " +
+                    "uploads, the uploaded parts will be cleared if exceed " +
+                    "this time",
+                    positiveInt(),
+                    12L * 60 * 60
+            );
+
     public static final ConfigOption<String> SERVER_PROTOCOL =
             new ConfigOption<>(
                     "server.protocol",
