@@ -346,7 +346,7 @@ public class VertexLabelService extends SchemaService {
                                 .build();
     }
 
-    public static VertexLabelStyle getStyle(SchemaElement element) {
+    private static VertexLabelStyle getStyle(SchemaElement element) {
         String styleValue = (String) element.userdata().get(USER_KEY_STYLE);
         if (styleValue != null) {
             return JsonUtil.fromJson(styleValue, VertexLabelStyle.class);

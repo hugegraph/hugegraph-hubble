@@ -340,7 +340,7 @@ public class EdgeLabelService extends SchemaService {
                               .build();
     }
 
-    public static EdgeLabelStyle getStyle(SchemaElement element) {
+    private static EdgeLabelStyle getStyle(SchemaElement element) {
         String styleValue = (String) element.userdata().get(USER_KEY_STYLE);
         if (styleValue != null) {
             return JsonUtil.fromJson(styleValue, EdgeLabelStyle.class);

@@ -41,7 +41,6 @@ import com.baidu.hugegraph.entity.load.FileMapping;
 import com.baidu.hugegraph.entity.load.JobManager;
 import com.baidu.hugegraph.entity.load.LoadTask;
 import com.baidu.hugegraph.exception.ExternalException;
-import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.service.GraphConnectionService;
 import com.baidu.hugegraph.service.load.FileMappingService;
 import com.baidu.hugegraph.service.load.JobManagerService;
@@ -114,10 +113,7 @@ public class LoadTaskController extends BaseController {
             Ex.check(this.service.count() < LIMIT,
                      "load.task.reached-limit", LIMIT);
             entity.setConnId(connId);
-            int rows = this.service.save(entity);
-            if (rows != 1) {
-                throw new InternalException("entity.insert.failed", entity);
-            }
+            this.service.save(entity);
         }
         return entity;
     }
@@ -128,9 +124,7 @@ public class LoadTaskController extends BaseController {
         if (task == null) {
             throw new ExternalException("load.task.not-exist.id", id);
         }
-        if (this.service.remove(id) != 1) {
-            throw new InternalException("entity.delete.failed", task);
-        }
+        this.service.remove(id);
     }
 
     @PostMapping("start")
@@ -157,10 +151,7 @@ public class LoadTaskController extends BaseController {
         }
         jobEntity.setJobStatus(JobStatus.LOADING);
         jobEntity.setUpdateTime(HubbleUtil.nowDate());
-        if (this.jobService.update(jobEntity) != 1) {
-            throw new InternalException("job-manager.entity.update.failed",
-                                        jobEntity);
-        }
+        this.jobService.update(jobEntity);
         return tasks;
     }
 
@@ -179,10 +170,7 @@ public class LoadTaskController extends BaseController {
         LoadTask task = this.service.pause(taskId);
         jobEntity.setJobStatus(JobStatus.LOADING);
         jobEntity.setUpdateTime(HubbleUtil.nowDate());
-        if (this.jobService.update(jobEntity) != 1) {
-            throw new InternalException("job-manager.entity.update.failed",
-                                        jobEntity);
-        }
+        this.jobService.update(jobEntity);
         return task;
     }
 
@@ -201,10 +189,7 @@ public class LoadTaskController extends BaseController {
         LoadTask task = this.service.resume(taskId);
         jobEntity.setJobStatus(JobStatus.LOADING);
         jobEntity.setUpdateTime(HubbleUtil.nowDate());
-        if (this.jobService.update(jobEntity) != 1) {
-            throw new InternalException("job-manager.entity.update.failed",
-                                        jobEntity);
-        }
+        this.jobService.update(jobEntity);
         return task;
     }
 
@@ -223,10 +208,7 @@ public class LoadTaskController extends BaseController {
         LoadTask task = this.service.stop(taskId);
         jobEntity.setJobStatus(JobStatus.LOADING);
         jobEntity.setUpdateTime(HubbleUtil.nowDate());
-        if (this.jobService.update(jobEntity) != 1) {
-            throw new InternalException("job-manager.entity.update.failed",
-                                        jobEntity);
-        }
+        this.jobService.update(jobEntity);
         return task;
     }
 
@@ -245,10 +227,7 @@ public class LoadTaskController extends BaseController {
         LoadTask task = this.service.retry(taskId);
         jobEntity.setJobStatus(JobStatus.LOADING);
         jobEntity.setUpdateTime( HubbleUtil.nowDate());
-        if (this.jobService.update(jobEntity) != 1) {
-            throw new InternalException("job-manager.entity.update.failed",
-                                        jobEntity);
-        }
+        this.jobService.update(jobEntity);
         return task;
     }
 

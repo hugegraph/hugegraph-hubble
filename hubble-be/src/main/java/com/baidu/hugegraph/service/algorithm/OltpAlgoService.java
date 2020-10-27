@@ -39,7 +39,6 @@ import com.baidu.hugegraph.entity.query.GraphView;
 import com.baidu.hugegraph.entity.query.GremlinResult;
 import com.baidu.hugegraph.entity.query.JsonView;
 import com.baidu.hugegraph.entity.query.TableView;
-import com.baidu.hugegraph.exception.InternalException;
 import com.baidu.hugegraph.service.HugeClientPoolService;
 import com.baidu.hugegraph.service.query.ExecuteHistoryService;
 import com.baidu.hugegraph.structure.graph.Edge;
@@ -81,10 +80,7 @@ public class OltpAlgoService {
         history = new ExecuteHistory(null, connId, 0L, ExecuteType.ALGORITHM,
                                      body.toString(), status,
                                      AsyncTaskStatus.UNKNOWN, -1L, createTime);
-        int rows = this.historyService.save(history);
-        if (rows != 1) {
-            throw new InternalException("entity.insert.failed", history);
-        }
+        this.historyService.save(history);
         return GremlinResult.builder()
                             .type(GremlinResult.Type.PATH)
                             .jsonView(jsonView)

@@ -196,8 +196,8 @@ public class HubbleOptions extends OptionHolder {
             new ConfigOption<>(
                     "upload_file.max_uploading_time",
                     "The maximum allowable uploading time(second) for file " +
-                    "uploads, the uploaded parts will be cleared if exceed " +
-                    "this time",
+                    "uploads, the uploaded file parts will be cleared if " +
+                    "exceed this time",
                     positiveInt(),
                     12L * 60 * 60
             );

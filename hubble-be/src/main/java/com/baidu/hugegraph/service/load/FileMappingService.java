@@ -116,18 +116,24 @@ public class FileMappingService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public int save(FileMapping mapping) {
-        return this.mapper.insert(mapping);
+    public void save(FileMapping mapping) {
+        if (this.mapper.insert(mapping) != 1) {
+            throw new InternalException("entity.insert.failed", mapping);
+        }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public int update(FileMapping mapping) {
-        return this.mapper.updateById(mapping);
+    public void update(FileMapping mapping) {
+        if (this.mapper.updateById(mapping) != 1) {
+            throw new InternalException("entity.update.failed", mapping);
+        }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public int remove(int id) {
-        return this.mapper.deleteById(id);
+    public void remove(int id) {
+        if (this.mapper.deleteById(id) != 1) {
+            throw new InternalException("entity.delete.failed", id);
+        }
     }
 
     public String generateFileToken(String fileName) {
@@ -341,7 +347,7 @@ public class FileMappingService {
                 try {
                     FileUtils.forceDelete(new File(filePath));
                 } catch (IOException e) {
-                    log.warn("Failed to delete uploading timeout file {}",
+                    log.warn("Failed to delete expired uploading file {}",
                              filePath, e);
                 }
                 this.remove(mapping.getId());

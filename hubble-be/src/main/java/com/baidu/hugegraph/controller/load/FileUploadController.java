@@ -107,9 +107,7 @@ public class FileUploadController {
         this.checkFileValid(connId, jobId, jobEntity, file, fileName);
         if (jobEntity.getJobStatus() == JobStatus.DEFAULT) {
             jobEntity.setJobStatus(JobStatus.UPLOADING);
-            if (this.jobService.update(jobEntity) != 1) {
-                throw new InternalException("entity.update.failed", jobEntity);
-            }
+            this.jobService.update(jobEntity);
         }
         // Ensure location exist and generate file path
         String filePath = this.generateFilePath(connId, jobId, fileName);
@@ -138,10 +136,7 @@ public class FileUploadController {
                     mapping = new FileMapping(connId, fileName, filePath);
                     mapping.setJobId(jobId);
                     mapping.setFileStatus(FileMappingStatus.UPLOADING);
-                    if (this.service.save(mapping) != 1) {
-                        throw new InternalException("entity.insert.failed",
-                                                    mapping);
-                    }
+                    this.service.save(mapping);
                 } else {
                     if (mapping.getFileStatus() == FileMappingStatus.COMPLETED) {
                         result.setId(mapping.getId());
@@ -155,9 +150,7 @@ public class FileUploadController {
                 // Determine whether all the parts have been uploaded, then merge them
                 boolean merged = this.service.tryMergePartFiles(filePath, total);
                 if (!merged) {
-                    if (this.service.update(mapping) != 1) {
-                        throw new InternalException("entity.update.failed", mapping);
-                    }
+                    this.service.update(mapping);
                     return result;
                 }
                 // Read column names and values then fill it
@@ -170,15 +163,11 @@ public class FileUploadController {
                 String newPath = this.service.moveToNextLevelDir(mapping);
                 // Update file mapping stored path
                 mapping.setPath(newPath);
-                if (this.service.update(mapping) != 1) {
-                    throw new InternalException("entity.update.failed", mapping);
-                }
+                this.service.update(mapping);
                 // Update Job Manager size
                 long jobSize = jobEntity.getJobSize() + mapping.getTotalSize();
                 jobEntity.setJobSize(jobSize);
-                if (this.jobService.update(jobEntity) != 1) {
-                    throw new InternalException("entity.update.failed", jobEntity);
-                }
+                this.jobService.update(jobEntity);
                 result.setId(mapping.getId());
                 // Remove uploading file token
                 this.uploadingTokenLocks().remove(token);
@@ -210,15 +199,10 @@ public class FileUploadController {
         try {
             this.service.deleteDiskFile(mapping);
             log.info("Prepare to remove file mapping {}", mapping.getId());
-            if (this.service.remove(mapping.getId()) != 1) {
-                throw new InternalException("entity.delete.failed", mapping);
-            }
+            this.service.remove(mapping.getId());
             long jobSize = jobEntity.getJobSize() - mapping.getTotalSize();
             jobEntity.setJobSize(jobSize);
-            if (this.jobService.update(jobEntity) != 1) {
-                throw new InternalException("job-manager.entity.update.failed",
-                                            jobEntity);
-            }
+            this.jobService.update(jobEntity);
             if (lock != null) {
                 this.uploadingTokenLocks().remove(token);
             }
@@ -230,17 +214,15 @@ public class FileUploadController {
         }
     }
 
-    @PutMapping("finish")
-    public JobManager finish(@PathVariable("jobId") int jobId) {
+    @PutMapping("next-step")
+    public JobManager nextStep(@PathVariable("jobId") int jobId) {
         JobManager jobEntity = this.jobService.get(jobId);
         Ex.check(jobEntity != null, "job-manager.not-exist.id", jobId);
         Ex.check(jobEntity.getJobStatus() == JobStatus.UPLOADING,
                  "job.manager.status.unexpected",
                  JobStatus.UPLOADING, jobEntity.getJobStatus());
         jobEntity.setJobStatus(JobStatus.MAPPING);
-        if (this.jobService.update(jobEntity) != 1) {
-            throw new InternalException("entity.update.failed", jobEntity);
-        }
+        this.jobService.update(jobEntity);
         return jobEntity;
     }
 

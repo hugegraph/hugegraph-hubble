@@ -135,19 +135,25 @@ public class LoadTaskService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public int save(LoadTask entity) {
-        return this.mapper.insert(entity);
+    public void save(LoadTask entity) {
+        if (this.mapper.insert(entity) != 1) {
+            throw new InternalException("entity.insert.failed", entity);
+        }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public int update(LoadTask entity) {
-        return this.mapper.updateById(entity);
+    public void update(LoadTask entity) {
+        if (this.mapper.updateById(entity) != 1) {
+            throw new InternalException("entity.update.failed", entity);
+        }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public int remove(int id) {
+    public void remove(int id) {
         this.runningTaskContainer.remove(id);
-        return this.mapper.deleteById(id);
+        if (this.mapper.deleteById(id) != 1) {
+            throw new InternalException("entity.delete.failed", id);
+        }
     }
 
     public List<LoadTask> batchTasks(int jobId) {
@@ -159,9 +165,7 @@ public class LoadTaskService {
     public LoadTask start(GraphConnection connection, FileMapping fileMapping) {
         connection = this.sslService.configSSL(this.config, connection);
         LoadTask task = this.buildLoadTask(connection, fileMapping);
-        if (this.save(task) != 1) {
-            throw new InternalException("entity.insert.failed", task);
-        }
+        this.save(task);
         // executed in other threads
         this.taskExecutor.execute(task, () -> this.update(task));
         // Save current load task
@@ -180,9 +184,7 @@ public class LoadTaskService {
 
         task.lock();
         try {
-            if (this.update(task) != 1) {
-                throw new InternalException("entity.update.failed", task);
-            }
+            this.update(task);
             this.runningTaskContainer.remove(taskId);
         } finally {
             task.unlock();
@@ -196,14 +198,12 @@ public class LoadTaskService {
                  task.getStatus() == LoadStatus.FAILED,
                  "Can only resume the PAUSED or FAILED task");
         task.lock();
-        // Set work mode in incrental mode, load from last breakpoint
-        task.getOptions().incrementalMode = true;
-        task.restoreContext();
         try {
+            // Set work mode in incrental mode, load from last breakpoint
+            task.getOptions().incrementalMode = true;
+            task.restoreContext();
             task.setStatus(LoadStatus.RUNNING);
-            if (this.update(task) != 1) {
-                throw new InternalException("entity.update.failed", task);
-            }
+            this.update(task);
             this.taskExecutor.execute(task, () -> this.update(task));
             this.runningTaskContainer.put(taskId, task);
         } finally {
@@ -227,9 +227,7 @@ public class LoadTaskService {
 
         task.lock();
         try {
-            if (this.update(task) != 1) {
-                throw new InternalException("entity.update.failed", task);
-            }
+            this.update(task);
             this.runningTaskContainer.remove(taskId);
         } finally {
             task.unlock();
@@ -243,16 +241,14 @@ public class LoadTaskService {
                  task.getStatus() == LoadStatus.STOPPED,
                  "Can only retry the FAILED or STOPPED task");
         task.lock();
-        // Set work mode in normal mode, load from begin
-        task.getOptions().incrementalMode = false;
-        task.restoreContext();
         try {
+            // Set work mode in normal mode, load from begin
+            task.getOptions().incrementalMode = false;
+            task.restoreContext();
             task.setStatus(LoadStatus.RUNNING);
             task.setLastDuration(0L);
             task.setCurrDuration(0L);
-            if (this.update(task) != 1) {
-                throw new InternalException("entity.update.failed", task);
-            }
+            this.update(task);
             this.taskExecutor.execute(task, () -> this.update(task));
             this.runningTaskContainer.put(taskId, task);
         } finally {
@@ -320,9 +316,7 @@ public class LoadTaskService {
                     }
                     task.setFileReadLines(readLines);
                     task.setCurrDuration(context.summary().totalTime());
-                    if (this.update(task) != 1) {
-                        throw new InternalException("entity.update.failed", task);
-                    }
+                    this.update(task);
                 }
             } finally {
                 task.unlock();

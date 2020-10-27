@@ -98,10 +98,7 @@ public class JobManagerController {
             entity.setJobSize(0L);
             entity.setUpdateTime(HubbleUtil.nowDate());
             entity.setCreateTime(HubbleUtil.nowDate());
-            int rows = this.service.save(entity);
-            if (rows != 1) {
-                throw new InternalException("entity.insert.failed", entity);
-            }
+            this.service.save(entity);
         }
         return entity;
     }
@@ -112,9 +109,7 @@ public class JobManagerController {
         if (task == null) {
             throw new ExternalException("job.manager.not-exist.id", id);
         }
-        if (this.service.remove(id) != 1) {
-            throw new InternalException("entity.delete.failed", task);
-        }
+        this.service.remove(id);
     }
 
     @GetMapping("{id}")
@@ -167,9 +162,7 @@ public class JobManagerController {
         }
         entity.setJobName(newEntity.getJobName());
         entity.setJobRemarks(newEntity.getJobRemarks());
-        if (this.service.update(entity) != 1) {
-            throw new InternalException("entity.update.failed", entity);
-        }
+        this.service.update(entity);
         return entity;
     }
 

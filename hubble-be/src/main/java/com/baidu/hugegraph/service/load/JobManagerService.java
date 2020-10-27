@@ -78,9 +78,9 @@ public class JobManagerService {
         query.orderByDesc("create_time");
         Page<JobManager> page = new Page<>(pageNo, pageSize);
         IPage<JobManager> list = this.mapper.selectPage(page, query);
-        list.getRecords().forEach((p) -> {
-            if (p.getJobStatus() == JobStatus.LOADING) {
-                List<LoadTask> tasks = this.taskService.taskListByJob(p.getId());
+        list.getRecords().forEach(task -> {
+            if (task.getJobStatus() == JobStatus.LOADING) {
+                List<LoadTask> tasks = this.taskService.taskListByJob(task.getId());
                 JobStatus status = JobStatus.SUCCESS;
                 for (LoadTask loadTask : tasks) {
                     if (loadTask.getStatus().inRunning() ||
@@ -97,17 +97,14 @@ public class JobManagerService {
 
                 if (status == JobStatus.SUCCESS ||
                     status == JobStatus.FAILED) {
-                    p.setJobStatus(status);
-                    if (this.update(p) != 1) {
-                        throw new InternalException("job-manager.entity.update.failed",
-                                                    p);
-                    }
+                    task.setJobStatus(status);
+                    this.update(task);
                 }
             }
-            Date endDate = p.getJobStatus() == JobStatus.FAILED ||
-                           p.getJobStatus() == JobStatus.SUCCESS ?
-                           p.getUpdateTime() : HubbleUtil.nowDate();
-            p.setJobDuration(endDate.getTime() - p.getCreateTime().getTime());
+            Date endDate = task.getJobStatus() == JobStatus.FAILED ||
+                           task.getJobStatus() == JobStatus.SUCCESS ?
+                           task.getUpdateTime() : HubbleUtil.nowDate();
+            task.setJobDuration(endDate.getTime() - task.getCreateTime().getTime());
         });
         return list;
     }
@@ -117,17 +114,23 @@ public class JobManagerService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public int remove(int id) {
-        return this.mapper.deleteById(id);
+    public void save(JobManager entity) {
+        if (this.mapper.insert(entity) != 1) {
+            throw new InternalException("entity.insert.failed", entity);
+        }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public int save(JobManager entity) {
-        return this.mapper.insert(entity);
+    public void update(JobManager entity) {
+        if (this.mapper.updateById(entity) != 1) {
+            throw new InternalException("entity.update.failed", entity);
+        }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public int update(JobManager entity) {
-        return this.mapper.updateById(entity);
+    public void remove(int id) {
+        if (this.mapper.deleteById(id) != 1) {
+            throw new InternalException("entity.delete.failed", id);
+        }
     }
 }
