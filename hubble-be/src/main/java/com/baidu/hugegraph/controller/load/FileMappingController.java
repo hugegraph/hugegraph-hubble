@@ -132,7 +132,7 @@ public class FileMappingController extends BaseController {
         if (mapping == null) {
             throw new ExternalException("load.file-mapping.not-exist.id", id);
         }
-        // change format to TEXT if needed
+        // Change format to TEXT if needed
         newEntity.changeFormatIfNeeded();
         FileSetting oldEntity = mapping.getFileSetting();
         FileSetting entity = this.mergeEntity(oldEntity, newEntity);

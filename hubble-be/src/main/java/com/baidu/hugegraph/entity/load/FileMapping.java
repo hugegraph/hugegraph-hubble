@@ -154,23 +154,21 @@ public class FileMapping {
 
     @JsonIgnore
     public Set<String> getVertexMappingLabels() {
-        if (this.getVertexMappings() != null) {
-            return this.getVertexMappings().stream()
-                       .map(ElementMapping::getLabel)
-                       .collect(Collectors.toSet());
-        } else {
+        if (this.getVertexMappings() == null) {
             return new HashSet<>();
         }
+        return this.getVertexMappings().stream()
+                   .map(ElementMapping::getLabel)
+                   .collect(Collectors.toSet());
     }
 
     @JsonIgnore
     public Set<String> getEdgeMappingLabels() {
-        if (this.getEdgeMappings() != null) {
-            return this.getEdgeMappings().stream()
-                       .map(ElementMapping::getLabel)
-                       .collect(Collectors.toSet());
-        } else {
+        if (this.getEdgeMappings() == null) {
             return new HashSet<>();
         }
+        return this.getEdgeMappings().stream()
+                   .map(ElementMapping::getLabel)
+                   .collect(Collectors.toSet());
     }
 }

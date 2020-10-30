@@ -249,7 +249,7 @@ public class LoadTask implements Runnable {
         long duration = this.getDuration();
         float rate;
         if (readLines == 0L || duration == 0L) {
-            rate = 0;
+            rate = 0.0F;
         } else {
             rate = readLines * 1000.0F / duration;
             rate = Math.round(rate * 1000) / 1000.0F;
