@@ -65,7 +65,7 @@
                             <tasks>
                                 <echo file="${top.level.dir}/dist.sh">
                                     cd ${hubble-fe.dir}
-                                    yarn install &amp;&amp; yarn build || exit 1
+                                    /usr/local/bin/yarn install &amp;&amp; /usr/local/bin/yarn build || exit 1
                                     echo "hubble-fe build ok."
 
                                     cd ..
