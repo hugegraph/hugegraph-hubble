@@ -19,7 +19,7 @@ import type {
   ExecutionLogs,
   FavoriteQuery
 } from '../../../stores/types/GraphManagementStore/dataAnalyzeStore';
-import {Algorithm} from '../../../stores/factory/dataAnalyzeStore/algorithmStore';
+import { Algorithm } from '../../../stores/factory/dataAnalyzeStore/algorithmStore';
 
 import ArrowIcon from '../../../assets/imgs/ic_arrow_16.svg';
 import EmptyIcon from '../../../assets/imgs/ic_sousuo_empty.svg';

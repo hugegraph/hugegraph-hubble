@@ -372,7 +372,16 @@ export class AlgorithmAnalyzerStore {
       case 'source':
         if (isEmpty(value)) {
           this.validateShortestPathAllParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
+            'data-analyze.algorithm-forms.shortest-path-all.validations.no-empty'
+          );
+
+          return;
+        }
+        break;
+      case 'target':
+        if (isEmpty(value)) {
+          this.validateShortestPathAllParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path-all.validations.no-empty'
           );
 
           return;
@@ -381,7 +390,7 @@ export class AlgorithmAnalyzerStore {
       case 'max_depth':
         if (isEmpty(value)) {
           this.validateShortestPathAllParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
+            'data-analyze.algorithm-forms.shortest-path-all.validations.no-empty'
           );
 
           return;
@@ -389,7 +398,7 @@ export class AlgorithmAnalyzerStore {
 
         if (!isInt(value, { min: 1 })) {
           this.validateShortestPathAllParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.shortest-path-all.validations.postive-integer-only'
           );
 
           return;
@@ -399,7 +408,7 @@ export class AlgorithmAnalyzerStore {
       case 'max_degree':
         if (!isInt(value, { min: 1 })) {
           this.validateShortestPathAllParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.shortest-path-all.validations.postive-integer-only'
           );
 
           return;
@@ -409,7 +418,7 @@ export class AlgorithmAnalyzerStore {
       case 'max_capacity':
         if (!isInt(value, { min: 0 })) {
           this.validateShortestPathAllParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.integer-only'
+            'data-analyze.algorithm-forms.shortest-path-all.validations.integer-only'
           );
 
           return;
@@ -419,7 +428,7 @@ export class AlgorithmAnalyzerStore {
       case 'capacity':
         if (!isInt(value, { min: 1 })) {
           this.validateShortestPathAllParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.shortest-path-all.validations.postive-integer-only'
           );
 
           return;
@@ -451,6 +460,15 @@ export class AlgorithmAnalyzerStore {
 
     switch (key) {
       case 'source':
+        if (isEmpty(value)) {
+          this.validateAllPathParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
+          );
+
+          return;
+        }
+        break;
+      case 'target':
         if (isEmpty(value)) {
           this.validateAllPathParamsErrorMessage[key] = i18next.t(
             'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
@@ -514,7 +532,7 @@ export class AlgorithmAnalyzerStore {
 
   @action
   resetAllPathParams() {
-    this.allPathParams = createValidateAllPathParamsErrorMessage();
+    this.allPathParams = createAllPathDefaultParams();
     this.validateAllPathParamsErrorMessage = createValidateAllPathParamsErrorMessage();
   }
 
@@ -666,9 +684,21 @@ export class AlgorithmAnalyzerStore {
         this.validateNeighborRankParamsParamsErrorMessage.source = '';
         break;
       case 'alpha':
-        if (Number(value) > 1 && Number(value) <= 0) {
+        if (isEmpty(value)) {
           this.validateNeighborRankParamsParamsErrorMessage[key] = i18next.t(
             'data-analyze.algorithm-forms.neighbor-rank.validations.no-empty'
+          );
+
+          return;
+        }
+
+        if (
+          Object.is(Number(value), NaN) ||
+          Number(value) > 1 ||
+          Number(value) <= 0
+        ) {
+          this.validateNeighborRankParamsParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.neighbor-rank.validations.range'
           );
 
           return;
