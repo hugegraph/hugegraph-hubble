@@ -31,10 +31,12 @@ import { useMultiKeyPress } from '../../../hooks';
 
 import LoopDetection from './algorithm/LoopDetection';
 import FocusDetection from './algorithm/FocusDetection';
+import ShortestPath from './algorithm/ShortestPath';
 import ShortestPathAll from './algorithm/ShortestPathAll';
 import AllPath from './algorithm/AllPath';
 import ModelSimilarity from './algorithm/ModelSimilarity';
 import NeighborRank from './algorithm/NeighborRank';
+import KStepNeighbor from './algorithm/KStepNeighbor';
 
 import ArrowIcon from '../../../assets/imgs/ic_arrow_16.svg';
 import QuestionMarkIcon from '../../../assets/imgs/ic_question_mark.svg';
@@ -60,15 +62,20 @@ const algorithmWhiteList: string[] = [
   Algorithm.allPath,
   Algorithm.modelSimilarity,
   Algorithm.neighborRankRecommendation
+  // Algorithm.kStepNeighbor,
+  // Algorithm.kHop
 ];
 
 const QueryAndAlgorithmLibrary: React.FC = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
+  const { algorithmAnalyzerStore } = dataAnalyzeStore;
   const { t } = useTranslation();
 
   const handleTabChange = (tab: string) => () => {
     dataAnalyzeStore.resetSwitchTabState();
     dataAnalyzeStore.setCurrentTab(tab);
+    // reset algorithm tab to list
+    algorithmAnalyzerStore.changeCurrentAlgorithm('');
   };
 
   return (
@@ -206,15 +213,6 @@ export const GremlinQuery: React.FC = observer(() => {
         }
       );
 
-      reaction(
-        () => dataAnalyzeStore.pulse,
-        () => {
-          (codeEditor.current as CodeMirror.Editor).setValue(
-            dataAnalyzeStore.codeEditorText
-          );
-        }
-      );
-
       return () => {
         (codeEditor.current as CodeMirror.Editor).off(
           'change',
@@ -223,6 +221,16 @@ export const GremlinQuery: React.FC = observer(() => {
       };
     }
   }, [dataAnalyzeStore]);
+
+  // weird, mobx@reaction is not working when puluse changed, setValue()
+  // has no influence
+  useEffect(() => {
+    if (codeEditor?.current && dataAnalyzeStore.codeEditorText !== '') {
+      (codeEditor.current as CodeMirror.Editor).setValue(
+        dataAnalyzeStore.codeEditorText
+      );
+    }
+  }, [dataAnalyzeStore.pulse, codeEditor?.current]);
 
   useEffect(() => {
     if (
@@ -431,451 +439,18 @@ export const AlgorithmQuery: React.FC = observer(() => {
     }
   };
 
+  const handleExpandClick = () => {
+    algorithmAnalyzerStore.switchCollapse(!algorithmAnalyzerStore.isCollapse);
+  };
+
   const renderForms = () => {
     switch (algorithmAnalyzerStore.currentAlgorithm) {
-      case Algorithm.shortestPath:
-        return (
-          <div className="query-tab-content-form">
-            <div className="query-tab-content-form-row">
-              <div className="query-tab-content-form-item">
-                <div className="query-tab-content-form-item-title">
-                  <i>*</i>
-                  <span>
-                    {t(
-                      'data-analyze.algorithm-forms.shortest-path.options.source'
-                    )}
-                  </span>
-                </div>
-                <Input
-                  width={400}
-                  size="medium"
-                  disabled={
-                    dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                  }
-                  placeholder={t(
-                    'data-analyze.algorithm-forms.shortest-path.placeholder.input-source-id'
-                  )}
-                  errorLocation="layer"
-                  errorMessage={
-                    algorithmAnalyzerStore
-                      .validateShortestPathParamsErrorMessage.source
-                  }
-                  value={
-                    algorithmAnalyzerStore.shortestPathAlgorithmParams.source
-                  }
-                  onChange={(e: any) => {
-                    algorithmAnalyzerStore.mutateShortestPathParams(
-                      'source',
-                      e.value as string
-                    );
-
-                    algorithmAnalyzerStore.validateShortestPathParams('source');
-                  }}
-                  originInputProps={{
-                    onBlur() {
-                      algorithmAnalyzerStore.validateShortestPathParams(
-                        'source'
-                      );
-                    }
-                  }}
-                />
-              </div>
-              <div className="query-tab-content-form-item">
-                <div className="query-tab-content-form-item-title">
-                  <span>
-                    {t(
-                      'data-analyze.algorithm-forms.shortest-path.options.label'
-                    )}
-                  </span>
-                </div>
-                <Select
-                  size="medium"
-                  trigger="click"
-                  value={
-                    algorithmAnalyzerStore.shortestPathAlgorithmParams.label
-                  }
-                  notFoundContent={t(
-                    'data-analyze.algorithm-forms.shortest-path.placeholder.no-edge-types'
-                  )}
-                  disabled={
-                    dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                  }
-                  width={400}
-                  onChange={(value: string) => {
-                    algorithmAnalyzerStore.mutateShortestPathParams(
-                      'label',
-                      value
-                    );
-                  }}
-                >
-                  <Select.Option value="__all__" key="__all__">
-                    {t('data-analyze.algorithm-forms.shortest-path.pre-value')}
-                  </Select.Option>
-                  {dataAnalyzeStore.edgeTypes.map(({ name }) => (
-                    <Select.Option value={name} key={name}>
-                      {name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </div>
-            </div>
-            <div className="query-tab-content-form-row">
-              <div className="query-tab-content-form-item">
-                <div className="query-tab-content-form-item-title">
-                  <i>*</i>
-                  <span>
-                    {t(
-                      'data-analyze.algorithm-forms.shortest-path.options.target'
-                    )}
-                  </span>
-                </div>
-                <Input
-                  width={400}
-                  size="medium"
-                  disabled={
-                    dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                  }
-                  placeholder={t(
-                    'data-analyze.algorithm-forms.shortest-path.placeholder.input-target-id'
-                  )}
-                  errorLocation="layer"
-                  errorMessage={
-                    algorithmAnalyzerStore
-                      .validateShortestPathParamsErrorMessage.target
-                  }
-                  value={
-                    algorithmAnalyzerStore.shortestPathAlgorithmParams.target
-                  }
-                  onChange={(e: any) => {
-                    algorithmAnalyzerStore.mutateShortestPathParams(
-                      'target',
-                      e.value as string
-                    );
-
-                    algorithmAnalyzerStore.validateShortestPathParams('target');
-                  }}
-                  originInputProps={{
-                    onBlur() {
-                      algorithmAnalyzerStore.validateShortestPathParams(
-                        'target'
-                      );
-                    }
-                  }}
-                />
-              </div>
-              <div className="query-tab-content-form-item">
-                <div className="query-tab-content-form-item-title">
-                  <span>
-                    {t(
-                      'data-analyze.algorithm-forms.shortest-path.options.max_degree'
-                    )}
-                  </span>
-                </div>
-                <Input
-                  width={400}
-                  size="medium"
-                  disabled={
-                    dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                  }
-                  placeholder={t(
-                    'data-analyze.algorithm-forms.shortest-path.placeholder.input-positive-integer'
-                  )}
-                  errorLocation="layer"
-                  errorMessage={
-                    algorithmAnalyzerStore
-                      .validateShortestPathParamsErrorMessage.max_degree
-                  }
-                  value={
-                    algorithmAnalyzerStore.shortestPathAlgorithmParams
-                      .max_degree
-                  }
-                  onChange={(e: any) => {
-                    algorithmAnalyzerStore.mutateShortestPathParams(
-                      'max_degree',
-                      e.value as string
-                    );
-
-                    algorithmAnalyzerStore.validateShortestPathParams(
-                      'max_degree'
-                    );
-                  }}
-                  originInputProps={{
-                    onBlur() {
-                      algorithmAnalyzerStore.validateShortestPathParams(
-                        'max_degree'
-                      );
-                    }
-                  }}
-                />
-              </div>
-            </div>
-            <div className="query-tab-content-form-row">
-              <div className="query-tab-content-form-item">
-                <div className="query-tab-content-form-item-title">
-                  <i>*</i>
-                  <span>
-                    {t(
-                      'data-analyze.algorithm-forms.shortest-path.options.direction'
-                    )}
-                  </span>
-                </div>
-                <Radio.Group
-                  disabled={
-                    dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                  }
-                  value={
-                    algorithmAnalyzerStore.shortestPathAlgorithmParams.direction
-                  }
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                    algorithmAnalyzerStore.mutateShortestPathParams(
-                      'direction',
-                      e.target.value
-                    );
-                  }}
-                >
-                  <Radio value="BOTH">both</Radio>
-                  <Radio value="OUT">out</Radio>
-                  <Radio value="IN">in</Radio>
-                </Radio.Group>
-              </div>
-              <div className="query-tab-content-form-item">
-                <div className="query-tab-content-form-item-title">
-                  <span>
-                    {t(
-                      'data-analyze.algorithm-forms.shortest-path.options.skip_degree'
-                    )}
-                  </span>
-                  <CustomTooltip
-                    trigger="hover"
-                    placement="bottom-start"
-                    modifiers={{
-                      offset: {
-                        offset: '0, 8'
-                      }
-                    }}
-                    tooltipWrapperProps={{
-                      className: 'tooltips-dark',
-                      style: {
-                        zIndex: 7
-                      }
-                    }}
-                    tooltipWrapper={t(
-                      'data-analyze.algorithm-forms.shortest-path.hint.skip-degree'
-                    )}
-                    childrenProps={{
-                      src: QuestionMarkIcon,
-                      alt: 'hint',
-                      style: {
-                        marginLeft: 5
-                      }
-                    }}
-                    childrenWrapperElement="img"
-                  />
-                </div>
-                <Input
-                  width={400}
-                  size="medium"
-                  disabled={
-                    dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                  }
-                  placeholder={t(
-                    'data-analyze.algorithm-forms.shortest-path.placeholder.input-integer'
-                  )}
-                  errorLocation="layer"
-                  errorMessage={
-                    algorithmAnalyzerStore
-                      .validateShortestPathParamsErrorMessage.skip_degree
-                  }
-                  value={
-                    algorithmAnalyzerStore.shortestPathAlgorithmParams
-                      .skip_degree
-                  }
-                  onChange={(e: any) => {
-                    algorithmAnalyzerStore.mutateShortestPathParams(
-                      'skip_degree',
-                      e.value as string
-                    );
-
-                    algorithmAnalyzerStore.validateShortestPathParams(
-                      'skip_degree'
-                    );
-                  }}
-                  originInputProps={{
-                    onBlur() {
-                      algorithmAnalyzerStore.validateShortestPathParams(
-                        'skip_degree'
-                      );
-                    }
-                  }}
-                />
-              </div>
-            </div>
-            <div className="query-tab-content-form-row">
-              <div className="query-tab-content-form-item">
-                <div className="query-tab-content-form-item-title">
-                  <i>*</i>
-                  <span>
-                    {t(
-                      'data-analyze.algorithm-forms.shortest-path.options.max_depth'
-                    )}
-                  </span>
-                  <CustomTooltip
-                    trigger="hover"
-                    placement="bottom-start"
-                    modifiers={{
-                      offset: {
-                        offset: '0, 8'
-                      }
-                    }}
-                    tooltipWrapperProps={{
-                      className: 'tooltips-dark',
-                      style: {
-                        zIndex: 7
-                      }
-                    }}
-                    tooltipWrapper={t(
-                      'data-analyze.algorithm-forms.shortest-path.hint.max-depth'
-                    )}
-                    childrenProps={{
-                      src: QuestionMarkIcon,
-                      alt: 'hint',
-                      style: {
-                        marginLeft: 5
-                      }
-                    }}
-                    childrenWrapperElement="img"
-                  />
-                </div>
-                <Input
-                  width={400}
-                  size="medium"
-                  disabled={
-                    dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                  }
-                  placeholder={t(
-                    'data-analyze.algorithm-forms.shortest-path.placeholder.input-positive-integer'
-                  )}
-                  errorLocation="layer"
-                  errorMessage={
-                    algorithmAnalyzerStore
-                      .validateShortestPathParamsErrorMessage.max_depth
-                  }
-                  value={
-                    algorithmAnalyzerStore.shortestPathAlgorithmParams.max_depth
-                  }
-                  onChange={(e: any) => {
-                    algorithmAnalyzerStore.mutateShortestPathParams(
-                      'max_depth',
-                      e.value as string
-                    );
-
-                    algorithmAnalyzerStore.validateShortestPathParams(
-                      'max_depth'
-                    );
-                  }}
-                  originInputProps={{
-                    onBlur() {
-                      algorithmAnalyzerStore.validateShortestPathParams(
-                        'max_depth'
-                      );
-                    }
-                  }}
-                />
-              </div>
-              <div className="query-tab-content-form-item">
-                <div className="query-tab-content-form-item-title">
-                  <span>
-                    {t(
-                      'data-analyze.algorithm-forms.shortest-path.options.capacity'
-                    )}
-                  </span>
-                </div>
-                <Input
-                  width={400}
-                  size="medium"
-                  disabled={
-                    dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                  }
-                  placeholder={t(
-                    'data-analyze.algorithm-forms.shortest-path.placeholder.input-positive-integer'
-                  )}
-                  errorLocation="layer"
-                  errorMessage={
-                    algorithmAnalyzerStore
-                      .validateShortestPathParamsErrorMessage.capacity
-                  }
-                  value={
-                    algorithmAnalyzerStore.shortestPathAlgorithmParams.capacity
-                  }
-                  onChange={(e: any) => {
-                    algorithmAnalyzerStore.mutateShortestPathParams(
-                      'capacity',
-                      e.value as string
-                    );
-
-                    algorithmAnalyzerStore.validateShortestPathParams(
-                      'capacity'
-                    );
-                  }}
-                  originInputProps={{
-                    onBlur() {
-                      algorithmAnalyzerStore.validateShortestPathParams(
-                        'capacity'
-                      );
-                    }
-                  }}
-                />
-              </div>
-            </div>
-            <div
-              className="query-tab-content-form-row"
-              style={{ marginLeft: 92, justifyContent: 'flex-start' }}
-            >
-              <Button
-                type="primary"
-                style={styles.primaryButton}
-                disabled={
-                  !isValidExec ||
-                  dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                }
-                onClick={async () => {
-                  algorithmAnalyzerStore.switchCollapse(true);
-                  dataAnalyzeStore.switchGraphLoaded(false);
-
-                  const timerId = dataAnalyzeStore.addTempExecLog();
-                  await dataAnalyzeStore.fetchGraphs({
-                    url: 'shortpath',
-                    type: Algorithm.shortestPath
-                  });
-                  await dataAnalyzeStore.fetchExecutionLogs();
-                  window.clearTimeout(timerId);
-                }}
-              >
-                {t('data-analyze.manipulations.execution')}
-              </Button>
-              <Button
-                style={styles.primaryButton}
-                disabled={
-                  dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                }
-                onClick={() => {
-                  algorithmAnalyzerStore.resetShortestPathParams();
-                  // temp solution
-                  algorithmAnalyzerStore.mutateShortestPathParams(
-                    'label',
-                    '__all__'
-                  );
-                }}
-              >
-                {t('data-analyze.manipulations.reset')}
-              </Button>
-            </div>
-          </div>
-        );
       case Algorithm.loopDetection:
         return <LoopDetection />;
       case Algorithm.focusDetection:
         return <FocusDetection />;
+      case Algorithm.shortestPath:
+        return <ShortestPath />;
       case Algorithm.shortestPathAll:
         return <ShortestPathAll />;
       case Algorithm.allPath:
@@ -884,6 +459,8 @@ export const AlgorithmQuery: React.FC = observer(() => {
         return <ModelSimilarity />;
       case Algorithm.neighborRankRecommendation:
         return <NeighborRank />;
+      case Algorithm.kStepNeighbor:
+        return <KStepNeighbor />;
     }
   };
 
@@ -894,7 +471,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
   }, []);
 
   return (
-    <div className="query-tab-content-wrapper">
+    <div className="query-tab-algorithm-wrapper">
       <div className="query-tab-content-title">
         {algorithmAnalyzerStore.currentAlgorithm === '' ? (
           <span>{t('data-analyze.algorithm-list.title')}</span>
@@ -908,16 +485,20 @@ export const AlgorithmQuery: React.FC = observer(() => {
                 marginRight: 12
               }}
               onClick={() => {
-                algorithmAnalyzerStore.dispose();
+                algorithmAnalyzerStore.changeCurrentAlgorithm('');
               }}
             />
-            <span>
+            <span onClick={handleExpandClick} style={{ cursor: 'pointer' }}>
               {t(
                 `data-analyze.algorithm-list.${algorithmAnalyzerStore.currentAlgorithm}`
               )}
             </span>
           </div>
         )}
+        <div
+          style={{ flex: 'auto', height: 24, cursor: 'pointer' }}
+          onClick={handleExpandClick}
+        ></div>
         <img
           src={ArrowIcon}
           alt="expand-collpase"
@@ -926,11 +507,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
               ? 'rotate(0deg)'
               : 'rotate(180deg)'
           }}
-          onClick={() => {
-            algorithmAnalyzerStore.switchCollapse(
-              !algorithmAnalyzerStore.isCollapse
-            );
-          }}
+          onClick={handleExpandClick}
         />
       </div>
       {algorithmAnalyzerStore.isCollapse ? null : algorithmAnalyzerStore.currentAlgorithm ===
@@ -960,9 +537,9 @@ export const AlgorithmQuery: React.FC = observer(() => {
             {[
               Algorithm.modelSimilarity,
               Algorithm.neighborRankRecommendation,
-              Algorithm.realTimeRecommendation,
               Algorithm.kStepNeighbor,
-              Algorithm.kHop
+              Algorithm.kHop,
+              Algorithm.customPath
             ].map((algorithm) => (
               <span
                 className={
@@ -978,11 +555,11 @@ export const AlgorithmQuery: React.FC = observer(() => {
           </div>
           <div className="query-tab-content-menu">
             {[
-              Algorithm.customPath,
-              Algorithm.customIntersectionDetection,
               Algorithm.radiographicInspection,
               Algorithm.commonNeighbor,
-              Algorithm.weightedShortestPath
+              Algorithm.weightedShortestPath,
+              Algorithm.singleSourceWeightedPath,
+              Algorithm.jaccardSimilarity
             ].map((algorithm) => (
               <span
                 className={
@@ -997,11 +574,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
             ))}
           </div>
           <div className="query-tab-content-menu">
-            {[
-              Algorithm.singleSourceWeightedPath,
-              Algorithm.jaccardSimilarity,
-              Algorithm.personalRankRecommendation
-            ].map((algorithm) => (
+            {[Algorithm.personalRankRecommendation].map((algorithm) => (
               <span
                 className={
                   algorithmWhiteList.includes(algorithm)

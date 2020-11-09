@@ -108,7 +108,7 @@ const ShortestPathAll = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.shortest-path-all.placeholder.input-source-id'
+              'data-analyze.algorithm-forms.shortest-path-all.placeholder.input-target-id'
             )}
             errorLocation="layer"
             errorMessage={

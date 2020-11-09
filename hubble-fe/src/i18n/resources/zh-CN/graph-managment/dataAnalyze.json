@@ -15,18 +15,16 @@
       "focus-detection": "交点检测",
       "shortest-path": "最短路径",
       "shortest-path-all": "全最短路径",
-      "all-path": "全部路径",
-      "neighbor-rank-recommendation": "Neighbor Rank推荐算法",
+      "all-path": "所有路径",
       "model-similarity": "模型相似度算法",
-      "real-time-recommendation": "实时推荐",
+      "neighbor-rank-recommendation": "Neighbor Rank推荐算法",
       "k-step-neighbor": "k步邻居",
       "k-hop": "k跳算法",
       "custom-path": "自定义路径",
-      "custom-intersection-detection": "自定义交点检测",
       "radiographic-inspection": "射线检测",
       "common-neighbor": "共同邻居",
       "weighted-shortest-path": "带权最短路径",
-      "single-source-weighted-path": "单源带权路径",
+      "single-source-weighted-path": "单源加权最短路径",
       "jaccard-similarity": "Jaccard相似度",
       "personal-rank-recommendation": "Personal Rank推荐算法"
     },
@@ -259,6 +257,113 @@
         },
         "pre-value": "全部",
         "add-new-rule": "添加规则"
+      },
+      "k-step-neighbor": {
+        "options": {
+          "source": "起点ID:",
+          "direction": "方向:",
+          "max_depth": "最大步数:",
+          "label": "边类型:",
+          "max_degree": "最大度数:",
+          "short_path": "最短路径:",
+          "limit": "遍历中访问顶点最大值:",
+          "capacity": "访问顶点最大值:"
+        },
+        "pre-value": "全部",
+        "placeholder": {
+          "input-source-id": "请输入起点ID",
+          "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer": "请填写大于0的整数",
+          "no-edge-types": "无边类型"
+        },
+        "hint": {
+          "max-depth": "为保证性能，建议不超过10步，推荐5步",
+          "skip-degree": "填写查询过程中需要跳过的顶点的最小的边数目，即当顶点的边数目大于超级顶点度数时，跳过该顶点，可用于规避超级点",
+          "shortest-path": "开启后，则查询出起始顶点最短路径为depth步的顶点，关闭后，则查询出起始顶点路径为depth步的顶点，可能有环，且不一定是最短路径"
+        },
+        "validations": {
+          "no-empty": "该项不能为空",
+          "integer-only": "请填写大于等于0的整数",
+          "postive-integer-only": "请填写大于0的整数"
+        }
+      },
+      "kHop": {
+        "options": {
+          "source": "起点ID:",
+          "direction": "方向:",
+          "max_depth": "最大步数:",
+          "label": "边类型:",
+          "max_degree": "最大度数:",
+          "skip_degree": "返回顶点最大值:"
+        },
+        "pre-value": "全部",
+        "placeholder": {
+          "input-source-id": "请输入起点ID",
+          "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer": "请填写大于0的整数",
+          "no-edge-types": "无边类型"
+        },
+        "hint": {
+          "max-depth": "为保证性能，建议不超过10步，推荐5步",
+          "skip-degree": "填写查询过程中需要跳过的顶点的最小的边数目，即当顶点的边数目大于超级顶点度数时，跳过该顶点，可用于规避超级点"
+        },
+        "validations": {
+          "no-empty": "该项不能为空",
+          "integer-only": "请填写大于等于0的整数",
+          "postive-integer-only": "请填写大于0的整数"
+        }
+      },
+      "radiographic-inspection": {
+        "options": {
+          "source": "起点ID:",
+          "direction": "方向:",
+          "max_depth": "最大步数:",
+          "label": "边类型:",
+          "max_degree": "最大度数:",
+          "capacity": "遍历中访问顶点最大值:",
+          "limit": "返回非环境路径最大值:"
+        },
+        "pre-value": "全部",
+        "placeholder": {
+          "input-source-id": "请输入起点ID",
+          "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer": "请填写大于0的整数",
+          "no-edge-types": "无边类型"
+        },
+        "hint": {
+          "max-depth": "为保证性能，建议不超过10步，推荐5步",
+          "skip-degree": "填写查询过程中需要跳过的顶点的最小的边数目，即当顶点的边数目大于超级顶点度数时，跳过该顶点，可用于规避超级点"
+        },
+        "validations": {
+          "no-empty": "该项不能为空",
+          "integer-only": "请填写大于等于0的整数",
+          "postive-integer-only": "请填写大于0的整数"
+        }
+      },
+      "common-neighbor": {
+        "options": {
+          "source": "起点ID:",
+          "direction": "方向:",
+          "label": "边类型:",
+          "max_degree": "最大度数:",
+          "capacity": "访问共同邻居最大值:"
+        },
+        "pre-value": "全部",
+        "placeholder": {
+          "input-source-id": "请输入起点ID",
+          "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer": "请填写大于0的整数",
+          "no-edge-types": "无边类型"
+        },
+        "hint": {
+          "max-depth": "为保证性能，建议不超过10步，推荐5步",
+          "skip-degree": "填写查询过程中需要跳过的顶点的最小的边数目，即当顶点的边数目大于超级顶点度数时，跳过该顶点，可用于规避超级点"
+        },
+        "validations": {
+          "no-empty": "该项不能为空",
+          "integer-only": "请填写大于等于0的整数",
+          "postive-integer-only": "请填写大于0的整数"
+        }
       }
     },
     "exec-logs": {

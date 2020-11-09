@@ -155,6 +155,13 @@ export function addGraphNodes(
         highlight: { background: '#fb6a02', border: '#fb6a02' },
         hover: { background: '#ec3112', border: '#ec3112' }
       },
+      // reveal label when zoom to max
+      scaling: {
+        label: {
+          max: Infinity,
+          maxVisible: Infinity
+        }
+      },
       chosen: {
         node(values: any, id: string, selected: boolean, hovering: boolean) {
           if (hovering || selected) {
