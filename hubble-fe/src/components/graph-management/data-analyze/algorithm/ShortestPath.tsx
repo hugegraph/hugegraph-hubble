@@ -1,6 +1,6 @@
-import React, { useContext, createContext } from 'react';
+import React, { useContext } from 'react';
 import { observer } from 'mobx-react';
-import { Button, Radio, Input, Select, Switch } from '@baidu/one-ui';
+import { Button, Radio, Input, Select } from '@baidu/one-ui';
 import { useTranslation } from 'react-i18next';
 import { styles } from '../QueryAndAlgorithmLibrary';
 import { Tooltip as CustomTooltip } from '../../../common';
@@ -9,14 +9,18 @@ import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyz
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
 
-const AllPath = observer(() => {
-  const { t } = useTranslation();
+const ShortestPath = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
+  const { t } = useTranslation();
 
-  const isValidExec = !Object.values(algorithmAnalyzerStore.allPathParams).some(
-    (value) => value === ''
-  );
+  const isValidExec =
+    Object.values(
+      algorithmAnalyzerStore.validateShortestPathParamsErrorMessage
+    ).every((value) => value === '') &&
+    algorithmAnalyzerStore.shortestPathAlgorithmParams.source !== '' &&
+    algorithmAnalyzerStore.shortestPathAlgorithmParams.target !== '' &&
+    algorithmAnalyzerStore.shortestPathAlgorithmParams.max_depth !== '';
 
   return (
     <div className="query-tab-content-form">
@@ -25,7 +29,7 @@ const AllPath = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.source')}
+              {t('data-analyze.algorithm-forms.shortest-path.options.source')}
             </span>
           </div>
           <Input
@@ -33,24 +37,25 @@ const AllPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-source-id'
+              'data-analyze.algorithm-forms.shortest-path.placeholder.input-source-id'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage.source
+              algorithmAnalyzerStore.validateShortestPathParamsErrorMessage
+                .source
             }
-            value={algorithmAnalyzerStore.allPathParams.source}
+            value={algorithmAnalyzerStore.shortestPathAlgorithmParams.source}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
+              algorithmAnalyzerStore.mutateShortestPathParams(
                 'source',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateAllPathParams('source');
+              algorithmAnalyzerStore.validateShortestPathParams('source');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('source');
+                algorithmAnalyzerStore.validateShortestPathParams('source');
               }
             }}
           />
@@ -58,24 +63,24 @@ const AllPath = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.label')}
+              {t('data-analyze.algorithm-forms.shortest-path.options.label')}
             </span>
           </div>
           <Select
             size="medium"
             trigger="click"
-            value={algorithmAnalyzerStore.allPathParams.label}
+            value={algorithmAnalyzerStore.shortestPathAlgorithmParams.label}
             notFoundContent={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.no-edge-types'
+              'data-analyze.algorithm-forms.shortest-path.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             width={400}
             onChange={(value: string) => {
-              algorithmAnalyzerStore.mutateAllPathParams('label', value);
+              algorithmAnalyzerStore.mutateShortestPathParams('label', value);
             }}
           >
             <Select.Option value="__all__" key="__all__">
-              {t('data-analyze.algorithm-forms.all-path.pre-value')}
+              {t('data-analyze.algorithm-forms.shortest-path.pre-value')}
             </Select.Option>
             {dataAnalyzeStore.edgeTypes.map(({ name }) => (
               <Select.Option value={name} key={name}>
@@ -90,7 +95,7 @@ const AllPath = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.target')}
+              {t('data-analyze.algorithm-forms.shortest-path.options.target')}
             </span>
           </div>
           <Input
@@ -98,24 +103,25 @@ const AllPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-target-id'
+              'data-analyze.algorithm-forms.shortest-path.placeholder.input-target-id'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage.target
+              algorithmAnalyzerStore.validateShortestPathParamsErrorMessage
+                .target
             }
-            value={algorithmAnalyzerStore.allPathParams.target}
+            value={algorithmAnalyzerStore.shortestPathAlgorithmParams.target}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
+              algorithmAnalyzerStore.mutateShortestPathParams(
                 'target',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateAllPathParams('target');
+              algorithmAnalyzerStore.validateShortestPathParams('target');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('target');
+                algorithmAnalyzerStore.validateShortestPathParams('target');
               }
             }}
           />
@@ -123,7 +129,9 @@ const AllPath = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.max_degree')}
+              {t(
+                'data-analyze.algorithm-forms.shortest-path.options.max_degree'
+              )}
             </span>
           </div>
           <Input
@@ -131,25 +139,27 @@ const AllPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-integer'
+              'data-analyze.algorithm-forms.shortest-path.placeholder.input-positive-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage
+              algorithmAnalyzerStore.validateShortestPathParamsErrorMessage
                 .max_degree
             }
-            value={algorithmAnalyzerStore.allPathParams.max_degree}
+            value={
+              algorithmAnalyzerStore.shortestPathAlgorithmParams.max_degree
+            }
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
+              algorithmAnalyzerStore.mutateShortestPathParams(
                 'max_degree',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateAllPathParams('max_degree');
+              algorithmAnalyzerStore.validateShortestPathParams('max_degree');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('max_degree');
+                algorithmAnalyzerStore.validateShortestPathParams('max_degree');
               }
             }}
           />
@@ -160,14 +170,16 @@ const AllPath = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.direction')}
+              {t(
+                'data-analyze.algorithm-forms.shortest-path.options.direction'
+              )}
             </span>
           </div>
           <Radio.Group
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            value={algorithmAnalyzerStore.allPathParams.direction}
+            value={algorithmAnalyzerStore.shortestPathAlgorithmParams.direction}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
+              algorithmAnalyzerStore.mutateShortestPathParams(
                 'direction',
                 e.target.value
               );
@@ -181,43 +193,9 @@ const AllPath = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.capacity')}
-            </span>
-          </div>
-          <Input
-            width={400}
-            size="medium"
-            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer'
-            )}
-            errorLocation="layer"
-            errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage.capacity
-            }
-            value={algorithmAnalyzerStore.allPathParams.capacity}
-            onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
-                'capacity',
-                e.value as string
-              );
-
-              algorithmAnalyzerStore.validateAllPathParams('capacity');
-            }}
-            originInputProps={{
-              onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('capacity');
-              }
-            }}
-          />
-        </div>
-      </div>
-      <div className="query-tab-content-form-row">
-        <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
-            <i>*</i>
-            <span>
-              {t('data-analyze.algorithm-forms.all-path.options.max_depth')}
+              {t(
+                'data-analyze.algorithm-forms.shortest-path.options.skip_degree'
+              )}
             </span>
             <CustomTooltip
               trigger="hover"
@@ -234,7 +212,7 @@ const AllPath = observer(() => {
                 }
               }}
               tooltipWrapper={t(
-                'data-analyze.algorithm-forms.all-path.hint.max-depth'
+                'data-analyze.algorithm-forms.shortest-path.hint.skip-degree'
               )}
               childrenProps={{
                 src: QuestionMarkIcon,
@@ -251,24 +229,94 @@ const AllPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.shortest-path.placeholder.input-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage.max_depth
+              algorithmAnalyzerStore.validateShortestPathParamsErrorMessage
+                .skip_degree
             }
-            value={algorithmAnalyzerStore.allPathParams.max_depth}
+            value={
+              algorithmAnalyzerStore.shortestPathAlgorithmParams.skip_degree
+            }
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
+              algorithmAnalyzerStore.mutateShortestPathParams(
+                'skip_degree',
+                e.value as string
+              );
+
+              algorithmAnalyzerStore.validateShortestPathParams('skip_degree');
+            }}
+            originInputProps={{
+              onBlur() {
+                algorithmAnalyzerStore.validateShortestPathParams(
+                  'skip_degree'
+                );
+              }
+            }}
+          />
+        </div>
+      </div>
+      <div className="query-tab-content-form-row">
+        <div className="query-tab-content-form-item">
+          <div className="query-tab-content-form-item-title">
+            <i>*</i>
+            <span>
+              {t(
+                'data-analyze.algorithm-forms.shortest-path.options.max_depth'
+              )}
+            </span>
+            <CustomTooltip
+              trigger="hover"
+              placement="bottom-start"
+              modifiers={{
+                offset: {
+                  offset: '0, 8'
+                }
+              }}
+              tooltipWrapperProps={{
+                className: 'tooltips-dark',
+                style: {
+                  zIndex: 7
+                }
+              }}
+              tooltipWrapper={t(
+                'data-analyze.algorithm-forms.shortest-path.hint.max-depth'
+              )}
+              childrenProps={{
+                src: QuestionMarkIcon,
+                alt: 'hint',
+                style: {
+                  marginLeft: 5
+                }
+              }}
+              childrenWrapperElement="img"
+            />
+          </div>
+          <Input
+            width={400}
+            size="medium"
+            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
+            placeholder={t(
+              'data-analyze.algorithm-forms.shortest-path.placeholder.input-positive-integer'
+            )}
+            errorLocation="layer"
+            errorMessage={
+              algorithmAnalyzerStore.validateShortestPathParamsErrorMessage
+                .max_depth
+            }
+            value={algorithmAnalyzerStore.shortestPathAlgorithmParams.max_depth}
+            onChange={(e: any) => {
+              algorithmAnalyzerStore.mutateShortestPathParams(
                 'max_depth',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateAllPathParams('max_depth');
+              algorithmAnalyzerStore.validateShortestPathParams('max_depth');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('max_depth');
+                algorithmAnalyzerStore.validateShortestPathParams('max_depth');
               }
             }}
           />
@@ -276,7 +324,7 @@ const AllPath = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.limit')}
+              {t('data-analyze.algorithm-forms.shortest-path.options.capacity')}
             </span>
           </div>
           <Input
@@ -284,24 +332,25 @@ const AllPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.shortest-path.placeholder.input-positive-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage.limit
+              algorithmAnalyzerStore.validateShortestPathParamsErrorMessage
+                .capacity
             }
-            value={algorithmAnalyzerStore.allPathParams.limit}
+            value={algorithmAnalyzerStore.shortestPathAlgorithmParams.capacity}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
-                'limit',
+              algorithmAnalyzerStore.mutateShortestPathParams(
+                'capacity',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateAllPathParams('limit');
+              algorithmAnalyzerStore.validateShortestPathParams('capacity');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('limit');
+                algorithmAnalyzerStore.validateShortestPathParams('capacity');
               }
             }}
           />
@@ -324,8 +373,8 @@ const AllPath = observer(() => {
 
             const timerId = dataAnalyzeStore.addTempExecLog();
             await dataAnalyzeStore.fetchGraphs({
-              url: 'paths',
-              type: Algorithm.allPath
+              url: 'shortpath',
+              type: Algorithm.shortestPath
             });
             await dataAnalyzeStore.fetchExecutionLogs();
             window.clearTimeout(timerId);
@@ -337,7 +386,9 @@ const AllPath = observer(() => {
           style={styles.primaryButton}
           disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
           onClick={() => {
-            algorithmAnalyzerStore.resetAllPathParams();
+            algorithmAnalyzerStore.resetShortestPathParams();
+            // temp solution
+            algorithmAnalyzerStore.mutateShortestPathParams('label', '__all__');
           }}
         >
           {t('data-analyze.manipulations.reset')}
@@ -347,4 +398,4 @@ const AllPath = observer(() => {
   );
 });
 
-export default AllPath;
+export default ShortestPath;

@@ -83,7 +83,7 @@ const ModelSimilarity = observer(() => {
               'data-analyze.algorithm-forms.model-similarity.placeholder.no-properties'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            width={400}
+            width={390}
             onChange={(value: string) => {
               algorithmAnalyzerStore.mutateModelSimilarityParams(
                 'property_filter',
@@ -116,7 +116,7 @@ const ModelSimilarity = observer(() => {
           </div>
           {sourceType === 'id' ? (
             <Input
-              width={400}
+              width={390}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -160,7 +160,7 @@ const ModelSimilarity = observer(() => {
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
               }
-              width={400}
+              width={390}
               onChange={(value: string) => {
                 algorithmAnalyzerStore.mutateModelSimilarityParams(
                   'vertexType',
@@ -211,7 +211,7 @@ const ModelSimilarity = observer(() => {
             />
           </div>
           <Input
-            width={400}
+            width={390}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -279,7 +279,7 @@ const ModelSimilarity = observer(() => {
             </Radio.Group>
           ) : (
             <Select
-              width={400}
+              width={390}
               mode="multiple"
               size="medium"
               trigger="click"
@@ -325,7 +325,7 @@ const ModelSimilarity = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={390}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -402,7 +402,7 @@ const ModelSimilarity = observer(() => {
           </div>
           {sourceType === 'id' ? (
             <Input
-              width={400}
+              width={390}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -464,7 +464,7 @@ const ModelSimilarity = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={390}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -543,7 +543,7 @@ const ModelSimilarity = observer(() => {
           </div>
           {sourceType === 'id' ? (
             <Input
-              width={400}
+              width={390}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -577,7 +577,7 @@ const ModelSimilarity = observer(() => {
             />
           ) : (
             <Input
-              width={400}
+              width={390}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -622,7 +622,7 @@ const ModelSimilarity = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={390}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -708,7 +708,7 @@ const ModelSimilarity = observer(() => {
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
               }
-              width={400}
+              width={390}
               onChange={(value: string) => {
                 algorithmAnalyzerStore.mutateModelSimilarityParams(
                   'label',
@@ -727,7 +727,7 @@ const ModelSimilarity = observer(() => {
             </Select>
           ) : (
             <Input
-              width={400}
+              width={390}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -768,7 +768,7 @@ const ModelSimilarity = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={390}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -841,7 +841,7 @@ const ModelSimilarity = observer(() => {
           </div>
           {sourceType === 'id' ? (
             <Input
-              width={400}
+              width={390}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -884,7 +884,7 @@ const ModelSimilarity = observer(() => {
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
               }
-              width={400}
+              width={390}
               onChange={(value: string) => {
                 algorithmAnalyzerStore.mutateModelSimilarityParams(
                   'label',
@@ -937,7 +937,7 @@ const ModelSimilarity = observer(() => {
               childrenWrapperElement="img"
             />
           </div>
-          <div style={{ width: 400 }}>
+          <div style={{ width: 390 }}>
             <Switch
               width={40}
               size="medium"
@@ -1003,7 +1003,7 @@ const ModelSimilarity = observer(() => {
           </div>
           {sourceType === 'id' ? (
             <Input
-              width={400}
+              width={390}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -1037,7 +1037,7 @@ const ModelSimilarity = observer(() => {
             />
           ) : (
             <Input
-              width={400}
+              width={390}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -1079,7 +1079,7 @@ const ModelSimilarity = observer(() => {
               )}
             </span>
           </div>
-          <div style={{ width: 400 }}>
+          <div style={{ width: 390 }}>
             <Switch
               width={40}
               size="medium"
@@ -1112,7 +1112,7 @@ const ModelSimilarity = observer(() => {
               </span>
             </div>
             <Input
-              width={400}
+              width={390}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -1178,7 +1178,7 @@ const ModelSimilarity = observer(() => {
           style={styles.primaryButton}
           disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
           onClick={() => {
-            algorithmAnalyzerStore.resetShortestPathAllParams();
+            algorithmAnalyzerStore.resetModelSimilarityParams();
           }}
         >
           {t('data-analyze.manipulations.reset')}

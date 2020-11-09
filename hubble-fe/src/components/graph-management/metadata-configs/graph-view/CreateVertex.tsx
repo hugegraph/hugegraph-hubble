@@ -164,6 +164,13 @@ const CreateVertex: React.FC = observer(() => {
                 },
                 hover: { background: '#ec3112', border: '#ec3112' }
               },
+              // reveal label when zoom to max
+              scaling: {
+                label: {
+                  max: Infinity,
+                  maxVisible: Infinity
+                }
+              },
               chosen: {
                 node(
                   values: any,

@@ -5,18 +5,21 @@ import { useTranslation } from 'react-i18next';
 import { styles } from '../QueryAndAlgorithmLibrary';
 import { Tooltip as CustomTooltip } from '../../../common';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
-
-import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
 
-const AllPath = observer(() => {
+import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
+
+const KStepNeighbor = observer(() => {
   const { t } = useTranslation();
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
 
-  const isValidExec = !Object.values(algorithmAnalyzerStore.allPathParams).some(
-    (value) => value === ''
-  );
+  const isValidExec =
+    Object.values(
+      algorithmAnalyzerStore.validateLoopDetectionParamsErrorMessage
+    ).every((value) => value === '') &&
+    algorithmAnalyzerStore.loopDetectionParams.source !== '' &&
+    algorithmAnalyzerStore.loopDetectionParams.max_depth !== '';
 
   return (
     <div className="query-tab-content-form">
@@ -25,7 +28,7 @@ const AllPath = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.source')}
+              {t('data-analyze.algorithm-forms.k-step-neighbor.options.source')}
             </span>
           </div>
           <Input
@@ -33,24 +36,25 @@ const AllPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-source-id'
+              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-source-id'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage.source
+              algorithmAnalyzerStore.validateLoopDetectionParamsErrorMessage
+                .source
             }
-            value={algorithmAnalyzerStore.allPathParams.source}
+            value={algorithmAnalyzerStore.loopDetectionParams.source}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
+              algorithmAnalyzerStore.mutateLoopDetectionParams(
                 'source',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateAllPathParams('source');
+              algorithmAnalyzerStore.validateLoopDetectionParams('source');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('source');
+                algorithmAnalyzerStore.validateLoopDetectionParams('source');
               }
             }}
           />
@@ -58,24 +62,24 @@ const AllPath = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.label')}
+              {t('data-analyze.algorithm-forms.k-step-neighbor.options.label')}
             </span>
           </div>
           <Select
             size="medium"
             trigger="click"
-            value={algorithmAnalyzerStore.allPathParams.label}
+            value={algorithmAnalyzerStore.loopDetectionParams.label}
             notFoundContent={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.no-edge-types'
+              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             width={400}
             onChange={(value: string) => {
-              algorithmAnalyzerStore.mutateAllPathParams('label', value);
+              algorithmAnalyzerStore.mutateLoopDetectionParams('label', value);
             }}
           >
             <Select.Option value="__all__" key="__all__">
-              {t('data-analyze.algorithm-forms.all-path.pre-value')}
+              {t('data-analyze.algorithm-forms.k-step-neighbor.pre-value')}
             </Select.Option>
             {dataAnalyzeStore.edgeTypes.map(({ name }) => (
               <Select.Option value={name} key={name}>
@@ -90,84 +94,16 @@ const AllPath = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.target')}
-            </span>
-          </div>
-          <Input
-            width={400}
-            size="medium"
-            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-target-id'
-            )}
-            errorLocation="layer"
-            errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage.target
-            }
-            value={algorithmAnalyzerStore.allPathParams.target}
-            onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
-                'target',
-                e.value as string
-              );
-
-              algorithmAnalyzerStore.validateAllPathParams('target');
-            }}
-            originInputProps={{
-              onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('target');
-              }
-            }}
-          />
-        </div>
-        <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
-            <span>
-              {t('data-analyze.algorithm-forms.all-path.options.max_degree')}
-            </span>
-          </div>
-          <Input
-            width={400}
-            size="medium"
-            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-integer'
-            )}
-            errorLocation="layer"
-            errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage
-                .max_degree
-            }
-            value={algorithmAnalyzerStore.allPathParams.max_degree}
-            onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
-                'max_degree',
-                e.value as string
-              );
-
-              algorithmAnalyzerStore.validateAllPathParams('max_degree');
-            }}
-            originInputProps={{
-              onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('max_degree');
-              }
-            }}
-          />
-        </div>
-      </div>
-      <div className="query-tab-content-form-row">
-        <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
-            <i>*</i>
-            <span>
-              {t('data-analyze.algorithm-forms.all-path.options.direction')}
+              {t(
+                'data-analyze.algorithm-forms.k-step-neighbor.options.direction'
+              )}
             </span>
           </div>
           <Radio.Group
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            value={algorithmAnalyzerStore.allPathParams.direction}
+            value={algorithmAnalyzerStore.loopDetectionParams.direction}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
+              algorithmAnalyzerStore.mutateLoopDetectionParams(
                 'direction',
                 e.target.value
               );
@@ -181,7 +117,9 @@ const AllPath = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.capacity')}
+              {t(
+                'data-analyze.algorithm-forms.k-step-neighbor.options.max_degree'
+              )}
             </span>
           </div>
           <Input
@@ -189,24 +127,27 @@ const AllPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage.capacity
+              algorithmAnalyzerStore.validateLoopDetectionParamsErrorMessage
+                .max_degree
             }
-            value={algorithmAnalyzerStore.allPathParams.capacity}
+            value={algorithmAnalyzerStore.loopDetectionParams.max_degree}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
-                'capacity',
+              algorithmAnalyzerStore.mutateLoopDetectionParams(
+                'max_degree',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateAllPathParams('capacity');
+              algorithmAnalyzerStore.validateLoopDetectionParams('max_degree');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('capacity');
+                algorithmAnalyzerStore.validateLoopDetectionParams(
+                  'max_degree'
+                );
               }
             }}
           />
@@ -217,7 +158,9 @@ const AllPath = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.max_depth')}
+              {t(
+                'data-analyze.algorithm-forms.k-step-neighbor.options.max_depth'
+              )}
             </span>
             <CustomTooltip
               trigger="hover"
@@ -234,7 +177,7 @@ const AllPath = observer(() => {
                 }
               }}
               tooltipWrapper={t(
-                'data-analyze.algorithm-forms.all-path.hint.max-depth'
+                'data-analyze.algorithm-forms.k-step-neighbor.hint.max-depth'
               )}
               childrenProps={{
                 src: QuestionMarkIcon,
@@ -251,24 +194,25 @@ const AllPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-positive-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage.max_depth
+              algorithmAnalyzerStore.validateLoopDetectionParamsErrorMessage
+                .max_depth
             }
-            value={algorithmAnalyzerStore.allPathParams.max_depth}
+            value={algorithmAnalyzerStore.loopDetectionParams.max_depth}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
+              algorithmAnalyzerStore.mutateLoopDetectionParams(
                 'max_depth',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateAllPathParams('max_depth');
+              algorithmAnalyzerStore.validateLoopDetectionParams('max_depth');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('max_depth');
+                algorithmAnalyzerStore.validateLoopDetectionParams('max_depth');
               }
             }}
           />
@@ -276,7 +220,7 @@ const AllPath = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.limit')}
+              {t('data-analyze.algorithm-forms.k-step-neighbor.options.limit')}
             </span>
           </div>
           <Input
@@ -284,24 +228,85 @@ const AllPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-positive-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage.limit
+              algorithmAnalyzerStore.validateLoopDetectionParamsErrorMessage
+                .limit
             }
-            value={algorithmAnalyzerStore.allPathParams.limit}
+            value={algorithmAnalyzerStore.loopDetectionParams.limit}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
+              algorithmAnalyzerStore.mutateLoopDetectionParams(
                 'limit',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateAllPathParams('limit');
+              algorithmAnalyzerStore.validateLoopDetectionParams('limit');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('limit');
+                algorithmAnalyzerStore.validateLoopDetectionParams('limit');
+              }
+            }}
+          />
+        </div>
+      </div>
+      <div className="query-tab-content-form-row">
+        <div className="query-tab-content-form-item">
+          <div className="query-tab-content-form-item-title">
+            <i>*</i>
+            <span>
+              {t(
+                'data-analyze.algorithm-forms.k-step-neighbor.options.short_path'
+              )}
+            </span>
+          </div>
+          <Switch
+            width={400}
+            size="medium"
+            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
+            checked={algorithmAnalyzerStore.loopDetectionParams.source_in_ring}
+            onChange={(checked: boolean) => {
+              algorithmAnalyzerStore.mutateLoopDetectionParams(
+                'source_in_ring',
+                checked
+              );
+            }}
+          />
+        </div>
+        <div className="query-tab-content-form-item">
+          <div className="query-tab-content-form-item-title">
+            <span>
+              {t(
+                'data-analyze.algorithm-forms.k-step-neighbor.options.capacity'
+              )}
+            </span>
+          </div>
+          <Input
+            width={400}
+            size="medium"
+            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
+            placeholder={t(
+              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-positive-integer'
+            )}
+            errorLocation="layer"
+            errorMessage={
+              algorithmAnalyzerStore.validateLoopDetectionParamsErrorMessage
+                .capacity
+            }
+            value={algorithmAnalyzerStore.loopDetectionParams.capacity}
+            onChange={(e: any) => {
+              algorithmAnalyzerStore.mutateLoopDetectionParams(
+                'capacity',
+                e.value as string
+              );
+
+              algorithmAnalyzerStore.validateLoopDetectionParams('capacity');
+            }}
+            originInputProps={{
+              onBlur() {
+                algorithmAnalyzerStore.validateLoopDetectionParams('capacity');
               }
             }}
           />
@@ -324,8 +329,8 @@ const AllPath = observer(() => {
 
             const timerId = dataAnalyzeStore.addTempExecLog();
             await dataAnalyzeStore.fetchGraphs({
-              url: 'paths',
-              type: Algorithm.allPath
+              url: 'rings',
+              type: Algorithm.loopDetection
             });
             await dataAnalyzeStore.fetchExecutionLogs();
             window.clearTimeout(timerId);
@@ -337,7 +342,7 @@ const AllPath = observer(() => {
           style={styles.primaryButton}
           disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
           onClick={() => {
-            algorithmAnalyzerStore.resetAllPathParams();
+            algorithmAnalyzerStore.resetLoopDetectionParams();
           }}
         >
           {t('data-analyze.manipulations.reset')}
@@ -347,4 +352,4 @@ const AllPath = observer(() => {
   );
 });
 
-export default AllPath;
+export default KStepNeighbor;

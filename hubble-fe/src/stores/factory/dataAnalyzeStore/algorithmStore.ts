@@ -70,8 +70,8 @@ export function createFocusDetectionDefaultParams() {
     max_depth: '',
     label: '__all__',
     max_degree: '10000',
-    limit: '10',
-    capacity: '10000000'
+    capacity: '10000000',
+    limit: '10'
   };
 }
 
@@ -153,7 +153,7 @@ export function createAllPathDefaultParams() {
     max_degree: '10000',
     skip_degree: '0',
     capacity: '10000000',
-    limit: '1000000'
+    limit: '10'
   };
 }
 
