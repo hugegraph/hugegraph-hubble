@@ -231,7 +231,7 @@ const NeighborRank = observer(() => {
             style={styles.primaryButton}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             onClick={() => {
-              algorithmAnalyzerStore.resetShortestPathAllParams();
+              algorithmAnalyzerStore.resetNeighborRankParams();
             }}
           >
             {t('data-analyze.manipulations.reset')}
@@ -323,7 +323,7 @@ const NeighborRank = observer(() => {
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
                     }
-                    width={400}
+                    width={380}
                     onChange={(value: string) => {
                       algorithmAnalyzerStore.mutateNeighborRankRuleParams(
                         'label',
@@ -357,7 +357,7 @@ const NeighborRank = observer(() => {
                     </span>
                   </div>
                   <Input
-                    width={400}
+                    width={380}
                     size="medium"
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -434,7 +434,7 @@ const NeighborRank = observer(() => {
                     />
                   </div>
                   <Input
-                    width={400}
+                    width={380}
                     size="medium"
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
