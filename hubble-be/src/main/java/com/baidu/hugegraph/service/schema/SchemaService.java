@@ -50,6 +50,7 @@ import com.baidu.hugegraph.structure.SchemaElement;
 import com.baidu.hugegraph.structure.schema.IndexLabel;
 import com.baidu.hugegraph.structure.schema.SchemaLabel;
 import com.baidu.hugegraph.util.HubbleUtil;
+import com.google.common.collect.ImmutableSet;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -59,6 +60,10 @@ public class SchemaService {
 
     public static final String USER_KEY_CREATE_TIME = "~create_time";
     public static final String USER_KEY_STYLE = "~style";
+
+    public static final Set<String> VALID_SCHEMA_STATUS = ImmutableSet.of(
+            "CREATED", "CREATING", "REBUILDING"
+    );
 
     @Autowired
     private HugeConfig config;
@@ -71,6 +76,10 @@ public class SchemaService {
 
     public HugeClient client(int connId) {
         return this.poolService.getOrCreate(connId);
+    }
+
+    public static boolean isValid(SchemaElement schema) {
+        return VALID_SCHEMA_STATUS.contains(schema.status());
     }
 
     public static <T extends SchemaElement> List<String> collectNames(
@@ -97,6 +106,9 @@ public class SchemaService {
             return propertyIndexes;
         }
         for (IndexLabel indexLabel : indexLabels) {
+            if (!isValid(indexLabel)) {
+                continue;
+            }
             if (indexLabel.baseType().string().equals(schemaLabel.type()) &&
                 indexLabel.baseValue().equals(schemaLabel.name())) {
                 SchemaType schemaType = SchemaType.convert(indexLabel.baseType());

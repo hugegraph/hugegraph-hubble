@@ -94,7 +94,9 @@ public class VertexLabelService extends SchemaService {
 
         List<VertexLabelEntity> results = new ArrayList<>(vertexLabels.size());
         vertexLabels.forEach(vertexLabel -> {
-            results.add(join(vertexLabel, indexLabels));
+            if (isValid(vertexLabel)) {
+                results.add(join(vertexLabel, indexLabels));
+            }
         });
         return results;
     }

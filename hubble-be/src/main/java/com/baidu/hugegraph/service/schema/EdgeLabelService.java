@@ -97,7 +97,9 @@ public class EdgeLabelService extends SchemaService {
 
         List<EdgeLabelEntity> results = new ArrayList<>(edgeLabels.size());
         edgeLabels.forEach(edgeLabel -> {
-            results.add(convert(edgeLabel, indexLabels));
+            if (isValid(edgeLabel)) {
+                results.add(convert(edgeLabel, indexLabels));
+            }
         });
         return results;
     }
