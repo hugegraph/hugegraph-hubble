@@ -53,7 +53,14 @@ import type {
   AllPathAlgorithmParams,
   ModelSimilarityParams,
   NeighborRankParams,
-  NeighborRankRule
+  NeighborRankRule,
+  KHop,
+  RadiographicInspection,
+  SameNeighbor,
+  WeightedShortestPath,
+  SingleSourceWeightedShortestPath,
+  Jaccard,
+  PersonalRank
 } from '../../types/GraphManagementStore/dataAnalyzeStore';
 import type {
   VertexTypeListResponse,
@@ -1364,6 +1371,13 @@ export class DataAnalyzeStore {
       | AllPathAlgorithmParams
       | ModelSimilarityParams
       | NeighborRankParams
+      | KHop
+      | RadiographicInspection
+      | SameNeighbor
+      | WeightedShortestPath
+      | SingleSourceWeightedShortestPath
+      | Jaccard
+      | PersonalRank
       | null = null;
 
     if (!isUndefined(algorithmConfigs)) {
@@ -1521,8 +1535,146 @@ export class DataAnalyzeStore {
           break;
         }
 
-        // default:
-        //   params = this.algorithmAnalyzerStore.shortestPathAlgorithmParams;
+        case Algorithm.kStepNeighbor: {
+          const clonedKStepNeighborParams = cloneDeep(
+            this.algorithmAnalyzerStore.neighborRankParams
+          );
+
+          clonedKStepNeighborParams.steps.forEach((step, index) => {
+            delete step.uuid;
+
+            if (step.label === '__all__') {
+              const clonedStep: NeighborRankRule = cloneDeep(step);
+              delete clonedStep.label;
+              clonedKStepNeighborParams.steps[index] = clonedStep;
+            }
+          });
+
+          params = clonedKStepNeighborParams;
+          break;
+        }
+
+        case Algorithm.kHop: {
+          if (
+            this.algorithmAnalyzerStore.shortestPathAllParams.label ===
+            '__all__'
+          ) {
+            const clonedParams: KHop = cloneDeep(
+              this.algorithmAnalyzerStore.kHopParams
+            );
+
+            delete clonedParams.label;
+            params = clonedParams;
+            break;
+          }
+
+          params = this.algorithmAnalyzerStore.kHopParams;
+          break;
+        }
+
+        case Algorithm.radiographicInspection: {
+          if (
+            this.algorithmAnalyzerStore.radiographicInspectionParams.label ===
+            '__all__'
+          ) {
+            const clonedParams: RadiographicInspection = cloneDeep(
+              this.algorithmAnalyzerStore.radiographicInspectionParams
+            );
+
+            delete clonedParams.label;
+            params = clonedParams;
+            break;
+          }
+
+          params = this.algorithmAnalyzerStore.radiographicInspectionParams;
+          break;
+        }
+
+        case Algorithm.sameNeighbor: {
+          if (
+            this.algorithmAnalyzerStore.sameNeighborParams.label === '__all__'
+          ) {
+            const clonedParams: SameNeighbor = cloneDeep(
+              this.algorithmAnalyzerStore.sameNeighborParams
+            );
+
+            delete clonedParams.label;
+            params = clonedParams;
+            break;
+          }
+
+          params = this.algorithmAnalyzerStore.sameNeighborParams;
+          break;
+        }
+
+        case Algorithm.weightedShortestPath: {
+          if (
+            this.algorithmAnalyzerStore.weightedShortestPathParams.label ===
+            '__all__'
+          ) {
+            const clonedParams: WeightedShortestPath = cloneDeep(
+              this.algorithmAnalyzerStore.weightedShortestPathParams
+            );
+
+            delete clonedParams.label;
+            params = clonedParams;
+            break;
+          }
+
+          params = this.algorithmAnalyzerStore.weightedShortestPathParams;
+          break;
+        }
+
+        case Algorithm.singleSourceWeightedShortestPath: {
+          if (
+            this.algorithmAnalyzerStore.singleSourceWeightedShortestPathParams
+              .label === '__all__'
+          ) {
+            const clonedParams: SingleSourceWeightedShortestPath = cloneDeep(
+              this.algorithmAnalyzerStore.singleSourceWeightedShortestPathParams
+            );
+
+            delete clonedParams.label;
+            params = clonedParams;
+            break;
+          }
+
+          params = this.algorithmAnalyzerStore
+            .singleSourceWeightedShortestPathParams;
+          break;
+        }
+
+        case Algorithm.jaccardSimilarity: {
+          if (this.algorithmAnalyzerStore.jaccardParams.label === '__all__') {
+            const clonedParams: Jaccard = cloneDeep(
+              this.algorithmAnalyzerStore.jaccardParams
+            );
+
+            delete clonedParams.label;
+            params = clonedParams;
+            break;
+          }
+
+          params = this.algorithmAnalyzerStore.jaccardParams;
+          break;
+        }
+
+        case Algorithm.personalRankRecommendation: {
+          if (
+            this.algorithmAnalyzerStore.personalRankParams.label === '__all__'
+          ) {
+            const clonedParams: PersonalRank = cloneDeep(
+              this.algorithmAnalyzerStore.personalRankParams
+            );
+
+            delete clonedParams.label;
+            params = clonedParams;
+            break;
+          }
+
+          params = this.algorithmAnalyzerStore.personalRankParams;
+          break;
+        }
       }
     }
 

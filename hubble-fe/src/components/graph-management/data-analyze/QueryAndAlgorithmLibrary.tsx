@@ -37,6 +37,14 @@ import AllPath from './algorithm/AllPath';
 import ModelSimilarity from './algorithm/ModelSimilarity';
 import NeighborRank from './algorithm/NeighborRank';
 import KStepNeighbor from './algorithm/KStepNeighbor';
+import KHop from './algorithm/KHop';
+import CustomPath from './algorithm/CustomPath';
+import RadiographicInspection from './algorithm/RadiographicInspection';
+import SameNeighbor from './algorithm/SameNeighbor';
+import WeightedShortestPath from './algorithm/WeightedShortestPath';
+import SingleSourceWeightedShortestPath from './algorithm/SingleSourceWeightedShortestPath';
+import Jaccard from './algorithm/Jaccard';
+import PersonalRank from './algorithm/PersonalRank';
 
 import ArrowIcon from '../../../assets/imgs/ic_arrow_16.svg';
 import QuestionMarkIcon from '../../../assets/imgs/ic_question_mark.svg';
@@ -53,18 +61,6 @@ export const styles = {
 };
 
 const codeRegexp = /[A-Za-z0-9]+/;
-
-const algorithmWhiteList: string[] = [
-  Algorithm.shortestPath,
-  Algorithm.loopDetection,
-  Algorithm.focusDetection,
-  Algorithm.shortestPathAll,
-  Algorithm.allPath,
-  Algorithm.modelSimilarity,
-  Algorithm.neighborRankRecommendation
-  // Algorithm.kStepNeighbor,
-  // Algorithm.kHop
-];
 
 const QueryAndAlgorithmLibrary: React.FC = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
@@ -437,10 +433,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
     algorithmAnalyzerStore.shortestPathAlgorithmParams.max_depth !== '';
 
   const handleChangeAlgorithm = (algorithm: string) => () => {
-    // disable other algorithm now
-    if (algorithmWhiteList.includes(algorithm)) {
-      algorithmAnalyzerStore.changeCurrentAlgorithm(algorithm);
-    }
+    algorithmAnalyzerStore.changeCurrentAlgorithm(algorithm);
   };
 
   const handleExpandClick = () => {
@@ -465,6 +458,22 @@ export const AlgorithmQuery: React.FC = observer(() => {
         return <NeighborRank />;
       case Algorithm.kStepNeighbor:
         return <KStepNeighbor />;
+      case Algorithm.kHop:
+        return <KHop />;
+      case Algorithm.customPath:
+        return <CustomPath />;
+      case Algorithm.radiographicInspection:
+        return <RadiographicInspection />;
+      case Algorithm.sameNeighbor:
+        return <SameNeighbor />;
+      case Algorithm.weightedShortestPath:
+        return <WeightedShortestPath />;
+      case Algorithm.singleSourceWeightedShortestPath:
+        return <SingleSourceWeightedShortestPath />;
+      case Algorithm.jaccardSimilarity:
+        return <Jaccard />;
+      case Algorithm.personalRankRecommendation:
+        return <PersonalRank />;
     }
   };
 
@@ -525,14 +534,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
               Algorithm.shortestPathAll,
               Algorithm.allPath
             ].map((algorithm) => (
-              <span
-                className={
-                  algorithmWhiteList.includes(algorithm)
-                    ? ''
-                    : 'query-tab-content-menu-item-disabled'
-                }
-                onClick={handleChangeAlgorithm(algorithm)}
-              >
+              <span onClick={handleChangeAlgorithm(algorithm)}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}
@@ -545,14 +547,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
               Algorithm.kHop,
               Algorithm.customPath
             ].map((algorithm) => (
-              <span
-                className={
-                  algorithmWhiteList.includes(algorithm)
-                    ? ''
-                    : 'query-tab-content-menu-item-disabled'
-                }
-                onClick={handleChangeAlgorithm(algorithm)}
-              >
+              <span onClick={handleChangeAlgorithm(algorithm)}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}
@@ -560,33 +555,19 @@ export const AlgorithmQuery: React.FC = observer(() => {
           <div className="query-tab-content-menu">
             {[
               Algorithm.radiographicInspection,
-              Algorithm.commonNeighbor,
+              Algorithm.sameNeighbor,
               Algorithm.weightedShortestPath,
-              Algorithm.singleSourceWeightedPath,
+              Algorithm.singleSourceWeightedShortestPath,
               Algorithm.jaccardSimilarity
             ].map((algorithm) => (
-              <span
-                className={
-                  algorithmWhiteList.includes(algorithm)
-                    ? ''
-                    : 'query-tab-content-menu-item-disabled'
-                }
-                onClick={handleChangeAlgorithm(algorithm)}
-              >
+              <span onClick={handleChangeAlgorithm(algorithm)}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}
           </div>
           <div className="query-tab-content-menu">
             {[Algorithm.personalRankRecommendation].map((algorithm) => (
-              <span
-                className={
-                  algorithmWhiteList.includes(algorithm)
-                    ? ''
-                    : 'query-tab-content-menu-item-disabled'
-                }
-                onClick={() => {}}
-              >
+              <span onClick={handleChangeAlgorithm(algorithm)}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}

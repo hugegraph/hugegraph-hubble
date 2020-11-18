@@ -9,17 +9,18 @@ import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithm
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 
-const KStepNeighbor = observer(() => {
+const PersonalRank = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const { t } = useTranslation();
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
 
   const isValidExec =
     Object.values(
-      algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
+      algorithmAnalyzerStore.validatePersonalRankErrorMessage
     ).every((value) => value === '') &&
-    algorithmAnalyzerStore.kStepNeighborParams.source !== '' &&
-    algorithmAnalyzerStore.kStepNeighborParams.max_depth !== '';
+    algorithmAnalyzerStore.personalRankParams.source !== '' &&
+    algorithmAnalyzerStore.personalRankParams.alpha !== '' &&
+    algorithmAnalyzerStore.personalRankParams.max_depth !== '';
 
   return (
     <div className="query-tab-content-form">
@@ -28,7 +29,7 @@ const KStepNeighbor = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.k-step-neighbor.options.source')}
+              {t('data-analyze.algorithm-forms.personal-rank.options.source')}
             </span>
           </div>
           <Input
@@ -36,25 +37,24 @@ const KStepNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-source-id'
+              'data-analyze.algorithm-forms.personal-rank.placeholder.input-source-id'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-                .source
+              algorithmAnalyzerStore.validatePersonalRankErrorMessage.source
             }
-            value={algorithmAnalyzerStore.kStepNeighborParams.source}
+            value={algorithmAnalyzerStore.personalRankParams.source}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
+              algorithmAnalyzerStore.mutatePersonalRankParams(
                 'source',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKStepNeighborParams('source');
+              algorithmAnalyzerStore.validatePersonalRankParams('source');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams('source');
+                algorithmAnalyzerStore.validatePersonalRankParams('source');
               }
             }}
           />
@@ -62,24 +62,24 @@ const KStepNeighbor = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.k-step-neighbor.options.label')}
+              {t('data-analyze.algorithm-forms.personal-rank.options.label')}
             </span>
           </div>
           <Select
             size="medium"
             trigger="click"
-            value={algorithmAnalyzerStore.kStepNeighborParams.label}
+            value={algorithmAnalyzerStore.personalRankParams.label}
             notFoundContent={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.no-edge-types'
+              'data-analyze.algorithm-forms.personal-rank.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             width={400}
             onChange={(value: string) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams('label', value);
+              algorithmAnalyzerStore.mutatePersonalRankParams('label', value);
             }}
           >
             <Select.Option value="__all__" key="__all__">
-              {t('data-analyze.algorithm-forms.k-step-neighbor.pre-value')}
+              {t('data-analyze.algorithm-forms.personal-rank.pre-value')}
             </Select.Option>
             {dataAnalyzeStore.edgeTypes.map(({ name }) => (
               <Select.Option value={name} key={name}>
@@ -94,31 +94,41 @@ const KStepNeighbor = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t(
-                'data-analyze.algorithm-forms.k-step-neighbor.options.direction'
-              )}
+              {t('data-analyze.algorithm-forms.personal-rank.options.alpha')}
             </span>
           </div>
-          <Radio.Group
+          <Input
+            width={400}
+            size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            value={algorithmAnalyzerStore.kStepNeighborParams.direction}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
-                'direction',
-                e.target.value
+            placeholder={t(
+              'data-analyze.algorithm-forms.personal-rank.placeholder.alpha'
+            )}
+            errorLocation="layer"
+            errorMessage={
+              algorithmAnalyzerStore.validatePersonalRankErrorMessage.alpha
+            }
+            value={algorithmAnalyzerStore.personalRankParams.alpha}
+            onChange={(e: any) => {
+              algorithmAnalyzerStore.mutatePersonalRankParams(
+                'alpha',
+                e.value as string
               );
+
+              algorithmAnalyzerStore.validatePersonalRankParams('alpha');
             }}
-          >
-            <Radio value="BOTH">both</Radio>
-            <Radio value="OUT">out</Radio>
-            <Radio value="IN">in</Radio>
-          </Radio.Group>
+            originInputProps={{
+              onBlur() {
+                algorithmAnalyzerStore.validatePersonalRankParams('alpha');
+              }
+            }}
+          />
         </div>
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
               {t(
-                'data-analyze.algorithm-forms.k-step-neighbor.options.max_degree'
+                'data-analyze.algorithm-forms.personal-rank.options.max_degree'
               )}
             </span>
           </div>
@@ -127,27 +137,24 @@ const KStepNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-integer'
+              'data-analyze.algorithm-forms.personal-rank.placeholder.input-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-                .max_degree
+              algorithmAnalyzerStore.validatePersonalRankErrorMessage.max_degree
             }
-            value={algorithmAnalyzerStore.kStepNeighborParams.max_degree}
+            value={algorithmAnalyzerStore.personalRankParams.max_degree}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
+              algorithmAnalyzerStore.mutatePersonalRankParams(
                 'max_degree',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKStepNeighborParams('max_degree');
+              algorithmAnalyzerStore.validatePersonalRankParams('max_degree');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams(
-                  'max_degree'
-                );
+                algorithmAnalyzerStore.validatePersonalRankParams('max_degree');
               }
             }}
           />
@@ -159,7 +166,7 @@ const KStepNeighbor = observer(() => {
             <i>*</i>
             <span>
               {t(
-                'data-analyze.algorithm-forms.k-step-neighbor.options.max_depth'
+                'data-analyze.algorithm-forms.personal-rank.options.max_depth'
               )}
             </span>
             <CustomTooltip
@@ -177,7 +184,7 @@ const KStepNeighbor = observer(() => {
                 }
               }}
               tooltipWrapper={t(
-                'data-analyze.algorithm-forms.k-step-neighbor.hint.max-depth'
+                'data-analyze.algorithm-forms.personal-rank.hint.max-depth'
               )}
               childrenProps={{
                 src: QuestionMarkIcon,
@@ -194,25 +201,24 @@ const KStepNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.personal-rank.placeholder.max_depth'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-                .max_depth
+              algorithmAnalyzerStore.validatePersonalRankErrorMessage.max_depth
             }
-            value={algorithmAnalyzerStore.kStepNeighborParams.max_depth}
+            value={algorithmAnalyzerStore.personalRankParams.max_depth}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
+              algorithmAnalyzerStore.mutatePersonalRankParams(
                 'max_depth',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKStepNeighborParams('max_depth');
+              algorithmAnalyzerStore.validatePersonalRankParams('max_depth');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams('max_depth');
+                algorithmAnalyzerStore.validatePersonalRankParams('max_depth');
               }
             }}
           />
@@ -220,7 +226,7 @@ const KStepNeighbor = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.k-step-neighbor.options.limit')}
+              {t('data-analyze.algorithm-forms.personal-rank.options.limit')}
             </span>
           </div>
           <Input
@@ -228,28 +234,88 @@ const KStepNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.personal-rank.placeholder.input-positive-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-                .limit
+              algorithmAnalyzerStore.validatePersonalRankErrorMessage.limit
             }
-            value={algorithmAnalyzerStore.kStepNeighborParams.limit}
+            value={algorithmAnalyzerStore.personalRankParams.limit}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
+              algorithmAnalyzerStore.mutatePersonalRankParams(
                 'limit',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKStepNeighborParams('limit');
+              algorithmAnalyzerStore.validatePersonalRankParams('limit');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams('limit');
+                algorithmAnalyzerStore.validatePersonalRankParams('limit');
               }
             }}
           />
+        </div>
+      </div>
+      <div className="query-tab-content-form-row">
+        <div className="query-tab-content-form-item">
+          <div className="query-tab-content-form-item-title">
+            <i>*</i>
+            <span>
+              {t(
+                'data-analyze.algorithm-forms.personal-rank.options.with_label.title'
+              )}
+            </span>
+          </div>
+          <Radio.Group
+            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
+            value={algorithmAnalyzerStore.personalRankParams.with_label}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              algorithmAnalyzerStore.mutatePersonalRankParams(
+                'with_label',
+                e.target.value
+              );
+            }}
+          >
+            <Radio value="SAME_LABEL">
+              {t(
+                'data-analyze.algorithm-forms.personal-rank.options.with_label.same_label'
+              )}
+            </Radio>
+            <Radio value="OTHER_LABEL">
+              {t(
+                'data-analyze.algorithm-forms.personal-rank.options.with_label.other_label'
+              )}
+            </Radio>
+            <Radio value="BOTH_LABEL">
+              {t(
+                'data-analyze.algorithm-forms.personal-rank.options.with_label.both_label'
+              )}
+            </Radio>
+          </Radio.Group>
+        </div>
+        <div className="query-tab-content-form-item">
+          <div className="query-tab-content-form-item-title">
+            <i>*</i>
+            <span>
+              {t('data-analyze.algorithm-forms.personal-rank.options.sorted')}
+            </span>
+          </div>
+          <div style={{ width: 400 }}>
+            <Switch
+              size="medium"
+              disabled={
+                dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
+              }
+              checked={algorithmAnalyzerStore.personalRankParams.sorted}
+              onChange={(checked: boolean) => {
+                algorithmAnalyzerStore.mutatePersonalRankParams(
+                  'sorted',
+                  checked
+                );
+              }}
+            />
+          </div>
         </div>
       </div>
       <div
@@ -269,8 +335,8 @@ const KStepNeighbor = observer(() => {
 
             const timerId = dataAnalyzeStore.addTempExecLog();
             await dataAnalyzeStore.fetchGraphs({
-              url: 'kneighbor',
-              type: Algorithm.kStepNeighbor
+              url: 'personalrank',
+              type: Algorithm.personalRankRecommendation
             });
             await dataAnalyzeStore.fetchExecutionLogs();
             window.clearTimeout(timerId);
@@ -282,7 +348,7 @@ const KStepNeighbor = observer(() => {
           style={styles.primaryButton}
           disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
           onClick={() => {
-            algorithmAnalyzerStore.resetKStepNeighborParams();
+            algorithmAnalyzerStore.resetPersonalRankParams();
           }}
         >
           {t('data-analyze.manipulations.reset')}
@@ -292,4 +358,4 @@ const KStepNeighbor = observer(() => {
   );
 });
 
-export default KStepNeighbor;
+export default PersonalRank;

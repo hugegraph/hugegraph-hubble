@@ -9,17 +9,17 @@ import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithm
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 
-const KStepNeighbor = observer(() => {
+const RadiographicInspection = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const { t } = useTranslation();
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
 
   const isValidExec =
     Object.values(
-      algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
+      algorithmAnalyzerStore.validateRadiographicInspectionParamsErrorMessage
     ).every((value) => value === '') &&
-    algorithmAnalyzerStore.kStepNeighborParams.source !== '' &&
-    algorithmAnalyzerStore.kStepNeighborParams.max_depth !== '';
+    algorithmAnalyzerStore.radiographicInspectionParams.source !== '' &&
+    algorithmAnalyzerStore.radiographicInspectionParams.max_depth !== '';
 
   return (
     <div className="query-tab-content-form">
@@ -28,7 +28,9 @@ const KStepNeighbor = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.k-step-neighbor.options.source')}
+              {t(
+                'data-analyze.algorithm-forms.radiographic-inspection.options.source'
+              )}
             </span>
           </div>
           <Input
@@ -36,25 +38,29 @@ const KStepNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-source-id'
+              'data-analyze.algorithm-forms.radiographic-inspection.placeholder.input-source-id'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-                .source
+              algorithmAnalyzerStore
+                .validateRadiographicInspectionParamsErrorMessage.source
             }
-            value={algorithmAnalyzerStore.kStepNeighborParams.source}
+            value={algorithmAnalyzerStore.radiographicInspectionParams.source}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
+              algorithmAnalyzerStore.mutateRadiographicInspectionParams(
                 'source',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKStepNeighborParams('source');
+              algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                'source'
+              );
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams('source');
+                algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                  'source'
+                );
               }
             }}
           />
@@ -62,24 +68,31 @@ const KStepNeighbor = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.k-step-neighbor.options.label')}
+              {t(
+                'data-analyze.algorithm-forms.radiographic-inspection.options.label'
+              )}
             </span>
           </div>
           <Select
             size="medium"
             trigger="click"
-            value={algorithmAnalyzerStore.kStepNeighborParams.label}
+            value={algorithmAnalyzerStore.radiographicInspectionParams.label}
             notFoundContent={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.no-edge-types'
+              'data-analyze.algorithm-forms.radiographic-inspection.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             width={400}
             onChange={(value: string) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams('label', value);
+              algorithmAnalyzerStore.mutateRadiographicInspectionParams(
+                'label',
+                value
+              );
             }}
           >
             <Select.Option value="__all__" key="__all__">
-              {t('data-analyze.algorithm-forms.k-step-neighbor.pre-value')}
+              {t(
+                'data-analyze.algorithm-forms.radiographic-inspection.pre-value'
+              )}
             </Select.Option>
             {dataAnalyzeStore.edgeTypes.map(({ name }) => (
               <Select.Option value={name} key={name}>
@@ -95,15 +108,17 @@ const KStepNeighbor = observer(() => {
             <i>*</i>
             <span>
               {t(
-                'data-analyze.algorithm-forms.k-step-neighbor.options.direction'
+                'data-analyze.algorithm-forms.radiographic-inspection.options.direction'
               )}
             </span>
           </div>
           <Radio.Group
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            value={algorithmAnalyzerStore.kStepNeighborParams.direction}
+            value={
+              algorithmAnalyzerStore.radiographicInspectionParams.direction
+            }
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
+              algorithmAnalyzerStore.mutateRadiographicInspectionParams(
                 'direction',
                 e.target.value
               );
@@ -118,7 +133,7 @@ const KStepNeighbor = observer(() => {
           <div className="query-tab-content-form-item-title">
             <span>
               {t(
-                'data-analyze.algorithm-forms.k-step-neighbor.options.max_degree'
+                'data-analyze.algorithm-forms.radiographic-inspection.options.max_degree'
               )}
             </span>
           </div>
@@ -127,25 +142,29 @@ const KStepNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-integer'
+              'data-analyze.algorithm-forms.radiographic-inspection.placeholder.input-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-                .max_degree
+              algorithmAnalyzerStore
+                .validateRadiographicInspectionParamsErrorMessage.max_degree
             }
-            value={algorithmAnalyzerStore.kStepNeighborParams.max_degree}
+            value={
+              algorithmAnalyzerStore.radiographicInspectionParams.max_degree
+            }
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
+              algorithmAnalyzerStore.mutateRadiographicInspectionParams(
                 'max_degree',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKStepNeighborParams('max_degree');
+              algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                'max_degree'
+              );
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams(
+                algorithmAnalyzerStore.validateRadiographicInspectionParams(
                   'max_degree'
                 );
               }
@@ -159,7 +178,7 @@ const KStepNeighbor = observer(() => {
             <i>*</i>
             <span>
               {t(
-                'data-analyze.algorithm-forms.k-step-neighbor.options.max_depth'
+                'data-analyze.algorithm-forms.radiographic-inspection.options.max_depth'
               )}
             </span>
             <CustomTooltip
@@ -177,7 +196,7 @@ const KStepNeighbor = observer(() => {
                 }
               }}
               tooltipWrapper={t(
-                'data-analyze.algorithm-forms.k-step-neighbor.hint.max-depth'
+                'data-analyze.algorithm-forms.radiographic-inspection.hint.max-depth'
               )}
               childrenProps={{
                 src: QuestionMarkIcon,
@@ -194,25 +213,31 @@ const KStepNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.radiographic-inspection.placeholder.input-positive-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-                .max_depth
+              algorithmAnalyzerStore
+                .validateRadiographicInspectionParamsErrorMessage.max_depth
             }
-            value={algorithmAnalyzerStore.kStepNeighborParams.max_depth}
+            value={
+              algorithmAnalyzerStore.radiographicInspectionParams.max_depth
+            }
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
+              algorithmAnalyzerStore.mutateRadiographicInspectionParams(
                 'max_depth',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKStepNeighborParams('max_depth');
+              algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                'max_depth'
+              );
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams('max_depth');
+                algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                  'max_depth'
+                );
               }
             }}
           />
@@ -220,7 +245,9 @@ const KStepNeighbor = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.k-step-neighbor.options.limit')}
+              {t(
+                'data-analyze.algorithm-forms.radiographic-inspection.options.capacity'
+              )}
             </span>
           </div>
           <Input
@@ -228,25 +255,72 @@ const KStepNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.radiographic-inspection.placeholder.input-positive-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-                .limit
+              algorithmAnalyzerStore
+                .validateRadiographicInspectionParamsErrorMessage.capacity
             }
-            value={algorithmAnalyzerStore.kStepNeighborParams.limit}
+            value={algorithmAnalyzerStore.radiographicInspectionParams.capacity}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
+              algorithmAnalyzerStore.mutateRadiographicInspectionParams(
+                'capacity',
+                e.value as string
+              );
+
+              algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                'capacity'
+              );
+            }}
+            originInputProps={{
+              onBlur() {
+                algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                  'capacity'
+                );
+              }
+            }}
+          />
+        </div>
+      </div>
+      <div className="query-tab-content-form-row">
+        <div className="query-tab-content-form-item"></div>
+        <div className="query-tab-content-form-item">
+          <div className="query-tab-content-form-item-title">
+            <span>
+              {t(
+                'data-analyze.algorithm-forms.radiographic-inspection.options.limit'
+              )}
+            </span>
+          </div>
+          <Input
+            width={400}
+            size="medium"
+            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
+            placeholder={t(
+              'data-analyze.algorithm-forms.radiographic-inspection.placeholder.input-positive-integer'
+            )}
+            errorLocation="layer"
+            errorMessage={
+              algorithmAnalyzerStore
+                .validateRadiographicInspectionParamsErrorMessage.limit
+            }
+            value={algorithmAnalyzerStore.radiographicInspectionParams.limit}
+            onChange={(e: any) => {
+              algorithmAnalyzerStore.mutateRadiographicInspectionParams(
                 'limit',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKStepNeighborParams('limit');
+              algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                'limit'
+              );
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams('limit');
+                algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                  'limit'
+                );
               }
             }}
           />
@@ -269,8 +343,8 @@ const KStepNeighbor = observer(() => {
 
             const timerId = dataAnalyzeStore.addTempExecLog();
             await dataAnalyzeStore.fetchGraphs({
-              url: 'kneighbor',
-              type: Algorithm.kStepNeighbor
+              url: 'rays',
+              type: Algorithm.radiographicInspection
             });
             await dataAnalyzeStore.fetchExecutionLogs();
             window.clearTimeout(timerId);
@@ -282,7 +356,7 @@ const KStepNeighbor = observer(() => {
           style={styles.primaryButton}
           disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
           onClick={() => {
-            algorithmAnalyzerStore.resetKStepNeighborParams();
+            algorithmAnalyzerStore.resetRadiographicInspectionParams();
           }}
         >
           {t('data-analyze.manipulations.reset')}
@@ -292,4 +366,4 @@ const KStepNeighbor = observer(() => {
   );
 });
 
-export default KStepNeighbor;
+export default RadiographicInspection;
