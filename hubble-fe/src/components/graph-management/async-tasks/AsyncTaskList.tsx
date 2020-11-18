@@ -231,6 +231,10 @@ const AsyncTaskList: React.FC = observer(() => {
           timeString += ' ' + restTime + 'ms';
         }
 
+        if (restTime <= 0) {
+          timeString = '0s';
+        }
+
         return <div className="no-line-break">{timeString}</div>;
       }
     },

@@ -14,9 +14,9 @@ export enum Algorithm {
   customPath = 'custom-path',
   customIntersectionDetection = 'custom-intersection-detection',
   radiographicInspection = 'radiographic-inspection',
-  commonNeighbor = 'common-neighbor',
+  sameNeighbor = 'same-neighbor',
   weightedShortestPath = 'weighted-shortest-path',
-  singleSourceWeightedPath = 'single-source-weighted-path',
+  singleSourceWeightedShortestPath = 'single-source-weighted-shortest-path',
   jaccardSimilarity = 'jaccard-similarity',
   personalRankRecommendation = 'personal-rank-recommendation'
 }
@@ -274,5 +274,201 @@ export function createValidateNeighborRankErrorMessage(): {
         top: ''
       }
     ]
+  };
+}
+
+export function createKStepNeighborDefaultParams() {
+  return {
+    source: '',
+    direction: 'BOTH',
+    max_depth: '',
+    label: '__all__',
+    max_degree: '10000',
+    limit: '10000000'
+  };
+}
+
+export function createValidateKStepNeighborParamsErrorMessage() {
+  return {
+    source: '',
+    direction: '',
+    max_depth: '',
+    label: '',
+    max_degree: '',
+    limit: ''
+  };
+}
+
+export function createKHopDefaultParams() {
+  return {
+    source: '',
+    direction: 'BOTH',
+    max_depth: '',
+    nearest: true,
+    label: '__all__',
+    max_degree: '10000',
+    limit: '10000000',
+    capacity: '10000000'
+  };
+}
+
+export function createValidateKHopParamsErrorMessage() {
+  return {
+    source: '',
+    direction: '',
+    max_depth: '',
+    nearest: '',
+    label: '',
+    max_degree: '',
+    limit: '',
+    capacity: ''
+  };
+}
+
+export function createRadiographicInspectionDefaultParams() {
+  return {
+    source: '',
+    direction: 'BOTH',
+    max_depth: '',
+    label: '__all__',
+    max_degree: '10000',
+    capacity: '1000000',
+    limit: '10'
+  };
+}
+
+export function createValidateRadiographicInspectionParamsErrorMessage() {
+  return {
+    source: '',
+    direction: '',
+    max_depth: '',
+    label: '',
+    max_degree: '',
+    capacity: '',
+    limit: ''
+  };
+}
+
+export function createSameNeighborDefaultParams() {
+  return {
+    vertex: '',
+    other: '',
+    direction: 'BOTH',
+    label: '__all__',
+    max_degree: '10000',
+    limit: '10000000'
+  };
+}
+
+export function createValidateSameNeighborParamsErrorMessage() {
+  return {
+    vertex: '',
+    other: '',
+    direction: '',
+    label: '',
+    max_degree: '',
+    limit: ''
+  };
+}
+
+export function createWeightedShortestPathDefaultParams() {
+  return {
+    source: '',
+    target: '',
+    direction: 'BOTH',
+    weighted: '',
+    with_vertex: true,
+    label: '__all__',
+    max_degree: '10000',
+    skip_degree: '0',
+    capacity: '10000000'
+  };
+}
+
+export function createValidateWeightedShortestPathParamsErrorMessage() {
+  return {
+    source: '',
+    target: '',
+    direction: '',
+    weighted: '',
+    with_vertex: '',
+    label: '',
+    max_degree: '',
+    skip_degree: '',
+    capacity: ''
+  };
+}
+
+export function createSingleSourceWeightedShortestPathDefaultParams() {
+  return {
+    source: '',
+    direction: 'BOTH',
+    weighted: '',
+    with_vertex: true,
+    label: '__all__',
+    max_degree: '10000',
+    skip_degree: '0',
+    capacity: '10000000',
+    limit: '10'
+  };
+}
+
+export function createValidateSingleSourceWeightedShortestPathParamsErrorMessage() {
+  return {
+    source: '',
+    direction: '',
+    weighted: '',
+    with_vertex: '',
+    label: '',
+    max_degree: '',
+    skip_degree: '',
+    capacity: '',
+    limit: ''
+  };
+}
+
+export function createJaccardDefaultParams() {
+  return {
+    vertex: '',
+    other: '',
+    direction: 'BOTH',
+    label: '__all__',
+    max_degree: '10000'
+  };
+}
+
+export function createValidateJaccardParamsErrorMessage() {
+  return {
+    vertex: '',
+    other: '',
+    direction: '',
+    label: '',
+    max_degree: ''
+  };
+}
+
+export function createPersonalRankDefaultParams() {
+  return {
+    source: '',
+    alpha: '',
+    max_depth: '',
+    with_label: 'SAME_LABEL',
+    label: '__all__',
+    max_degree: '10000',
+    limit: '10000000',
+    sorted: true
+  };
+}
+
+export function createValidatePersonalRankParamsErrorMessage() {
+  return {
+    source: '',
+    alpha: '',
+    max_depth: '',
+    with_label: '',
+    label: '',
+    max_degree: '',
+    limit: '',
+    sorted: ''
   };
 }
