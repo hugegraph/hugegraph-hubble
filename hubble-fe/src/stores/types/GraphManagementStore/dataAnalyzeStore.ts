@@ -187,3 +187,96 @@ export interface NeighborRankParams {
   capacity: string;
   steps: NeighborRankRule[];
 }
+
+// export interface KStepNeighbor {
+//   source: string;
+//   direction: string;
+//   max_depth: string;
+//   short: boolean
+//   label: string;
+//   max_degree: string;
+//   capacity: string;
+//   limit: string;
+// }
+
+export interface KStepNeighbor {
+  source: string;
+  direction: string;
+  max_depth: string;
+  label: string;
+  max_degree: string;
+  limit: string;
+}
+
+export interface KHop {
+  source: string;
+  direction: string;
+  max_depth: string;
+  nearest: boolean;
+  label: string;
+  max_degree: string;
+  limit: string;
+  capacity: string;
+}
+
+export interface RadiographicInspection {
+  source: string;
+  direction: string;
+  max_depth: string;
+  label: string;
+  max_degree: string;
+  capacity: string;
+  limit: string;
+}
+
+export interface SameNeighbor {
+  vertex: string;
+  other: string;
+  direction: string;
+  label: string;
+  max_degree: string;
+  limit: string;
+}
+
+export interface WeightedShortestPath {
+  source: string;
+  target: string;
+  direction: string;
+  weighted: string;
+  with_vertex: boolean;
+  label: string;
+  max_degree: string;
+  skip_degree: string;
+  capacity: string;
+}
+
+export interface SingleSourceWeightedShortestPath {
+  source: string;
+  direction: string;
+  weighted: string;
+  with_vertex: boolean;
+  label: string;
+  max_degree: string;
+  skip_degree: string;
+  capacity: string;
+  limit: string;
+}
+
+export interface Jaccard {
+  vertex: string;
+  other: string;
+  direction: string;
+  label: string;
+  max_degree: string;
+}
+
+export interface PersonalRank {
+  source: string;
+  alpha: string;
+  max_depth: string;
+  with_label: string;
+  label: string;
+  max_degree: string;
+  limit: string;
+  sorted: boolean;
+}

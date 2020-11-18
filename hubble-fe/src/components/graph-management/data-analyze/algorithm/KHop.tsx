@@ -9,17 +9,17 @@ import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithm
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 
-const KStepNeighbor = observer(() => {
+const KHop = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const { t } = useTranslation();
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
 
   const isValidExec =
-    Object.values(
-      algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-    ).every((value) => value === '') &&
-    algorithmAnalyzerStore.kStepNeighborParams.source !== '' &&
-    algorithmAnalyzerStore.kStepNeighborParams.max_depth !== '';
+    Object.values(algorithmAnalyzerStore.validateKHopParamsErrorMessage).every(
+      (value) => value === ''
+    ) &&
+    algorithmAnalyzerStore.kHopParams.source !== '' &&
+    algorithmAnalyzerStore.kHopParams.max_depth !== '';
 
   return (
     <div className="query-tab-content-form">
@@ -27,59 +27,54 @@ const KStepNeighbor = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <i>*</i>
-            <span>
-              {t('data-analyze.algorithm-forms.k-step-neighbor.options.source')}
-            </span>
+            <span>{t('data-analyze.algorithm-forms.kHop.options.source')}</span>
           </div>
           <Input
             width={400}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-source-id'
+              'data-analyze.algorithm-forms.kHop.placeholder.input-source-id'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-                .source
+              algorithmAnalyzerStore.validateKHopParamsErrorMessage.source
             }
-            value={algorithmAnalyzerStore.kStepNeighborParams.source}
+            value={algorithmAnalyzerStore.kHopParams.source}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
+              algorithmAnalyzerStore.mutateKHopParams(
                 'source',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKStepNeighborParams('source');
+              algorithmAnalyzerStore.validateKHopParams('source');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams('source');
+                algorithmAnalyzerStore.validateKHopParams('source');
               }
             }}
           />
         </div>
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
-            <span>
-              {t('data-analyze.algorithm-forms.k-step-neighbor.options.label')}
-            </span>
+            <span>{t('data-analyze.algorithm-forms.kHop.options.label')}</span>
           </div>
           <Select
             size="medium"
             trigger="click"
-            value={algorithmAnalyzerStore.kStepNeighborParams.label}
+            value={algorithmAnalyzerStore.kHopParams.label}
             notFoundContent={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.no-edge-types'
+              'data-analyze.algorithm-forms.kHop.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             width={400}
             onChange={(value: string) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams('label', value);
+              algorithmAnalyzerStore.mutateKHopParams('label', value);
             }}
           >
             <Select.Option value="__all__" key="__all__">
-              {t('data-analyze.algorithm-forms.k-step-neighbor.pre-value')}
+              {t('data-analyze.algorithm-forms.kHop.pre-value')}
             </Select.Option>
             {dataAnalyzeStore.edgeTypes.map(({ name }) => (
               <Select.Option value={name} key={name}>
@@ -94,16 +89,14 @@ const KStepNeighbor = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t(
-                'data-analyze.algorithm-forms.k-step-neighbor.options.direction'
-              )}
+              {t('data-analyze.algorithm-forms.kHop.options.direction')}
             </span>
           </div>
           <Radio.Group
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            value={algorithmAnalyzerStore.kStepNeighborParams.direction}
+            value={algorithmAnalyzerStore.kHopParams.direction}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
+              algorithmAnalyzerStore.mutateKHopParams(
                 'direction',
                 e.target.value
               );
@@ -117,9 +110,7 @@ const KStepNeighbor = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t(
-                'data-analyze.algorithm-forms.k-step-neighbor.options.max_degree'
-              )}
+              {t('data-analyze.algorithm-forms.kHop.options.max_degree')}
             </span>
           </div>
           <Input
@@ -127,27 +118,24 @@ const KStepNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-integer'
+              'data-analyze.algorithm-forms.kHop.placeholder.input-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-                .max_degree
+              algorithmAnalyzerStore.validateKHopParamsErrorMessage.max_degree
             }
-            value={algorithmAnalyzerStore.kStepNeighborParams.max_degree}
+            value={algorithmAnalyzerStore.kHopParams.max_degree}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
+              algorithmAnalyzerStore.mutateKHopParams(
                 'max_degree',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKStepNeighborParams('max_degree');
+              algorithmAnalyzerStore.validateKHopParams('max_degree');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams(
-                  'max_degree'
-                );
+                algorithmAnalyzerStore.validateKHopParams('max_degree');
               }
             }}
           />
@@ -158,9 +146,7 @@ const KStepNeighbor = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t(
-                'data-analyze.algorithm-forms.k-step-neighbor.options.max_depth'
-              )}
+              {t('data-analyze.algorithm-forms.kHop.options.max_depth')}
             </span>
             <CustomTooltip
               trigger="hover"
@@ -177,7 +163,7 @@ const KStepNeighbor = observer(() => {
                 }
               }}
               tooltipWrapper={t(
-                'data-analyze.algorithm-forms.k-step-neighbor.hint.max-depth'
+                'data-analyze.algorithm-forms.kHop.hint.max-depth'
               )}
               childrenProps={{
                 src: QuestionMarkIcon,
@@ -194,33 +180,82 @@ const KStepNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.kHop.placeholder.input-positive-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-                .max_depth
+              algorithmAnalyzerStore.validateKHopParamsErrorMessage.max_depth
             }
-            value={algorithmAnalyzerStore.kStepNeighborParams.max_depth}
+            value={algorithmAnalyzerStore.kHopParams.max_depth}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
+              algorithmAnalyzerStore.mutateKHopParams(
                 'max_depth',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKStepNeighborParams('max_depth');
+              algorithmAnalyzerStore.validateKHopParams('max_depth');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams('max_depth');
+                algorithmAnalyzerStore.validateKHopParams('max_depth');
               }
             }}
           />
         </div>
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
+            <span>{t('data-analyze.algorithm-forms.kHop.options.limit')}</span>
+          </div>
+          <Input
+            width={400}
+            size="medium"
+            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
+            placeholder={t(
+              'data-analyze.algorithm-forms.kHop.placeholder.input-positive-integer'
+            )}
+            errorLocation="layer"
+            errorMessage={
+              algorithmAnalyzerStore.validateKHopParamsErrorMessage.limit
+            }
+            value={algorithmAnalyzerStore.kHopParams.limit}
+            onChange={(e: any) => {
+              algorithmAnalyzerStore.mutateKHopParams(
+                'limit',
+                e.value as string
+              );
+
+              algorithmAnalyzerStore.validateKHopParams('limit');
+            }}
+            originInputProps={{
+              onBlur() {
+                algorithmAnalyzerStore.validateKHopParams('limit');
+              }
+            }}
+          />
+        </div>
+      </div>
+      <div className="query-tab-content-form-row">
+        <div className="query-tab-content-form-item">
+          <div className="query-tab-content-form-item-title">
+            <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.k-step-neighbor.options.limit')}
+              {t('data-analyze.algorithm-forms.kHop.options.nearest')}
+            </span>
+          </div>
+          <Switch
+            width={400}
+            size="medium"
+            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
+            checked={algorithmAnalyzerStore.kHopParams.nearest}
+            onChange={(checked: boolean) => {
+              algorithmAnalyzerStore.mutateKHopParams('nearest', checked);
+            }}
+          />
+        </div>
+        <div className="query-tab-content-form-item">
+          <div className="query-tab-content-form-item-title">
+            <span>
+              {t('data-analyze.algorithm-forms.kHop.options.capacity')}
             </span>
           </div>
           <Input
@@ -228,25 +263,24 @@ const KStepNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.kHop.placeholder.input-positive-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-                .limit
+              algorithmAnalyzerStore.validateKHopParamsErrorMessage.capacity
             }
-            value={algorithmAnalyzerStore.kStepNeighborParams.limit}
+            value={algorithmAnalyzerStore.kHopParams.capacity}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
-                'limit',
+              algorithmAnalyzerStore.mutateKHopParams(
+                'capacity',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKStepNeighborParams('limit');
+              algorithmAnalyzerStore.validateKHopParams('capacity');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams('limit');
+                algorithmAnalyzerStore.validateKHopParams('capacity');
               }
             }}
           />
@@ -269,8 +303,8 @@ const KStepNeighbor = observer(() => {
 
             const timerId = dataAnalyzeStore.addTempExecLog();
             await dataAnalyzeStore.fetchGraphs({
-              url: 'kneighbor',
-              type: Algorithm.kStepNeighbor
+              url: 'kout',
+              type: Algorithm.kHop
             });
             await dataAnalyzeStore.fetchExecutionLogs();
             window.clearTimeout(timerId);
@@ -282,7 +316,7 @@ const KStepNeighbor = observer(() => {
           style={styles.primaryButton}
           disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
           onClick={() => {
-            algorithmAnalyzerStore.resetKStepNeighborParams();
+            algorithmAnalyzerStore.resetKHopParams();
           }}
         >
           {t('data-analyze.manipulations.reset')}
@@ -292,4 +326,4 @@ const KStepNeighbor = observer(() => {
   );
 });
 
-export default KStepNeighbor;
+export default KHop;
