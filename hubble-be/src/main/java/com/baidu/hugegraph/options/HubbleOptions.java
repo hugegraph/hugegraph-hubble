@@ -214,7 +214,7 @@ public class HubbleOptions extends OptionHolder {
     public static final ConfigOption<String> CLIENT_TRUSTSTORE_FILE =
             new ConfigOption<>(
                     "ssl.client_truststore_file",
-                    "The path of the client truststore file used " +
+                    "The path of the client truststore file " +
                     "when https protocol is enabled",
                     null,
                     "conf/hugegraph.truststore"
@@ -223,7 +223,7 @@ public class HubbleOptions extends OptionHolder {
     public static final ConfigOption<String> CLIENT_TRUSTSTORE_PASSWORD =
             new ConfigOption<>(
                     "ssl.client_truststore_password",
-                    "The password of the client truststore file used " +
+                    "The password of the client truststore " +
                     "when https protocol is enabled",
                     null,
                     "hugegraph"
