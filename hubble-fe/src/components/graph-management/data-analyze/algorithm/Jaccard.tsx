@@ -128,6 +128,32 @@ const Jaccard = observer(() => {
             <span>
               {t('data-analyze.algorithm-forms.jaccard.options.max_degree')}
             </span>
+            <CustomTooltip
+              trigger="hover"
+              placement="bottom-start"
+              modifiers={{
+                offset: {
+                  offset: '0, 8'
+                }
+              }}
+              tooltipWrapperProps={{
+                className: 'tooltips-dark',
+                style: {
+                  zIndex: 7
+                }
+              }}
+              tooltipWrapper={t(
+                'data-analyze.algorithm-forms.jaccard.hint.max-degree'
+              )}
+              childrenProps={{
+                src: QuestionMarkIcon,
+                alt: 'hint',
+                style: {
+                  marginLeft: 5
+                }
+              }}
+              childrenWrapperElement="img"
+            />
           </div>
           <Input
             width={400}

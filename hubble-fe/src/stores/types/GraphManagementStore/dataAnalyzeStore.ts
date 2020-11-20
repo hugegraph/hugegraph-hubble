@@ -78,7 +78,17 @@ export interface AddQueryCollectionParams {
 export interface ExecutionLogs {
   id: number;
   async_id: number;
+  async_status:
+    | 'UNKNOWN'
+    | 'NEW'
+    | 'QUEUED'
+    | 'RESTORING'
+    | 'RUNNING'
+    | 'SUCCESS'
+    | 'CANCELLED'
+    | 'FAILED';
   type: string;
+  algorithm_name: string;
   content: string;
   status: 'SUCCESS' | 'RUNNING' | 'FAILED';
   duration: string;
@@ -188,17 +198,6 @@ export interface NeighborRankParams {
   steps: NeighborRankRule[];
 }
 
-// export interface KStepNeighbor {
-//   source: string;
-//   direction: string;
-//   max_depth: string;
-//   short: boolean
-//   label: string;
-//   max_degree: string;
-//   capacity: string;
-//   limit: string;
-// }
-
 export interface KStepNeighbor {
   source: string;
   direction: string;
@@ -217,6 +216,27 @@ export interface KHop {
   max_degree: string;
   limit: string;
   capacity: string;
+}
+
+export interface CustomPathParams {
+  method: string;
+  source: string;
+  vertexType: string;
+  vertexProperty: string[];
+  default_weight: string;
+  capacity: string;
+  limit: string;
+  steps: CustomPathRule[];
+}
+
+export interface CustomPathRule {
+  uuid: string;
+  direction: string;
+  labels: string[];
+  properties: string;
+  weight_by: string;
+  degree: string;
+  sample: string;
 }
 
 export interface RadiographicInspection {
