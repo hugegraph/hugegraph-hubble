@@ -70,8 +70,6 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
   const handleTabChange = (tab: string) => () => {
     dataAnalyzeStore.resetSwitchTabState();
     dataAnalyzeStore.setCurrentTab(tab);
-    // need manually set codeMirror text value to empty here
-    dataAnalyzeStore.codeEditorInstance?.setValue('');
     // reset algorithm tab to list
     algorithmAnalyzerStore.changeCurrentAlgorithm('');
   };
@@ -89,21 +87,8 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
         >
           {t('data-analyze.category.gremlin-analyze')}
         </div>
-        <div
-          onClick={handleTabChange('algorithm-analyze')}
-          className={
-            dataAnalyzeStore.currentTab === 'algorithm-analyze'
-              ? 'query-tab-index active'
-              : 'query-tab-index'
-          }
-        >
-          {t('data-analyze.category.algorithm-analyze')}
-        </div>
       </div>
       {dataAnalyzeStore.currentTab === 'gremlin-analyze' && <GremlinQuery />}
-      {dataAnalyzeStore.currentTab === 'algorithm-analyze' && (
-        <AlgorithmQuery />
-      )}
     </>
   );
 });
@@ -202,7 +187,6 @@ export const GremlinQuery: React.FC = observer(() => {
         );
       };
 
-      dataAnalyzeStore.assignCodeEditorInstance(codeEditor.current);
       codeEditor.current.on('change', handleCodeEditorChange);
 
       reaction(
@@ -229,8 +213,7 @@ export const GremlinQuery: React.FC = observer(() => {
         dataAnalyzeStore.codeEditorText
       );
     }
-  }, [dataAnalyzeStore.pulse]);
-  // }, [dataAnalyzeStore.pulse, codeEditor?.current]);
+  }, [dataAnalyzeStore.pulse, codeEditor?.current]);
 
   useEffect(() => {
     if (
