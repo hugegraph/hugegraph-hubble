@@ -75,6 +75,8 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
     }
 
     dataAnalyzeStore.setCurrentTab(tab);
+    // need manually set codeMirror text value to empty here
+    dataAnalyzeStore.codeEditorInstance?.setValue('');
     // reset algorithm tab to list
     algorithmAnalyzerStore.changeCurrentAlgorithm('');
   };
@@ -205,6 +207,7 @@ export const GremlinQuery: React.FC = observer(() => {
         );
       };
 
+      dataAnalyzeStore.assignCodeEditorInstance(codeEditor.current);
       codeEditor.current.on('change', handleCodeEditorChange);
 
       reaction(
@@ -231,7 +234,8 @@ export const GremlinQuery: React.FC = observer(() => {
         dataAnalyzeStore.codeEditorText
       );
     }
-  }, [dataAnalyzeStore.pulse, codeEditor?.current]);
+  }, [dataAnalyzeStore.pulse]);
+  // }, [dataAnalyzeStore.pulse, codeEditor?.current]);
 
   useEffect(() => {
     if (

@@ -36,7 +36,9 @@ import {
   createJaccardDefaultParams,
   createValidateJaccardParamsErrorMessage,
   createPersonalRankDefaultParams,
-  createValidatePersonalRankParamsErrorMessage
+  createValidatePersonalRankParamsErrorMessage,
+  createCustomPathDefaultParams,
+  createValidateCustomPathParamsErrorMessage
 } from '../../factory/dataAnalyzeStore/algorithmStore';
 import i18next from '../../../i18n';
 
@@ -57,7 +59,9 @@ import type {
   WeightedShortestPath,
   SingleSourceWeightedShortestPath,
   Jaccard,
-  PersonalRank
+  PersonalRank,
+  CustomPathParams,
+  CustomPathRule
 } from '../../types/GraphManagementStore/dataAnalyzeStore';
 
 export class AlgorithmAnalyzerStore {
@@ -131,6 +135,15 @@ export class AlgorithmAnalyzerStore {
 
   @observable
   validateKHopParamsErrorMessage = createValidateKHopParamsErrorMessage();
+
+  @observable
+  customPathParams: CustomPathParams = createCustomPathDefaultParams();
+
+  @observable
+  validateCustomPathParmasErrorMessage = createValidateCustomPathParamsErrorMessage();
+
+  @observable isDuplicateCustomPathRule = false;
+  duplicateCustomPathRuleSet = new Set<string>();
 
   @observable
   radiographicInspectionParams: RadiographicInspection = createRadiographicInspectionDefaultParams();
@@ -821,29 +834,12 @@ export class AlgorithmAnalyzerStore {
 
   @action
   validateDuplicateNeighborRankRules(uuid: string) {
-    // for (let index = 0; index < this.neighborRankParams.steps.length; index++) {
-    //   if (index !== ruleIndex) {
-    //     if (
-    //       isEqual(
-    //         this.neighborRankParams.steps[index],
-    //         this.neighborRankParams.steps[ruleIndex]
-    //       )
-    //     ) {
-    //       this.duplicateNeighborRankRuleSet.add(ruleIndex);
-    //       return;
-    //     }
-    //   }
-    // }
     const currentStep = this.neighborRankParams.steps.find(
       ({ uuid: currentUUID }) => currentUUID === uuid
     );
 
     for (const step of this.neighborRankParams.steps) {
       if (step.uuid !== uuid && !isUndefined(currentStep)) {
-        // need toJS util here since there will not be converted to object
-        // console.log('wtf is currentstep: ', { ...currentStep, id: '' });
-        // console.log('wtf is step: ', { ...step, id: '' });
-        // if (isEqual(toJS(currentStep), toJS(step))) {
         if (isEqual({ ...currentStep, uuid: '' }, { ...step, uuid: '' })) {
           this.duplicateNeighborRankRuleSet.add(uuid);
           return;
@@ -858,32 +854,6 @@ export class AlgorithmAnalyzerStore {
         this.validateDuplicateNeighborRankRules(uuid);
       });
     }
-
-    // const arr: number[][] = [];
-
-    // const keys: (keyof NeighborRankRule)[] = [
-    //   'direction',
-    //   'label',
-    //   'degree',
-    //   'top'
-    // ];
-
-    // keys.forEach((key) => {
-    //   this.neighborRankParams.steps.forEach((step, stepIndex) => {
-    //     const ruleValue = step[key];
-    //     const index = arr.findIndex(
-    //       (value) =>
-    //         value.length !== 0 &&
-    //         this.neighborRankParams.steps[value[0]][key] === ruleValue
-    //     );
-
-    //     if (index !== -1) {
-    //       arr.push([stepIndex]);
-    //     } else {
-    //       arr[index].push(stepIndex);
-    //     }
-    //   });
-    // });
   }
 
   @action
@@ -1041,6 +1011,182 @@ export class AlgorithmAnalyzerStore {
   resetKHopParams() {
     this.kHopParams = createKHopDefaultParams();
     this.validateKHopParamsErrorMessage = createValidateKHopParamsErrorMessage();
+  }
+
+  @action
+  addCustomPathRule() {
+    this.customPathParams.steps.push({
+      uuid: v4(),
+      direction: 'BOTH',
+      labels: ['__all__'],
+      weight_by: '',
+      properties: '',
+      degree: '10000',
+      sample: '100'
+    });
+
+    // add error message together
+    this.validateCustomPathParmasErrorMessage.steps.push({
+      uuid: '',
+      direction: '',
+      labels: '',
+      weight_by: '',
+      properties: '',
+      degree: '',
+      sample: ''
+    });
+  }
+
+  @action
+  removeCustomPathRule(ruleIndex: number) {
+    remove(this.customPathParams.steps, (_, index) => index === ruleIndex);
+    // remove error message together
+    remove(
+      this.validateCustomPathParmasErrorMessage.steps,
+      (_, index) => index === ruleIndex
+    );
+  }
+
+  @action
+  mutateCustomPathParams<T extends keyof CustomPathParams>(
+    key: T,
+    value: CustomPathParams[T]
+  ) {
+    this.customPathParams[key] = value;
+  }
+
+  @action
+  mutateCustomPathRuleParams<T extends keyof CustomPathRule>(
+    key: T,
+    value: CustomPathRule[T],
+    index: number
+  ) {
+    this.customPathParams.steps[index][key] = value;
+  }
+
+  @action
+  validateCustomPathParams<T extends keyof CustomPathParams>(key: T) {
+    const value = this.customPathParams[key];
+
+    switch (key) {
+      case 'source':
+        if (isEmpty(value)) {
+          this.validateCustomPathParmasErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.custom-path.validations.no-empty'
+          );
+
+          return;
+        }
+
+        this.validateNeighborRankParamsParamsErrorMessage.source = '';
+        break;
+      case 'capacity':
+        if (!isEmpty(value) && !isInt(value as string, { min: 0 })) {
+          this.validateCustomPathParmasErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.custom-path.validations.integer-only'
+          );
+
+          return;
+        }
+
+        this.validateCustomPathParmasErrorMessage.capacity = '';
+        break;
+      case 'limit':
+        if (!isEmpty(value) && !isInt(value as string, { min: 0 })) {
+          this.validateCustomPathParmasErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.custom-path.validations.integer-only'
+          );
+
+          return;
+        }
+
+        this.validateCustomPathParmasErrorMessage.capacity = '';
+        break;
+    }
+  }
+
+  @action
+  validateCustomPathRules<T extends keyof CustomPathRule>(
+    key: T,
+    ruleIndex: number
+  ) {
+    const value = this.customPathParams.steps[ruleIndex][key];
+
+    switch (key) {
+      case 'properties':
+        if (isEmpty(value)) {
+          this.validateCustomPathParmasErrorMessage.steps[ruleIndex][
+            key
+          ] = i18next.t(
+            'data-analyze.algorithm-forms.custom-path.validations.no-empty'
+          );
+
+          return;
+        }
+
+        break;
+      case 'degree':
+      case 'sample':
+        if (!isEmpty(value) && !isInt(value as string, { min: 0 })) {
+          this.validateCustomPathParmasErrorMessage.steps[ruleIndex][
+            key
+          ] = i18next.t(
+            'data-analyze.algorithm-forms.neighbor-rank.validations.integer-only'
+          );
+
+          return;
+        }
+        break;
+      default:
+        return;
+    }
+
+    this.validateCustomPathParmasErrorMessage.steps[ruleIndex][key] = '';
+  }
+
+  @action
+  validateDuplicateCustomPathRules(uuid: string) {
+    const currentStep = this.customPathParams.steps.find(
+      ({ uuid: currentUUID }) => currentUUID === uuid
+    );
+
+    for (const step of this.customPathParams.steps) {
+      if (step.uuid !== uuid && !isUndefined(currentStep)) {
+        if (isEqual({ ...currentStep, uuid: '' }, { ...step, uuid: '' })) {
+          this.duplicateCustomPathRuleSet.add(uuid);
+          return;
+        }
+      }
+    }
+
+    this.duplicateCustomPathRuleSet.delete(uuid);
+
+    if (this.duplicateCustomPathRuleSet.size !== 0) {
+      this.duplicateCustomPathRuleSet.forEach((uuid) => {
+        this.validateDuplicateCustomPathRules(uuid);
+      });
+    }
+  }
+
+  @action
+  switchCustomPathMethod(method: string) {
+    this.customPathParams.method = method;
+
+    if (method === 'id') {
+      this.customPathParams.vertexType = '';
+      this.customPathParams.vertexProperty = [];
+      this.validateCustomPathParmasErrorMessage.vertexType = '';
+      this.validateCustomPathParmasErrorMessage.vertexProperty = '';
+    } else {
+      this.customPathParams.source = '';
+      this.validateCustomPathParmasErrorMessage.source = '';
+    }
+  }
+
+  @action
+  resetCustomPathParams() {
+    this.customPathParams = createCustomPathDefaultParams();
+    this.validateCustomPathParmasErrorMessage = createValidateCustomPathParamsErrorMessage();
   }
 
   @action

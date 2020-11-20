@@ -11,29 +11,30 @@ import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyz
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
-import { NeighborRankRule } from '../../../../stores/types/GraphManagementStore/dataAnalyzeStore';
+import { CustomPathRule } from '../../../../stores/types/GraphManagementStore/dataAnalyzeStore';
 
 const CustomPath = observer(() => {
   const { t } = useTranslation();
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
 
-  const sourceType = algorithmAnalyzerStore.modelSimilarityParams.method;
+  const sourceType = algorithmAnalyzerStore.customPathParams.method;
 
   const isValidExec =
     Object.values(
-      algorithmAnalyzerStore.validateNeighborRankParamsParamsErrorMessage
+      algorithmAnalyzerStore.validateCustomPathParmasErrorMessage
     ).every((value) => Array.isArray(value) || value === '') &&
-    algorithmAnalyzerStore.validateNeighborRankParamsParamsErrorMessage.steps.every(
+    algorithmAnalyzerStore.validateCustomPathParmasErrorMessage.steps.every(
       (step) => Object.values(step).every((value) => value === '')
     ) &&
-    algorithmAnalyzerStore.neighborRankParams.source !== '' &&
-    algorithmAnalyzerStore.neighborRankParams.alpha !== '';
+    (algorithmAnalyzerStore.customPathParams.method === 'id'
+      ? algorithmAnalyzerStore.customPathParams.source !== ''
+      : true);
 
   const isValidAddRule =
-    algorithmAnalyzerStore.validateNeighborRankParamsParamsErrorMessage.steps.every(
+    algorithmAnalyzerStore.validateCustomPathParmasErrorMessage.steps.every(
       (step) => Object.values(step).every((value) => value === '')
-    ) && algorithmAnalyzerStore.duplicateNeighborRankRuleSet.size === 0;
+    ) && algorithmAnalyzerStore.duplicateCustomPathRuleSet.size === 0;
 
   const invalidExtendFormClassname = (flag: boolean) => {
     return classnames({
@@ -57,11 +58,9 @@ const CustomPath = observer(() => {
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
               }
-              value={algorithmAnalyzerStore.modelSimilarityParams.method}
+              value={algorithmAnalyzerStore.customPathParams.method}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                algorithmAnalyzerStore.switchModelSimilarityMethod(
-                  e.target.value
-                );
+                algorithmAnalyzerStore.switchCustomPathMethod(e.target.value);
               }}
             >
               <Radio value="id">
@@ -101,25 +100,21 @@ const CustomPath = observer(() => {
                 )}
                 errorLocation="layer"
                 errorMessage={
-                  algorithmAnalyzerStore
-                    .validateModelSimilartiyParamsErrorMessage.source
+                  algorithmAnalyzerStore.validateCustomPathParmasErrorMessage
+                    .source
                 }
-                value={algorithmAnalyzerStore.modelSimilarityParams.source}
+                value={algorithmAnalyzerStore.customPathParams.source}
                 onChange={(e: any) => {
-                  algorithmAnalyzerStore.mutateModelSimilarityParams(
+                  algorithmAnalyzerStore.mutateCustomPathParams(
                     'source',
                     e.value as string
                   );
 
-                  algorithmAnalyzerStore.validateModelSimilarityParams(
-                    'source'
-                  );
+                  algorithmAnalyzerStore.validateCustomPathParams('source');
                 }}
                 originInputProps={{
                   onBlur() {
-                    algorithmAnalyzerStore.validateModelSimilarityParams(
-                      'source'
-                    );
+                    algorithmAnalyzerStore.validateCustomPathParams('source');
                   }
                 }}
               />
@@ -128,18 +123,18 @@ const CustomPath = observer(() => {
                 size="medium"
                 trigger="click"
                 selectorName={t(
-                  'data-analyze.algorithm-forms.model-similarity.placeholder.input-vertex-type'
+                  'data-analyze.algorithm-forms.custom-path.placeholder.input-vertex-type'
                 )}
-                value={algorithmAnalyzerStore.modelSimilarityParams.vertexType}
+                value={algorithmAnalyzerStore.customPathParams.vertexType}
                 notFoundContent={t(
-                  'data-analyze.algorithm-forms.model-similarity.placeholder.no-vertex-type'
+                  'data-analyze.algorithm-forms.custom-path.placeholder.no-vertex-type'
                 )}
                 disabled={
                   dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
                 }
                 width={390}
                 onChange={(value: string) => {
-                  algorithmAnalyzerStore.mutateModelSimilarityParams(
+                  algorithmAnalyzerStore.mutateCustomPathParams(
                     'vertexType',
                     value
                   );
@@ -154,6 +149,46 @@ const CustomPath = observer(() => {
             )}
           </div>
         </div>
+        {sourceType !== 'id' && (
+          <div className="query-tab-content-form-row">
+            <div className="query-tab-content-form-item">
+              <div className="query-tab-content-form-item-title large">
+                <span>
+                  {t(
+                    'data-analyze.algorithm-forms.custom-path.options.vertex-property'
+                  )}
+                </span>
+              </div>
+              <Select
+                size="medium"
+                trigger="click"
+                selectorName={t(
+                  'data-analyze.algorithm-forms.custom-path.placeholder.input-vertex-property'
+                )}
+                value={algorithmAnalyzerStore.customPathParams.vertexType}
+                notFoundContent={t(
+                  'data-analyze.algorithm-forms.custom-path.placeholder.no-vertex-property'
+                )}
+                disabled={
+                  dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
+                }
+                width={390}
+                onChange={(value: string) => {
+                  algorithmAnalyzerStore.mutateCustomPathParams(
+                    'vertexProperty',
+                    [value]
+                  );
+                }}
+              >
+                {dataAnalyzeStore.vertexTypes.map(({ name }) => (
+                  <Select.Option value={name} key={name}>
+                    {name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </div>
+          </div>
+        )}
         <div className="query-tab-content-form-row">
           <div className="query-tab-content-form-item">
             <div className="query-tab-content-form-item-title large">
@@ -168,23 +203,23 @@ const CustomPath = observer(() => {
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
               }
-              value={algorithmAnalyzerStore.neighborRankParams.direction}
+              value={algorithmAnalyzerStore.customPathParams.default_weight}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                algorithmAnalyzerStore.mutateNeighborRankParams(
-                  'direction',
+                algorithmAnalyzerStore.mutateCustomPathParams(
+                  'default_weight',
                   e.target.value
                 );
               }}
             >
-              <Radio value="BOTH">
+              <Radio value="NONE">
                 {t('data-analyze.algorithm-forms.custom-path.radio-value.none')}
               </Radio>
-              <Radio value="OUT">
+              <Radio value="INCR">
                 {t(
                   'data-analyze.algorithm-forms.custom-path.radio-value.ascend'
                 )}
               </Radio>
-              <Radio value="IN">
+              <Radio value="DECR">
                 {t(
                   'data-analyze.algorithm-forms.custom-path.radio-value.descend'
                 )}
@@ -210,21 +245,21 @@ const CustomPath = observer(() => {
               )}
               errorLocation="layer"
               errorMessage={
-                algorithmAnalyzerStore
-                  .validateNeighborRankParamsParamsErrorMessage.capacity
+                algorithmAnalyzerStore.validateCustomPathParmasErrorMessage
+                  .capacity
               }
-              value={algorithmAnalyzerStore.neighborRankParams.capacity}
+              value={algorithmAnalyzerStore.customPathParams.capacity}
               onChange={(e: any) => {
-                algorithmAnalyzerStore.mutateNeighborRankParams(
+                algorithmAnalyzerStore.mutateCustomPathParams(
                   'capacity',
                   e.value as string
                 );
 
-                algorithmAnalyzerStore.validateNeighborRankParams('capacity');
+                algorithmAnalyzerStore.validateCustomPathParams('capacity');
               }}
               originInputProps={{
                 onBlur() {
-                  algorithmAnalyzerStore.validateNeighborRankParams('capacity');
+                  algorithmAnalyzerStore.validateCustomPathParams('capacity');
                 }
               }}
             />
@@ -248,21 +283,21 @@ const CustomPath = observer(() => {
               )}
               errorLocation="layer"
               errorMessage={
-                algorithmAnalyzerStore.validateModelSimilartiyParamsErrorMessage
+                algorithmAnalyzerStore.validateCustomPathParmasErrorMessage
                   .limit
               }
-              value={algorithmAnalyzerStore.modelSimilarityParams.limit}
+              value={algorithmAnalyzerStore.customPathParams.limit}
               onChange={(e: any) => {
-                algorithmAnalyzerStore.mutateModelSimilarityParams(
+                algorithmAnalyzerStore.mutateCustomPathParams(
                   'limit',
                   e.value as string
                 );
 
-                algorithmAnalyzerStore.validateModelSimilarityParams('limit');
+                algorithmAnalyzerStore.validateCustomPathParams('limit');
               }}
               originInputProps={{
                 onBlur() {
-                  algorithmAnalyzerStore.validateModelSimilarityParams('limit');
+                  algorithmAnalyzerStore.validateCustomPathParams('limit');
                 }
               }}
             />
@@ -285,8 +320,8 @@ const CustomPath = observer(() => {
 
               const timerId = dataAnalyzeStore.addTempExecLog();
               await dataAnalyzeStore.fetchGraphs({
-                url: 'neighborrank',
-                type: Algorithm.neighborRankRecommendation
+                url: 'customizedpaths',
+                type: Algorithm.customPath
               });
               await dataAnalyzeStore.fetchExecutionLogs();
               window.clearTimeout(timerId);
@@ -298,7 +333,7 @@ const CustomPath = observer(() => {
             style={styles.primaryButton}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             onClick={() => {
-              algorithmAnalyzerStore.resetNeighborRankParams();
+              algorithmAnalyzerStore.resetCustomPathParams();
             }}
           >
             {t('data-analyze.manipulations.reset')}
@@ -310,12 +345,15 @@ const CustomPath = observer(() => {
         className="query-tab-content-form-expand-wrapper"
         style={{ width: '50%' }}
       >
-        {algorithmAnalyzerStore.neighborRankParams.steps.map(
-          ({ uuid, direction, label, degree, top }, ruleIndex) => {
+        {algorithmAnalyzerStore.customPathParams.steps.map(
+          (
+            { uuid, direction, labels, degree, sample, properties, weight_by },
+            ruleIndex
+          ) => {
             return (
               <div
                 className={invalidExtendFormClassname(
-                  algorithmAnalyzerStore.duplicateNeighborRankRuleSet.has(uuid)
+                  algorithmAnalyzerStore.duplicateCustomPathRuleSet.has(uuid)
                 )}
               >
                 <div className="query-tab-content-form-expand-item">
@@ -323,7 +361,7 @@ const CustomPath = observer(() => {
                     <i>*</i>
                     <span>
                       {t(
-                        'data-analyze.algorithm-forms.neighbor-rank.options.direction'
+                        'data-analyze.algorithm-forms.custom-path.options.direction'
                       )}
                     </span>
                   </div>
@@ -333,13 +371,13 @@ const CustomPath = observer(() => {
                     }
                     value={direction}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                      algorithmAnalyzerStore.mutateNeighborRankRuleParams(
+                      algorithmAnalyzerStore.mutateCustomPathRuleParams(
                         'direction',
                         e.target.value,
                         ruleIndex
                       );
 
-                      algorithmAnalyzerStore.validateDuplicateNeighborRankRules(
+                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
                         uuid
                       );
                     }}
@@ -348,8 +386,7 @@ const CustomPath = observer(() => {
                     <Radio value="OUT">out</Radio>
                     <Radio value="IN">in</Radio>
                   </Radio.Group>
-                  {size(algorithmAnalyzerStore.neighborRankParams.steps) >
-                    1 && (
+                  {size(algorithmAnalyzerStore.customPathParams.steps) > 1 && (
                     <div
                       style={{
                         marginLeft: 198,
@@ -359,11 +396,9 @@ const CustomPath = observer(() => {
                         lineHeight: '22px'
                       }}
                       onClick={() => {
-                        algorithmAnalyzerStore.removeNeighborRankRule(
-                          ruleIndex
-                        );
+                        algorithmAnalyzerStore.removeCustomPathRule(ruleIndex);
 
-                        algorithmAnalyzerStore.validateDuplicateNeighborRankRules(
+                        algorithmAnalyzerStore.validateDuplicateCustomPathRules(
                           uuid
                         );
                       }}
@@ -383,7 +418,7 @@ const CustomPath = observer(() => {
                   <Select
                     size="medium"
                     trigger="click"
-                    value={label}
+                    value={labels[0]}
                     notFoundContent={t(
                       'data-analyze.algorithm-forms.custom-path.placeholder.no-edge-types'
                     )}
@@ -392,21 +427,19 @@ const CustomPath = observer(() => {
                     }
                     width={380}
                     onChange={(value: string) => {
-                      algorithmAnalyzerStore.mutateNeighborRankRuleParams(
-                        'label',
-                        value,
+                      algorithmAnalyzerStore.mutateCustomPathRuleParams(
+                        'labels',
+                        [value],
                         ruleIndex
                       );
 
-                      algorithmAnalyzerStore.validateDuplicateNeighborRankRules(
+                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
                         uuid
                       );
                     }}
                   >
                     <Select.Option value="__all__" key="__all__">
-                      {t(
-                        'data-analyze.algorithm-forms.neighbor-rank.pre-value'
-                      )}
+                      {t('data-analyze.algorithm-forms.custom-path.pre-value')}
                     </Select.Option>
                     {dataAnalyzeStore.edgeTypes.map(({ name }) => (
                       <Select.Option value={name} key={name}>
@@ -435,31 +468,30 @@ const CustomPath = observer(() => {
                     errorLocation="layer"
                     errorMessage={
                       algorithmAnalyzerStore
-                        .validateNeighborRankParamsParamsErrorMessage.steps[
-                        ruleIndex
-                      ].degree
+                        .validateCustomPathParmasErrorMessage.steps[ruleIndex]
+                        .properties
                     }
-                    value={degree}
+                    value={properties}
                     onChange={(e: any) => {
-                      algorithmAnalyzerStore.mutateNeighborRankRuleParams(
-                        'degree',
+                      algorithmAnalyzerStore.mutateCustomPathRuleParams(
+                        'properties',
                         e.value as string,
                         ruleIndex
                       );
 
-                      algorithmAnalyzerStore.validateNeighborRankRules(
-                        'degree',
+                      algorithmAnalyzerStore.validateCustomPathRules(
+                        'properties',
                         ruleIndex
                       );
 
-                      algorithmAnalyzerStore.validateDuplicateNeighborRankRules(
+                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
                         uuid
                       );
                     }}
                     originInputProps={{
                       onBlur() {
-                        algorithmAnalyzerStore.validateNeighborRankRules(
-                          'degree',
+                        algorithmAnalyzerStore.validateCustomPathRules(
+                          'properties',
                           ruleIndex
                         );
                       }
@@ -477,31 +509,29 @@ const CustomPath = observer(() => {
                   <Select
                     size="medium"
                     trigger="click"
-                    value={label}
-                    notFoundContent={t(
+                    value={weight_by}
+                    selectorName={t(
                       'data-analyze.algorithm-forms.custom-path.placeholder.select-property'
+                    )}
+                    notFoundContent={t(
+                      'data-analyze.algorithm-forms.custom-path.placeholder.no-property'
                     )}
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
                     }
                     width={380}
                     onChange={(value: string) => {
-                      algorithmAnalyzerStore.mutateNeighborRankRuleParams(
-                        'label',
+                      algorithmAnalyzerStore.mutateCustomPathRuleParams(
+                        'weight_by',
                         value,
                         ruleIndex
                       );
 
-                      algorithmAnalyzerStore.validateDuplicateNeighborRankRules(
+                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
                         uuid
                       );
                     }}
                   >
-                    <Select.Option value="__all__" key="__all__">
-                      {t(
-                        'data-analyze.algorithm-forms.neighbor-rank.pre-value'
-                      )}
-                    </Select.Option>
                     {dataAnalyzeStore.edgeTypes.map(({ name }) => (
                       <Select.Option value={name} key={name}>
                         {name}
@@ -529,30 +559,29 @@ const CustomPath = observer(() => {
                     errorLocation="layer"
                     errorMessage={
                       algorithmAnalyzerStore
-                        .validateNeighborRankParamsParamsErrorMessage.steps[
-                        ruleIndex
-                      ].degree
+                        .validateCustomPathParmasErrorMessage.steps[ruleIndex]
+                        .degree
                     }
                     value={degree}
                     onChange={(e: any) => {
-                      algorithmAnalyzerStore.mutateNeighborRankRuleParams(
+                      algorithmAnalyzerStore.mutateCustomPathRuleParams(
                         'degree',
                         e.value as string,
                         ruleIndex
                       );
 
-                      algorithmAnalyzerStore.validateNeighborRankRules(
+                      algorithmAnalyzerStore.validateCustomPathRules(
                         'degree',
                         ruleIndex
                       );
 
-                      algorithmAnalyzerStore.validateDuplicateNeighborRankRules(
+                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
                         uuid
                       );
                     }}
                     originInputProps={{
                       onBlur() {
-                        algorithmAnalyzerStore.validateNeighborRankRules(
+                        algorithmAnalyzerStore.validateCustomPathRules(
                           'degree',
                           ruleIndex
                         );
@@ -580,31 +609,30 @@ const CustomPath = observer(() => {
                     errorLocation="layer"
                     errorMessage={
                       algorithmAnalyzerStore
-                        .validateNeighborRankParamsParamsErrorMessage.steps[
-                        ruleIndex
-                      ].top
+                        .validateCustomPathParmasErrorMessage.steps[ruleIndex]
+                        .sample
                     }
-                    value={top}
+                    value={sample}
                     onChange={(e: any) => {
-                      algorithmAnalyzerStore.mutateNeighborRankRuleParams(
-                        'top',
+                      algorithmAnalyzerStore.mutateCustomPathRuleParams(
+                        'sample',
                         e.value as string,
                         ruleIndex
                       );
 
-                      algorithmAnalyzerStore.validateNeighborRankRules(
-                        'top',
+                      algorithmAnalyzerStore.validateCustomPathRules(
+                        'sample',
                         ruleIndex
                       );
 
-                      algorithmAnalyzerStore.validateDuplicateNeighborRankRules(
+                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
                         uuid
                       );
                     }}
                     originInputProps={{
                       onBlur() {
-                        algorithmAnalyzerStore.validateNeighborRankRules(
-                          'top',
+                        algorithmAnalyzerStore.validateCustomPathRules(
+                          'sample',
                           ruleIndex
                         );
                       }
@@ -623,22 +651,22 @@ const CustomPath = observer(() => {
             marginTop: 8
           }}
         >
-          {algorithmAnalyzerStore.duplicateNeighborRankRuleSet.size === 0 ? (
+          {algorithmAnalyzerStore.duplicateCustomPathRuleSet.size === 0 ? (
             <span
               style={{ cursor: 'pointer' }}
               onClick={() => {
                 if (isValidAddRule) {
-                  algorithmAnalyzerStore.addNeighborRankRule();
+                  algorithmAnalyzerStore.addCustomPathRule();
 
-                  algorithmAnalyzerStore.validateDuplicateNeighborRankRules(
+                  algorithmAnalyzerStore.validateDuplicateCustomPathRules(
                     (last(
-                      algorithmAnalyzerStore.neighborRankParams.steps
-                    ) as NeighborRankRule).uuid
+                      algorithmAnalyzerStore.customPathParams.steps
+                    ) as CustomPathRule).uuid
                   );
                 }
               }}
             >
-              {t('data-analyze.algorithm-forms.neighbor-rank.add-new-rule')}
+              {t('data-analyze.algorithm-forms.custom-path.add-new-rule')}
             </span>
           ) : (
             <div
@@ -653,7 +681,7 @@ const CustomPath = observer(() => {
               }}
             >
               {t(
-                'data-analyze.algorithm-forms.neighbor-rank.validations.input-chars'
+                'data-analyze.algorithm-forms.custom-path.validations.input-chars'
               )}
             </div>
           )}

@@ -60,7 +60,8 @@ import type {
   WeightedShortestPath,
   SingleSourceWeightedShortestPath,
   Jaccard,
-  PersonalRank
+  PersonalRank,
+  CustomPathRule
 } from '../../types/GraphManagementStore/dataAnalyzeStore';
 import type {
   VertexTypeListResponse,
@@ -118,6 +119,7 @@ export class DataAnalyzeStore {
   @observable favoritePopUp = '';
   // whether user selects vertex or edge
   @observable graphInfoDataSet = '';
+  @observable codeEditorInstance: CodeMirror.Editor | null = null;
   @observable codeEditorText = '';
   @observable dynamicAddGraphDataStatus = '';
   @observable favoriteQueriesSortOrder: Record<
@@ -592,6 +594,11 @@ export class DataAnalyzeStore {
   }
 
   @action
+  assignCodeEditorInstance(instance: CodeMirror.Editor) {
+    this.codeEditorInstance = instance;
+  }
+
+  @action
   mutateCodeEditorText(text: string) {
     this.codeEditorText = text;
   }
@@ -660,6 +667,8 @@ export class DataAnalyzeStore {
     const tempData: ExecutionLogs = {
       id: NaN,
       async_id: NaN,
+      algorithm_name: '',
+      async_status: 'UNKNOWN',
       type: 'GREMLIN',
       content: this.codeEditorText,
       status: 'RUNNING',
@@ -1060,6 +1069,7 @@ export class DataAnalyzeStore {
     this.isFullScreenReuslt = false;
     this.isClickOnNodeOrEdge = false;
     this.queryMode = 'query';
+    this.codeEditorInstance = null;
     this.codeEditorText = '';
     this.dynamicAddGraphDataStatus = '';
     this.graphData = {} as FetchGraphResponse;
@@ -1569,6 +1579,46 @@ export class DataAnalyzeStore {
           }
 
           params = this.algorithmAnalyzerStore.kHopParams;
+          break;
+        }
+
+        case Algorithm.customPath: {
+          const {
+            source,
+            vertexType,
+            vertexProperty,
+            default_weight,
+            capacity,
+            limit,
+            steps
+          } = this.algorithmAnalyzerStore.customPathParams;
+
+          const clonedCustomPathRules = cloneDeep(steps);
+
+          clonedCustomPathRules.forEach((step, index) => {
+            delete step.uuid;
+
+            if (step.labels[0] === '__all__') {
+              const clonedStep: CustomPathRule = cloneDeep(step);
+              delete clonedStep.labels;
+              clonedCustomPathRules[index] = clonedStep;
+            }
+          });
+
+          const convertedParams = {
+            sources: {
+              ids: [source],
+              label: vertexType,
+              properties: vertexProperty
+            },
+            default_weight,
+            capacity,
+            limit,
+            steps: clonedCustomPathRules
+          };
+
+          // @ts-ignore
+          params = convertedParams;
           break;
         }
 
