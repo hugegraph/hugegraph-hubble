@@ -231,7 +231,7 @@ const NeighborRank = observer(() => {
             style={styles.primaryButton}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             onClick={() => {
-              algorithmAnalyzerStore.resetShortestPathAllParams();
+              algorithmAnalyzerStore.resetNeighborRankParams();
             }}
           >
             {t('data-analyze.manipulations.reset')}
@@ -323,7 +323,7 @@ const NeighborRank = observer(() => {
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
                     }
-                    width={400}
+                    width={380}
                     onChange={(value: string) => {
                       algorithmAnalyzerStore.mutateNeighborRankRuleParams(
                         'label',
@@ -355,9 +355,35 @@ const NeighborRank = observer(() => {
                         'data-analyze.algorithm-forms.neighbor-rank.options.degree'
                       )}
                     </span>
+                    <CustomTooltip
+                      trigger="hover"
+                      placement="bottom-start"
+                      modifiers={{
+                        offset: {
+                          offset: '0, 8'
+                        }
+                      }}
+                      tooltipWrapperProps={{
+                        className: 'tooltips-dark',
+                        style: {
+                          zIndex: 7
+                        }
+                      }}
+                      tooltipWrapper={t(
+                        'data-analyze.algorithm-forms.neighbor-rank.hint.max-degree'
+                      )}
+                      childrenProps={{
+                        src: QuestionMarkIcon,
+                        alt: 'hint',
+                        style: {
+                          marginLeft: 5
+                        }
+                      }}
+                      childrenWrapperElement="img"
+                    />
                   </div>
                   <Input
-                    width={400}
+                    width={380}
                     size="medium"
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -434,7 +460,7 @@ const NeighborRank = observer(() => {
                     />
                   </div>
                   <Input
-                    width={400}
+                    width={380}
                     size="medium"
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'

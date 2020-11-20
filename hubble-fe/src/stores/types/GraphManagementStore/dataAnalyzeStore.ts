@@ -78,7 +78,17 @@ export interface AddQueryCollectionParams {
 export interface ExecutionLogs {
   id: number;
   async_id: number;
+  async_status:
+    | 'UNKNOWN'
+    | 'NEW'
+    | 'QUEUED'
+    | 'RESTORING'
+    | 'RUNNING'
+    | 'SUCCESS'
+    | 'CANCELLED'
+    | 'FAILED';
   type: string;
+  algorithm_name: string;
   content: string;
   status: 'SUCCESS' | 'RUNNING' | 'FAILED';
   duration: string;
@@ -186,4 +196,107 @@ export interface NeighborRankParams {
   direction: string;
   capacity: string;
   steps: NeighborRankRule[];
+}
+
+export interface KStepNeighbor {
+  source: string;
+  direction: string;
+  max_depth: string;
+  label: string;
+  max_degree: string;
+  limit: string;
+}
+
+export interface KHop {
+  source: string;
+  direction: string;
+  max_depth: string;
+  nearest: boolean;
+  label: string;
+  max_degree: string;
+  limit: string;
+  capacity: string;
+}
+
+export interface CustomPathParams {
+  method: string;
+  source: string;
+  vertexType: string;
+  vertexProperty: string[];
+  default_weight: string;
+  capacity: string;
+  limit: string;
+  steps: CustomPathRule[];
+}
+
+export interface CustomPathRule {
+  uuid: string;
+  direction: string;
+  labels: string[];
+  properties: string;
+  weight_by: string;
+  degree: string;
+  sample: string;
+}
+
+export interface RadiographicInspection {
+  source: string;
+  direction: string;
+  max_depth: string;
+  label: string;
+  max_degree: string;
+  capacity: string;
+  limit: string;
+}
+
+export interface SameNeighbor {
+  vertex: string;
+  other: string;
+  direction: string;
+  label: string;
+  max_degree: string;
+  limit: string;
+}
+
+export interface WeightedShortestPath {
+  source: string;
+  target: string;
+  direction: string;
+  weighted: string;
+  with_vertex: boolean;
+  label: string;
+  max_degree: string;
+  skip_degree: string;
+  capacity: string;
+}
+
+export interface SingleSourceWeightedShortestPath {
+  source: string;
+  direction: string;
+  weighted: string;
+  with_vertex: boolean;
+  label: string;
+  max_degree: string;
+  skip_degree: string;
+  capacity: string;
+  limit: string;
+}
+
+export interface Jaccard {
+  vertex: string;
+  other: string;
+  direction: string;
+  label: string;
+  max_degree: string;
+}
+
+export interface PersonalRank {
+  source: string;
+  alpha: string;
+  max_depth: string;
+  with_label: string;
+  label: string;
+  max_degree: string;
+  limit: string;
+  sorted: boolean;
 }

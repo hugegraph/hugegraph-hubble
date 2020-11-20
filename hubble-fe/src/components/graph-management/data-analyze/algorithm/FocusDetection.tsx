@@ -132,6 +132,32 @@ const FocusDetection = observer(() => {
                 'data-analyze.algorithm-forms.focus-detection.options.max_degree'
               )}
             </span>
+            <CustomTooltip
+              trigger="hover"
+              placement="bottom-start"
+              modifiers={{
+                offset: {
+                  offset: '0, 8'
+                }
+              }}
+              tooltipWrapperProps={{
+                className: 'tooltips-dark',
+                style: {
+                  zIndex: 7
+                }
+              }}
+              tooltipWrapper={t(
+                'data-analyze.algorithm-forms.focus-detection.hint.max-degree'
+              )}
+              childrenProps={{
+                src: QuestionMarkIcon,
+                alt: 'hint',
+                style: {
+                  marginLeft: 5
+                }
+              }}
+              childrenWrapperElement="img"
+            />
           </div>
           <Input
             width={400}
@@ -192,7 +218,9 @@ const FocusDetection = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.focus-detection.options.limit')}
+              {t(
+                'data-analyze.algorithm-forms.focus-detection.options.capacity'
+              )}
             </span>
           </div>
           <Input
@@ -205,20 +233,20 @@ const FocusDetection = observer(() => {
             errorLocation="layer"
             errorMessage={
               algorithmAnalyzerStore.validateFocusDetectionParamsErrorMessage
-                .limit
+                .capacity
             }
-            value={algorithmAnalyzerStore.focusDetectionParams.limit}
+            value={algorithmAnalyzerStore.focusDetectionParams.capacity}
             onChange={(e: any) => {
               algorithmAnalyzerStore.mutateFocusDetectionParams(
-                'limit',
+                'capacity',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateFocusDetectionParams('limit');
+              algorithmAnalyzerStore.validateFocusDetectionParams('capacity');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateFocusDetectionParams('limit');
+                algorithmAnalyzerStore.validateFocusDetectionParams('capacity');
               }
             }}
           />
@@ -293,9 +321,7 @@ const FocusDetection = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t(
-                'data-analyze.algorithm-forms.focus-detection.options.capacity'
-              )}
+              {t('data-analyze.algorithm-forms.focus-detection.options.limit')}
             </span>
           </div>
           <Input
@@ -308,20 +334,20 @@ const FocusDetection = observer(() => {
             errorLocation="layer"
             errorMessage={
               algorithmAnalyzerStore.validateFocusDetectionParamsErrorMessage
-                .capacity
+                .limit
             }
-            value={algorithmAnalyzerStore.focusDetectionParams.capacity}
+            value={algorithmAnalyzerStore.focusDetectionParams.limit}
             onChange={(e: any) => {
               algorithmAnalyzerStore.mutateFocusDetectionParams(
-                'capacity',
+                'limit',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateFocusDetectionParams('capacity');
+              algorithmAnalyzerStore.validateFocusDetectionParams('limit');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateFocusDetectionParams('capacity');
+                algorithmAnalyzerStore.validateFocusDetectionParams('limit');
               }
             }}
           />

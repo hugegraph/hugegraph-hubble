@@ -5,18 +5,21 @@ import { useTranslation } from 'react-i18next';
 import { styles } from '../QueryAndAlgorithmLibrary';
 import { Tooltip as CustomTooltip } from '../../../common';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
-
-import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
 
-const AllPath = observer(() => {
-  const { t } = useTranslation();
+import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
+
+const RadiographicInspection = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
+  const { t } = useTranslation();
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
 
-  const isValidExec = !Object.values(algorithmAnalyzerStore.allPathParams).some(
-    (value) => value === ''
-  );
+  const isValidExec =
+    Object.values(
+      algorithmAnalyzerStore.validateRadiographicInspectionParamsErrorMessage
+    ).every((value) => value === '') &&
+    algorithmAnalyzerStore.radiographicInspectionParams.source !== '' &&
+    algorithmAnalyzerStore.radiographicInspectionParams.max_depth !== '';
 
   return (
     <div className="query-tab-content-form">
@@ -25,7 +28,9 @@ const AllPath = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.source')}
+              {t(
+                'data-analyze.algorithm-forms.radiographic-inspection.options.source'
+              )}
             </span>
           </div>
           <Input
@@ -33,24 +38,29 @@ const AllPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-source-id'
+              'data-analyze.algorithm-forms.radiographic-inspection.placeholder.input-source-id'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage.source
+              algorithmAnalyzerStore
+                .validateRadiographicInspectionParamsErrorMessage.source
             }
-            value={algorithmAnalyzerStore.allPathParams.source}
+            value={algorithmAnalyzerStore.radiographicInspectionParams.source}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
+              algorithmAnalyzerStore.mutateRadiographicInspectionParams(
                 'source',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateAllPathParams('source');
+              algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                'source'
+              );
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('source');
+                algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                  'source'
+                );
               }
             }}
           />
@@ -58,24 +68,31 @@ const AllPath = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.label')}
+              {t(
+                'data-analyze.algorithm-forms.radiographic-inspection.options.label'
+              )}
             </span>
           </div>
           <Select
             size="medium"
             trigger="click"
-            value={algorithmAnalyzerStore.allPathParams.label}
+            value={algorithmAnalyzerStore.radiographicInspectionParams.label}
             notFoundContent={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.no-edge-types'
+              'data-analyze.algorithm-forms.radiographic-inspection.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             width={400}
             onChange={(value: string) => {
-              algorithmAnalyzerStore.mutateAllPathParams('label', value);
+              algorithmAnalyzerStore.mutateRadiographicInspectionParams(
+                'label',
+                value
+              );
             }}
           >
             <Select.Option value="__all__" key="__all__">
-              {t('data-analyze.algorithm-forms.all-path.pre-value')}
+              {t(
+                'data-analyze.algorithm-forms.radiographic-inspection.pre-value'
+              )}
             </Select.Option>
             {dataAnalyzeStore.edgeTypes.map(({ name }) => (
               <Select.Option value={name} key={name}>
@@ -90,110 +107,18 @@ const AllPath = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.target')}
-            </span>
-          </div>
-          <Input
-            width={400}
-            size="medium"
-            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-target-id'
-            )}
-            errorLocation="layer"
-            errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage.target
-            }
-            value={algorithmAnalyzerStore.allPathParams.target}
-            onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
-                'target',
-                e.value as string
-              );
-
-              algorithmAnalyzerStore.validateAllPathParams('target');
-            }}
-            originInputProps={{
-              onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('target');
-              }
-            }}
-          />
-        </div>
-        <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
-            <span>
-              {t('data-analyze.algorithm-forms.all-path.options.max_degree')}
-            </span>
-            <CustomTooltip
-              trigger="hover"
-              placement="bottom-start"
-              modifiers={{
-                offset: {
-                  offset: '0, 8'
-                }
-              }}
-              tooltipWrapperProps={{
-                className: 'tooltips-dark',
-                style: {
-                  zIndex: 7
-                }
-              }}
-              tooltipWrapper={t(
-                'data-analyze.algorithm-forms.all-path.hint.max-degree'
+              {t(
+                'data-analyze.algorithm-forms.radiographic-inspection.options.direction'
               )}
-              childrenProps={{
-                src: QuestionMarkIcon,
-                alt: 'hint',
-                style: {
-                  marginLeft: 5
-                }
-              }}
-              childrenWrapperElement="img"
-            />
-          </div>
-          <Input
-            width={400}
-            size="medium"
-            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-integer'
-            )}
-            errorLocation="layer"
-            errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage
-                .max_degree
-            }
-            value={algorithmAnalyzerStore.allPathParams.max_degree}
-            onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
-                'max_degree',
-                e.value as string
-              );
-
-              algorithmAnalyzerStore.validateAllPathParams('max_degree');
-            }}
-            originInputProps={{
-              onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('max_degree');
-              }
-            }}
-          />
-        </div>
-      </div>
-      <div className="query-tab-content-form-row">
-        <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
-            <i>*</i>
-            <span>
-              {t('data-analyze.algorithm-forms.all-path.options.direction')}
             </span>
           </div>
           <Radio.Group
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            value={algorithmAnalyzerStore.allPathParams.direction}
+            value={
+              algorithmAnalyzerStore.radiographicInspectionParams.direction
+            }
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
+              algorithmAnalyzerStore.mutateRadiographicInspectionParams(
                 'direction',
                 e.target.value
               );
@@ -207,43 +132,9 @@ const AllPath = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.capacity')}
-            </span>
-          </div>
-          <Input
-            width={400}
-            size="medium"
-            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer'
-            )}
-            errorLocation="layer"
-            errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage.capacity
-            }
-            value={algorithmAnalyzerStore.allPathParams.capacity}
-            onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
-                'capacity',
-                e.value as string
-              );
-
-              algorithmAnalyzerStore.validateAllPathParams('capacity');
-            }}
-            originInputProps={{
-              onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('capacity');
-              }
-            }}
-          />
-        </div>
-      </div>
-      <div className="query-tab-content-form-row">
-        <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
-            <i>*</i>
-            <span>
-              {t('data-analyze.algorithm-forms.all-path.options.max_depth')}
+              {t(
+                'data-analyze.algorithm-forms.radiographic-inspection.options.max_degree'
+              )}
             </span>
             <CustomTooltip
               trigger="hover"
@@ -260,7 +151,7 @@ const AllPath = observer(() => {
                 }
               }}
               tooltipWrapper={t(
-                'data-analyze.algorithm-forms.all-path.hint.max-depth'
+                'data-analyze.algorithm-forms.radiographic-inspection.hint.max-degree'
               )}
               childrenProps={{
                 src: QuestionMarkIcon,
@@ -277,24 +168,102 @@ const AllPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.radiographic-inspection.placeholder.input-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage.max_depth
+              algorithmAnalyzerStore
+                .validateRadiographicInspectionParamsErrorMessage.max_degree
             }
-            value={algorithmAnalyzerStore.allPathParams.max_depth}
+            value={
+              algorithmAnalyzerStore.radiographicInspectionParams.max_degree
+            }
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
+              algorithmAnalyzerStore.mutateRadiographicInspectionParams(
+                'max_degree',
+                e.value as string
+              );
+
+              algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                'max_degree'
+              );
+            }}
+            originInputProps={{
+              onBlur() {
+                algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                  'max_degree'
+                );
+              }
+            }}
+          />
+        </div>
+      </div>
+      <div className="query-tab-content-form-row">
+        <div className="query-tab-content-form-item">
+          <div className="query-tab-content-form-item-title">
+            <i>*</i>
+            <span>
+              {t(
+                'data-analyze.algorithm-forms.radiographic-inspection.options.max_depth'
+              )}
+            </span>
+            <CustomTooltip
+              trigger="hover"
+              placement="bottom-start"
+              modifiers={{
+                offset: {
+                  offset: '0, 8'
+                }
+              }}
+              tooltipWrapperProps={{
+                className: 'tooltips-dark',
+                style: {
+                  zIndex: 7
+                }
+              }}
+              tooltipWrapper={t(
+                'data-analyze.algorithm-forms.radiographic-inspection.hint.max-depth'
+              )}
+              childrenProps={{
+                src: QuestionMarkIcon,
+                alt: 'hint',
+                style: {
+                  marginLeft: 5
+                }
+              }}
+              childrenWrapperElement="img"
+            />
+          </div>
+          <Input
+            width={400}
+            size="medium"
+            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
+            placeholder={t(
+              'data-analyze.algorithm-forms.radiographic-inspection.placeholder.input-positive-integer'
+            )}
+            errorLocation="layer"
+            errorMessage={
+              algorithmAnalyzerStore
+                .validateRadiographicInspectionParamsErrorMessage.max_depth
+            }
+            value={
+              algorithmAnalyzerStore.radiographicInspectionParams.max_depth
+            }
+            onChange={(e: any) => {
+              algorithmAnalyzerStore.mutateRadiographicInspectionParams(
                 'max_depth',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateAllPathParams('max_depth');
+              algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                'max_depth'
+              );
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('max_depth');
+                algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                  'max_depth'
+                );
               }
             }}
           />
@@ -302,7 +271,9 @@ const AllPath = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.all-path.options.limit')}
+              {t(
+                'data-analyze.algorithm-forms.radiographic-inspection.options.capacity'
+              )}
             </span>
           </div>
           <Input
@@ -310,24 +281,72 @@ const AllPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.radiographic-inspection.placeholder.input-positive-integer'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateAllPathParamsErrorMessage.limit
+              algorithmAnalyzerStore
+                .validateRadiographicInspectionParamsErrorMessage.capacity
             }
-            value={algorithmAnalyzerStore.allPathParams.limit}
+            value={algorithmAnalyzerStore.radiographicInspectionParams.capacity}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateAllPathParams(
+              algorithmAnalyzerStore.mutateRadiographicInspectionParams(
+                'capacity',
+                e.value as string
+              );
+
+              algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                'capacity'
+              );
+            }}
+            originInputProps={{
+              onBlur() {
+                algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                  'capacity'
+                );
+              }
+            }}
+          />
+        </div>
+      </div>
+      <div className="query-tab-content-form-row">
+        <div className="query-tab-content-form-item"></div>
+        <div className="query-tab-content-form-item">
+          <div className="query-tab-content-form-item-title">
+            <span>
+              {t(
+                'data-analyze.algorithm-forms.radiographic-inspection.options.limit'
+              )}
+            </span>
+          </div>
+          <Input
+            width={400}
+            size="medium"
+            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
+            placeholder={t(
+              'data-analyze.algorithm-forms.radiographic-inspection.placeholder.input-positive-integer'
+            )}
+            errorLocation="layer"
+            errorMessage={
+              algorithmAnalyzerStore
+                .validateRadiographicInspectionParamsErrorMessage.limit
+            }
+            value={algorithmAnalyzerStore.radiographicInspectionParams.limit}
+            onChange={(e: any) => {
+              algorithmAnalyzerStore.mutateRadiographicInspectionParams(
                 'limit',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateAllPathParams('limit');
+              algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                'limit'
+              );
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateAllPathParams('limit');
+                algorithmAnalyzerStore.validateRadiographicInspectionParams(
+                  'limit'
+                );
               }
             }}
           />
@@ -350,8 +369,8 @@ const AllPath = observer(() => {
 
             const timerId = dataAnalyzeStore.addTempExecLog();
             await dataAnalyzeStore.fetchGraphs({
-              url: 'paths',
-              type: Algorithm.allPath
+              url: 'rays',
+              type: Algorithm.radiographicInspection
             });
             await dataAnalyzeStore.fetchExecutionLogs();
             window.clearTimeout(timerId);
@@ -363,7 +382,7 @@ const AllPath = observer(() => {
           style={styles.primaryButton}
           disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
           onClick={() => {
-            algorithmAnalyzerStore.resetAllPathParams();
+            algorithmAnalyzerStore.resetRadiographicInspectionParams();
           }}
         >
           {t('data-analyze.manipulations.reset')}
@@ -373,4 +392,4 @@ const AllPath = observer(() => {
   );
 });
 
-export default AllPath;
+export default RadiographicInspection;
