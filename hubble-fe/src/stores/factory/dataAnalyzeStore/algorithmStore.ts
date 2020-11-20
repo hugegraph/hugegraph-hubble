@@ -325,6 +325,52 @@ export function createValidateKHopParamsErrorMessage() {
   };
 }
 
+export function createCustomPathDefaultParams() {
+  return {
+    method: 'id',
+    source: '',
+    vertexType: '',
+    vertexProperty: [],
+    default_weight: 'NONE',
+    capacity: '10000000',
+    limit: '10000000',
+    steps: [
+      {
+        uuid: v4(),
+        direction: 'BOTH',
+        labels: ['__all__'],
+        properties: '10000',
+        weight_by: '',
+        degree: '10000',
+        sample: '0'
+      }
+    ]
+  };
+}
+
+export function createValidateCustomPathParamsErrorMessage() {
+  return {
+    method: '',
+    source: '',
+    vertexType: '',
+    vertexProperty: '',
+    default_weight: '',
+    capacity: '',
+    limit: '',
+    steps: [
+      {
+        uuid: '',
+        direction: '',
+        labels: '',
+        properties: '',
+        weight_by: '',
+        degree: '',
+        sample: ''
+      }
+    ]
+  };
+}
+
 export function createRadiographicInspectionDefaultParams() {
   return {
     source: '',

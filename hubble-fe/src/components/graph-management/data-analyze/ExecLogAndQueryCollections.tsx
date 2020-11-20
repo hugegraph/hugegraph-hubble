@@ -80,6 +80,7 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
           <ExecutionContent
             type={rowData.type}
             content={text}
+            algorithmName={rowData.algorithm_name}
             highlightText=""
           />
         );
@@ -208,7 +209,11 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
               className="exec-log-manipulation"
               onClick={loadStatements(
                 rowData.content,
-                rowData.type === 'GREMLIN_ASYNC' ? 'task' : 'query'
+                rowData.type === 'GREMLIN_ASYNC'
+                  ? 'task'
+                  : rowData.type === 'GREMLIN'
+                  ? 'query'
+                  : 'algorithm'
               )}
             >
               加载语句
@@ -383,7 +388,7 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
   );
 
   const loadStatements = useCallback(
-    (content: string, type?: 'query' | 'task') => () => {
+    (content: string, type?: 'query' | 'task' | 'algorithm') => () => {
       if (!dataAnalyzeStore.isLoadingGraph) {
         if (!isUndefined(type)) {
           type === 'task'
@@ -553,13 +558,14 @@ const ExecutionContent: React.FC<{
   type: string;
   content: string;
   highlightText: string;
-}> = observer(({ type, content, highlightText }) => {
+  algorithmName?: string;
+}> = observer(({ type, content, highlightText, algorithmName }) => {
   const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
   const { t } = useTranslation();
   const [isExpand, switchExpand] = useState(dataAnalyzeStore.isSearched.status);
   const statements =
     type === 'ALGORITHM'
-      ? formatAlgorithmStatement(content, Algorithm.shortestPath, t)
+      ? formatAlgorithmStatement(content, algorithmName, t)
       : content.split('\n').filter((statement) => statement !== '');
 
   const arrowIconClassName = classnames({
@@ -667,27 +673,21 @@ export const DeleteConfirm: React.FC<DeleteConfirmProps> = observer(
   }
 );
 
-function formatAlgorithmStatement(
+export function formatAlgorithmStatement(
   content: string,
-  algorithmType: string,
+  algorithmType: string | undefined,
   translator: TFunction
 ) {
-  const convertedString = content
-    .replace(/^.*\(/, '')
-    .replace(/\)$/, '')
-    .replace(/ /g, '');
+  if (isUndefined(algorithmType)) {
+    return [''];
+  }
+
   const statements: string[] = [
-    translator(`data-analyze.algorithm-list.${algorithmType}`)
+    translator(`data-analyze.algorithm-forms.api-name-mapping.${algorithmType}`)
   ];
 
-  convertedString.split(',').forEach((item) => {
-    const [key, value] = item.split('=');
-
-    statements.push(
-      `${translator(
-        `data-analyze.algorithm-forms.shortest-path.options.${key}`
-      )} ${value}`
-    );
+  Object.entries(JSON.parse(content)).forEach(([key, value]) => {
+    statements.push(`${key}: ${value}`);
   });
 
   return statements;

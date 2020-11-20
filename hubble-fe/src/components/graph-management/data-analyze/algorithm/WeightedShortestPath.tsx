@@ -152,6 +152,32 @@ const WeightedShortestPath = observer(() => {
                 'data-analyze.algorithm-forms.weighted-shortest-path.options.max_degree'
               )}
             </span>
+            <CustomTooltip
+              trigger="hover"
+              placement="bottom-start"
+              modifiers={{
+                offset: {
+                  offset: '0, 8'
+                }
+              }}
+              tooltipWrapperProps={{
+                className: 'tooltips-dark',
+                style: {
+                  zIndex: 7
+                }
+              }}
+              tooltipWrapper={t(
+                'data-analyze.algorithm-forms.weighted-shortest-path.hint.max-degree'
+              )}
+              childrenProps={{
+                src: QuestionMarkIcon,
+                alt: 'hint',
+                style: {
+                  marginLeft: 5
+                }
+              }}
+              childrenWrapperElement="img"
+            />
           </div>
           <Input
             width={400}
@@ -360,7 +386,6 @@ const WeightedShortestPath = observer(() => {
       <div className="query-tab-content-form-row">
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
-            <i>*</i>
             <span>
               {t(
                 'data-analyze.algorithm-forms.weighted-shortest-path.options.with_vertex'

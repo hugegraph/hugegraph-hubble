@@ -355,6 +355,32 @@ const NeighborRank = observer(() => {
                         'data-analyze.algorithm-forms.neighbor-rank.options.degree'
                       )}
                     </span>
+                    <CustomTooltip
+                      trigger="hover"
+                      placement="bottom-start"
+                      modifiers={{
+                        offset: {
+                          offset: '0, 8'
+                        }
+                      }}
+                      tooltipWrapperProps={{
+                        className: 'tooltips-dark',
+                        style: {
+                          zIndex: 7
+                        }
+                      }}
+                      tooltipWrapper={t(
+                        'data-analyze.algorithm-forms.neighbor-rank.hint.max-degree'
+                      )}
+                      childrenProps={{
+                        src: QuestionMarkIcon,
+                        alt: 'hint',
+                        style: {
+                          marginLeft: 5
+                        }
+                      }}
+                      childrenWrapperElement="img"
+                    />
                   </div>
                   <Input
                     width={380}

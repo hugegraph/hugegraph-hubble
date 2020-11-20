@@ -131,6 +131,32 @@ const PersonalRank = observer(() => {
                 'data-analyze.algorithm-forms.personal-rank.options.max_degree'
               )}
             </span>
+            <CustomTooltip
+              trigger="hover"
+              placement="bottom-start"
+              modifiers={{
+                offset: {
+                  offset: '0, 8'
+                }
+              }}
+              tooltipWrapperProps={{
+                className: 'tooltips-dark',
+                style: {
+                  zIndex: 7
+                }
+              }}
+              tooltipWrapper={t(
+                'data-analyze.algorithm-forms.personal-rank.hint.max-degree'
+              )}
+              childrenProps={{
+                src: QuestionMarkIcon,
+                alt: 'hint',
+                style: {
+                  marginLeft: 5
+                }
+              }}
+              childrenWrapperElement="img"
+            />
           </div>
           <Input
             width={400}
@@ -266,6 +292,32 @@ const PersonalRank = observer(() => {
                 'data-analyze.algorithm-forms.personal-rank.options.with_label.title'
               )}
             </span>
+            <CustomTooltip
+              trigger="hover"
+              placement="bottom-start"
+              modifiers={{
+                offset: {
+                  offset: '0, 8'
+                }
+              }}
+              tooltipWrapperProps={{
+                className: 'tooltips-dark',
+                style: {
+                  zIndex: 7
+                }
+              }}
+              tooltipWrapper={t(
+                'data-analyze.algorithm-forms.personal-rank.hint.with-label'
+              )}
+              childrenProps={{
+                src: QuestionMarkIcon,
+                alt: 'hint',
+                style: {
+                  marginLeft: 5
+                }
+              }}
+              childrenWrapperElement="img"
+            />
           </div>
           <Radio.Group
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
@@ -296,10 +348,35 @@ const PersonalRank = observer(() => {
         </div>
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
-            <i>*</i>
             <span>
               {t('data-analyze.algorithm-forms.personal-rank.options.sorted')}
             </span>
+            <CustomTooltip
+              trigger="hover"
+              placement="bottom-start"
+              modifiers={{
+                offset: {
+                  offset: '0, 8'
+                }
+              }}
+              tooltipWrapperProps={{
+                className: 'tooltips-dark',
+                style: {
+                  zIndex: 7
+                }
+              }}
+              tooltipWrapper={t(
+                'data-analyze.algorithm-forms.personal-rank.hint.sorted'
+              )}
+              childrenProps={{
+                src: QuestionMarkIcon,
+                alt: 'hint',
+                style: {
+                  marginLeft: 5
+                }
+              }}
+              childrenWrapperElement="img"
+            />
           </div>
           <div style={{ width: 400 }}>
             <Switch
