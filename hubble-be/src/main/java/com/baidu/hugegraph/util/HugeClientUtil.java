@@ -75,7 +75,7 @@ public final class HugeClientUtil {
                 throw new ExternalException("client-server.version.unmatched", e);
             }
             if (message != null && message.startsWith("Error loading trust store from")) {
-                throw new ExternalException("load.truststore.error", e);
+                throw new ExternalException("https.load.truststore.error", e);
             }
             throw e;
         } catch (ServerException e) {
