@@ -153,7 +153,7 @@ const LoopDetection = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.loop-detection.placeholder.input-integer'
+              'data-analyze.algorithm-forms.loop-detection.placeholder.input-positive-integer-or-negative-one-max-degree'
             )}
             errorLocation="layer"
             errorMessage={
@@ -254,7 +254,7 @@ const LoopDetection = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.loop-detection.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.loop-detection.placeholder.input-positive-integer-or-negative-one-limit'
             )}
             errorLocation="layer"
             errorMessage={
@@ -314,7 +314,7 @@ const LoopDetection = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.loop-detection.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.loop-detection.placeholder.input-positive-integer-or-negative-one-capacity'
             )}
             errorLocation="layer"
             errorMessage={

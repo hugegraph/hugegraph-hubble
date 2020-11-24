@@ -153,7 +153,7 @@ const KStepNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-integer'
+              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-positive-integer-or-negative-one-max-degree'
             )}
             errorLocation="layer"
             errorMessage={
@@ -254,7 +254,7 @@ const KStepNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-positive-integer-or-negative-one-limit'
             )}
             errorLocation="layer"
             errorMessage={

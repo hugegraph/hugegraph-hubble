@@ -10,15 +10,7 @@ import { observer } from 'mobx-react';
 import CodeMirror from 'codemirror';
 import { useTranslation } from 'react-i18next';
 import classnames from 'classnames';
-import {
-  Button,
-  Tooltip,
-  Alert,
-  Dropdown,
-  Input,
-  Radio,
-  Select
-} from '@baidu/one-ui';
+import { Button, Tooltip, Alert, Dropdown } from '@baidu/one-ui';
 
 import 'codemirror/lib/codemirror.css';
 import 'react-popper-tooltip/dist/styles.css';
@@ -79,6 +71,7 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
     dataAnalyzeStore.codeEditorInstance?.setValue('');
     // reset algorithm tab to list
     algorithmAnalyzerStore.changeCurrentAlgorithm('');
+    algorithmAnalyzerStore.switchCollapse(false);
   };
 
   return (
@@ -458,7 +451,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
         return <AllPath />;
       case Algorithm.modelSimilarity:
         return <ModelSimilarity />;
-      case Algorithm.neighborRankRecommendation:
+      case Algorithm.neighborRank:
         return <NeighborRank />;
       case Algorithm.kStepNeighbor:
         return <KStepNeighbor />;
@@ -502,6 +495,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
                 marginRight: 12
               }}
               onClick={() => {
+                algorithmAnalyzerStore.switchCollapse(false);
                 algorithmAnalyzerStore.changeCurrentAlgorithm('');
               }}
             />
@@ -538,7 +532,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
               Algorithm.shortestPathAll,
               Algorithm.allPath
             ].map((algorithm) => (
-              <span onClick={handleChangeAlgorithm(algorithm)}>
+              <span onClick={handleChangeAlgorithm(algorithm)} key={algorithm}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}
@@ -546,12 +540,12 @@ export const AlgorithmQuery: React.FC = observer(() => {
           <div className="query-tab-content-menu">
             {[
               Algorithm.modelSimilarity,
-              Algorithm.neighborRankRecommendation,
+              Algorithm.neighborRank,
               Algorithm.kStepNeighbor,
               Algorithm.kHop,
               Algorithm.customPath
             ].map((algorithm) => (
-              <span onClick={handleChangeAlgorithm(algorithm)}>
+              <span onClick={handleChangeAlgorithm(algorithm)} key={algorithm}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}
@@ -564,14 +558,14 @@ export const AlgorithmQuery: React.FC = observer(() => {
               Algorithm.singleSourceWeightedShortestPath,
               Algorithm.jaccardSimilarity
             ].map((algorithm) => (
-              <span onClick={handleChangeAlgorithm(algorithm)}>
+              <span onClick={handleChangeAlgorithm(algorithm)} key={algorithm}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}
           </div>
           <div className="query-tab-content-menu">
             {[Algorithm.personalRankRecommendation].map((algorithm) => (
-              <span onClick={handleChangeAlgorithm(algorithm)}>
+              <span onClick={handleChangeAlgorithm(algorithm)} key={algorithm}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}

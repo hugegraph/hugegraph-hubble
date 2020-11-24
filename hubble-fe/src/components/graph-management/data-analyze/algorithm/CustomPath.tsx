@@ -241,7 +241,7 @@ const CustomPath = observer(() => {
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
               }
               placeholder={t(
-                'data-analyze.algorithm-forms.custom-path.placeholder.input-positive-integer'
+                'data-analyze.algorithm-forms.custom-path.placeholder.input-positive-integer-or-negative-one-capacity'
               )}
               errorLocation="layer"
               errorMessage={
@@ -279,7 +279,7 @@ const CustomPath = observer(() => {
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
               }
               placeholder={t(
-                'data-analyze.algorithm-forms.custom-path.placeholder.input-integer'
+                'data-analyze.algorithm-forms.custom-path.placeholder.input-positive-integer-or-negative-one-limit'
               )}
               errorLocation="layer"
               errorMessage={
@@ -389,7 +389,7 @@ const CustomPath = observer(() => {
                   {size(algorithmAnalyzerStore.customPathParams.steps) > 1 && (
                     <div
                       style={{
-                        marginLeft: 198,
+                        marginLeft: 175,
                         fontSize: 14,
                         color: '#2b65ff',
                         cursor: 'pointer',
@@ -554,7 +554,7 @@ const CustomPath = observer(() => {
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
                     }
                     placeholder={t(
-                      'data-analyze.algorithm-forms.custom-path.placeholder.input-integer'
+                      'data-analyze.algorithm-forms.custom-path.placeholder.input-positive-integer-or-negative-one-degree'
                     )}
                     errorLocation="layer"
                     errorMessage={
@@ -669,17 +669,7 @@ const CustomPath = observer(() => {
               {t('data-analyze.algorithm-forms.custom-path.add-new-rule')}
             </span>
           ) : (
-            <div
-              style={{
-                width: 150,
-                boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)',
-                lineHeight: '18px',
-                padding: '16px',
-                color: '#e64552',
-                fontSize: 14,
-                textAlign: 'center'
-              }}
-            >
+            <div className="query-tab-algorithm-hint">
               {t(
                 'data-analyze.algorithm-forms.custom-path.validations.input-chars'
               )}

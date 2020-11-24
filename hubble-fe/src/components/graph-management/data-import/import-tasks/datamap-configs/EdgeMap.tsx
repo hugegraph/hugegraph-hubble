@@ -150,6 +150,9 @@ const EdgeMap: React.FC<EdgeMapProps> = observer(
               size="medium"
               getPopupContainer={(e: any) => e}
               selectorName={t('data-configs.type.placeholder.select-edge-type')}
+              notFoundContent={t(
+                'data-configs.type.placeholder.select-vertex-type'
+              )}
               value={
                 isEdit
                   ? dataMapStore.editedEdgeMap!.label

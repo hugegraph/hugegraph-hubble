@@ -164,7 +164,7 @@ const FocusDetection = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.focus-detection.placeholder.input-integer'
+              'data-analyze.algorithm-forms.focus-detection.placeholder.input-positive-integer-or-negative-one-max-degree'
             )}
             errorLocation="layer"
             errorMessage={
@@ -228,7 +228,7 @@ const FocusDetection = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.focus-detection.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.focus-detection.placeholder.input-positive-integer-or-negative-one-capacity'
             )}
             errorLocation="layer"
             errorMessage={
@@ -329,7 +329,7 @@ const FocusDetection = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.focus-detection.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.focus-detection.placeholder.input-positive-integer-or-negative-one-limit'
             )}
             errorLocation="layer"
             errorMessage={

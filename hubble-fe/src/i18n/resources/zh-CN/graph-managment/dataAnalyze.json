@@ -17,7 +17,7 @@
       "shortest-path-all": "全最短路径",
       "all-path": "所有路径",
       "model-similarity": "模型相似度算法",
-      "neighbor-rank-recommendation": "Neighbor Rank推荐算法",
+      "neighbor-rank": "Neighbor Rank推荐算法",
       "k-step-neighbor": "k步邻居",
       "k-hop": "k跳算法",
       "custom-path": "自定义路径",
@@ -43,19 +43,20 @@
         "pre-value": "全部",
         "placeholder": {
           "input-source-id": "请输入起点ID",
-          "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
+          "input-positive-integer-or-negative-one-capacity": "请填写-1或大于0的整数，默认为10000000",
+          "input-positive-integer-or-negative-one-limit": "请填写-1或大于0的整数，默认为10",
           "input-positive-integer": "请填写大于0的整数",
           "no-edge-types": "无边类型"
         },
         "hint": {
           "max-depth": "为保证性能，建议不超过10步，推荐5步",
-          "max-degree": "查询过程中，单个顶点的最大边数目",
-          "skip-degree": "填写查询过程中需要跳过的顶点的最小的边数目，即当顶点的边数目大于超级顶点度数时，跳过该顶点，可用于规避超级点"
+          "max-degree": "查询过程中，单个顶点的最大边数目"
         },
         "validations": {
           "no-empty": "该项不能为空",
-          "integer-only": "请填写大于等于0的整数",
-          "postive-integer-only": "请填写大于0的整数"
+          "postive-integer-only": "请填写大于0的整数",
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数"
         }
       },
       "focus-detection": {
@@ -66,14 +67,16 @@
           "max_depth": "最大步数:",
           "label": "边类型:",
           "max_degree": "最大度数:",
-          "limit": "访问顶点最大值:",
-          "capacity": "返回交点最大值:"
+          "capacity": "访问顶点最大值:",
+          "limit": "返回交点最大值:"
         },
         "pre-value": "全部",
         "placeholder": {
           "input-source-id": "请输入起点ID",
           "input-target-id": "请输入终点ID",
-          "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
+          "input-positive-integer-or-negative-one-capacity": "请填写-1或大于0的整数，默认为10000000",
+          "input-positive-integer-or-negative-one-limit": "请填写-1或大于0的整数，默认为10",
           "input-positive-integer": "请填写大于0的整数",
           "no-edge-types": "无边类型"
         },
@@ -83,8 +86,8 @@
         },
         "validations": {
           "no-empty": "该项不能为空",
-          "integer-only": "请填写大于等于0的整数",
-          "postive-integer-only": "请填写大于0的整数"
+          "postive-integer-only": "请填写大于0的整数",
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数"
         }
       },
       "shortest-path": {
@@ -93,19 +96,18 @@
           "target": "终点ID:",
           "direction": "方向:",
           "max_depth": "最大步数:",
-          "maxDepth": "最大步数:",
           "label": "边类型:",
           "max_degree": "最大度数:",
-          "maxDegree": "最大度数:",
           "skip_degree": "超级顶点度数:",
-          "skipDegree": "超级顶点度数:",
           "capacity": "访问顶点最大值:"
         },
         "pre-value": "全部",
         "placeholder": {
           "input-source-id": "请输入起点ID",
           "input-target-id": "请输入终点ID",
-          "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
+          "input-positive-integer-or-negative-one-capacity": "请填写-1或大于0的整数，默认为10000000",
+          "input-integer": "请填写大于等于0的整数，默认为0",
           "input-positive-integer": "请填写大于0的整数",
           "no-edge-types": "无边类型"
         },
@@ -116,6 +118,7 @@
         },
         "validations": {
           "no-empty": "该项不能为空",
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数",
           "integer-only": "请填写大于等于0的整数",
           "postive-integer-only": "请填写大于0的整数"
         }
@@ -135,8 +138,10 @@
         "placeholder": {
           "input-source-id": "请输入起点ID",
           "input-target-id": "请输入终点ID",
-          "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
+          "input-positive-integer-or-negative-one-capacity": "请填写-1或大于0的整数，默认为10000000",
           "input-positive-integer": "请填写大于0的整数",
+          "input-integer": "请填写大于等于0的整数，默认为0",
           "no-edge-types": "无边类型"
         },
         "hint": {
@@ -147,7 +152,8 @@
         "validations": {
           "no-empty": "该项不能为空",
           "integer-only": "请填写大于等于0的整数",
-          "postive-integer-only": "请填写大于0的整数"
+          "postive-integer-only": "请填写大于0的整数",
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数"
         }
       },
       "all-path": {
@@ -165,7 +171,9 @@
         "placeholder": {
           "input-source-id": "请输入起点ID",
           "input-target-id": "请输入终点ID",
-          "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
+          "input-positive-integer-or-negative-one-capacity": "请填写-1或大于0的整数，默认为10000000",
+          "input-positive-integer-or-negative-one-limit": "请填写-1或大于0的整数，默认为10",
           "input-positive-integer": "请填写大于0的整数",
           "no-edge-types": "无边类型"
         },
@@ -175,22 +183,22 @@
         },
         "validations": {
           "no-empty": "该项不能为空",
-          "integer-only": "请填写大于等于0的整数",
-          "postive-integer-only": "请填写大于0的整数"
+          "postive-integer-only": "请填写大于0的整数",
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数"
         }
       },
       "model-similarity": {
         "options": {
           "method": "起点选择方式:",
           "source": "起点ID:",
-          "vertex-type": "顶点类型",
-          "vertex-property": "顶点属性",
+          "vertex-type": "顶点类型:",
+          "vertex-property": "顶点属性及值:",
           "direction": "方向:",
           "least_neighbor": "最少邻居数:",
           "similarity": "相似度:",
           "label": "边类型:",
           "max_similar": "相似度最高个数:",
-          "least_similar": "梭形相似点最小个数:",
+          "least_similar": "模形相似点最小个数:",
           "property_filter": "属性过滤:",
           "least_property_number": "最小属性值个数:",
           "max_degree": "最大度数:",
@@ -205,17 +213,24 @@
           "filtered-type-property": "筛选类型属性"
         },
         "placeholder": {
-          "input-source-id": "请输入起点ID",
+          "input-source-id": "请输入起点ID，多个ID用逗号分隔",
           "input-vertex-type": "请选择顶点类型",
-          "input-vertex-property": "请选择顶点属性",
+          "select-vertex-property": "请选择顶点属性",
+          "input-vertex-property": "多属性值以逗号分隔",
+          "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
+          "input-positive-integer-or-negative-one-capacity": "请填写-1或大于0的整数，默认为10000000",
+          "input-positive-integer-or-negative-one-limit": "请填写-1或大于0的整数，默认为10",
           "input-integer": "请填写大于等于0的整数",
           "input-positive-integer": "请填写大于0的整数",
           "input-integer-gt-1": "请填写大于1的整数",
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数",
           "input-filtered-property": "请选择需要过滤的属性",
           "no-properties": "无属性",
-          "no-vertex-type": "无顶点类型"
+          "no-vertex-type": "无顶点类型",
+          "similarity": "请输入(0-1]的数字"
         },
         "hint": {
+          "vertex_type_or_property": "顶点类型/顶点属性至少填写一项",
           "least_property_number": "属性过滤和最小属性值个数需一起使用；设置后效果为：当起点跟其所有的梭形相似点某个属性的值大于等于最小属性值个数时，才会返回该起点及其梭形相似点",
           "max-degree": "查询过程中，单个顶点的最大边数目",
           "least_neighbor": "邻居数少于当前设定值，则认为起点没有梭形相似点",
@@ -227,9 +242,14 @@
           "no-empty": "该项不能为空",
           "no-edge-typs": "无边类型",
           "integer-only": "请填写大于等于0的整数",
-          "positive-integer-only": "请填写大于0的整数",
-          "integer-gt-1": "请填写大于1的整数"
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数",
+          "postive-integer-only": "请填写大于0的整数",
+          "integer-gt-1": "请填写大于1的整数",
+          "similarity": "请输入(0-1]的数字",
+          "no-gt-1000": "该值不能大于等于1000"
         },
+        "add": "添加",
+        "delete": "删除",
         "pre-value": "全部"
       },
       "neighbor-rank": {
@@ -240,11 +260,14 @@
           "capacity": "访问顶点最大值:",
           "label": "边类型:",
           "degree": "最大度数:",
-          "top": "每层保留权重Top N:"
+          "top": "每层保留权重Top N:",
+          "steps": "steps:"
         },
         "placeholder": {
           "input-source-id": "请输入起点ID",
-          "input-integer": "请填写大于等于0的整数",
+          "input-integer-lt-1000": "请填写大于等于0小于1000的整数, 默认为100",
+          "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
+          "input-positive-integer-or-negative-one-capacity": "请填写-1或大于0的整数，默认为10000000",
           "input-positive-integer": "请填写大于0的整数",
           "range": "范围(0-1]"
         },
@@ -256,9 +279,10 @@
           "no-empty": "该项不能为空",
           "no-edge-typs": "无边类型",
           "range": "请填写大于0且小于等于1的数值",
-          "integer-only": "请填写大于等于0的整数",
+          "integer-only-lt-1000": "请填写大于等于0的整数小于1000的整数",
           "postive-integer-only": "请填写大于0的整数",
-          "input-chars": "规则不能其它重复"
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数",
+          "input-chars": "规则不能与其它重复"
         },
         "pre-value": "全部",
         "add-new-rule": "添加规则"
@@ -275,7 +299,8 @@
         "pre-value": "全部",
         "placeholder": {
           "input-source-id": "请输入起点ID",
-          "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
+          "input-positive-integer-or-negative-one-limit": "请填写-1或大于0的整数，默认为10",
           "input-positive-integer": "请填写大于0的整数",
           "no-edge-types": "无边类型"
         },
@@ -285,8 +310,8 @@
         },
         "validations": {
           "no-empty": "该项不能为空",
-          "integer-only": "请填写大于等于0的整数",
-          "postive-integer-only": "请填写大于0的整数"
+          "postive-integer-only": "请填写大于0的整数",
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数"
         }
       },
       "kHop": {
@@ -297,13 +322,15 @@
           "nearest": "最短路径:",
           "label": "边类型:",
           "max_degree": "最大度数:",
-          "limit": "遍历中访问顶点最大值:",
-          "capacity": "访问顶点最大值:"
+          "capacity": "遍历中访问顶点最大值:",
+          "limit": "返回顶点最大值:"
         },
         "pre-value": "全部",
         "placeholder": {
           "input-source-id": "请输入起点ID",
-          "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
+          "input-positive-integer-or-negative-one-capacity": "请填写-1或大于0的整数，默认为10000000",
+          "input-positive-integer-or-negative-one-limit": "请填写-1或大于0的整数，默认为10",
           "input-positive-integer": "请填写大于0的整数",
           "no-edge-types": "无边类型"
         },
@@ -314,8 +341,8 @@
         },
         "validations": {
           "no-empty": "该项不能为空",
-          "integer-only": "请填写大于等于0的整数",
-          "postive-integer-only": "请填写大于0的整数"
+          "postive-integer-only": "请填写大于0的整数",
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数"
         }
       },
       "custom-path": {
@@ -326,7 +353,7 @@
           "vertex-property": "顶点属性:",
           "default_weight": "路径权重排序:",
           "capacity": "遍历中访问顶点最大值:",
-          "limit": "访问顶点最大值:",
+          "limit": "返回顶点最大值:",
           "direction": "方向:",
           "label": "边类型:",
           "properties": "边属性:",
@@ -340,6 +367,9 @@
           "input-vertex-property": "请选择顶点属性",
           "input-integer": "请填写大于等于0的整数",
           "input-positive-integer": "请填写大于0的整数",
+          "input-positive-integer-or-negative-one-degree": "请填写-1或大于0的整数，默认为10000",
+          "input-positive-integer-or-negative-one-capacity": "请填写-1或大于0的整数，默认为10000000",
+          "input-positive-integer-or-negative-one-limit": "请填写-1或大于0的整数，默认为10000000",
           "input-property": "请输入边属性",
           "input-number": "请输入数字",
           "select-property": "请选择属性",
@@ -363,6 +393,7 @@
           "range": "请填写大于0且小于等于1的数值",
           "integer-only": "请填写大于等于0的整数",
           "postive-integer-only": "请填写大于0的整数",
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数",
           "input-chars": "规则不能其它重复"
         },
         "pre-value": "全部",
@@ -376,13 +407,15 @@
           "label": "边类型:",
           "max_degree": "最大度数:",
           "capacity": "遍历中访问顶点最大值:",
-          "limit": "返回非环境路径最大值:"
+          "limit": "返回非环路路径最大值:"
         },
         "pre-value": "全部",
         "placeholder": {
           "input-source-id": "请输入起点ID",
-          "input-integer": "请填写大于等于0的整数",
           "input-positive-integer": "请填写大于0的整数",
+          "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
+          "input-positive-integer-or-negative-one-capacity": "请填写-1或大于0的整数，默认为10000000",
+          "input-positive-integer-or-negative-one-limit": "请填写-1或大于0的整数，默认为10000000",
           "no-edge-types": "无边类型"
         },
         "hint": {
@@ -391,8 +424,8 @@
         },
         "validations": {
           "no-empty": "该项不能为空",
-          "integer-only": "请填写大于等于0的整数",
-          "postive-integer-only": "请填写大于0的整数"
+          "postive-integer-only": "请填写大于0的整数",
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数"
         }
       },
       "same-neighbor": {
@@ -407,7 +440,8 @@
         "pre-value": "全部",
         "placeholder": {
           "input-source-id": "请输入起点ID",
-          "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
+          "input-positive-integer-or-negative-one-limit": "请填写-1或大于0的整数，默认为10000000",
           "input-positive-integer": "请填写大于0的整数",
           "no-edge-types": "无边类型"
         },
@@ -417,8 +451,10 @@
         },
         "validations": {
           "no-empty": "该项不能为空",
-          "integer-only": "请填写大于等于0的整数",
-          "postive-integer-only": "请填写大于0的整数"
+          "postive-integer-only": "请填写大于0的整数",
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数",
+          "no-same-value-with-other": "不能与顶点2相同",
+          "no-same-value-with-vertex": "不能与顶点1相同"
         }
       },
       "weighted-shortest-path": {
@@ -426,20 +462,22 @@
           "source": "起点ID:",
           "target": "终点ID:",
           "direction": "方向:",
-          "weighted": "权重属性:",
+          "weight": "权重属性:",
           "with_vertex": "返回顶点完整信息:",
           "label": "边类型:",
           "max_degree": "最大度数:",
           "skip_degree": "跳过点的度数:",
-          "limit": "遍历中访问顶点最大值:"
+          "capacity": "遍历中访问顶点最大值:"
         },
         "pre-value": "全部",
         "placeholder": {
           "input-source-id": "请输入起点ID",
           "input-target-id": "请输入终点ID",
           "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
+          "input-positive-integer-or-negative-one-capacity": "请填写-1或大于0的整数，默认为10000000",
           "select-property": "请选择属性",
-          "input-positive-integer": "请填写大于0的整数",
+          "input-positive-integer": "请填写大于0的整数，默认为0",
           "no-property": "无属性",
           "no-edge-types": "无边类型"
         },
@@ -451,6 +489,7 @@
         "validations": {
           "no-empty": "该项不能为空",
           "integer-only": "请填写大于等于0的整数",
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数",
           "postive-integer-only": "请填写大于0的整数"
         }
       },
@@ -458,7 +497,7 @@
         "options": {
           "source": "起点ID:",
           "direction": "方向:",
-          "weighted": "权重属性:",
+          "weight": "权重属性:",
           "with_vertex": "返回顶点完整信息:",
           "label": "边类型:",
           "max_degree": "最大度数:",
@@ -469,8 +508,11 @@
         "pre-value": "全部",
         "placeholder": {
           "input-source-id": "请输入起点ID",
-          "input-integer": "请填写大于等于0的整数",
+          "input-integer": "请填写大于等于0的整数，默认为0",
           "input-positive-integer": "请填写大于0的整数",
+          "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
+          "input-positive-integer-or-negative-one-capacity": "请填写-1或大于0的整数，默认为10000000",
+          "input-positive-integer-or-negative-one-limit": "请填写-1或大于0的整数，默认为10",
           "no-property": "若不填写权重为1.0",
           "no-edge-types": "无边类型"
         },
@@ -482,7 +524,8 @@
         "validations": {
           "no-empty": "该项不能为空",
           "integer-only": "请填写大于等于0的整数",
-          "postive-integer-only": "请填写大于0的整数"
+          "postive-integer-only": "请填写大于0的整数",
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数"
         }
       },
       "jaccard": {
@@ -496,8 +539,8 @@
         "pre-value": "全部",
         "placeholder": {
           "input-source-id": "请输入起点ID",
-          "input-integer": "请填写大于等于0的整数",
           "input-positive-integer": "请填写大于0的整数",
+          "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
           "no-edge-types": "无边类型"
         },
         "hint": {
@@ -506,8 +549,10 @@
         },
         "validations": {
           "no-empty": "该项不能为空",
-          "integer-only": "请填写大于等于0的整数",
-          "postive-integer-only": "请填写大于0的整数"
+          "postive-integer-only": "请填写大于0的整数",
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数",
+          "no-same-value-with-other": "不能与顶点2相同",
+          "no-same-value-with-vertex": "不能与顶点1相同"
         }
       },
       "personal-rank": {
@@ -522,19 +567,20 @@
             "both_label": "全部类型顶点"
           },
           "label": "边类型:",
-          "max_degree": "最大度数:",
+          "degree": "最大度数:",
           "limit": "返回顶点最大值:",
           "sorted": "返回结果排序:"
         },
         "placeholder": {
           "input-source-id": "请输入起点ID",
-          "input-integer": "请填写大于等于0的整数",
+          "input-positive-integer-or-negative-one-degree": "请填写-1或大于0的整数，默认为10000",
+          "input-positive-integer-or-negative-one-limit": "请填写-1或大于0的整数，默认为10000000",
           "input-positive-integer": "请填写大于0的整数",
           "alpha": "请输入(0-1]的数字",
           "max_depth": "请输入(0-50]的数字"
         },
         "hint": {
-          "max-degree": "查询过程中，单个顶点的最大边数目",
+          "degree": "查询过程中，单个顶点的最大边数目",
           "with-label": "根据是否与起点类型相同，筛选返回结果",
           "sorted": "选择开，则降序排列，选择关，则不排序"
         },
@@ -543,8 +589,8 @@
           "no-edge-typs": "无边类型",
           "alpha-range": "请填写大于0且小于等于1的数值",
           "depth-range": "请填写大于0且小于等于50的数值",
-          "integer-only": "请填写大于等于0的整数",
           "postive-integer-only": "请填写大于0的整数",
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数",
           "input-chars": "规则不能其它重复"
         },
         "pre-value": "全部",

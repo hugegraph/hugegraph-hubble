@@ -165,7 +165,7 @@ const ShortestPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.shortest-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.shortest-path.placeholder.input-positive-integer-or-negative-one-max-degree'
             )}
             errorLocation="layer"
             errorMessage={
@@ -358,7 +358,7 @@ const ShortestPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.shortest-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.shortest-path.placeholder.input-positive-integer-or-negative-one-capacity'
             )}
             errorLocation="layer"
             errorMessage={

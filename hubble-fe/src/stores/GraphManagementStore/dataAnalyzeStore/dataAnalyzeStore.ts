@@ -1,7 +1,15 @@
 import { createContext } from 'react';
 import { observable, action, flow, computed, runInAction } from 'mobx';
 import axios, { AxiosResponse } from 'axios';
-import { isUndefined, cloneDeep, isEmpty, remove, size } from 'lodash-es';
+import {
+  isUndefined,
+  cloneDeep,
+  isEmpty,
+  remove,
+  size,
+  fromPairs,
+  invert
+} from 'lodash-es';
 import vis from 'vis-network';
 import isInt from 'validator/lib/isInt';
 import isUUID from 'validator/lib/isUUID';
@@ -61,14 +69,17 @@ import type {
   SingleSourceWeightedShortestPath,
   Jaccard,
   PersonalRank,
-  CustomPathRule
+  CustomPathRule,
+  KStepNeighbor
 } from '../../types/GraphManagementStore/dataAnalyzeStore';
 import type {
   VertexTypeListResponse,
   VertexType,
-  EdgeType
+  EdgeType,
+  MetadataPropertyIndex
 } from '../../types/GraphManagementStore/metadataConfigsStore';
 import type { EdgeTypeListResponse } from '../../types/GraphManagementStore/metadataConfigsStore';
+import { AlgorithmInternalNameMapping } from '../../../utils';
 
 const ruleMap: RuleMap = {
   大于: 'gt',
@@ -149,6 +160,7 @@ export class DataAnalyzeStore {
   @observable.ref valueTypes: Record<string, string> = {};
   @observable.ref vertexTypes: VertexType[] = [];
   @observable.ref edgeTypes: EdgeType[] = [];
+  @observable.ref propertyIndexes: MetadataPropertyIndex[] = [];
   @observable.ref colorSchemas: ColorSchemas = {};
   @observable.ref colorList: string[] = [];
   @observable.ref colorMappings: Record<string, string> = {};
@@ -667,10 +679,23 @@ export class DataAnalyzeStore {
     const tempData: ExecutionLogs = {
       id: NaN,
       async_id: NaN,
-      algorithm_name: '',
+      algorithm_name:
+        this.currentTab === 'algorithm-analyze'
+          ? invert(AlgorithmInternalNameMapping)[
+              this.algorithmAnalyzerStore.currentAlgorithm
+            ]
+          : '',
       async_status: 'UNKNOWN',
-      type: 'GREMLIN',
-      content: this.codeEditorText,
+      type:
+        this.currentTab === 'algorithm-analyze'
+          ? 'ALGORITHM'
+          : this.queryMode === 'query'
+          ? 'GREMLIN'
+          : 'GREMLIN_ASYNC',
+      content:
+        this.currentTab === 'algorithm-analyze'
+          ? JSON.stringify(this.algorithmAnalyzerStore.currentAlgorithmParams)
+          : this.codeEditorText,
       status: 'RUNNING',
       duration: '0ms',
       create_time: timeString
@@ -1364,6 +1389,38 @@ export class DataAnalyzeStore {
     }
   });
 
+  fetchAllPropertyIndexes = flow(function* fetchAllPropertyIndexes(
+    this: DataAnalyzeStore,
+    indexType: 'vertex' | 'edge'
+  ) {
+    this.requestStatus.fetchAllPropertyIndexes = 'pending';
+
+    try {
+      const result = yield axios
+        .get(`${baseUrl}/${this.currentId}/schema/propertyindexes`, {
+          params: {
+            page_size: -1,
+            is_vertex_label: indexType === 'vertex'
+          }
+        })
+        .catch(checkIfLocalNetworkOffline);
+
+      if (result.data.status !== 200) {
+        if (result.data.status === 401) {
+          this.validateLicenseOrMemories = false;
+        }
+
+        throw new Error(result.data.message);
+      }
+
+      this.propertyIndexes = result.data.data.records;
+      this.requestStatus.fetchAllPropertyIndexes = 'success';
+    } catch (error) {
+      this.requestStatus.fetchAllPropertyIndexes = 'failed';
+      this.errorMessage = error.message;
+    }
+  });
+
   fetchGraphs = flow(function* fetchGraphs(
     this: DataAnalyzeStore,
     algorithmConfigs?: { url: string; type: string }
@@ -1381,6 +1438,7 @@ export class DataAnalyzeStore {
       | AllPathAlgorithmParams
       | ModelSimilarityParams
       | NeighborRankParams
+      | KStepNeighbor
       | KHop
       | RadiographicInspection
       | SameNeighbor
@@ -1489,19 +1547,32 @@ export class DataAnalyzeStore {
             property_filter,
             least_property_number,
             max_degree,
-            skip_degree,
             capacity,
             limit,
             return_common_connection,
             return_complete_info
           } = this.algorithmAnalyzerStore.modelSimilarityParams;
 
+          const sources: Record<string, any> = {};
+
+          if (source !== '') {
+            sources.ids = source.split(',');
+          } else {
+            if (vertexType !== '') {
+              sources.label = vertexType;
+            }
+
+            if (vertexProperty[0][0] !== '') {
+              const convertedVertexProperty = vertexProperty.map(
+                ([key, value]) => [key, value.split(',')]
+              );
+
+              sources.properties = fromPairs(convertedVertexProperty);
+            }
+          }
+
           const convertedParams = {
-            sources: {
-              ids: [source],
-              label: vertexType,
-              properties: vertexProperty
-            },
+            sources,
             label,
             direction,
             min_neighbors: least_neighbor,
@@ -1521,22 +1592,61 @@ export class DataAnalyzeStore {
             delete convertedParams.label;
           }
 
+          if (max_degree === '') {
+            delete convertedParams.max_degree;
+          }
+
+          if (capacity === '') {
+            delete convertedParams.capacity;
+          }
+
+          if (limit === '') {
+            delete convertedParams.limit;
+          }
+
+          if (max_similar === '') {
+            delete convertedParams.top;
+          }
+
+          if (least_similar === '') {
+            delete convertedParams.min_similars;
+          }
+
+          if (convertedParams.group_property === '') {
+            delete convertedParams.group_property;
+            delete convertedParams.min_groups;
+          }
+
           // @ts-ignore
           params = convertedParams;
           break;
         }
 
-        case Algorithm.neighborRankRecommendation: {
+        case Algorithm.neighborRank: {
           const clonedNeighborRankParams = cloneDeep(
             this.algorithmAnalyzerStore.neighborRankParams
           );
 
+          if (clonedNeighborRankParams.capacity === '') {
+            clonedNeighborRankParams.capacity = '10000000';
+          }
+
           clonedNeighborRankParams.steps.forEach((step, index) => {
             delete step.uuid;
+            const clonedStep = cloneDeep(step);
 
-            if (step.label === '__all__') {
-              const clonedStep: NeighborRankRule = cloneDeep(step);
-              delete clonedStep.label;
+            if (step.labels[0] === '__all__') {
+              delete clonedStep.labels;
+              clonedNeighborRankParams.steps[index] = clonedStep;
+            }
+
+            if (step.degree === '') {
+              clonedStep.degree = '10000';
+              clonedNeighborRankParams.steps[index] = clonedStep;
+            }
+
+            if (step.top === '') {
+              clonedStep.top = '100';
               clonedNeighborRankParams.steps[index] = clonedStep;
             }
           });
@@ -1546,29 +1656,24 @@ export class DataAnalyzeStore {
         }
 
         case Algorithm.kStepNeighbor: {
-          const clonedKStepNeighborParams = cloneDeep(
-            this.algorithmAnalyzerStore.neighborRankParams
-          );
+          if (
+            this.algorithmAnalyzerStore.kStepNeighborParams.label === '__all__'
+          ) {
+            const clonedKStepNeighborParams: KStepNeighbor = cloneDeep(
+              this.algorithmAnalyzerStore.kStepNeighborParams
+            );
 
-          clonedKStepNeighborParams.steps.forEach((step, index) => {
-            delete step.uuid;
+            delete clonedKStepNeighborParams.label;
+            params = clonedKStepNeighborParams;
+            break;
+          }
 
-            if (step.label === '__all__') {
-              const clonedStep: NeighborRankRule = cloneDeep(step);
-              delete clonedStep.label;
-              clonedKStepNeighborParams.steps[index] = clonedStep;
-            }
-          });
-
-          params = clonedKStepNeighborParams;
+          params = this.algorithmAnalyzerStore.kStepNeighborParams;
           break;
         }
 
         case Algorithm.kHop: {
-          if (
-            this.algorithmAnalyzerStore.shortestPathAllParams.label ===
-            '__all__'
-          ) {
+          if (this.algorithmAnalyzerStore.kHopParams.label === '__all__') {
             const clonedParams: KHop = cloneDeep(
               this.algorithmAnalyzerStore.kHopParams
             );
@@ -1710,19 +1815,23 @@ export class DataAnalyzeStore {
         }
 
         case Algorithm.personalRankRecommendation: {
-          if (
-            this.algorithmAnalyzerStore.personalRankParams.label === '__all__'
-          ) {
-            const clonedParams: PersonalRank = cloneDeep(
-              this.algorithmAnalyzerStore.personalRankParams
-            );
+          const clonedParams: PersonalRank = cloneDeep(
+            this.algorithmAnalyzerStore.personalRankParams
+          );
 
+          if (clonedParams.label === '__all__') {
             delete clonedParams.label;
-            params = clonedParams;
-            break;
           }
 
-          params = this.algorithmAnalyzerStore.personalRankParams;
+          if (clonedParams.degree === '') {
+            clonedParams.degree = '10000';
+          }
+
+          if (clonedParams.limit === '') {
+            clonedParams.limit = '10000000';
+          }
+
+          params = clonedParams;
           break;
         }
       }

@@ -144,7 +144,7 @@ const KHop = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.kHop.placeholder.input-integer'
+              'data-analyze.algorithm-forms.kHop.placeholder.input-positive-integer-or-negative-one-max-degree'
             )}
             errorLocation="layer"
             errorMessage={
@@ -230,31 +230,33 @@ const KHop = observer(() => {
         </div>
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
-            <span>{t('data-analyze.algorithm-forms.kHop.options.limit')}</span>
+            <span>
+              {t('data-analyze.algorithm-forms.kHop.options.capacity')}
+            </span>
           </div>
           <Input
             width={400}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.kHop.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.kHop.placeholder.input-positive-integer-or-negative-one-capacity'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKHopParamsErrorMessage.limit
+              algorithmAnalyzerStore.validateKHopParamsErrorMessage.capacity
             }
-            value={algorithmAnalyzerStore.kHopParams.limit}
+            value={algorithmAnalyzerStore.kHopParams.capacity}
             onChange={(e: any) => {
               algorithmAnalyzerStore.mutateKHopParams(
-                'limit',
+                'capacity',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKHopParams('limit');
+              algorithmAnalyzerStore.validateKHopParams('capacity');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKHopParams('limit');
+                algorithmAnalyzerStore.validateKHopParams('capacity');
               }
             }}
           />
@@ -305,33 +307,31 @@ const KHop = observer(() => {
         </div>
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
-            <span>
-              {t('data-analyze.algorithm-forms.kHop.options.capacity')}
-            </span>
+            <span>{t('data-analyze.algorithm-forms.kHop.options.limit')}</span>
           </div>
           <Input
             width={400}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.kHop.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.kHop.placeholder.input-positive-integer-or-negative-one-limit'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKHopParamsErrorMessage.capacity
+              algorithmAnalyzerStore.validateKHopParamsErrorMessage.limit
             }
-            value={algorithmAnalyzerStore.kHopParams.capacity}
+            value={algorithmAnalyzerStore.kHopParams.limit}
             onChange={(e: any) => {
               algorithmAnalyzerStore.mutateKHopParams(
-                'capacity',
+                'limit',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKHopParams('capacity');
+              algorithmAnalyzerStore.validateKHopParams('limit');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKHopParams('capacity');
+                algorithmAnalyzerStore.validateKHopParams('limit');
               }
             }}
           />

@@ -14,9 +14,13 @@ const AllPath = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
 
-  const isValidExec = !Object.values(algorithmAnalyzerStore.allPathParams).some(
-    (value) => value === ''
-  );
+  const isValidExec =
+    Object.values(
+      algorithmAnalyzerStore.validateAllPathParamsErrorMessage
+    ).every((value) => value === '') &&
+    algorithmAnalyzerStore.allPathParams.source !== '' &&
+    algorithmAnalyzerStore.allPathParams.target !== '' &&
+    algorithmAnalyzerStore.allPathParams.max_depth !== '';
 
   return (
     <div className="query-tab-content-form">
@@ -157,7 +161,7 @@ const AllPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-integer'
+              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer-or-negative-one-max-degree'
             )}
             errorLocation="layer"
             errorMessage={
@@ -215,7 +219,7 @@ const AllPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer-or-negative-one-capacity'
             )}
             errorLocation="layer"
             errorMessage={
@@ -310,7 +314,7 @@ const AllPath = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer-or-negative-one-limit'
             )}
             errorLocation="layer"
             errorMessage={

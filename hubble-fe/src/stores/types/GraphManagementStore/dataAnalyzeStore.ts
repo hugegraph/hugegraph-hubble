@@ -144,7 +144,6 @@ export interface ShortestPathAlgorithmParams {
   max_degree: string;
   skip_degree: string;
   capacity: string;
-  limit: string;
 }
 
 // export type ShortestPathAllAlgorithmParams = ShortestPathAlgorithmParams;
@@ -159,13 +158,22 @@ export interface ShortestPathAllAlgorithmParams {
   capacity: string;
 }
 
-export type AllPathAlgorithmParams = ShortestPathAlgorithmParams;
+export type AllPathAlgorithmParams = {
+  source: string;
+  target: string;
+  direction: string;
+  max_depth: string;
+  label: string;
+  max_degree: string;
+  capacity: string;
+  limit: string;
+};
 
 export interface ModelSimilarityParams {
   method: string;
   source: string;
   vertexType: string;
-  vertexProperty: string[];
+  vertexProperty: string[][];
   direction: string;
   least_neighbor: string;
   similarity: string;
@@ -175,7 +183,6 @@ export interface ModelSimilarityParams {
   property_filter: string;
   least_property_number: string;
   max_degree: string;
-  skip_degree: string;
   capacity: string;
   limit: string;
   return_common_connection: boolean;
@@ -185,7 +192,7 @@ export interface ModelSimilarityParams {
 export interface NeighborRankRule {
   uuid: string;
   direction: string;
-  label: string;
+  labels: string[];
   degree: string;
   top: string;
 }
@@ -193,7 +200,6 @@ export interface NeighborRankRule {
 export interface NeighborRankParams {
   source: string;
   alpha: string;
-  direction: string;
   capacity: string;
   steps: NeighborRankRule[];
 }
@@ -262,7 +268,7 @@ export interface WeightedShortestPath {
   source: string;
   target: string;
   direction: string;
-  weighted: string;
+  weight: string;
   with_vertex: boolean;
   label: string;
   max_degree: string;
@@ -273,7 +279,7 @@ export interface WeightedShortestPath {
 export interface SingleSourceWeightedShortestPath {
   source: string;
   direction: string;
-  weighted: string;
+  weight: string;
   with_vertex: boolean;
   label: string;
   max_degree: string;
@@ -296,7 +302,7 @@ export interface PersonalRank {
   max_depth: string;
   with_label: string;
   label: string;
-  max_degree: string;
+  degree: string;
   limit: string;
   sorted: boolean;
 }

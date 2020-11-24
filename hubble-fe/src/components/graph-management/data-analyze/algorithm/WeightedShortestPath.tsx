@@ -20,13 +20,16 @@ const WeightedShortestPath = observer(() => {
     ).every((value) => value === '') &&
     algorithmAnalyzerStore.weightedShortestPathParams.source !== '' &&
     algorithmAnalyzerStore.weightedShortestPathParams.target !== '' &&
-    algorithmAnalyzerStore.weightedShortestPathParams.weighted !== '';
+    algorithmAnalyzerStore.weightedShortestPathParams.weight !== '';
 
   return (
     <div className="query-tab-content-form">
       <div className="query-tab-content-form-row">
         <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
+          <div
+            className="query-tab-content-form-item-title"
+            style={{ minWidth: 118 }}
+          >
             <i>*</i>
             <span>
               {t(
@@ -35,7 +38,7 @@ const WeightedShortestPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={390}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -82,7 +85,7 @@ const WeightedShortestPath = observer(() => {
               'data-analyze.algorithm-forms.weighted-shortest-path.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            width={400}
+            width={390}
             onChange={(value: string) => {
               algorithmAnalyzerStore.mutateWeightedShortestPathParams(
                 'label',
@@ -105,7 +108,10 @@ const WeightedShortestPath = observer(() => {
       </div>
       <div className="query-tab-content-form-row">
         <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
+          <div
+            className="query-tab-content-form-item-title"
+            style={{ minWidth: 118 }}
+          >
             <i>*</i>
             <span>
               {t(
@@ -114,7 +120,7 @@ const WeightedShortestPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={390}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -180,11 +186,11 @@ const WeightedShortestPath = observer(() => {
             />
           </div>
           <Input
-            width={400}
+            width={390}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.weighted-shortest-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.weighted-shortest-path.placeholder.input-positive-integer-or-negative-one-max-degree'
             )}
             errorLocation="layer"
             errorMessage={
@@ -214,7 +220,10 @@ const WeightedShortestPath = observer(() => {
       </div>
       <div className="query-tab-content-form-row">
         <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
+          <div
+            className="query-tab-content-form-item-title"
+            style={{ minWidth: 118 }}
+          >
             <i>*</i>
             <span>
               {t(
@@ -272,7 +281,7 @@ const WeightedShortestPath = observer(() => {
             />
           </div>
           <Input
-            width={400}
+            width={390}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -308,18 +317,21 @@ const WeightedShortestPath = observer(() => {
       </div>
       <div className="query-tab-content-form-row">
         <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
+          <div
+            className="query-tab-content-form-item-title"
+            style={{ minWidth: 118 }}
+          >
             <i>*</i>
             <span>
               {t(
-                'data-analyze.algorithm-forms.weighted-shortest-path.options.weighted'
+                'data-analyze.algorithm-forms.weighted-shortest-path.options.weight'
               )}
             </span>
           </div>
           <Select
             size="medium"
             trigger="click"
-            value={algorithmAnalyzerStore.weightedShortestPathParams.weighted}
+            value={algorithmAnalyzerStore.weightedShortestPathParams.weight}
             notFoundContent={t(
               'data-analyze.algorithm-forms.weighted-shortest-path.placeholder.no-property'
             )}
@@ -327,10 +339,10 @@ const WeightedShortestPath = observer(() => {
               'data-analyze.algorithm-forms.weighted-shortest-path.placeholder.select-property'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            width={400}
+            width={390}
             onChange={(value: string) => {
               algorithmAnalyzerStore.mutateWeightedShortestPathParams(
-                'weighted',
+                'weight',
                 value
               );
             }}
@@ -346,16 +358,16 @@ const WeightedShortestPath = observer(() => {
           <div className="query-tab-content-form-item-title">
             <span>
               {t(
-                'data-analyze.algorithm-forms.weighted-shortest-path.options.limit'
+                'data-analyze.algorithm-forms.weighted-shortest-path.options.capacity'
               )}
             </span>
           </div>
           <Input
-            width={400}
+            width={390}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.weighted-shortest-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.weighted-shortest-path.placeholder.input-positive-integer-or-negative-one-capacity'
             )}
             errorLocation="layer"
             errorMessage={
@@ -385,7 +397,10 @@ const WeightedShortestPath = observer(() => {
       </div>
       <div className="query-tab-content-form-row">
         <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
+          <div
+            className="query-tab-content-form-item-title"
+            style={{ minWidth: 118 }}
+          >
             <span>
               {t(
                 'data-analyze.algorithm-forms.weighted-shortest-path.options.with_vertex'
@@ -393,7 +408,7 @@ const WeightedShortestPath = observer(() => {
             </span>
           </div>
           <Switch
-            width={400}
+            width={390}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             checked={

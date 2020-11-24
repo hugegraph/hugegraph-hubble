@@ -42,7 +42,7 @@ const Jaccard = observer(() => {
             errorMessage={
               algorithmAnalyzerStore.validateJaccardParamsErrorMessage.vertex
             }
-            value={algorithmAnalyzerStore.loopDetectionParams.source}
+            value={algorithmAnalyzerStore.jaccardParams.vertex}
             onChange={(e: any) => {
               algorithmAnalyzerStore.mutateJaccardParams(
                 'vertex',
@@ -67,7 +67,7 @@ const Jaccard = observer(() => {
           <Select
             size="medium"
             trigger="click"
-            value={algorithmAnalyzerStore.loopDetectionParams.label}
+            value={algorithmAnalyzerStore.jaccardParams.label}
             notFoundContent={t(
               'data-analyze.algorithm-forms.jaccard.placeholder.no-edge-types'
             )}
@@ -107,7 +107,7 @@ const Jaccard = observer(() => {
             errorMessage={
               algorithmAnalyzerStore.validateJaccardParamsErrorMessage.other
             }
-            value={algorithmAnalyzerStore.loopDetectionParams.source}
+            value={algorithmAnalyzerStore.jaccardParams.other}
             onChange={(e: any) => {
               algorithmAnalyzerStore.mutateJaccardParams(
                 'other',
@@ -160,14 +160,14 @@ const Jaccard = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.jaccard.placeholder.input-integer'
+              'data-analyze.algorithm-forms.jaccard.placeholder.input-positive-integer-or-negative-one-max-degree'
             )}
             errorLocation="layer"
             errorMessage={
               algorithmAnalyzerStore.validateJaccardParamsErrorMessage
                 .max_degree
             }
-            value={algorithmAnalyzerStore.loopDetectionParams.max_degree}
+            value={algorithmAnalyzerStore.jaccardParams.max_degree}
             onChange={(e: any) => {
               algorithmAnalyzerStore.mutateJaccardParams(
                 'max_degree',
@@ -194,7 +194,7 @@ const Jaccard = observer(() => {
           </div>
           <Radio.Group
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            value={algorithmAnalyzerStore.loopDetectionParams.direction}
+            value={algorithmAnalyzerStore.jaccardParams.direction}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               algorithmAnalyzerStore.mutateJaccardParams(
                 'direction',

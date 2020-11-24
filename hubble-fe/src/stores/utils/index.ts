@@ -242,3 +242,10 @@ export function formatVertexIdText(
     return text === replacedText ? '~id' : text;
   }
 }
+
+export function isGtNegativeOneButZero(value: string) {
+  return !(
+    !isEmpty(value) &&
+    (!isInt(value as string, { min: -1 }) || String(Number(value)) === '0')
+  );
+}

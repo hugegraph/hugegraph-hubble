@@ -7,7 +7,7 @@ export enum Algorithm {
   shortestPathAll = 'shortest-path-all',
   allPath = 'all-path',
   modelSimilarity = 'model-similarity',
-  neighborRankRecommendation = 'neighbor-rank-recommendation',
+  neighborRank = 'neighbor-rank',
   realTimeRecommendation = 'real-time-recommendation',
   kStepNeighbor = 'k-step-neighbor',
   kHop = 'k-hop',
@@ -98,8 +98,7 @@ export function createShortestPathDefaultParams() {
     label: '__all__',
     max_degree: '10000',
     skip_degree: '0',
-    capacity: '10000000',
-    limit: '1000000'
+    capacity: '10000000'
   };
 }
 
@@ -112,8 +111,7 @@ export function createValidateShortestPathParamsErrorMessage() {
     label: '',
     max_degree: '',
     skip_degree: '',
-    capacity: '',
-    limit: ''
+    capacity: ''
   };
 }
 
@@ -176,7 +174,7 @@ export function createModelSimilarityDefaultParams() {
     method: 'id',
     source: '',
     vertexType: '',
-    vertexProperty: [],
+    vertexProperty: [['', '']],
     direction: 'BOTH',
     least_neighbor: '',
     similarity: '',
@@ -186,7 +184,6 @@ export function createModelSimilarityDefaultParams() {
     property_filter: '',
     least_property_number: '',
     max_degree: '10000',
-    skip_degree: '10000000',
     capacity: '10000000',
     limit: '10',
     return_common_connection: false,
@@ -209,7 +206,6 @@ export function createValidateModelSimilarParamsErrorMessage() {
     property_filter: '',
     least_property_number: '',
     max_degree: '',
-    skip_degree: '',
     capacity: '',
     limit: '',
     return_common_connection: '',
@@ -220,12 +216,11 @@ export function createValidateModelSimilarParamsErrorMessage() {
 export function createNeighborRankDefaultParams(): {
   source: string;
   alpha: string;
-  direction: string;
   capacity: string;
   steps: {
     uuid: string;
     direction: string;
-    label: string;
+    labels: string[];
     degree: string;
     top: string;
   }[];
@@ -233,13 +228,12 @@ export function createNeighborRankDefaultParams(): {
   return {
     source: '',
     alpha: '',
-    direction: 'BOTH',
     capacity: '10000000',
     steps: [
       {
         uuid: v4(),
         direction: 'BOTH',
-        label: '__all__',
+        labels: ['__all__'],
         degree: '10000',
         top: '100'
       }
@@ -250,12 +244,11 @@ export function createNeighborRankDefaultParams(): {
 export function createValidateNeighborRankErrorMessage(): {
   source: string;
   alpha: string;
-  direction: string;
   capacity: string;
   steps: {
     uuid: string;
     direction: string;
-    label: string;
+    labels: string;
     degree: string;
     top: string;
   }[];
@@ -263,13 +256,12 @@ export function createValidateNeighborRankErrorMessage(): {
   return {
     source: '',
     alpha: '',
-    direction: '',
     capacity: '',
     steps: [
       {
         uuid: '',
         direction: '',
-        label: '',
+        labels: '',
         degree: '',
         top: ''
       }
@@ -422,7 +414,7 @@ export function createWeightedShortestPathDefaultParams() {
     source: '',
     target: '',
     direction: 'BOTH',
-    weighted: '',
+    weight: '',
     with_vertex: true,
     label: '__all__',
     max_degree: '10000',
@@ -436,7 +428,7 @@ export function createValidateWeightedShortestPathParamsErrorMessage() {
     source: '',
     target: '',
     direction: '',
-    weighted: '',
+    weight: '',
     with_vertex: '',
     label: '',
     max_degree: '',
@@ -449,7 +441,7 @@ export function createSingleSourceWeightedShortestPathDefaultParams() {
   return {
     source: '',
     direction: 'BOTH',
-    weighted: '',
+    weight: '',
     with_vertex: true,
     label: '__all__',
     max_degree: '10000',
@@ -463,7 +455,7 @@ export function createValidateSingleSourceWeightedShortestPathParamsErrorMessage
   return {
     source: '',
     direction: '',
-    weighted: '',
+    weight: '',
     with_vertex: '',
     label: '',
     max_degree: '',
@@ -500,7 +492,7 @@ export function createPersonalRankDefaultParams() {
     max_depth: '',
     with_label: 'SAME_LABEL',
     label: '__all__',
-    max_degree: '10000',
+    degree: '10000',
     limit: '10000000',
     sorted: true
   };
@@ -513,7 +505,7 @@ export function createValidatePersonalRankParamsErrorMessage() {
     max_depth: '',
     with_label: '',
     label: '',
-    max_degree: '',
+    degree: '',
     limit: '',
     sorted: ''
   };

@@ -133,37 +133,6 @@ const NeighborRank = observer(() => {
               className="query-tab-content-form-item-title"
               style={{ width: 105 }}
             >
-              <i>*</i>
-              <span>
-                {t(
-                  'data-analyze.algorithm-forms.neighbor-rank.options.direction'
-                )}
-              </span>
-            </div>
-            <Radio.Group
-              disabled={
-                dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-              }
-              value={algorithmAnalyzerStore.neighborRankParams.direction}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                algorithmAnalyzerStore.mutateNeighborRankParams(
-                  'direction',
-                  e.target.value
-                );
-              }}
-            >
-              <Radio value="BOTH">both</Radio>
-              <Radio value="OUT">out</Radio>
-              <Radio value="IN">in</Radio>
-            </Radio.Group>
-          </div>
-        </div>
-        <div className="query-tab-content-form-row">
-          <div className="query-tab-content-form-item">
-            <div
-              className="query-tab-content-form-item-title"
-              style={{ width: 105 }}
-            >
               <span>
                 {t(
                   'data-analyze.algorithm-forms.neighbor-rank.options.capacity'
@@ -177,7 +146,7 @@ const NeighborRank = observer(() => {
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
               }
               placeholder={t(
-                'data-analyze.algorithm-forms.neighbor-rank.placeholder.input-positive-integer'
+                'data-analyze.algorithm-forms.neighbor-rank.placeholder.input-positive-integer-or-negative-one-capacity'
               )}
               errorLocation="layer"
               errorMessage={
@@ -219,7 +188,7 @@ const NeighborRank = observer(() => {
               const timerId = dataAnalyzeStore.addTempExecLog();
               await dataAnalyzeStore.fetchGraphs({
                 url: 'neighborrank',
-                type: Algorithm.neighborRankRecommendation
+                type: Algorithm.neighborRank
               });
               await dataAnalyzeStore.fetchExecutionLogs();
               window.clearTimeout(timerId);
@@ -244,7 +213,7 @@ const NeighborRank = observer(() => {
         style={{ width: '50%' }}
       >
         {algorithmAnalyzerStore.neighborRankParams.steps.map(
-          ({ uuid, direction, label, degree, top }, ruleIndex) => {
+          ({ uuid, direction, labels, degree, top }, ruleIndex) => {
             return (
               <div
                 className={invalidExtendFormClassname(
@@ -285,7 +254,7 @@ const NeighborRank = observer(() => {
                     1 && (
                     <div
                       style={{
-                        marginLeft: 198,
+                        marginLeft: 175,
                         fontSize: 14,
                         color: '#2b65ff',
                         cursor: 'pointer',
@@ -316,7 +285,7 @@ const NeighborRank = observer(() => {
                   <Select
                     size="medium"
                     trigger="click"
-                    value={label}
+                    value={labels[0]}
                     notFoundContent={t(
                       'data-analyze.algorithm-forms.neighbor-rank.placeholder.no-edge-types'
                     )}
@@ -326,8 +295,8 @@ const NeighborRank = observer(() => {
                     width={380}
                     onChange={(value: string) => {
                       algorithmAnalyzerStore.mutateNeighborRankRuleParams(
-                        'label',
-                        value,
+                        'labels',
+                        [value],
                         ruleIndex
                       );
 
@@ -389,7 +358,7 @@ const NeighborRank = observer(() => {
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
                     }
                     placeholder={t(
-                      'data-analyze.algorithm-forms.neighbor-rank.placeholder.input-integer'
+                      'data-analyze.algorithm-forms.neighbor-rank.placeholder.input-positive-integer-or-negative-one-max-degree'
                     )}
                     errorLocation="layer"
                     errorMessage={
@@ -466,7 +435,7 @@ const NeighborRank = observer(() => {
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
                     }
                     placeholder={t(
-                      'data-analyze.algorithm-forms.neighbor-rank.placeholder.input-integer'
+                      'data-analyze.algorithm-forms.neighbor-rank.placeholder.input-integer-lt-1000'
                     )}
                     errorLocation="layer"
                     errorMessage={
@@ -534,7 +503,7 @@ const NeighborRank = observer(() => {
           ) : (
             <div
               style={{
-                width: 150,
+                width: 160,
                 boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)',
                 lineHeight: '18px',
                 padding: '16px',

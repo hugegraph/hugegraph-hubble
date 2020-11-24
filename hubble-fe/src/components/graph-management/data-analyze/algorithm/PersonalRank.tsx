@@ -26,7 +26,10 @@ const PersonalRank = observer(() => {
     <div className="query-tab-content-form">
       <div className="query-tab-content-form-row">
         <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
+          <div
+            className="query-tab-content-form-item-title"
+            style={{ minWidth: 112 }}
+          >
             <i>*</i>
             <span>
               {t('data-analyze.algorithm-forms.personal-rank.options.source')}
@@ -91,7 +94,10 @@ const PersonalRank = observer(() => {
       </div>
       <div className="query-tab-content-form-row">
         <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
+          <div
+            className="query-tab-content-form-item-title"
+            style={{ minWidth: 112 }}
+          >
             <i>*</i>
             <span>
               {t('data-analyze.algorithm-forms.personal-rank.options.alpha')}
@@ -127,9 +133,7 @@ const PersonalRank = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t(
-                'data-analyze.algorithm-forms.personal-rank.options.max_degree'
-              )}
+              {t('data-analyze.algorithm-forms.personal-rank.options.degree')}
             </span>
             <CustomTooltip
               trigger="hover"
@@ -146,7 +150,7 @@ const PersonalRank = observer(() => {
                 }
               }}
               tooltipWrapper={t(
-                'data-analyze.algorithm-forms.personal-rank.hint.max-degree'
+                'data-analyze.algorithm-forms.personal-rank.hint.degree'
               )}
               childrenProps={{
                 src: QuestionMarkIcon,
@@ -163,24 +167,24 @@ const PersonalRank = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.personal-rank.placeholder.input-integer'
+              'data-analyze.algorithm-forms.personal-rank.placeholder.input-positive-integer-or-negative-one-degree'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validatePersonalRankErrorMessage.max_degree
+              algorithmAnalyzerStore.validatePersonalRankErrorMessage.degree
             }
-            value={algorithmAnalyzerStore.personalRankParams.max_degree}
+            value={algorithmAnalyzerStore.personalRankParams.degree}
             onChange={(e: any) => {
               algorithmAnalyzerStore.mutatePersonalRankParams(
-                'max_degree',
+                'degree',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validatePersonalRankParams('max_degree');
+              algorithmAnalyzerStore.validatePersonalRankParams('degree');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validatePersonalRankParams('max_degree');
+                algorithmAnalyzerStore.validatePersonalRankParams('degree');
               }
             }}
           />
@@ -188,39 +192,16 @@ const PersonalRank = observer(() => {
       </div>
       <div className="query-tab-content-form-row">
         <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
+          <div
+            className="query-tab-content-form-item-title"
+            style={{ minWidth: 112 }}
+          >
             <i>*</i>
             <span>
               {t(
                 'data-analyze.algorithm-forms.personal-rank.options.max_depth'
               )}
             </span>
-            <CustomTooltip
-              trigger="hover"
-              placement="bottom-start"
-              modifiers={{
-                offset: {
-                  offset: '0, 8'
-                }
-              }}
-              tooltipWrapperProps={{
-                className: 'tooltips-dark',
-                style: {
-                  zIndex: 7
-                }
-              }}
-              tooltipWrapper={t(
-                'data-analyze.algorithm-forms.personal-rank.hint.max-depth'
-              )}
-              childrenProps={{
-                src: QuestionMarkIcon,
-                alt: 'hint',
-                style: {
-                  marginLeft: 5
-                }
-              }}
-              childrenWrapperElement="img"
-            />
           </div>
           <Input
             width={400}
@@ -260,7 +241,7 @@ const PersonalRank = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.personal-rank.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.personal-rank.placeholder.input-positive-integer-or-negative-one-limit'
             )}
             errorLocation="layer"
             errorMessage={
@@ -285,7 +266,10 @@ const PersonalRank = observer(() => {
       </div>
       <div className="query-tab-content-form-row">
         <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
+          <div
+            className="query-tab-content-form-item-title"
+            style={{ minWidth: 112 }}
+          >
             <i>*</i>
             <span>
               {t(

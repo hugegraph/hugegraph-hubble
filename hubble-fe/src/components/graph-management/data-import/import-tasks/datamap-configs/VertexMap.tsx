@@ -159,6 +159,9 @@ const VertexMap: React.FC<VertexMapProps> = observer(
               selectorName={t(
                 'data-configs.type.placeholder.select-vertex-type'
               )}
+              notFoundContent={t(
+                'data-configs.type.placeholder.select-vertex-type'
+              )}
               value={
                 isEdit
                   ? dataMapStore.editedVertexMap!.label

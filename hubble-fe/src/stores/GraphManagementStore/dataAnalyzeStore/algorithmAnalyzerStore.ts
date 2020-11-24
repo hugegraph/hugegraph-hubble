@@ -1,6 +1,6 @@
 import { DataAnalyzeStore } from './dataAnalyzeStore';
-import { observable, action, toJS } from 'mobx';
-import { isEmpty, remove, isEqual, isUndefined } from 'lodash-es';
+import { observable, action, computed } from 'mobx';
+import { isEmpty, remove, isEqual, isUndefined, flatten } from 'lodash-es';
 import { v4 } from 'uuid';
 import isInt from 'validator/lib/isInt';
 
@@ -41,6 +41,7 @@ import {
   createValidateCustomPathParamsErrorMessage
 } from '../../factory/dataAnalyzeStore/algorithmStore';
 import i18next from '../../../i18n';
+import { isGtNegativeOneButZero } from '../../utils';
 
 import type { dict } from '../../types/common';
 import type {
@@ -181,6 +182,49 @@ export class AlgorithmAnalyzerStore {
   @observable
   validatePersonalRankErrorMessage = createValidatePersonalRankParamsErrorMessage();
 
+  @computed get allPropertyIndexProperty() {
+    return flatten(
+      this.dataAnalyzeStore.propertyIndexes.map(({ fields }) => fields)
+    );
+  }
+
+  @computed get currentAlgorithmParams() {
+    switch (this.currentAlgorithm) {
+      case 'loop-detection':
+        return this.loopDetectionParams;
+      case 'focus-detection':
+        return this.focusDetectionParams;
+      case 'shortest-path':
+        return this.shortestPathAlgorithmParams;
+      case 'shortest-path-all':
+        return this.shortestPathAllParams;
+      case 'all-path':
+        return this.allPathParams;
+      case 'model-similarity':
+        return this.modelSimilarityParams;
+      case 'neighbor-rank':
+        return this.neighborRankParams;
+      case 'kneighbor':
+        return this.kStepNeighborParams;
+      case 'kHop':
+        return this.kHopParams;
+      case 'custom-path':
+        return this.customPathParams;
+      case 'radiographic-inspection':
+        return this.loopDetectionParams;
+      case 'same-neighbor':
+        return this.sameNeighborParams;
+      case 'weighted-shortest-path':
+        return this.weightedShortestPathParams;
+      case 'single-source-weighted-shortest-path':
+        return this.singleSourceWeightedShortestPathParams;
+      case 'jaccard':
+        return this.jaccardParams;
+      case 'personal-rank':
+        return this.personalRankParams;
+    }
+  }
+
   @action
   switchCollapse(flag: boolean) {
     this.isCollapse = flag;
@@ -189,6 +233,169 @@ export class AlgorithmAnalyzerStore {
   @action
   changeCurrentAlgorithm(algorithm: string) {
     this.currentAlgorithm = algorithm;
+  }
+
+  @action
+  mutateLoopDetectionParams<T extends keyof LoopDetectionParams>(
+    key: T,
+    value: LoopDetectionParams[T]
+  ) {
+    this.loopDetectionParams[key] = value;
+  }
+
+  @action
+  validateLoopDetectionParams<T extends keyof LoopDetectionParams>(key: T) {
+    const value = this.loopDetectionParams[key];
+
+    switch (key) {
+      case 'source':
+        if (isEmpty(value)) {
+          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.loop-detection.validations.no-empty'
+          );
+
+          return;
+        }
+        break;
+      case 'max_depth':
+        if (isEmpty(value)) {
+          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.loop-detection.validations.no-empty'
+          );
+
+          return;
+        }
+
+        if (!isInt(value as string, { min: 1 })) {
+          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.loop-detection.validations.postive-integer-only'
+          );
+
+          return;
+        }
+
+        break;
+      case 'max_degree':
+        if (!isGtNegativeOneButZero(value as string)) {
+          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.loop-detection.validations.positive-integer-or-negative-one-only'
+          );
+
+          return;
+        }
+
+        break;
+      case 'limit':
+        if (!isGtNegativeOneButZero(value as string)) {
+          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.loop-detection.validations.positive-integer-or-negative-one-only'
+          );
+
+          return;
+        }
+
+        break;
+      case 'capacity':
+        if (!isGtNegativeOneButZero(value as string)) {
+          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.loop-detection.validations.positive-integer-or-negative-one-only'
+          );
+
+          return;
+        }
+
+        break;
+    }
+
+    this.validateLoopDetectionParamsErrorMessage[key] = '';
+  }
+
+  @action
+  resetLoopDetectionParams() {
+    this.loopDetectionParams = createLoopDetectionDefaultParams();
+    this.validateLoopDetectionParamsErrorMessage = createValidateLoopDetectionParamsErrorMessage();
+  }
+
+  @action
+  mutateFocusDetectionParams<T extends keyof FocusDetectionParams>(
+    key: T,
+    value: FocusDetectionParams[T]
+  ) {
+    this.focusDetectionParams[key] = value;
+  }
+
+  @action
+  validateFocusDetectionParams<T extends keyof FocusDetectionParams>(key: T) {
+    const value = this.focusDetectionParams[key];
+
+    switch (key) {
+      case 'source':
+      case 'target':
+        if (isEmpty(value)) {
+          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.focus-detection.validations.no-empty'
+          );
+
+          return;
+        }
+        break;
+      case 'max_depth':
+        if (isEmpty(value)) {
+          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.focus-detection.validations.no-empty'
+          );
+
+          return;
+        }
+
+        if (!isInt(value, { min: 1 })) {
+          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.focus-detection.validations.postive-integer-only'
+          );
+
+          return;
+        }
+
+        break;
+      case 'max_degree':
+        if (!isGtNegativeOneButZero(value as string)) {
+          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.focus-detection.validations.positive-integer-or-negative-one-only'
+          );
+
+          return;
+        }
+
+        break;
+      case 'limit':
+        if (!isGtNegativeOneButZero(value as string)) {
+          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.focus-detection.validations.positive-integer-or-negative-one-only'
+          );
+
+          return;
+        }
+
+        break;
+      case 'capacity':
+        if (!isGtNegativeOneButZero(value as string)) {
+          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.focus-detection.validations.positive-integer-or-negative-one-only'
+          );
+
+          return;
+        }
+
+        break;
+    }
+
+    this.validateFocusDetectionParamsErrorMessage[key] = '';
+  }
+
+  @action
+  resetFocusDetectionParams() {
+    this.focusDetectionParams = createFocusDetectionDefaultParams();
+    this.validateFocusDetectionParamsErrorMessage = createValidateFocusDetectionParamsErrorMessage();
   }
 
   @action
@@ -235,9 +442,9 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'max_degree':
-        if (!isInt(value, { min: 1 })) {
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validateShortestPathParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.shortest-path.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -245,7 +452,7 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'skip_degree':
-        if (!isInt(value, { min: 0 })) {
+        if (value !== '' && !isInt(value, { min: 0 })) {
           this.validateShortestPathParamsErrorMessage[key] = i18next.t(
             'data-analyze.algorithm-forms.shortest-path.validations.integer-only'
           );
@@ -255,9 +462,9 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'capacity':
-        if (!isInt(value, { min: 1 })) {
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validateShortestPathParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.shortest-path.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -273,169 +480,6 @@ export class AlgorithmAnalyzerStore {
   resetShortestPathParams() {
     this.shortestPathAlgorithmParams = createShortestPathDefaultParams();
     this.validateShortestPathParamsErrorMessage = createValidateShortestPathParamsErrorMessage();
-  }
-
-  @action
-  mutateLoopDetectionParams<T extends keyof LoopDetectionParams>(
-    key: T,
-    value: LoopDetectionParams[T]
-  ) {
-    this.loopDetectionParams[key] = value;
-  }
-
-  @action
-  validateLoopDetectionParams<T extends keyof LoopDetectionParams>(key: T) {
-    const value = this.loopDetectionParams[key];
-
-    switch (key) {
-      case 'source':
-        if (isEmpty(value)) {
-          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
-          );
-
-          return;
-        }
-        break;
-      case 'max_depth':
-        if (isEmpty(value)) {
-          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
-          );
-
-          return;
-        }
-
-        if (!isInt(value as string, { min: 1 })) {
-          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
-          );
-
-          return;
-        }
-
-        break;
-      case 'max_degree':
-        if (!isInt(value as string, { min: 1 })) {
-          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
-          );
-
-          return;
-        }
-
-        break;
-      case 'limit':
-        if (!isInt(value as string, { min: 0 })) {
-          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.integer-only'
-          );
-
-          return;
-        }
-
-        break;
-      case 'capacity':
-        if (!isInt(value as string, { min: 1 })) {
-          this.validateLoopDetectionParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
-          );
-
-          return;
-        }
-
-        break;
-    }
-
-    this.validateLoopDetectionParamsErrorMessage[key] = '';
-  }
-
-  @action
-  resetLoopDetectionParams() {
-    this.loopDetectionParams = createLoopDetectionDefaultParams();
-    this.validateLoopDetectionParamsErrorMessage = createValidateLoopDetectionParamsErrorMessage();
-  }
-
-  @action
-  mutateFocusDetectionParams<T extends keyof FocusDetectionParams>(
-    key: T,
-    value: FocusDetectionParams[T]
-  ) {
-    this.focusDetectionParams[key] = value;
-  }
-
-  @action
-  validateFocusDetectionParams<T extends keyof FocusDetectionParams>(key: T) {
-    const value = this.focusDetectionParams[key];
-
-    switch (key) {
-      case 'source':
-      case 'target':
-        if (isEmpty(value)) {
-          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
-          );
-
-          return;
-        }
-        break;
-      case 'max_depth':
-        if (isEmpty(value)) {
-          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
-          );
-
-          return;
-        }
-
-        if (!isInt(value, { min: 1 })) {
-          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
-          );
-
-          return;
-        }
-
-        break;
-      case 'max_degree':
-        if (!isInt(value, { min: 1 })) {
-          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
-          );
-
-          return;
-        }
-
-        break;
-      case 'limit':
-        if (!isInt(value, { min: 0 })) {
-          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.integer-only'
-          );
-
-          return;
-        }
-
-        break;
-      case 'capacity':
-        if (!isInt(value, { min: 1 })) {
-          this.validateFocusDetectionParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
-          );
-
-          return;
-        }
-
-        break;
-    }
-
-    this.validateFocusDetectionParamsErrorMessage[key] = '';
-  }
-
-  @action
-  resetFocusDetectionParams() {
-    this.focusDetectionParams = createFocusDetectionDefaultParams();
-    this.validateFocusDetectionParamsErrorMessage = createValidateFocusDetectionParamsErrorMessage();
   }
 
   @action
@@ -490,19 +534,9 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'max_degree':
-        if (!isInt(value, { min: 1 })) {
+        if (!isGtNegativeOneButZero(value)) {
           this.validateShortestPathAllParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path-all.validations.postive-integer-only'
-          );
-
-          return;
-        }
-
-        break;
-      case 'max_capacity':
-        if (!isInt(value, { min: 0 })) {
-          this.validateShortestPathAllParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path-all.validations.integer-only'
+            'data-analyze.algorithm-forms.shortest-path-all.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -510,15 +544,23 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'capacity':
-        if (!isInt(value, { min: 1 })) {
+        if (!isGtNegativeOneButZero(value)) {
           this.validateShortestPathAllParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path-all.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.shortest-path-all.validations.positive-integer-or-negative-one-only'
           );
 
           return;
         }
 
         break;
+      case 'skip_degree':
+        if (value !== '' && !isInt(value, { min: 0 })) {
+          this.validateShortestPathAllParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path-all.validations.integer-only'
+          );
+
+          return;
+        }
     }
 
     this.validateShortestPathAllParamsErrorMessage[key] = '';
@@ -546,7 +588,7 @@ export class AlgorithmAnalyzerStore {
       case 'source':
         if (isEmpty(value)) {
           this.validateAllPathParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
+            'data-analyze.algorithm-forms.all-path.validations.no-empty'
           );
 
           return;
@@ -555,7 +597,7 @@ export class AlgorithmAnalyzerStore {
       case 'target':
         if (isEmpty(value)) {
           this.validateAllPathParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
+            'data-analyze.algorithm-forms.all-path.validations.no-empty'
           );
 
           return;
@@ -564,7 +606,7 @@ export class AlgorithmAnalyzerStore {
       case 'max_depth':
         if (isEmpty(value)) {
           this.validateAllPathParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
+            'data-analyze.algorithm-forms.all-path.validations.no-empty'
           );
 
           return;
@@ -572,7 +614,7 @@ export class AlgorithmAnalyzerStore {
 
         if (!isInt(value, { min: 1 })) {
           this.validateAllPathParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.all-path.validations.postive-integer-only'
           );
 
           return;
@@ -580,19 +622,9 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'max_degree':
-        if (!isInt(value, { min: 1 })) {
+        if (!isGtNegativeOneButZero(value)) {
           this.validateAllPathParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
-          );
-
-          return;
-        }
-
-        break;
-      case 'max_capacity':
-        if (!isInt(value, { min: 0 })) {
-          this.validateAllPathParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.integer-only'
+            'data-analyze.algorithm-forms.all-path.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -600,9 +632,19 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'capacity':
-        if (!isInt(value, { min: 1 })) {
+        if (!isGtNegativeOneButZero(value)) {
           this.validateAllPathParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.shortest-path.validations.positive-integer-or-negative-one-only'
+          );
+
+          return;
+        }
+
+        break;
+      case 'limit':
+        if (!isGtNegativeOneButZero(value)) {
+          this.validateAllPathParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -621,6 +663,32 @@ export class AlgorithmAnalyzerStore {
   }
 
   @action
+  addModelSimilarityVertexProperty() {
+    this.modelSimilarityParams.vertexProperty.push(['', '']);
+  }
+
+  @action
+  editModelSimilarityVertexProperty(
+    index: number,
+    type: 'key' | 'value',
+    value: string
+  ) {
+    if (type === 'key') {
+      this.modelSimilarityParams.vertexProperty[index][0] = value;
+    } else {
+      this.modelSimilarityParams.vertexProperty[index][1] = value;
+    }
+  }
+
+  @action
+  removeModelSimilarityVertexProperty(propertyIndex: number) {
+    remove(
+      this.modelSimilarityParams.vertexProperty,
+      (_, index) => index === propertyIndex
+    );
+  }
+
+  @action
   mutateModelSimilarityParams<T extends keyof ModelSimilarityParams>(
     key: T,
     value: ModelSimilarityParams[T]
@@ -634,7 +702,33 @@ export class AlgorithmAnalyzerStore {
 
     switch (key) {
       case 'source':
+        if (isEmpty(value)) {
+          this.validateModelSimilartiyParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.model-similarity.validations.no-empty'
+          );
+
+          return;
+        }
+
+        break;
       case 'least_neighbor':
+        if (isEmpty(value)) {
+          this.validateModelSimilartiyParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.model-similarity.validations.no-empty'
+          );
+
+          return;
+        }
+
+        if (!isInt(value as string, { min: 1 })) {
+          this.validateModelSimilartiyParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.model-similarity.validations.postive-integer-only'
+          );
+
+          return;
+        }
+
+        break;
       case 'similarity':
         if (isEmpty(value)) {
           this.validateModelSimilartiyParamsErrorMessage[key] = i18next.t(
@@ -644,22 +738,21 @@ export class AlgorithmAnalyzerStore {
           return;
         }
 
-        // if (!isInt(value, { min: 1 })) {
-        //   this.validateModelSimilartiyParamsErrorMessage[key] = i18next.t(
-        //     'data-analyze.algorithm-forms.shortest-path.validations.postive-integer-only'
-        //   );
+        if (
+          Object.is(Number(value), NaN) ||
+          Number(value) > 1 ||
+          Number(value) <= 0
+        ) {
+          this.validateModelSimilartiyParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.model-similarity.validations.similarity'
+          );
 
-        //   return;
-        // }
+          return;
+        }
 
         break;
       case 'max_similar':
-        // case 'least_similar':
-        // case 'max_degree':
-        // case 'skip_degree':
-        // case 'capacity':
-        // case 'limit':
-        if (!isInt(value as string, { min: 0 })) {
+        if (value !== '' && !isInt(value as string, { min: 0 })) {
           this.validateModelSimilartiyParamsErrorMessage[key] = i18next.t(
             'data-analyze.algorithm-forms.model-similarity.validations.integer-only'
           );
@@ -668,10 +761,61 @@ export class AlgorithmAnalyzerStore {
         }
 
         break;
+      case 'least_similar':
+        if (value !== '' && !isInt(value as string, { min: 1 })) {
+          this.validateModelSimilartiyParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.model-similarity.validations.postive-integer-only'
+          );
+
+          return;
+        }
+
+        break;
       case 'least_property_number':
+        if (
+          !isEmpty(this.modelSimilarityParams.property_filter) &&
+          isEmpty(value)
+        ) {
+          this.validateModelSimilartiyParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.model-similarity.validations.no-empty'
+          );
+
+          return;
+        }
+
         if (value !== '' && !isInt(value as string, { min: 2 })) {
           this.validateModelSimilartiyParamsErrorMessage[key] = i18next.t(
             'data-analyze.algorithm-forms.model-similarity.validations.integer-gt-1'
+          );
+
+          return;
+        }
+
+        break;
+      case 'max_degree':
+        if (!isGtNegativeOneButZero(value as string)) {
+          this.validateModelSimilartiyParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.model-similarity.validations.positive-integer-or-negative-one-only'
+          );
+
+          return;
+        }
+
+        break;
+      case 'capacity':
+        if (!isGtNegativeOneButZero(value as string)) {
+          this.validateModelSimilartiyParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.model-similarity.validations.positive-integer-or-negative-one-only'
+          );
+
+          return;
+        }
+
+        break;
+      case 'limit':
+        if (!isGtNegativeOneButZero(value as string)) {
+          this.validateModelSimilartiyParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.model-similarity.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -695,7 +839,7 @@ export class AlgorithmAnalyzerStore {
 
     if (method === 'id') {
       this.modelSimilarityParams.vertexType = '';
-      this.modelSimilarityParams.vertexProperty = [];
+      this.modelSimilarityParams.vertexProperty = [['', '']];
       this.validateModelSimilartiyParamsErrorMessage.vertexType = '';
       this.validateModelSimilartiyParamsErrorMessage.vertexProperty = '';
     } else {
@@ -709,16 +853,21 @@ export class AlgorithmAnalyzerStore {
     this.neighborRankParams.steps.push({
       uuid: v4(),
       direction: 'BOTH',
-      label: '__all__',
+      labels: ['__all__'],
       degree: '10000',
       top: '100'
     });
 
     // add error message together
+    this.addValidateNeighborRankRule();
+  }
+
+  @action
+  addValidateNeighborRankRule() {
     this.validateNeighborRankParamsParamsErrorMessage.steps.push({
       uuid: '',
       direction: '',
-      label: '',
+      labels: '',
       degree: '',
       top: ''
     });
@@ -728,6 +877,11 @@ export class AlgorithmAnalyzerStore {
   removeNeighborRankRule(ruleIndex: number) {
     remove(this.neighborRankParams.steps, (_, index) => index === ruleIndex);
     // remove error message together
+    this.removeValidateNeighborRankRule(ruleIndex);
+  }
+
+  @action
+  removeValidateNeighborRankRule(ruleIndex: number) {
     remove(
       this.validateNeighborRankParamsParamsErrorMessage.steps,
       (_, index) => index === ruleIndex
@@ -791,9 +945,9 @@ export class AlgorithmAnalyzerStore {
         this.validateNeighborRankParamsParamsErrorMessage.alpha = '';
         break;
       case 'capacity':
-        if (!isEmpty(value) && !isInt(value as string, { min: 0 })) {
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validateNeighborRankParamsParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.neighbor-rank.validations.integer-only'
+            'data-analyze.algorithm-forms.neighbor-rank.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -813,12 +967,22 @@ export class AlgorithmAnalyzerStore {
 
     switch (key) {
       case 'degree':
-      case 'top':
-        if (!isEmpty(value) && !isInt(value as string, { min: 0 })) {
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validateNeighborRankParamsParamsErrorMessage.steps[ruleIndex][
             key
           ] = i18next.t(
-            'data-analyze.algorithm-forms.neighbor-rank.validations.integer-only'
+            'data-analyze.algorithm-forms.neighbor-rank.validations.positive-integer-or-negative-one-only'
+          );
+
+          return;
+        }
+        break;
+      case 'top':
+        if (!isEmpty(value) && !isInt(value as string, { min: 0, max: 999 })) {
+          this.validateNeighborRankParamsParamsErrorMessage.steps[ruleIndex][
+            key
+          ] = i18next.t(
+            'data-analyze.algorithm-forms.neighbor-rank.validations.integer-only-lt-1000'
           );
 
           return;
@@ -904,9 +1068,9 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'max_degree':
-        if (value !== '' && !isInt(value as string, { min: 1 })) {
+        if (!isGtNegativeOneButZero(value)) {
           this.validateKStepNeighborParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.k-step-neighbor.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.k-step-neighbor.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -914,9 +1078,9 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'limit':
-        if (value !== '' && !isInt(value as string, { min: 0 })) {
+        if (!isGtNegativeOneButZero(value)) {
           this.validateKStepNeighborParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.k-step-neighbor.validations.integer-only'
+            'data-analyze.algorithm-forms.k-step-neighbor.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -973,9 +1137,9 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'max_degree':
-        if (value !== '' && !isInt(value as string, { min: 1 })) {
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validateKHopParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.kHop.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.kHop.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -983,9 +1147,9 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'limit':
-        if (value !== '' && !isInt(value as string, { min: 0 })) {
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validateKHopParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.kHop.validations.integer-only'
+            'data-analyze.algorithm-forms.kHop.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -993,9 +1157,9 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'capacity':
-        if (value !== '' && !isInt(value as string, { min: 0 })) {
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validateKHopParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.kHop.validations.integer-only'
+            'data-analyze.algorithm-forms.kHop.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1078,12 +1242,12 @@ export class AlgorithmAnalyzerStore {
           return;
         }
 
-        this.validateNeighborRankParamsParamsErrorMessage.source = '';
+        this.validateCustomPathParmasErrorMessage.source = '';
         break;
       case 'capacity':
-        if (!isEmpty(value) && !isInt(value as string, { min: 0 })) {
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validateCustomPathParmasErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.custom-path.validations.integer-only'
+            'data-analyze.algorithm-forms.custom-path.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1092,9 +1256,9 @@ export class AlgorithmAnalyzerStore {
         this.validateCustomPathParmasErrorMessage.capacity = '';
         break;
       case 'limit':
-        if (!isEmpty(value) && !isInt(value as string, { min: 0 })) {
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validateCustomPathParmasErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.custom-path.validations.integer-only'
+            'data-analyze.algorithm-forms.custom-path.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1126,6 +1290,16 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'degree':
+        if (!isGtNegativeOneButZero(value as string)) {
+          this.validateCustomPathParmasErrorMessage.steps[ruleIndex][
+            key
+          ] = i18next.t(
+            'data-analyze.algorithm-forms.neighbor-rank.validations.positive-integer-or-negative-one-only'
+          );
+
+          return;
+        }
+        break;
       case 'sample':
         if (!isEmpty(value) && !isInt(value as string, { min: 0 })) {
           this.validateCustomPathParmasErrorMessage.steps[ruleIndex][
@@ -1239,11 +1413,11 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'max_degree':
-        if (value !== '' && !isInt(value as string, { min: 1 })) {
+        if (!isGtNegativeOneButZero(value)) {
           this.validateRadiographicInspectionParamsErrorMessage[
             key
           ] = i18next.t(
-            'data-analyze.algorithm-forms.radiographic-inspection.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.radiographic-inspection.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1251,11 +1425,11 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'capacity':
-        if (value !== '' && !isInt(value as string, { min: 0 })) {
+        if (!isGtNegativeOneButZero(value)) {
           this.validateRadiographicInspectionParamsErrorMessage[
             key
           ] = i18next.t(
-            'data-analyze.algorithm-forms.radiographic-inspection.validations.integer-only'
+            'data-analyze.algorithm-forms.radiographic-inspection.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1263,11 +1437,11 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'limit':
-        if (value !== '' && !isInt(value as string, { min: 0 })) {
+        if (!isGtNegativeOneButZero(value)) {
           this.validateRadiographicInspectionParamsErrorMessage[
             key
           ] = i18next.t(
-            'data-analyze.algorithm-forms.radiographic-inspection.validations.integer-only'
+            'data-analyze.algorithm-forms.radiographic-inspection.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1307,6 +1481,14 @@ export class AlgorithmAnalyzerStore {
           return;
         }
 
+        if (value === this.sameNeighborParams.other) {
+          this.validateSameNeighborParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.same-neighbor.validations.no-same-value-with-other'
+          );
+
+          return;
+        }
+
         break;
       case 'other':
         if (isEmpty(value)) {
@@ -1317,11 +1499,19 @@ export class AlgorithmAnalyzerStore {
           return;
         }
 
+        if (value === this.sameNeighborParams.vertex) {
+          this.validateSameNeighborParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.same-neighbor.validations.no-same-value-with-vertex'
+          );
+
+          return;
+        }
+
         break;
       case 'max_degree':
-        if (value !== '' && !isInt(value as string, { min: 1 })) {
+        if (!isGtNegativeOneButZero(value)) {
           this.validateSameNeighborParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.same-neighbor.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.same-neighbor.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1329,9 +1519,9 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'limit':
-        if (value !== '' && !isInt(value as string, { min: 0 })) {
+        if (!isGtNegativeOneButZero(value)) {
           this.validateSameNeighborParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.same-neighbor.validations.integer-only'
+            'data-analyze.algorithm-forms.same-neighbor.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1376,9 +1566,9 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'max_degree':
-        if (value !== '' && !isInt(value as string, { min: 1 })) {
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validateWeightedShortestPathParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.weighted-shortest-path.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.weighted-shortest-path.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1395,10 +1585,10 @@ export class AlgorithmAnalyzerStore {
         }
 
         break;
-      case 'limit':
-        if (value !== '' && !isInt(value as string, { min: 0 })) {
+      case 'capacity':
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validateWeightedShortestPathParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.weighted-shortest-path.validations.integer-only'
+            'data-analyze.algorithm-forms.weighted-shortest-path.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1443,11 +1633,11 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'max_degree':
-        if (value !== '' && !isInt(value as string, { min: 1 })) {
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validateSingleSourceWeightedShortestPathParamsErrorMessage[
             key
           ] = i18next.t(
-            'data-analyze.algorithm-forms.single-source-weighted-shortest-path.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.single-source-weighted-shortest-path.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1467,11 +1657,11 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'capacity':
-        if (value !== '' && !isInt(value as string, { min: 0 })) {
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validateSingleSourceWeightedShortestPathParamsErrorMessage[
             key
           ] = i18next.t(
-            'data-analyze.algorithm-forms.single-source-weighted-shortest-path.validations.integer-only'
+            'data-analyze.algorithm-forms.single-source-weighted-shortest-path.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1479,11 +1669,11 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'limit':
-        if (value !== '' && !isInt(value as string, { min: 0 })) {
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validateSingleSourceWeightedShortestPathParamsErrorMessage[
             key
           ] = i18next.t(
-            'data-analyze.algorithm-forms.single-source-weighted-shortest-path.validations.integer-only'
+            'data-analyze.algorithm-forms.single-source-weighted-shortest-path.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1512,10 +1702,35 @@ export class AlgorithmAnalyzerStore {
 
     switch (key) {
       case 'vertex':
+        if (isEmpty(value)) {
+          this.validateJaccardParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.jaccard.validations.no-empty'
+          );
+
+          return;
+        }
+
+        if (value === this.jaccardParams.other) {
+          this.validateJaccardParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.jaccard.validations.no-same-value-with-other'
+          );
+
+          return;
+        }
+
+        break;
       case 'other':
         if (isEmpty(value)) {
           this.validateJaccardParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.single-source-weighted-shortest-path.validations.no-empty'
+            'data-analyze.algorithm-forms.jaccard.validations.no-empty'
+          );
+
+          return;
+        }
+
+        if (value === this.jaccardParams.vertex) {
+          this.validateJaccardParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.jaccard.validations.no-same-value-with-vertex'
           );
 
           return;
@@ -1523,9 +1738,9 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'max_degree':
-        if (value !== '' && !isInt(value as string, { min: 1 })) {
+        if (!isGtNegativeOneButZero(value)) {
           this.validateJaccardParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.single-source-weighted-shortest-path.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.jaccard.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1610,10 +1825,10 @@ export class AlgorithmAnalyzerStore {
         }
 
         break;
-      case 'max_degree':
-        if (value !== '' && !isInt(value as string, { min: 1 })) {
+      case 'degree':
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validatePersonalRankErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.personal-rank.validations.postive-integer-only'
+            'data-analyze.algorithm-forms.personal-rank.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1621,9 +1836,9 @@ export class AlgorithmAnalyzerStore {
 
         break;
       case 'limit':
-        if (value !== '' && !isInt(value as string, { min: 0 })) {
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validatePersonalRankErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.personal-rank.validations.integer-only'
+            'data-analyze.algorithm-forms.personal-rank.validations.positive-integer-or-negative-one-only'
           );
 
           return;
@@ -1654,11 +1869,14 @@ export class AlgorithmAnalyzerStore {
     this.resetAllPathParams();
     this.resetModelSimilarityParams();
     this.resetNeighborRankParams();
+    this.resetKStepNeighborParams();
     this.resetKHopParams();
+    this.resetCustomPathParams();
     this.resetRadiographicInspectionParams();
     this.resetSameNeighborParams();
     this.resetWeightedShortestPathParams();
     this.resetSingleSourceWeightedShortestPathParams();
     this.resetJaccardParams();
+    this.resetPersonalRankParams();
   }
 }

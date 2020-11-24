@@ -14,9 +14,13 @@ const ShortestPathAll = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
 
-  const isValidExec = !Object.values(
-    algorithmAnalyzerStore.shortestPathAllParams
-  ).some((value) => value === '');
+  const isValidExec =
+    Object.values(
+      algorithmAnalyzerStore.validateShortestPathAllParamsErrorMessage
+    ).every((value) => value === '') &&
+    algorithmAnalyzerStore.shortestPathAllParams.source !== '' &&
+    algorithmAnalyzerStore.shortestPathAllParams.target !== '' &&
+    algorithmAnalyzerStore.shortestPathAllParams.max_depth !== '';
 
   return (
     <div className="query-tab-content-form">
@@ -170,7 +174,7 @@ const ShortestPathAll = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.shortest-path-all.placeholder.input-integer'
+              'data-analyze.algorithm-forms.shortest-path-all.placeholder.input-positive-integer-or-negative-one-max-degree'
             )}
             errorLocation="layer"
             errorMessage={
@@ -236,7 +240,7 @@ const ShortestPathAll = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.shortest-path-all.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.shortest-path-all.placeholder.input-positive-integer-or-negative-one-capacity'
             )}
             errorLocation="layer"
             errorMessage={
@@ -367,7 +371,7 @@ const ShortestPathAll = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.shortest-path-all.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.shortest-path-all.placeholder.input-integer'
             )}
             errorLocation="layer"
             errorMessage={

@@ -42,6 +42,7 @@ const DataAnalyze: React.FC = observer(() => {
       dataAnalyzeStore.setCurrentId(Number(params.id));
       dataAnalyzeStore.fetchValueTypes();
       dataAnalyzeStore.fetchVertexTypes();
+      dataAnalyzeStore.fetchAllPropertyIndexes('vertex');
       dataAnalyzeStore.fetchEdgeTypes();
       dataAnalyzeStore.fetchAllNodeStyle();
       dataAnalyzeStore.fetchAllEdgeStyle();
