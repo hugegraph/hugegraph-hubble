@@ -154,10 +154,11 @@ public class LoadTaskController extends BaseController {
             return tasks;
         } catch (Exception e) {
             existError = true;
-            jobEntity.setJobStatus(JobStatus.FAILED);
             throw e;
         } finally {
-            if (!existError) {
+            if (existError) {
+                jobEntity.setJobStatus(JobStatus.FAILED);
+            } else {
                 jobEntity.setJobStatus(JobStatus.LOADING);
             }
             jobEntity.setUpdateTime(HubbleUtil.nowDate());
