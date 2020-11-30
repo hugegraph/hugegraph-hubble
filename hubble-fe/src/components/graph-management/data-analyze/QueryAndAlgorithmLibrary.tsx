@@ -326,7 +326,6 @@ export const GremlinQuery: React.FC = observer(() => {
               onClickButton={handleQueryExecution}
               size="small"
               type="primary"
-              primaryType="primary"
               disabled={
                 dataAnalyzeStore.codeEditorText.length === 0 ||
                 !codeRegexp.test(dataAnalyzeStore.codeEditorText) ||
