@@ -160,6 +160,11 @@ export class ServerDataImportStore {
   }
 
   @action
+  resetImportTasks() {
+    this.importTasks = [];
+  }
+
+  @action
   dispose() {
     this.readOnly = false;
     this.importConfigReadOnly = false;

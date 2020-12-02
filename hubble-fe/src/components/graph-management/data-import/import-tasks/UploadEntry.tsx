@@ -129,6 +129,11 @@ const UploadEntry: React.FC = observer(() => {
               dataImportRootStore.currentStatus === 'DEFAULT' ||
               dataImportRootStore.currentStatus === 'UPLOADING'
             ) {
+              // users may browse from <JobDetails />
+              // which make @readonly and @irregularProcess true
+              dataMapStore.switchReadOnly(false);
+              dataMapStore.switchIrregularProcess(false);
+
               dataImportRootStore.setCurrentStatus('MAPPING');
               dataImportRootStore.sendUploadCompleteSignal();
             }

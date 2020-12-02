@@ -10,6 +10,8 @@ import {
   DataImportRootStoreContext
 } from '../../../../stores';
 
+import { useInitDataImport } from '../../../../hooks';
+
 import PassIcon from '../../../../assets/imgs/ic_pass.svg';
 
 const ImportFinish: React.FC = observer(() => {
@@ -19,10 +21,11 @@ const ImportFinish: React.FC = observer(() => {
   const [, params] = useRoute(
     '/graph-management/:id/data-import/import-manager/:jobId/import-tasks/:status*'
   );
+  const isInitReady = useInitDataImport();
   const [, setLocation] = useLocation();
   const { t } = useTranslation();
 
-  return (
+  return isInitReady ? (
     <div className="import-tasks-complete-hint">
       <div className="import-tasks-complete-hint-description">
         <img src={PassIcon} alt="complete" />
@@ -64,7 +67,7 @@ const ImportFinish: React.FC = observer(() => {
         </Button>
       </div>
     </div>
-  );
+  ) : null;
 });
 
 export default ImportFinish;

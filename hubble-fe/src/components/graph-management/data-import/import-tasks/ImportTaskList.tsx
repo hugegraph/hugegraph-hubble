@@ -450,6 +450,9 @@ export const ImportManagerManipulation: React.FC<ImportManagerManipulationProps>
       }
 
       if (step === 2) {
+        // users may browse from <JobDetails />
+        dataMapStore.switchReadOnly(false);
+
         await dataMapStore.fetchDataMaps();
         dataMapStore.setSelectedFileId(dataMapStore.fileMapInfos[0].id);
         dataMapStore.setSelectedFileInfo();
@@ -462,6 +465,9 @@ export const ImportManagerManipulation: React.FC<ImportManagerManipulationProps>
       }
 
       if (step === 3) {
+        // users may browse from <JobDetails />
+        serverDataImportStore.switchReadOnly(false);
+
         await dataMapStore.fetchDataMaps();
 
         // need to set default selected file
@@ -473,6 +479,12 @@ export const ImportManagerManipulation: React.FC<ImportManagerManipulationProps>
           dataMapStore.selectedFileInfo!.load_parameter
         );
         serverDataImportStore.switchIrregularProcess(true);
+
+        if (status === 'SETTING') {
+          serverDataImportStore.resetImportTasks();
+          serverDataImportStore.switchFetchImportStatus('standby');
+          serverDataImportStore.switchImportFinished(false);
+        }
 
         if (status === 'LOADING') {
           dataMapStore.switchLock(true);
