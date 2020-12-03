@@ -365,6 +365,11 @@ export const FileDropZone: React.FC = observer(() => {
         ({ name }) => name === fileName
       )!;
 
+      // users may click back button in browser
+      if (isUndefined(fileUploadTask)) {
+        return;
+      }
+
       // the index of fileChunk is pending
       dataImportRootStore.mutateFileUploadTasks(
         'pendingChunkIndexes',
