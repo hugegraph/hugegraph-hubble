@@ -481,6 +481,9 @@ export const ImportManagerManipulation: React.FC<ImportManagerManipulationProps>
         serverDataImportStore.switchIrregularProcess(true);
 
         if (status === 'SETTING') {
+          // user may browse from <JobDeatils /> to <ImportTask />
+          dataMapStore.switchReadOnly(false);
+
           serverDataImportStore.resetImportTasks();
           serverDataImportStore.switchFetchImportStatus('standby');
           serverDataImportStore.switchImportFinished(false);

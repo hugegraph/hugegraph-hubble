@@ -183,6 +183,10 @@ export default function useInitDataImport() {
           serverDataImportStore.switchIrregularProcess(true);
         }
 
+        if (job.job_status === 'SETTING') {
+          dataMapStore.switchReadOnly(false);
+        }
+
         if (job.job_status === 'LOADING') {
           dataMapStore.switchLock(true);
           serverDataImportStore.switchImportConfigReadOnly(true);
