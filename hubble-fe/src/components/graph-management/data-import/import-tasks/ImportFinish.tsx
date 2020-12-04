@@ -1,6 +1,7 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { useRoute, useLocation } from 'wouter';
+import { isEmpty } from 'lodash-es';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@baidu/one-ui';
 
@@ -21,11 +22,19 @@ const ImportFinish: React.FC = observer(() => {
   const [, params] = useRoute(
     '/graph-management/:id/data-import/import-manager/:jobId/import-tasks/:status*'
   );
-  const isInitReady = useInitDataImport();
   const [, setLocation] = useLocation();
   const { t } = useTranslation();
 
-  return isInitReady ? (
+  useEffect(() => {
+    if (isEmpty(serverDataImportStore.importTasks) && params !== null) {
+      dataImportRootStore.setCurrentId(Number(params.id));
+      dataImportRootStore.setCurrentJobId(Number(params.jobId));
+
+      serverDataImportStore.fetchAllImportTasks();
+    }
+  }, [params?.id, params?.jobId]);
+
+  return (
     <div className="import-tasks-complete-hint">
       <div className="import-tasks-complete-hint-description">
         <img src={PassIcon} alt="complete" />
@@ -33,7 +42,10 @@ const ImportFinish: React.FC = observer(() => {
           <div>{t('data-import-status.finished')}</div>
           <div>
             {t('data-import-status.success', {
-              number: serverDataImportStore.successImportFileStatusNumber
+              number:
+                serverDataImportStore.successImportFileStatusNumber !== 0
+                  ? serverDataImportStore.successImportFileStatusNumber
+                  : '-'
             })}
             {serverDataImportStore.pausedImportFileNumber !== 0 &&
               `，${t('data-import-status.pause', {
@@ -67,7 +79,7 @@ const ImportFinish: React.FC = observer(() => {
         </Button>
       </div>
     </div>
-  ) : null;
+  );
 });
 
 export default ImportFinish;

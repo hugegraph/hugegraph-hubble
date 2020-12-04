@@ -198,11 +198,6 @@ export default function useInitDataImport() {
         }
       }
 
-      if (status === 'finish') {
-        setLocation(`/graph-management/${id}/data-import/import-manager`);
-        importManagerStore.setSelectedJob(null);
-      }
-
       setInitReady(true);
     };
 
