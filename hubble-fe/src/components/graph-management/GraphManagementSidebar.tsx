@@ -128,7 +128,8 @@ const GraphManagementSidebar: React.FC = observer(() => {
   if (
     !match ||
     params?.subCategory === 'job-error-log' ||
-    params?.jobId === 'task-error-log'
+    params?.jobId === 'task-error-log' ||
+    (params?.category === 'async-tasks' && params?.jobId === 'result')
   ) {
     return null;
   }

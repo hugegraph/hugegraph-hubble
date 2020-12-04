@@ -69,6 +69,11 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
 
   const handleTabChange = (tab: string) => () => {
     dataAnalyzeStore.resetSwitchTabState();
+
+    if (tab !== dataAnalyzeStore.currentTab) {
+      dataAnalyzeStore.mutateCodeEditorText('');
+    }
+
     dataAnalyzeStore.setCurrentTab(tab);
     // reset algorithm tab to list
     algorithmAnalyzerStore.changeCurrentAlgorithm('');
