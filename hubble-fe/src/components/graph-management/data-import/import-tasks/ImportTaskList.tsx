@@ -490,8 +490,15 @@ export const ImportManagerManipulation: React.FC<ImportManagerManipulationProps>
         }
 
         if (status === 'LOADING') {
+          // reveal previous & next button in <DataMap />
+          // users may browse from <JobDetails /> which set @readonly true
+          dataMapStore.switchReadOnly(false);
           dataMapStore.switchLock(true);
           serverDataImportStore.switchImportConfigReadOnly(true);
+          // users may browse from <JobDetails />, let store fetches
+          // for one time and decide whether import is finished
+          serverDataImportStore.resetImportTasks();
+          serverDataImportStore.switchImportFinished(false);
         }
 
         route = 'loading';
