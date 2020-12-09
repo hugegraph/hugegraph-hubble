@@ -201,6 +201,15 @@ export const GremlinQuery: React.FC = observer(() => {
         }
       );
 
+      reaction(
+        () => dataAnalyzeStore.pulse,
+        () => {
+          (codeEditor.current as CodeMirror.Editor).setValue(
+            dataAnalyzeStore.codeEditorText
+          );
+        }
+      );
+
       return () => {
         (codeEditor.current as CodeMirror.Editor).off(
           'change',
@@ -209,16 +218,6 @@ export const GremlinQuery: React.FC = observer(() => {
       };
     }
   }, [dataAnalyzeStore]);
-
-  // weird, mobx@reaction is not working when puluse changed, setValue()
-  // has no influence
-  useEffect(() => {
-    if (codeEditor?.current && dataAnalyzeStore.codeEditorText !== '') {
-      (codeEditor.current as CodeMirror.Editor).setValue(
-        dataAnalyzeStore.codeEditorText
-      );
-    }
-  }, [dataAnalyzeStore.pulse, codeEditor?.current]);
 
   useEffect(() => {
     if (
