@@ -1468,7 +1468,7 @@ export class DataAnalyzeStore {
         }
         case Algorithm.focusDetection: {
           if (
-            this.algorithmAnalyzerStore.loopDetectionParams.label === '__all__'
+            this.algorithmAnalyzerStore.focusDetectionParams.label === '__all__'
           ) {
             const clonedParams: FocusDetectionParams = cloneDeep(
               this.algorithmAnalyzerStore.focusDetectionParams
