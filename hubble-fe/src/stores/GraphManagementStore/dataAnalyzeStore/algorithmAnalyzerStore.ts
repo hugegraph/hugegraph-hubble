@@ -204,9 +204,9 @@ export class AlgorithmAnalyzerStore {
         return this.modelSimilarityParams;
       case 'neighbor-rank':
         return this.neighborRankParams;
-      case 'kneighbor':
+      case 'k-step-neighbor':
         return this.kStepNeighborParams;
-      case 'kHop':
+      case 'k-hop':
         return this.kHopParams;
       case 'custom-path':
         return this.customPathParams;
