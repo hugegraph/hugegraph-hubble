@@ -92,7 +92,8 @@ public class GraphService {
         VertexLabelEntity vl = this.vlService.get(entity.getLabel(), connId);
         // Allowed front-end always pass id
         if (vl.getIdStrategy().isCustomize()) {
-            Object vid = this.convertVertexId(vl.getIdStrategy(), entity.getId());
+            Object vid = this.convertVertexId(vl.getIdStrategy(),
+                                              entity.getId());
             vertex.id(vid);
         }
         this.fillProperties(connId, vl, vertex, entity.getProperties());
