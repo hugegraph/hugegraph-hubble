@@ -102,7 +102,7 @@ const SameNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.same-neighbor.placeholder.input-source-id'
+              'data-analyze.algorithm-forms.same-neighbor.placeholder.input-other-id'
             )}
             errorLocation="layer"
             errorMessage={

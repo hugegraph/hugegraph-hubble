@@ -80,11 +80,13 @@ export interface ExecutionLogs {
   async_id: number;
   async_status:
     | 'UNKNOWN'
-    | 'NEW'
+    | 'SCHEDULING'
+    | 'SCHEDULED'
     | 'QUEUED'
     | 'RESTORING'
     | 'RUNNING'
     | 'SUCCESS'
+    | 'CANCELLING'
     | 'CANCELLED'
     | 'FAILED';
   type: string;
@@ -228,8 +230,8 @@ export interface CustomPathParams {
   method: string;
   source: string;
   vertexType: string;
-  vertexProperty: string[];
-  default_weight: string;
+  vertexProperty: string[][];
+  sort_by: string;
   capacity: string;
   limit: string;
   steps: CustomPathRule[];
@@ -239,8 +241,9 @@ export interface CustomPathRule {
   uuid: string;
   direction: string;
   labels: string[];
-  properties: string;
+  properties: string[][];
   weight_by: string;
+  default_weight: string;
   degree: string;
   sample: string;
 }

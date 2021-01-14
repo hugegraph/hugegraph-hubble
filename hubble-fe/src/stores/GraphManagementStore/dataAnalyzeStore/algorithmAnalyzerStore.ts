@@ -1182,11 +1182,12 @@ export class AlgorithmAnalyzerStore {
     this.customPathParams.steps.push({
       uuid: v4(),
       direction: 'BOTH',
-      labels: ['__all__'],
+      labels: [],
       weight_by: '',
-      properties: '',
+      default_weight: '',
+      properties: [['', '']],
       degree: '10000',
-      sample: '100'
+      sample: '0'
     });
 
     // add error message together
@@ -1195,6 +1196,7 @@ export class AlgorithmAnalyzerStore {
       direction: '',
       labels: '',
       weight_by: '',
+      default_weight: '',
       properties: '',
       degree: '',
       sample: ''
@@ -1208,6 +1210,32 @@ export class AlgorithmAnalyzerStore {
     remove(
       this.validateCustomPathParmasErrorMessage.steps,
       (_, index) => index === ruleIndex
+    );
+  }
+
+  @action
+  addCustomPathVertexProperty() {
+    this.customPathParams.vertexProperty.push(['', '']);
+  }
+
+  @action
+  removeCustomPathVertexProperty(propertyIndex: number) {
+    remove(
+      this.customPathParams.vertexProperty,
+      (_, index) => index === propertyIndex
+    );
+  }
+
+  @action
+  addCustomPathRuleProperty(ruleIndex: number) {
+    this.customPathParams.steps[ruleIndex].properties.push(['', '']);
+  }
+
+  @action
+  removeCustomPathRuleProperty(ruleIndex: number, propertyIndex: number) {
+    remove(
+      this.customPathParams.steps[ruleIndex].properties,
+      (_, index) => index === propertyIndex
     );
   }
 
@@ -1301,15 +1329,37 @@ export class AlgorithmAnalyzerStore {
         }
         break;
       case 'sample':
-        if (!isEmpty(value) && !isInt(value as string, { min: 0 })) {
+        if (!isGtNegativeOneButZero(value as string)) {
           this.validateCustomPathParmasErrorMessage.steps[ruleIndex][
             key
           ] = i18next.t(
-            'data-analyze.algorithm-forms.neighbor-rank.validations.integer-only'
+            'data-analyze.algorithm-forms.neighbor-rank.validations.positive-integer-or-negative-one-only'
           );
 
           return;
         }
+        break;
+      case 'default_weight':
+        if (isEmpty(value)) {
+          this.validateCustomPathParmasErrorMessage.steps[ruleIndex][
+            key
+          ] = i18next.t(
+            'data-analyze.algorithm-forms.custom-path.validations.no-empty'
+          );
+
+          return;
+        }
+
+        if (!isInt(value as string)) {
+          this.validateCustomPathParmasErrorMessage.steps[ruleIndex][
+            key
+          ] = i18next.t(
+            'data-analyze.algorithm-forms.custom-path.validations.input-number'
+          );
+
+          return;
+        }
+
         break;
       default:
         return;
@@ -1348,7 +1398,7 @@ export class AlgorithmAnalyzerStore {
 
     if (method === 'id') {
       this.customPathParams.vertexType = '';
-      this.customPathParams.vertexProperty = [];
+      this.customPathParams.vertexProperty = [['', '']];
       this.validateCustomPathParmasErrorMessage.vertexType = '';
       this.validateCustomPathParmasErrorMessage.vertexProperty = '';
     } else {

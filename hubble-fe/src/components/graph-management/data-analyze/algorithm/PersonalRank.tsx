@@ -20,6 +20,7 @@ const PersonalRank = observer(() => {
     ).every((value) => value === '') &&
     algorithmAnalyzerStore.personalRankParams.source !== '' &&
     algorithmAnalyzerStore.personalRankParams.alpha !== '' &&
+    algorithmAnalyzerStore.personalRankParams.label !== '' &&
     algorithmAnalyzerStore.personalRankParams.max_depth !== '';
 
   return (
@@ -64,6 +65,7 @@ const PersonalRank = observer(() => {
         </div>
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
+            <i>*</i>
             <span>
               {t('data-analyze.algorithm-forms.personal-rank.options.label')}
             </span>
@@ -72,6 +74,9 @@ const PersonalRank = observer(() => {
             size="medium"
             trigger="click"
             value={algorithmAnalyzerStore.personalRankParams.label}
+            selectorName={t(
+              'data-analyze.algorithm-forms.personal-rank.placeholder.select-edge'
+            )}
             notFoundContent={t(
               'data-analyze.algorithm-forms.personal-rank.placeholder.no-edge-types'
             )}
@@ -81,9 +86,6 @@ const PersonalRank = observer(() => {
               algorithmAnalyzerStore.mutatePersonalRankParams('label', value);
             }}
           >
-            <Select.Option value="__all__" key="__all__">
-              {t('data-analyze.algorithm-forms.personal-rank.pre-value')}
-            </Select.Option>
             {dataAnalyzeStore.edgeTypes.map(({ name }) => (
               <Select.Option value={name} key={name}>
                 {name}

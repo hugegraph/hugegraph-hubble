@@ -63,7 +63,15 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
     dataAnalyzeStore.resetSwitchTabState();
 
     if (tab !== dataAnalyzeStore.currentTab) {
+      // reset codeEditor value
       dataAnalyzeStore.mutateCodeEditorText('');
+
+      // reset default selection of edge labels
+      algorithmAnalyzerStore.mutateCustomPathRuleParams(
+        'labels',
+        dataAnalyzeStore.edgeTypes.map(({ name }) => name),
+        0
+      );
     }
 
     dataAnalyzeStore.setCurrentTab(tab);

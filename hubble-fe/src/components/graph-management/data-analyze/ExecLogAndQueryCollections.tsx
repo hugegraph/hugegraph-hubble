@@ -663,7 +663,7 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
               return;
             case 'weightedshortpath':
               algorithmAnalyzerStore.changeCurrentAlgorithm(
-                Algorithm.sameNeighbor
+                Algorithm.weightedShortestPath
               );
 
               Object.keys(params).forEach((key) => {

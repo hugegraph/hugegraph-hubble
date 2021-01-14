@@ -49,7 +49,7 @@ export function formatAlgorithmStatement(
         least_neighbor: algorithmParams.min_neighbors,
         similarity: algorithmParams.alpha,
         label:
-          algorithmParams.label === null
+          algorithmParams.label === null || algorithmParams.label === '__all__'
             ? translator(
                 `data-analyze.algorithm-forms.model-similarity.pre-value`
               )
@@ -69,6 +69,12 @@ export function formatAlgorithmStatement(
       convertedParams = { ...algorithmParams };
       convertedParams['vertex-type'] = convertedParams.vertexType;
       convertedParams['vertex-property'] = convertedParams.vertexProperty;
+      convertedParams.label =
+        algorithmParams.label === null || algorithmParams.label === '__all__'
+          ? translator(
+              `data-analyze.algorithm-forms.model-similarity.pre-value`
+            )
+          : algorithmParams.label;
 
       delete convertedParams.vertexType;
       delete convertedParams.vertexProperty;
@@ -139,7 +145,7 @@ export function formatAlgorithmStatement(
     value = isObject(value) ? JSON.stringify(value, null, 4) : value;
 
     // label value could be null when it means all
-    if (key === 'label' && value === null) {
+    if (key === 'label' && (value === null || value === '__all__')) {
       value = translator(
         `data-analyze.algorithm-forms.${AlgorithmInternalNameMapping[algorithmType]}.pre-value`
       );
