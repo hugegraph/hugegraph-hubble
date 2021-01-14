@@ -1692,31 +1692,74 @@ export class DataAnalyzeStore {
             source,
             vertexType,
             vertexProperty,
-            default_weight,
+            sort_by,
             capacity,
             limit,
             steps
           } = this.algorithmAnalyzerStore.customPathParams;
+
+          const sources: Record<string, any> = {};
+
+          if (source !== '') {
+            sources.ids = source.split(',');
+          } else {
+            if (vertexType !== '') {
+              sources.label = vertexType;
+            }
+
+            if (vertexProperty[0][0] !== '') {
+              const convertedVertexProperty = vertexProperty.map(
+                ([key, value]) => [key, value.split(',')]
+              );
+
+              sources.properties = fromPairs(convertedVertexProperty);
+            }
+          }
 
           const clonedCustomPathRules = cloneDeep(steps);
 
           clonedCustomPathRules.forEach((step, index) => {
             delete step.uuid;
 
-            if (step.labels[0] === '__all__') {
-              const clonedStep: CustomPathRule = cloneDeep(step);
-              delete clonedStep.labels;
-              clonedCustomPathRules[index] = clonedStep;
+            const clonedCustomPathRule = cloneDeep(step);
+
+            if (isEmpty(clonedCustomPathRule.labels)) {
+              delete clonedCustomPathRule.labels;
+            }
+
+            if (clonedCustomPathRule.properties[0][0] !== '') {
+              // omit property types here
+              // @ts-ignore
+              clonedCustomPathRule.properties = fromPairs(
+                clonedCustomPathRule.properties.map(([key, value]) => [
+                  key,
+                  value.split(',')
+                ])
+              );
+
+              clonedCustomPathRules[index] = clonedCustomPathRule;
+            } else {
+              delete clonedCustomPathRule.properties;
+            }
+
+            if (isEmpty(clonedCustomPathRule.degree)) {
+              delete clonedCustomPathRule.degree;
+            }
+
+            if (isEmpty(clonedCustomPathRule.sample)) {
+              delete clonedCustomPathRule.degree;
+            }
+
+            if (step.weight_by === '__CUSTOM_WEIGHT__') {
+              delete step.weight_by;
+            } else {
+              delete step.default_weight;
             }
           });
 
           const convertedParams = {
-            sources: {
-              ids: [source],
-              label: vertexType,
-              properties: vertexProperty
-            },
-            default_weight,
+            sources,
+            sort_by,
             capacity,
             limit,
             steps: clonedCustomPathRules
