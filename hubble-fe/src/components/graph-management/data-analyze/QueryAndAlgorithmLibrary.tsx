@@ -95,7 +95,7 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
         >
           {t('data-analyze.category.gremlin-analyze')}
         </div>
-        <div
+        {/* <div
           onClick={handleTabChange('algorithm-analyze')}
           className={
             dataAnalyzeStore.currentTab === 'algorithm-analyze'
@@ -104,7 +104,7 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
           }
         >
           {t('data-analyze.category.algorithm-analyze')}
-        </div>
+        </div> */}
       </div>
       {dataAnalyzeStore.currentTab === 'gremlin-analyze' && <GremlinQuery />}
       {dataAnalyzeStore.currentTab === 'algorithm-analyze' && (
