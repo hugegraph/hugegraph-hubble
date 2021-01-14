@@ -1,6 +1,6 @@
-import React, { useCallback } from 'react';
-import { observer } from 'mobx-react';
-import { useLocation } from 'wouter';
+import React, {useCallback} from 'react';
+import {observer} from 'mobx-react';
+import {useLocation} from 'wouter';
 
 import './AppBar.less';
 
@@ -25,7 +25,9 @@ const AppBar: React.FC = observer(() => {
           <span>图管理</span>
         </div>
       </div>
-      <div className="navigator-additions"></div>
+      <div className="navigator-additions">
+        <span></span>
+      </div>
     </nav>
   );
 });

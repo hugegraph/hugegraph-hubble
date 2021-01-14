@@ -34,6 +34,7 @@ import type { VertexTypeValidatePropertyIndexes } from '../../../../stores/types
 import BlueArrowIcon from '../../../../assets/imgs/ic_arrow_blue.svg';
 import HintIcon from '../../../../assets/imgs/ic_question_mark.svg';
 import closeIcon from '../../../../assets/imgs/ic_close_16.svg';
+import { clearObserving } from 'mobx/lib/internal';
 
 const CreateVertex: React.FC = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
@@ -974,7 +975,8 @@ const CreateVertex: React.FC = observer(() => {
                           }
                         }}
                         tooltipWrapperProps={{
-                          className: 'metadata-properties-tooltips'
+                          className: 'metadata-properties-tooltips',
+                          style: { zIndex: 1041 }
                         }}
                         tooltipWrapper={
                           <div ref={deleteWrapperRef}>
