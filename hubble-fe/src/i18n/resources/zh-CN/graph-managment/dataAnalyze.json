@@ -9,6 +9,9 @@
       "favorite": "收藏",
       "reset": "重置"
     },
+    "hint": {
+      "graph-disabled": "该图不可用"
+    },
     "algorithm-list": {
       "title": "算法目录",
       "loop-detection": "环路检测",
@@ -24,9 +27,9 @@
       "radiographic-inspection": "射线检测",
       "same-neighbor": "共同邻居",
       "weighted-shortest-path": "带权最短路径",
-      "single-source-weighted-shortest-path": "单源加权最短路径",
-      "jaccard-similarity": "Jaccard相似度",
-      "personal-rank-recommendation": "Personal Rank推荐算法"
+      "single-source-weighted-shortest-path": "单源带权最短路径",
+      "jaccard": "Jaccard相似度",
+      "personal-rank": "Personal Rank推荐算法"
     },
     "algorithm-forms": {
       "loop-detection": {
@@ -314,7 +317,7 @@
           "positive-integer-or-negative-one-only": "请填写-1或大于0的整数"
         }
       },
-      "kHop": {
+      "k-hop": {
         "options": {
           "source": "起点ID:",
           "direction": "方向:",
@@ -351,34 +354,41 @@
           "source": "起点ID:",
           "vertex-type": "顶点类型:",
           "vertex-property": "顶点属性:",
-          "default_weight": "路径权重排序:",
+          "sort_by": "路径权重排序:",
           "capacity": "遍历中访问顶点最大值:",
           "limit": "返回顶点最大值:",
           "direction": "方向:",
-          "label": "边类型:",
+          "labels": "边类型:",
           "properties": "边属性:",
           "weight_by": "根据属性计算边权重:",
           "degree": "最大度数:",
-          "sample": "采样值:"
+          "sample": "采样值:",
+          "steps": "steps:"
         },
         "placeholder": {
-          "input-source-id": "请输入起点ID",
-          "input-vertex-type": "请选择顶点类型",
-          "input-vertex-property": "请选择顶点属性",
+          "input-source-id": "请输入起点ID，多个ID用逗号分隔",
+          "select-vertex-type": "请选择顶点类型",
+          "select-vertex-property": "请选择顶点属性",
+          "input-multiple-properties": "多属性值以逗号分隔",
           "input-integer": "请填写大于等于0的整数",
           "input-positive-integer": "请填写大于0的整数",
           "input-positive-integer-or-negative-one-degree": "请填写-1或大于0的整数，默认为10000",
           "input-positive-integer-or-negative-one-capacity": "请填写-1或大于0的整数，默认为10000000",
-          "input-positive-integer-or-negative-one-limit": "请填写-1或大于0的整数，默认为10000000",
+          "input-positive-integer-or-negative-one-limit": "请填写-1或大于0的整数，默认为10",
           "input-property": "请输入边属性",
-          "input-number": "请输入数字",
+          "input-number": "请输入浮点数字",
+          "select-edge-type": "请选择边类型",
+          "select-edge-property": "请选择边属性",
           "select-property": "请选择属性",
           "no-vertex-type": "无顶点类型",
           "no-vertex-property": "无顶点属性",
-          "no-property": "无属性"
+          "no-edge-type": "无边类型",
+          "no-edge-property": "无边属性",
+          "no-properties": "无属性"
         },
         "hint": {
-          "top": "在结果中每一层只保留权重最高的N个结果"
+          "top": "在结果中每一层只保留权重最高的N个结果",
+          "vertex_type_or_property": "顶点类型/顶点属性至少填写一项"
         },
         "radio-value": {
           "specific-id": "指定ID",
@@ -394,9 +404,12 @@
           "integer-only": "请填写大于等于0的整数",
           "postive-integer-only": "请填写大于0的整数",
           "positive-integer-or-negative-one-only": "请填写-1或大于0的整数",
-          "input-chars": "规则不能其它重复"
+          "input-chars": "规则不能其它重复",
+          "input-number": "请输入浮点数字"
         },
-        "pre-value": "全部",
+        "custom-weight": "自定义权重值",
+        "add": "添加",
+        "delete": "删除",
         "add-new-rule": "添加规则"
       },
       "radiographic-inspection": {
@@ -435,11 +448,12 @@
           "direction": "方向:",
           "label": "边类型:",
           "max_degree": "最大度数:",
-          "limit": "访问共同邻居最大值:"
+          "limit": "返回共同邻居最大值:"
         },
         "pre-value": "全部",
         "placeholder": {
-          "input-source-id": "请输入起点ID",
+          "input-source-id": "请输入顶点ID",
+          "input-other-id": "请输入不同于顶点1的ID",
           "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
           "input-positive-integer-or-negative-one-limit": "请填写-1或大于0的整数，默认为10000000",
           "input-positive-integer": "请填写大于0的整数",
@@ -478,7 +492,7 @@
           "input-positive-integer-or-negative-one-capacity": "请填写-1或大于0的整数，默认为10000000",
           "select-property": "请选择属性",
           "input-positive-integer": "请填写大于0的整数，默认为0",
-          "no-property": "无属性",
+          "no-property": "无属性值为数字类型的属性",
           "no-edge-types": "无边类型"
         },
         "hint": {
@@ -538,7 +552,8 @@
         },
         "pre-value": "全部",
         "placeholder": {
-          "input-source-id": "请输入起点ID",
+          "input-source-id": "请输入顶点ID",
+          "input-other-id": "请输入不同于顶点1的ID",
           "input-positive-integer": "请填写大于0的整数",
           "input-positive-integer-or-negative-one-max-degree": "请填写-1或大于0的整数，默认为10000",
           "no-edge-types": "无边类型"
@@ -560,21 +575,22 @@
           "source": "起点ID:",
           "alpha": "Alpha:",
           "max_depth": "迭代次数:",
-          "with_label": {
-            "title": "返回结果筛选",
-            "same_label": "相同类型顶点",
-            "other_label": "不同类型顶点",
-            "both_label": "全部类型顶点"
-          },
+          "with_label": "返回结果筛选:",
           "label": "边类型:",
           "degree": "最大度数:",
           "limit": "返回顶点最大值:",
           "sorted": "返回结果排序:"
         },
+        "with-label-radio-value": {
+          "same_label": "相同类型顶点",
+          "other_label": "不同类型顶点",
+          "both_label": "全部类型顶点"
+        },
         "placeholder": {
           "input-source-id": "请输入起点ID",
           "input-positive-integer-or-negative-one-degree": "请填写-1或大于0的整数，默认为10000",
           "input-positive-integer-or-negative-one-limit": "请填写-1或大于0的整数，默认为10000000",
+          "select-edge": "请选择边类型",
           "input-positive-integer": "请填写大于0的整数",
           "alpha": "请输入(0-1]的数字",
           "max_depth": "请输入(0-50]的数字"
@@ -610,7 +626,7 @@
         "rays": "射线检测",
         "sameneighbors": "共同邻居",
         "weightedshortpath": "带权最短路径",
-        "singleshortpath": "单源加权最短路径",
+        "singleshortpath": "单源带权最短路径",
         "jaccardsimilarity": "Jaccard相似度",
         "personalrank": "Personal Rank推荐算法"
       }

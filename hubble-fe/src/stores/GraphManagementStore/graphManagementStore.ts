@@ -363,6 +363,9 @@ export class GraphManagementStore {
           id,
           name
         }));
+
+        this.graphData = result.data.data.records;
+        this.graphDataPageConfig.pageTotal = result.data.data.total;
       }
 
       if (result.data.status !== 200) {

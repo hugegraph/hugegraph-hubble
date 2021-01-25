@@ -243,7 +243,11 @@ export function formatVertexIdText(
   }
 }
 
-export function isGtNegativeOneButZero(value: string) {
+export function isGtNegativeOneButZero(value: string | number) {
+  if (typeof value === 'number') {
+    value = String(value);
+  }
+
   return !(
     !isEmpty(value) &&
     (!isInt(value as string, { min: -1 }) || String(Number(value)) === '0')

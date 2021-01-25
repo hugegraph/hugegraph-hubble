@@ -8,17 +8,15 @@ export enum Algorithm {
   allPath = 'all-path',
   modelSimilarity = 'model-similarity',
   neighborRank = 'neighbor-rank',
-  realTimeRecommendation = 'real-time-recommendation',
   kStepNeighbor = 'k-step-neighbor',
   kHop = 'k-hop',
   customPath = 'custom-path',
-  customIntersectionDetection = 'custom-intersection-detection',
   radiographicInspection = 'radiographic-inspection',
   sameNeighbor = 'same-neighbor',
   weightedShortestPath = 'weighted-shortest-path',
   singleSourceWeightedShortestPath = 'single-source-weighted-shortest-path',
-  jaccardSimilarity = 'jaccard-similarity',
-  personalRankRecommendation = 'personal-rank-recommendation'
+  jaccard = 'jaccard',
+  personalRankRecommendation = 'personal-rank'
 }
 
 export function initializeRequestStatus() {
@@ -322,19 +320,20 @@ export function createCustomPathDefaultParams() {
     method: 'id',
     source: '',
     vertexType: '',
-    vertexProperty: [],
-    default_weight: 'NONE',
+    vertexProperty: [['', '']],
+    sort_by: 'NONE',
     capacity: '10000000',
-    limit: '10000000',
+    limit: '10',
     steps: [
       {
         uuid: v4(),
         direction: 'BOTH',
-        labels: ['__all__'],
-        properties: '10000',
+        labels: [],
+        properties: [['', '']],
         weight_by: '',
+        default_weight: '',
         degree: '10000',
-        sample: '0'
+        sample: '100'
       }
     ]
   };
@@ -346,7 +345,7 @@ export function createValidateCustomPathParamsErrorMessage() {
     source: '',
     vertexType: '',
     vertexProperty: '',
-    default_weight: '',
+    sort_by: '',
     capacity: '',
     limit: '',
     steps: [
@@ -356,6 +355,7 @@ export function createValidateCustomPathParamsErrorMessage() {
         labels: '',
         properties: '',
         weight_by: '',
+        default_weight: '',
         degree: '',
         sample: ''
       }
@@ -491,7 +491,7 @@ export function createPersonalRankDefaultParams() {
     alpha: '',
     max_depth: '',
     with_label: 'SAME_LABEL',
-    label: '__all__',
+    label: '',
     degree: '10000',
     limit: '10000000',
     sorted: true

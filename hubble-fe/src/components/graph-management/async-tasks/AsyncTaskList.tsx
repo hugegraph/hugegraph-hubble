@@ -261,9 +261,7 @@ const AsyncTaskList: React.FC = observer(() => {
           <div onClick={handleFilterOptions('status', 'running')}>
             {t('async-tasks.table-filters.status.running')}
           </div>
-          <div onClick={handleFilterOptions('status', 'restoring')}>
-            {t('async-tasks.table-filters.status.restoring')}
-          </div>
+          <div onClick={handleFilterOptions('status', 'restoring')}></div>
           <div onClick={handleFilterOptions('status', 'success')}>
             {t('async-tasks.table-filters.status.success')}
           </div>
@@ -416,7 +414,7 @@ const AsyncTaskList: React.FC = observer(() => {
         <div className="async-task-list-content-header">
           <Input.Search
             size="medium"
-            width={205}
+            width={215}
             placeholder={t('async-tasks.placeholders.search')}
             value={asyncTasksStore.searchWords}
             onChange={handleSearchChange}

@@ -4,10 +4,12 @@ import {
   AlgorithmInternalNameMapping,
   formatAlgorithmStatement
 } from './formatAlgorithmStatement';
+import isDataTypeNumeric from './isDataTypeNumeric';
 
 export {
   convertStringToJSON,
   getUnicodeLength,
   AlgorithmInternalNameMapping,
-  formatAlgorithmStatement
+  formatAlgorithmStatement,
+  isDataTypeNumeric
 };

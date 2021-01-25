@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { observer } from 'mobx-react';
 import classnames from 'classnames';
-import { isUndefined, cloneDeep, isEmpty } from 'lodash-es';
+import { isUndefined, cloneDeep, isEmpty, isNull } from 'lodash-es';
 import Highlighter from 'react-highlight-words';
 import { useRoute, useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
@@ -34,12 +34,14 @@ import type {
   PersonalRank,
   ModelSimilarityParams,
   NeighborRankParams,
-  CustomPathParams
+  CustomPathParams,
+  CustomPathRule
 } from '../../../stores/types/GraphManagementStore/dataAnalyzeStore';
 import { Algorithm } from '../../../stores/factory/dataAnalyzeStore/algorithmStore';
 
 import ArrowIcon from '../../../assets/imgs/ic_arrow_16.svg';
 import EmptyIcon from '../../../assets/imgs/ic_sousuo_empty.svg';
+import { toJS } from 'mobx';
 
 export const AlgorithmInternalNameMapping: Record<string, string> = {
   rings: 'loop-detection',
@@ -50,7 +52,7 @@ export const AlgorithmInternalNameMapping: Record<string, string> = {
   fsimilarity: 'model-similarity',
   neighborrank: 'neighbor-rank',
   kneighbor: 'k-step-neighbor',
-  kout: 'kHop',
+  kout: 'k-hop',
   customizedpaths: 'custom-path',
   rays: 'radiographic-inspection',
   sameneighbors: 'same-neighbor',
@@ -620,19 +622,79 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
 
               return;
             case 'customizedpaths':
-              algorithmAnalyzerStore.changeCurrentAlgorithm(
-                Algorithm.customIntersectionDetection
+              const clonedParams = cloneDeep(params);
+
+              if (isEmpty(params.sources.ids)) {
+                clonedParams.method = 'property';
+              } else {
+                clonedParams.method = 'id';
+              }
+              clonedParams.source = clonedParams.sources.ids.join(',');
+              clonedParams.vertexType = clonedParams.sources.label;
+              clonedParams.vertexProperty = Object.entries(
+                clonedParams.sources.properties
               );
 
-              const clonedParams = cloneDeep(params) as CustomPathParams;
+              if (isEmpty(clonedParams.vertexProperty)) {
+                clonedParams.vertexProperty = [['', '']];
+              } else {
+                clonedParams.vertexProperty = clonedParams.vertexProperty.map(
+                  ([key, value]: [string, string[]]) => [key, value.join(',')]
+                );
 
-              clonedParams.steps.forEach(({ labels }, index) => {
+                clonedParams.vertexProperty = Object.keys(
+                  clonedParams.vertexProperty
+                ).map((key) => [
+                  key,
+                  clonedParams.vertexProperty[key].join(',')
+                ]);
+              }
+
+              clonedParams.steps.forEach((step: any, index: number) => {
+                const { labels, properties, weight_by, default_weight } = step;
                 clonedParams.steps[index].uuid = v4();
 
-                if (labels[0] === null) {
-                  clonedParams.steps[index].labels = ['__all__'];
+                if (isEmpty(labels)) {
+                  step.labels = dataAnalyzeStore.edgeTypes.map(
+                    ({ name }) => name
+                  );
+                }
+
+                if (isEmpty(properties)) {
+                  step.properties = [['', '']];
+                } else {
+                  step.properties = Object.keys(step.properties).map((key) => [
+                    key,
+                    step.properties[key].join(',')
+                  ]);
+                }
+
+                if (clonedParams.sort_by === 'NONE') {
+                  step.weight_by = '';
+                  step.default_weight = '';
+                } else {
+                  if (!isNull(weight_by)) {
+                    step.default_weight = '';
+                  } else {
+                    // custom weight
+                    step.weight_by = '__CUSTOM_WEIGHT__';
+                    step.default_weight = default_weight;
+                  }
                 }
               });
+
+              delete clonedParams.sources;
+
+              Object.keys(clonedParams).forEach((key) => {
+                algorithmAnalyzerStore.mutateCustomPathParams(
+                  key as keyof CustomPathParams,
+                  clonedParams[key]
+                );
+              });
+
+              algorithmAnalyzerStore.changeCurrentAlgorithm(
+                Algorithm.customPath
+              );
 
               return;
             case 'rays':
@@ -663,7 +725,7 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
               return;
             case 'weightedshortpath':
               algorithmAnalyzerStore.changeCurrentAlgorithm(
-                Algorithm.sameNeighbor
+                Algorithm.weightedShortestPath
               );
 
               Object.keys(params).forEach((key) => {
@@ -688,9 +750,7 @@ const ExecLogAndQueryCollections: React.FC = observer(() => {
 
               return;
             case 'jaccardsimilarity':
-              algorithmAnalyzerStore.changeCurrentAlgorithm(
-                Algorithm.jaccardSimilarity
-              );
+              algorithmAnalyzerStore.changeCurrentAlgorithm(Algorithm.jaccard);
 
               Object.keys(params).forEach((key) => {
                 algorithmAnalyzerStore.mutateJaccardParams(
@@ -889,11 +949,12 @@ const ExecutionContent: React.FC<{
   algorithmName?: string;
 }> = observer(({ type, content, highlightText, algorithmName }) => {
   const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isExpand, switchExpand] = useState(dataAnalyzeStore.isSearched.status);
+
   const statements =
     type === 'ALGORITHM'
-      ? formatAlgorithmStatement(content, algorithmName, t)
+      ? formatAlgorithmStatement(content, algorithmName, t, i18n)
       : content.split('\n').filter((statement) => statement !== '');
 
   const arrowIconClassName = classnames({

@@ -497,7 +497,7 @@ const EdgeTypeList: React.FC = observer(() => {
               className="metadata-properties-modal-description"
               style={{ marginBottom: 0 }}
             >
-              确认删除以下边？
+              确认删除以下边类型？
             </div>
             <div className="metadata-properties-modal-description">
               删除元数据耗时较久，详情可在任务管理中查看。
@@ -1752,7 +1752,7 @@ const EdgeTypeListManipulation: React.FC<EdgeTypeListManipulation> = observer(
                 <p className="metadata-properties-tooltips-title">
                   确认删除此边类型？
                 </p>
-                <p>确认删除边类型？删除后无法恢复，请谨慎操作</p>
+                <p>删除后无法恢复，请谨慎操作</p>
                 <p>删除元数据耗时较久，详情可在任务管理中查看</p>
                 <div className="metadata-properties-tooltips-footer">
                   <Button

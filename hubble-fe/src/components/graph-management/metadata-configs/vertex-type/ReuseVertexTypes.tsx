@@ -9,19 +9,25 @@ import {
   Input,
   Message
 } from '@baidu/one-ui';
-
-import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
-import PassIcon from '../../../../assets/imgs/ic_pass.svg';
-import './ReuseVertexTypes.less';
 import { cloneDeep } from 'lodash-es';
+import { useTranslation } from 'react-i18next';
+
+import { GraphManagementStoreContext } from '../../../../stores';
+import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
+
+import PassIcon from '../../../../assets/imgs/ic_pass.svg';
+
+import './ReuseVertexTypes.less';
 
 const ReuseVertexTypes: React.FC = observer(() => {
+  const graphManagementStore = useContext(GraphManagementStoreContext);
   const metadataConfigsRootStore = useContext(MetadataConfigsRootStore);
   const { vertexTypeStore } = metadataConfigsRootStore;
   const [currentStatus, setCurrentStatus] = useState(1);
   // acutally the name, not id in database
   const [selectedId, mutateSelectedId] = useState<[] | string>([]);
   const [selectedList, mutateSelectedList] = useState<string[]>([]);
+  const { t } = useTranslation();
 
   // step 2
   const [vertexTypeEditIndex, setVertexTypeEditIndex] = useState<number | null>(
@@ -235,7 +241,7 @@ const ReuseVertexTypes: React.FC = observer(() => {
 
                 // remove selected status of the property in <Transfer />
                 const newSelectedList = [...selectedList].filter(
-                  property =>
+                  (property) =>
                     property !==
                     vertexTypeStore.editedCheckedReusableData!
                       .vertexlabel_conflicts[index].entity.name
@@ -735,6 +741,18 @@ const ReuseVertexTypes: React.FC = observer(() => {
                   vertexTypeStore.fetchVertexTypeList({
                     reuseId: Number(id)
                   });
+
+                  const enable = graphManagementStore.graphData.find(
+                    ({ name }) => name === selectedName
+                  )?.enabled;
+
+                  if (!enable) {
+                    Message.error({
+                      content: t('data-analyze.hint.graph-disabled'),
+                      size: 'medium',
+                      showCloseIcon: false
+                    });
+                  }
                 }}
                 value={selectedId}
               >

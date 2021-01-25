@@ -8,7 +8,9 @@ import {
   remove,
   size,
   fromPairs,
-  invert
+  invert,
+  flatten,
+  uniq
 } from 'lodash-es';
 import vis from 'vis-network';
 import isInt from 'validator/lib/isInt';
@@ -236,6 +238,16 @@ export class DataAnalyzeStore {
 
   @observable.shallow requestStatus = initalizeRequestStatus();
   @observable errorInfo = initalizeErrorInfo();
+
+  @computed get allPropertiesFromEdge() {
+    return uniq(
+      flatten(
+        this.edgeTypes.map(({ properties }) =>
+          properties.map(({ name }) => name)
+        )
+      )
+    );
+  }
 
   @computed get graphNodes(): GraphNode[] {
     return this.originalGraphData.data.graph_view.vertices.map(
@@ -1721,33 +1733,26 @@ export class DataAnalyzeStore {
           clonedCustomPathRules.forEach((step, index) => {
             delete step.uuid;
 
-            const clonedCustomPathRule = cloneDeep(step);
-
-            if (isEmpty(clonedCustomPathRule.labels)) {
-              delete clonedCustomPathRule.labels;
+            if (isEmpty(step.labels)) {
+              delete step.labels;
             }
 
-            if (clonedCustomPathRule.properties[0][0] !== '') {
+            if (step.properties[0][0] !== '') {
               // omit property types here
               // @ts-ignore
-              clonedCustomPathRule.properties = fromPairs(
-                clonedCustomPathRule.properties.map(([key, value]) => [
-                  key,
-                  value.split(',')
-                ])
+              step.properties = fromPairs(
+                step.properties.map(([key, value]) => [key, value.split(',')])
               );
-
-              clonedCustomPathRules[index] = clonedCustomPathRule;
             } else {
-              delete clonedCustomPathRule.properties;
+              delete step.properties;
             }
 
-            if (isEmpty(clonedCustomPathRule.degree)) {
-              delete clonedCustomPathRule.degree;
+            if (isEmpty(step.degree)) {
+              delete step.degree;
             }
 
-            if (isEmpty(clonedCustomPathRule.sample)) {
-              delete clonedCustomPathRule.degree;
+            if (isEmpty(step.sample)) {
+              delete step.sample;
             }
 
             if (step.weight_by === '__CUSTOM_WEIGHT__') {
@@ -1755,15 +1760,25 @@ export class DataAnalyzeStore {
             } else {
               delete step.default_weight;
             }
+
+            if (step.weight_by === '') {
+              delete step.weight_by;
+            }
           });
 
-          const convertedParams = {
+          const convertedParams: Record<string, any> = {
             sources,
             sort_by,
-            capacity,
-            limit,
             steps: clonedCustomPathRules
           };
+
+          if (!isEmpty(capacity)) {
+            convertedParams.capactiy = capacity;
+          }
+
+          if (!isEmpty(limit)) {
+            convertedParams.limit = limit;
+          }
 
           // @ts-ignore
           params = convertedParams;
@@ -1842,7 +1857,7 @@ export class DataAnalyzeStore {
           break;
         }
 
-        case Algorithm.jaccardSimilarity: {
+        case Algorithm.jaccard: {
           if (this.algorithmAnalyzerStore.jaccardParams.label === '__all__') {
             const clonedParams: Jaccard = cloneDeep(
               this.algorithmAnalyzerStore.jaccardParams

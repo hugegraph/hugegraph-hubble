@@ -235,7 +235,7 @@ const DataAnalyzeInfoDrawer: React.FC = observer(() => {
               <div>
                 <Input
                   size="medium"
-                  width={268}
+                  width={240}
                   placeholder="请输入属性值"
                   errorLocation="layer"
                   errorMessage={dataAnalyzeStore.validateEditableGraphDataPropertyErrorMessage!.nonNullable.get(
@@ -288,7 +288,7 @@ const DataAnalyzeInfoDrawer: React.FC = observer(() => {
                 <div>
                   <Input
                     size="medium"
-                    width={268}
+                    width={240}
                     placeholder="请输入属性值"
                     errorLocation="layer"
                     errorMessage={dataAnalyzeStore.validateEditableGraphDataPropertyErrorMessage!.nullable.get(

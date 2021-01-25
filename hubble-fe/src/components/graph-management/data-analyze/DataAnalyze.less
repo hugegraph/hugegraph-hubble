@@ -880,8 +880,12 @@
       }
 
       & > div {
-        flex-basis: 50%;
+        // flex-basis: 50%;
         line-height: 32px;
+
+        &:first-child {
+          width: 162px;
+        }
       }
     }
   }
@@ -1180,4 +1184,13 @@ div.vis-tooltip {
   border-radius: 0;
   pointer-events: none;
   z-index: 5;
+}
+
+// refer to index.less, this should be fixed in the future version
+.data-analyze-dynamic-add-options .new-fc-one-input-all-container {
+  position: relative;
+}
+
+.data-analyze-graph-node-info .new-fc-one-input-all-container {
+  position: relative;
 }

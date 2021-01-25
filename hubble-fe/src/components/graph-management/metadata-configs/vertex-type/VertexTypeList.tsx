@@ -1669,8 +1669,8 @@ const VertexTypeListManipulation: React.FC<VertexTypeListManipulation> = observe
                     <p className="metadata-properties-tooltips-title">
                       确认删除此顶点类型？
                     </p>
-                    <p>确认删除此顶点类型？删除后无法恢复，请谨慎操作</p>
-                    <p>删除元数据耗时较久，详情可在任务管理中查看</p>
+                    <p>删除后无法恢复，请谨慎操作。</p>
+                    <p>删除元数据耗时较久，详情可在任务管理中查看。</p>
                     <div className="metadata-properties-tooltips-footer">
                       <Button
                         size="medium"

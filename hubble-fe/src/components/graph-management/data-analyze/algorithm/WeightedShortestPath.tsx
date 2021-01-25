@@ -4,10 +4,12 @@ import { Button, Radio, Input, Select, Switch } from '@baidu/one-ui';
 import { useTranslation } from 'react-i18next';
 import { styles } from '../QueryAndAlgorithmLibrary';
 import { Tooltip as CustomTooltip } from '../../../common';
+
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
+import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
+import { isDataTypeNumeric } from '../../../../utils';
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
-import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
 
 const WeightedShortestPath = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
@@ -347,11 +349,19 @@ const WeightedShortestPath = observer(() => {
               );
             }}
           >
-            {dataAnalyzeStore.properties.map(({ name }) => (
-              <Select.Option value={name} key={name}>
-                {name}
-              </Select.Option>
-            ))}
+            {dataAnalyzeStore.allPropertiesFromEdge
+              .filter((propertyName) =>
+                isDataTypeNumeric(
+                  dataAnalyzeStore.properties.find(
+                    ({ name }) => name === propertyName
+                  )?.data_type
+                )
+              )
+              .map((propertyName) => (
+                <Select.Option value={propertyName} key={propertyName}>
+                  {propertyName}
+                </Select.Option>
+              ))}
           </Select>
         </div>
         <div className="query-tab-content-form-item">

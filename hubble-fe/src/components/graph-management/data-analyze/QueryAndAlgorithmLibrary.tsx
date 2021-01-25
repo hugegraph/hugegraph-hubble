@@ -63,7 +63,15 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
     dataAnalyzeStore.resetSwitchTabState();
 
     if (tab !== dataAnalyzeStore.currentTab) {
+      // reset codeEditor value
       dataAnalyzeStore.mutateCodeEditorText('');
+
+      // reset default selection of edge labels
+      algorithmAnalyzerStore.mutateCustomPathRuleParams(
+        'labels',
+        dataAnalyzeStore.edgeTypes.map(({ name }) => name),
+        0
+      );
     }
 
     dataAnalyzeStore.setCurrentTab(tab);
@@ -467,7 +475,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
         return <WeightedShortestPath />;
       case Algorithm.singleSourceWeightedShortestPath:
         return <SingleSourceWeightedShortestPath />;
-      case Algorithm.jaccardSimilarity:
+      case Algorithm.jaccard:
         return <Jaccard />;
       case Algorithm.personalRankRecommendation:
         return <PersonalRank />;
@@ -556,7 +564,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
               Algorithm.sameNeighbor,
               Algorithm.weightedShortestPath,
               Algorithm.singleSourceWeightedShortestPath,
-              Algorithm.jaccardSimilarity
+              Algorithm.jaccard
             ].map((algorithm) => (
               <span onClick={handleChangeAlgorithm(algorithm)} key={algorithm}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}

@@ -317,16 +317,18 @@ const CheckAndEditEdge: React.FC = observer(() => {
             }
           }}
           tooltipWrapperProps={{
-            className: 'metadata-properties-tooltips',
+            className: 'metadata-graph-tooltips',
             style: {
               zIndex: 1042
             }
           }}
           tooltipWrapper={
             <div ref={deleteWrapperRef}>
-              <p style={{ marginBottom: 8 }}>确认删除此边类型？</p>
-              <p>删除后无法恢复，请谨慎操作</p>
-              <p>删除元数据耗时较久，详情可在任务管理中查看</p>
+              <p className="metadata-graph-tooltips-title">
+                确认删除此边类型？
+              </p>
+              <p>删除后无法恢复，请谨慎操作。</p>
+              <p>删除元数据耗时较久，详情可在任务管理中查看。</p>
               <div
                 style={{
                   display: 'flex',

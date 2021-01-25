@@ -20,6 +20,7 @@ const PersonalRank = observer(() => {
     ).every((value) => value === '') &&
     algorithmAnalyzerStore.personalRankParams.source !== '' &&
     algorithmAnalyzerStore.personalRankParams.alpha !== '' &&
+    algorithmAnalyzerStore.personalRankParams.label !== '' &&
     algorithmAnalyzerStore.personalRankParams.max_depth !== '';
 
   return (
@@ -64,6 +65,7 @@ const PersonalRank = observer(() => {
         </div>
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
+            <i>*</i>
             <span>
               {t('data-analyze.algorithm-forms.personal-rank.options.label')}
             </span>
@@ -72,6 +74,9 @@ const PersonalRank = observer(() => {
             size="medium"
             trigger="click"
             value={algorithmAnalyzerStore.personalRankParams.label}
+            selectorName={t(
+              'data-analyze.algorithm-forms.personal-rank.placeholder.select-edge'
+            )}
             notFoundContent={t(
               'data-analyze.algorithm-forms.personal-rank.placeholder.no-edge-types'
             )}
@@ -81,9 +86,6 @@ const PersonalRank = observer(() => {
               algorithmAnalyzerStore.mutatePersonalRankParams('label', value);
             }}
           >
-            <Select.Option value="__all__" key="__all__">
-              {t('data-analyze.algorithm-forms.personal-rank.pre-value')}
-            </Select.Option>
             {dataAnalyzeStore.edgeTypes.map(({ name }) => (
               <Select.Option value={name} key={name}>
                 {name}
@@ -273,7 +275,7 @@ const PersonalRank = observer(() => {
             <i>*</i>
             <span>
               {t(
-                'data-analyze.algorithm-forms.personal-rank.options.with_label.title'
+                'data-analyze.algorithm-forms.personal-rank.options.with_label'
               )}
             </span>
             <CustomTooltip
@@ -315,17 +317,17 @@ const PersonalRank = observer(() => {
           >
             <Radio value="SAME_LABEL">
               {t(
-                'data-analyze.algorithm-forms.personal-rank.options.with_label.same_label'
+                'data-analyze.algorithm-forms.personal-rank.with-label-radio-value.same_label'
               )}
             </Radio>
             <Radio value="OTHER_LABEL">
               {t(
-                'data-analyze.algorithm-forms.personal-rank.options.with_label.other_label'
+                'data-analyze.algorithm-forms.personal-rank.with-label-radio-value.other_label'
               )}
             </Radio>
             <Radio value="BOTH_LABEL">
               {t(
-                'data-analyze.algorithm-forms.personal-rank.options.with_label.both_label'
+                'data-analyze.algorithm-forms.personal-rank.with-label-radio-value.both_label'
               )}
             </Radio>
           </Radio.Group>

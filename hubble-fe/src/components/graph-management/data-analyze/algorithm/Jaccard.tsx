@@ -101,7 +101,7 @@ const Jaccard = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.jaccard.placeholder.input-source-id'
+              'data-analyze.algorithm-forms.jaccard.placeholder.input-other-id'
             )}
             errorLocation="layer"
             errorMessage={
@@ -226,7 +226,7 @@ const Jaccard = observer(() => {
             const timerId = dataAnalyzeStore.addTempExecLog();
             await dataAnalyzeStore.fetchGraphs({
               url: 'jaccardsimilarity',
-              type: Algorithm.jaccardSimilarity
+              type: Algorithm.jaccard
             });
             await dataAnalyzeStore.fetchExecutionLogs();
             window.clearTimeout(timerId);

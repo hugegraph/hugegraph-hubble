@@ -27,14 +27,16 @@ const KHop = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <i>*</i>
-            <span>{t('data-analyze.algorithm-forms.kHop.options.source')}</span>
+            <span>
+              {t('data-analyze.algorithm-forms.k-hop.options.source')}
+            </span>
           </div>
           <Input
             width={400}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.kHop.placeholder.input-source-id'
+              'data-analyze.algorithm-forms.k-hop.placeholder.input-source-id'
             )}
             errorLocation="layer"
             errorMessage={
@@ -58,14 +60,14 @@ const KHop = observer(() => {
         </div>
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
-            <span>{t('data-analyze.algorithm-forms.kHop.options.label')}</span>
+            <span>{t('data-analyze.algorithm-forms.k-hop.options.label')}</span>
           </div>
           <Select
             size="medium"
             trigger="click"
             value={algorithmAnalyzerStore.kHopParams.label}
             notFoundContent={t(
-              'data-analyze.algorithm-forms.kHop.placeholder.no-edge-types'
+              'data-analyze.algorithm-forms.k-hop.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             width={400}
@@ -74,7 +76,7 @@ const KHop = observer(() => {
             }}
           >
             <Select.Option value="__all__" key="__all__">
-              {t('data-analyze.algorithm-forms.kHop.pre-value')}
+              {t('data-analyze.algorithm-forms.k-hop.pre-value')}
             </Select.Option>
             {dataAnalyzeStore.edgeTypes.map(({ name }) => (
               <Select.Option value={name} key={name}>
@@ -89,7 +91,7 @@ const KHop = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.kHop.options.direction')}
+              {t('data-analyze.algorithm-forms.k-hop.options.direction')}
             </span>
           </div>
           <Radio.Group
@@ -110,7 +112,7 @@ const KHop = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.kHop.options.max_degree')}
+              {t('data-analyze.algorithm-forms.k-hop.options.max_degree')}
             </span>
             <CustomTooltip
               trigger="hover"
@@ -127,7 +129,7 @@ const KHop = observer(() => {
                 }
               }}
               tooltipWrapper={t(
-                'data-analyze.algorithm-forms.kHop.hint.max-degree'
+                'data-analyze.algorithm-forms.k-hop.hint.max-degree'
               )}
               childrenProps={{
                 src: QuestionMarkIcon,
@@ -144,7 +146,7 @@ const KHop = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.kHop.placeholder.input-positive-integer-or-negative-one-max-degree'
+              'data-analyze.algorithm-forms.k-hop.placeholder.input-positive-integer-or-negative-one-max-degree'
             )}
             errorLocation="layer"
             errorMessage={
@@ -172,7 +174,7 @@ const KHop = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.kHop.options.max_depth')}
+              {t('data-analyze.algorithm-forms.k-hop.options.max_depth')}
             </span>
             <CustomTooltip
               trigger="hover"
@@ -189,7 +191,7 @@ const KHop = observer(() => {
                 }
               }}
               tooltipWrapper={t(
-                'data-analyze.algorithm-forms.kHop.hint.max-depth'
+                'data-analyze.algorithm-forms.k-hop.hint.max-depth'
               )}
               childrenProps={{
                 src: QuestionMarkIcon,
@@ -206,7 +208,7 @@ const KHop = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.kHop.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.k-hop.placeholder.input-positive-integer'
             )}
             errorLocation="layer"
             errorMessage={
@@ -231,7 +233,7 @@ const KHop = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.kHop.options.capacity')}
+              {t('data-analyze.algorithm-forms.k-hop.options.capacity')}
             </span>
           </div>
           <Input
@@ -239,7 +241,7 @@ const KHop = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.kHop.placeholder.input-positive-integer-or-negative-one-capacity'
+              'data-analyze.algorithm-forms.k-hop.placeholder.input-positive-integer-or-negative-one-capacity'
             )}
             errorLocation="layer"
             errorMessage={
@@ -266,7 +268,7 @@ const KHop = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.kHop.options.nearest')}
+              {t('data-analyze.algorithm-forms.k-hop.options.nearest')}
             </span>
             <CustomTooltip
               trigger="hover"
@@ -283,7 +285,7 @@ const KHop = observer(() => {
                 }
               }}
               tooltipWrapper={t(
-                'data-analyze.algorithm-forms.kHop.hint.shortest-path'
+                'data-analyze.algorithm-forms.k-hop.hint.shortest-path'
               )}
               childrenProps={{
                 src: QuestionMarkIcon,
@@ -307,14 +309,14 @@ const KHop = observer(() => {
         </div>
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
-            <span>{t('data-analyze.algorithm-forms.kHop.options.limit')}</span>
+            <span>{t('data-analyze.algorithm-forms.k-hop.options.limit')}</span>
           </div>
           <Input
             width={400}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.kHop.placeholder.input-positive-integer-or-negative-one-limit'
+              'data-analyze.algorithm-forms.k-hop.placeholder.input-positive-integer-or-negative-one-limit'
             )}
             errorLocation="layer"
             errorMessage={
