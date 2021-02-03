@@ -732,7 +732,7 @@ const ReuseVertexTypes: React.FC = observer(() => {
                 onChange={(selectedName: string) => {
                   mutateSelectedId(selectedName);
 
-                  const id = metadataConfigsRootStore.idList.find(
+                  const id = graphManagementStore.idList.find(
                     ({ name }) => name === selectedName
                   )!.id;
 
@@ -756,7 +756,7 @@ const ReuseVertexTypes: React.FC = observer(() => {
                 }}
                 value={selectedId}
               >
-                {metadataConfigsRootStore.idList
+                {graphManagementStore.idList
                   .filter(
                     ({ id }) =>
                       Number(id) !== metadataConfigsRootStore.currentId

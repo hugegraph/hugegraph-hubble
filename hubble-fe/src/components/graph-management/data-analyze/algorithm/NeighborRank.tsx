@@ -1,8 +1,7 @@
 import React, { useContext } from 'react';
 import { observer } from 'mobx-react';
-import { size, last } from 'lodash-es';
+import { size } from 'lodash-es';
 import { useTranslation } from 'react-i18next';
-import classnames from 'classnames';
 import { styles } from '../QueryAndAlgorithmLibrary';
 import { Button, Radio, Input, Select } from '@baidu/one-ui';
 
@@ -11,7 +10,6 @@ import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyz
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
-import { NeighborRankRule } from '../../../../stores/types/GraphManagementStore/dataAnalyzeStore';
 
 const NeighborRank = observer(() => {
   const { t } = useTranslation();
@@ -28,17 +26,9 @@ const NeighborRank = observer(() => {
     algorithmAnalyzerStore.neighborRankParams.source !== '' &&
     algorithmAnalyzerStore.neighborRankParams.alpha !== '';
 
-  const isValidAddRule =
-    algorithmAnalyzerStore.validateNeighborRankParamsParamsErrorMessage.steps.every(
-      (step) => Object.values(step).every((value) => value === '')
-    ) && algorithmAnalyzerStore.duplicateNeighborRankRuleSet.size === 0;
-
-  const invalidExtendFormClassname = (flag: boolean) => {
-    return classnames({
-      'query-tab-content-form-expand-items': true,
-      'query-tab-content-form-expand-items-invalid': flag
-    });
-  };
+  const isValidAddRule = algorithmAnalyzerStore.validateNeighborRankParamsParamsErrorMessage.steps.every(
+    (step) => Object.values(step).every((value) => value === '')
+  );
 
   return (
     <div style={{ display: 'flex' }}>
@@ -215,11 +205,7 @@ const NeighborRank = observer(() => {
         {algorithmAnalyzerStore.neighborRankParams.steps.map(
           ({ uuid, direction, labels, degree, top }, ruleIndex) => {
             return (
-              <div
-                className={invalidExtendFormClassname(
-                  algorithmAnalyzerStore.duplicateNeighborRankRuleSet.has(uuid)
-                )}
-              >
+              <div className="query-tab-content-form-expand-items">
                 <div className="query-tab-content-form-expand-item">
                   <div className="query-tab-content-form-item-title query-tab-content-form-expand-title">
                     <i>*</i>
@@ -240,10 +226,6 @@ const NeighborRank = observer(() => {
                         e.target.value,
                         ruleIndex
                       );
-
-                      algorithmAnalyzerStore.validateDuplicateNeighborRankRules(
-                        uuid
-                      );
                     }}
                   >
                     <Radio value="BOTH">both</Radio>
@@ -263,10 +245,6 @@ const NeighborRank = observer(() => {
                       onClick={() => {
                         algorithmAnalyzerStore.removeNeighborRankRule(
                           ruleIndex
-                        );
-
-                        algorithmAnalyzerStore.validateDuplicateNeighborRankRules(
-                          uuid
                         );
                       }}
                     >
@@ -298,10 +276,6 @@ const NeighborRank = observer(() => {
                         'labels',
                         [value],
                         ruleIndex
-                      );
-
-                      algorithmAnalyzerStore.validateDuplicateNeighborRankRules(
-                        uuid
                       );
                     }}
                   >
@@ -379,10 +353,6 @@ const NeighborRank = observer(() => {
                         'degree',
                         ruleIndex
                       );
-
-                      algorithmAnalyzerStore.validateDuplicateNeighborRankRules(
-                        uuid
-                      );
                     }}
                     originInputProps={{
                       onBlur() {
@@ -456,10 +426,6 @@ const NeighborRank = observer(() => {
                         'top',
                         ruleIndex
                       );
-
-                      algorithmAnalyzerStore.validateDuplicateNeighborRankRules(
-                        uuid
-                      );
                     }}
                     originInputProps={{
                       onBlur() {
@@ -483,40 +449,16 @@ const NeighborRank = observer(() => {
             marginTop: 8
           }}
         >
-          {algorithmAnalyzerStore.duplicateNeighborRankRuleSet.size === 0 ? (
-            <span
-              style={{ cursor: 'pointer' }}
-              onClick={() => {
-                if (isValidAddRule) {
-                  algorithmAnalyzerStore.addNeighborRankRule();
-
-                  algorithmAnalyzerStore.validateDuplicateNeighborRankRules(
-                    (last(
-                      algorithmAnalyzerStore.neighborRankParams.steps
-                    ) as NeighborRankRule).uuid
-                  );
-                }
-              }}
-            >
-              {t('data-analyze.algorithm-forms.neighbor-rank.add-new-rule')}
-            </span>
-          ) : (
-            <div
-              style={{
-                width: 160,
-                boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)',
-                lineHeight: '18px',
-                padding: '16px',
-                color: '#e64552',
-                fontSize: 14,
-                textAlign: 'center'
-              }}
-            >
-              {t(
-                'data-analyze.algorithm-forms.neighbor-rank.validations.input-chars'
-              )}
-            </div>
-          )}
+          <span
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              if (isValidAddRule) {
+                algorithmAnalyzerStore.addNeighborRankRule();
+              }
+            }}
+          >
+            {t('data-analyze.algorithm-forms.neighbor-rank.add-new-rule')}
+          </span>
         </div>
       </div>
     </div>

@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react';
 import {
   size,
-  last,
   flatten,
   flattenDeep,
   uniq,
@@ -11,15 +10,12 @@ import {
   fromPairs
 } from 'lodash-es';
 import { useTranslation } from 'react-i18next';
-import classnames from 'classnames';
 import { styles } from '../QueryAndAlgorithmLibrary';
 import { Button, Radio, Input, Select } from '@baidu/one-ui';
 
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
 import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
 import { isDataTypeNumeric } from '../../../../utils';
-
-import type { CustomPathRule } from '../../../../stores/types/GraphManagementStore/dataAnalyzeStore';
 
 const CustomPath = observer(() => {
   const { t } = useTranslation();
@@ -100,17 +96,9 @@ const CustomPath = observer(() => {
     isValidateRuleProperties &&
     isValidRuleWeight;
 
-  const isValidAddRule =
-    algorithmAnalyzerStore.validateCustomPathParmasErrorMessage.steps.every(
-      (step) => Object.values(step).every((value) => value === '')
-    ) && algorithmAnalyzerStore.duplicateCustomPathRuleSet.size === 0;
-
-  const invalidExtendFormClassname = (flag: boolean) => {
-    return classnames({
-      'query-tab-content-form-expand-items': true,
-      'query-tab-content-form-expand-items-invalid': flag
-    });
-  };
+  const isValidAddRule = algorithmAnalyzerStore.validateCustomPathParmasErrorMessage.steps.every(
+    (step) => Object.values(step).every((value) => value === '')
+  );
 
   return (
     <div style={{ display: 'flex' }}>
@@ -628,12 +616,7 @@ const CustomPath = observer(() => {
             ruleIndex
           ) => {
             return (
-              <div
-                className={invalidExtendFormClassname(
-                  algorithmAnalyzerStore.duplicateCustomPathRuleSet.has(uuid)
-                )}
-                key={uuid}
-              >
+              <div className="query-tab-content-form-expand-items" key={uuid}>
                 <div className="query-tab-content-form-expand-item">
                   <div className="query-tab-content-form-item-title query-tab-content-form-expand-title">
                     <i>*</i>
@@ -654,10 +637,6 @@ const CustomPath = observer(() => {
                         e.target.value,
                         ruleIndex
                       );
-
-                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                        uuid
-                      );
                     }}
                   >
                     <Radio value="BOTH">both</Radio>
@@ -675,10 +654,6 @@ const CustomPath = observer(() => {
                       }}
                       onClick={() => {
                         algorithmAnalyzerStore.removeCustomPathRule(ruleIndex);
-
-                        algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                          uuid
-                        );
                       }}
                     >
                       删除
@@ -714,10 +689,6 @@ const CustomPath = observer(() => {
                         'labels',
                         value,
                         ruleIndex
-                      );
-
-                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                        uuid
                       );
                     }}
                   >
@@ -934,10 +905,6 @@ const CustomPath = observer(() => {
                           value,
                           ruleIndex
                         );
-
-                        algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                          uuid
-                        );
                       }}
                     >
                       <Select.Option
@@ -948,19 +915,13 @@ const CustomPath = observer(() => {
                           'data-analyze.algorithm-forms.custom-path.custom-weight'
                         )}
                       </Select.Option>
-                      {properties
-                        .filter(([key]) => {
-                          return isDataTypeNumeric(
-                            dataAnalyzeStore.properties.find(
-                              ({ name }) => name === key
-                            )?.data_type
-                          );
-                        })
-                        .map(([key]) => (
-                          <Select.Option value={key} key={key}>
-                            {key}
+                      {dataAnalyzeStore.allPropertiesFromEdge.map(
+                        (property) => (
+                          <Select.Option value={property} property={property}>
+                            {property}
                           </Select.Option>
-                        ))}
+                        )
+                      )}
                     </Select>
                   </div>
                 )}
@@ -996,10 +957,6 @@ const CustomPath = observer(() => {
                         algorithmAnalyzerStore.validateCustomPathRules(
                           'default_weight',
                           ruleIndex
-                        );
-
-                        algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                          uuid
                         );
                       }}
                       originInputProps={{
@@ -1048,10 +1005,6 @@ const CustomPath = observer(() => {
                         'degree',
                         ruleIndex
                       );
-
-                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                        uuid
-                      );
                     }}
                     originInputProps={{
                       onBlur() {
@@ -1098,10 +1051,6 @@ const CustomPath = observer(() => {
                         'sample',
                         ruleIndex
                       );
-
-                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                        uuid
-                      );
                     }}
                     originInputProps={{
                       onBlur() {
@@ -1125,30 +1074,16 @@ const CustomPath = observer(() => {
             marginTop: 8
           }}
         >
-          {algorithmAnalyzerStore.duplicateCustomPathRuleSet.size === 0 ? (
-            <span
-              style={{ cursor: 'pointer' }}
-              onClick={() => {
-                if (isValidAddRule) {
-                  algorithmAnalyzerStore.addCustomPathRule();
-
-                  algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                    (last(
-                      algorithmAnalyzerStore.customPathParams.steps
-                    ) as CustomPathRule).uuid
-                  );
-                }
-              }}
-            >
-              {t('data-analyze.algorithm-forms.custom-path.add-new-rule')}
-            </span>
-          ) : (
-            <div className="query-tab-algorithm-hint">
-              {t(
-                'data-analyze.algorithm-forms.custom-path.validations.input-chars'
-              )}
-            </div>
-          )}
+          <span
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              if (isValidAddRule) {
+                algorithmAnalyzerStore.addCustomPathRule();
+              }
+            }}
+          >
+            {t('data-analyze.algorithm-forms.custom-path.add-new-rule')}
+          </span>
         </div>
       </div>
     </div>

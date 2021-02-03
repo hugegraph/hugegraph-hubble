@@ -131,6 +131,28 @@ const EdgeTypeList: React.FC = observer(() => {
     edgeTypeStore.edgeTypes.map(({ name }) => name)
   );
 
+  const handleOutSideClick = useCallback(
+    (e: MouseEvent) => {
+      if (
+        isAddProperty &&
+        dropdownWrapperRef.current &&
+        !dropdownWrapperRef.current.contains(e.target as Element)
+      ) {
+        switchIsAddProperty(false);
+      }
+
+      if (
+        (deleteExistPopIndexInDrawer || deleteAddedPopIndexInDrawer) &&
+        deleteWrapperInDrawerRef.current &&
+        !deleteWrapperInDrawerRef.current.contains(e.target as Element)
+      ) {
+        setDeleteExistPopIndexInDrawer(null);
+        setDeleteAddedPopIndexInDrawer(null);
+      }
+    },
+    [deleteExistPopIndexInDrawer, deleteWrapperInDrawerRef, isAddProperty]
+  );
+
   const handleSelectedTableRow = (newSelectedRowKeys: string[]) => {
     mutateSelectedRowKeys(newSelectedRowKeys);
   };
@@ -377,6 +399,14 @@ const EdgeTypeList: React.FC = observer(() => {
     metadataConfigsRootStore.currentId,
     edgeTypeStore
   ]);
+
+  useEffect(() => {
+    document.addEventListener('click', handleOutSideClick, false);
+
+    return () => {
+      document.removeEventListener('click', handleOutSideClick, false);
+    };
+  }, [handleOutSideClick]);
 
   if (edgeTypeStore.currentTabStatus === 'new') {
     return <NewEdgeType />;
@@ -650,7 +680,9 @@ const EdgeTypeList: React.FC = observer(() => {
                   <div className="metadata-drawer-options-name">
                     <span>边类型名称：</span>
                   </div>
-                  {edgeTypeStore.selectedEdgeType!.name}
+                  <div style={{ maxWidth: 420 }}>
+                    {edgeTypeStore.selectedEdgeType!.name}
+                  </div>
                 </div>
                 <div className="metadata-drawer-options">
                   <div className="metadata-drawer-options-name">
@@ -891,13 +923,17 @@ const EdgeTypeList: React.FC = observer(() => {
                   <div className="metadata-drawer-options-name">
                     <span>起点类型：</span>
                   </div>
-                  {edgeTypeStore.selectedEdgeType!.source_label}
+                  <div style={{ maxWidth: 420 }}>
+                    {edgeTypeStore.selectedEdgeType!.source_label}
+                  </div>
                 </div>
                 <div className={metadataDrawerOptionClass}>
                   <div className="metadata-drawer-options-name">
                     <span>终点类型：</span>
                   </div>
-                  {edgeTypeStore.selectedEdgeType!.target_label}
+                  <div style={{ maxWidth: 420 }}>
+                    {edgeTypeStore.selectedEdgeType!.target_label}
+                  </div>
                 </div>
                 <div className={metadataDrawerOptionClass}>
                   <div className="metadata-drawer-options-name">
@@ -926,7 +962,7 @@ const EdgeTypeList: React.FC = observer(() => {
                           className="metadata-drawer-options-list-row"
                           key={name}
                         >
-                          <div>{name}</div>
+                          <div style={{ maxWidth: 260 }}>{name}</div>
                           <div style={{ width: 70, textAlign: 'center' }}>
                             <Switch
                               checkedChildren="开"
@@ -946,7 +982,7 @@ const EdgeTypeList: React.FC = observer(() => {
                             className="metadata-drawer-options-list-row"
                             key={name}
                           >
-                            <div>{name}</div>
+                            <div style={{ maxWidth: 260 }}>{name}</div>
                             <div style={{ width: 70, textAlign: 'center' }}>
                               <Switch
                                 checkedChildren="开"
@@ -1048,7 +1084,9 @@ const EdgeTypeList: React.FC = observer(() => {
                   <div className="metadata-drawer-options-name">
                     <span>区分键属性：</span>
                   </div>
-                  {edgeTypeStore.selectedEdgeType!.sort_keys.join(';')}
+                  <div style={{ maxWidth: 420 }}>
+                    {edgeTypeStore.selectedEdgeType!.sort_keys.join(';')}
+                  </div>
                 </div>
                 <div className="metadata-drawer-options">
                   <div className="metadata-drawer-options-name">
@@ -1130,7 +1168,7 @@ const EdgeTypeList: React.FC = observer(() => {
                         })}
                     </Select>
                   ) : (
-                    <div>
+                    <div style={{ maxWidth: 420 }}>
                       {edgeTypeStore.selectedEdgeType?.style.display_fields
                         .map((field) => formatVertexIdText(field, '边类型'))
                         .join('-')}

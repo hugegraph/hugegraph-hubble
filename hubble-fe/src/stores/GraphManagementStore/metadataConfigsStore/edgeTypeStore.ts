@@ -1387,7 +1387,7 @@ export class EdgeTypeStore {
           },
           {
             params: {
-              reused_conn_id: this.metadataConfigsRootStore.idList.find(
+              reused_conn_id: this.metadataConfigsRootStore.graphManagementStore.idList.find(
                 ({ name }) => name === reuseId
               )!.id
             }

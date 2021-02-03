@@ -81,7 +81,7 @@ const MetadataConfig: React.FC = observer(() => {
       dataAnalyzeStore.fetchAllNodeStyle();
       dataAnalyzeStore.fetchAllEdgeStyle();
       metadataConfigRootStore.setCurrentId(Number(params.id));
-      metadataConfigRootStore.fetchIdList();
+      // metadataConfigRootStore.fetchIdList();
     }
 
     return () => {
@@ -145,20 +145,17 @@ const MetadataConfig: React.FC = observer(() => {
             type="primary"
             style={{ width: 88 }}
             onClick={() => {
+              metadataConfigRootStore.setCurrentId(null);
               setLocation('/');
             }}
           >
-            返回首页
+            返回
           </Button>
         ]}
-        visible={
-          !metadataConfigRootStore.metadataPropertyStore
-            .validateLicenseOrMemories ||
-          !metadataConfigRootStore.vertexTypeStore.validateLicenseOrMemories ||
-          !metadataConfigRootStore.edgeTypeStore.validateLicenseOrMemories ||
-          !metadataConfigRootStore.metadataPropertyIndexStore
-            .validateLicenseOrMemories
-        }
+        visible={graphManagementStore.graphData.some(
+          ({ id, enabled }) =>
+            metadataConfigRootStore.currentId === id && !enabled
+        )}
         destroyOnClose
         needCloseIcon={false}
       >

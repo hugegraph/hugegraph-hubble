@@ -1418,10 +1418,6 @@ export class DataAnalyzeStore {
         .catch(checkIfLocalNetworkOffline);
 
       if (result.data.status !== 200) {
-        if (result.data.status === 401) {
-          this.validateLicenseOrMemories = false;
-        }
-
         throw new Error(result.data.message);
       }
 

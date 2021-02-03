@@ -529,4 +529,7 @@ function filterParams(originParams: GraphDataConfig): GraphDataConfig {
   return newParams;
 }
 
-export default createContext(new GraphManagementStore());
+// For DI in subclass
+export const GraphManagementStoreInstance = new GraphManagementStore();
+
+export default createContext(GraphManagementStoreInstance);

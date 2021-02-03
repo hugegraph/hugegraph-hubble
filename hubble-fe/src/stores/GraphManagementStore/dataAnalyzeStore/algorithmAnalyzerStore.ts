@@ -123,9 +123,6 @@ export class AlgorithmAnalyzerStore {
   @observable
   validateNeighborRankParamsParamsErrorMessage = createValidateNeighborRankErrorMessage();
 
-  @observable isDuplicateNeighborRankRule = false;
-  duplicateNeighborRankRuleSet = new Set<string>();
-
   @observable
   kStepNeighborParams: KStepNeighbor = createKStepNeighborDefaultParams();
 
@@ -143,9 +140,6 @@ export class AlgorithmAnalyzerStore {
 
   @observable
   validateCustomPathParmasErrorMessage = createValidateCustomPathParamsErrorMessage();
-
-  @observable isDuplicateCustomPathRule = false;
-  duplicateCustomPathRuleSet = new Set<string>();
 
   @observable
   radiographicInspectionParams: RadiographicInspection = createRadiographicInspectionDefaultParams();
@@ -998,30 +992,6 @@ export class AlgorithmAnalyzerStore {
   }
 
   @action
-  validateDuplicateNeighborRankRules(uuid: string) {
-    const currentStep = this.neighborRankParams.steps.find(
-      ({ uuid: currentUUID }) => currentUUID === uuid
-    );
-
-    for (const step of this.neighborRankParams.steps) {
-      if (step.uuid !== uuid && !isUndefined(currentStep)) {
-        if (isEqual({ ...currentStep, uuid: '' }, { ...step, uuid: '' })) {
-          this.duplicateNeighborRankRuleSet.add(uuid);
-          return;
-        }
-      }
-    }
-
-    this.duplicateNeighborRankRuleSet.delete(uuid);
-
-    if (this.duplicateNeighborRankRuleSet.size !== 0) {
-      this.duplicateNeighborRankRuleSet.forEach((uuid) => {
-        this.validateDuplicateNeighborRankRules(uuid);
-      });
-    }
-  }
-
-  @action
   resetNeighborRankParams() {
     this.neighborRankParams = createNeighborRankDefaultParams();
     this.validateNeighborRankParamsParamsErrorMessage = createValidateNeighborRankErrorMessage();
@@ -1370,30 +1340,6 @@ export class AlgorithmAnalyzerStore {
   }
 
   @action
-  validateDuplicateCustomPathRules(uuid: string) {
-    const currentStep = this.customPathParams.steps.find(
-      ({ uuid: currentUUID }) => currentUUID === uuid
-    );
-
-    for (const step of this.customPathParams.steps) {
-      if (step.uuid !== uuid && !isUndefined(currentStep)) {
-        if (isEqual({ ...currentStep, uuid: '' }, { ...step, uuid: '' })) {
-          this.duplicateCustomPathRuleSet.add(uuid);
-          return;
-        }
-      }
-    }
-
-    this.duplicateCustomPathRuleSet.delete(uuid);
-
-    if (this.duplicateCustomPathRuleSet.size !== 0) {
-      this.duplicateCustomPathRuleSet.forEach((uuid) => {
-        this.validateDuplicateCustomPathRules(uuid);
-      });
-    }
-  }
-
-  @action
   switchCustomPathMethod(method: string) {
     this.customPathParams.method = method;
 
@@ -1411,6 +1357,11 @@ export class AlgorithmAnalyzerStore {
   @action
   resetCustomPathParams() {
     this.customPathParams = createCustomPathDefaultParams();
+
+    // manually assign step edge values
+    this.customPathParams.steps[0].labels = this.dataAnalyzeStore.edgeTypes.map(
+      ({ name }) => name
+    );
     this.validateCustomPathParmasErrorMessage = createValidateCustomPathParamsErrorMessage();
   }
 

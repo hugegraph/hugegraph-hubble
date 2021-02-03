@@ -151,7 +151,7 @@ const AsyncTaskList: React.FC = observer(() => {
             {t('async-tasks.table-filters.task-type.gremlin')}
           </div>
           <div onClick={handleFilterOptions('type', 'algorithm')}>
-            {t('async-tasks.table-filters.task-type.algorithm')}{' '}
+            {t('async-tasks.table-filters.task-type.algorithm')}
           </div>
           <div onClick={handleFilterOptions('type', 'remove_schema')}>
             {t('async-tasks.table-filters.task-type.remove-schema')}
@@ -261,7 +261,9 @@ const AsyncTaskList: React.FC = observer(() => {
           <div onClick={handleFilterOptions('status', 'running')}>
             {t('async-tasks.table-filters.status.running')}
           </div>
-          <div onClick={handleFilterOptions('status', 'restoring')}></div>
+          <div onClick={handleFilterOptions('status', 'restoring')}>
+            {t('async-tasks.table-filters.status.restoring')}
+          </div>
           <div onClick={handleFilterOptions('status', 'success')}>
             {t('async-tasks.table-filters.status.success')}
           </div>

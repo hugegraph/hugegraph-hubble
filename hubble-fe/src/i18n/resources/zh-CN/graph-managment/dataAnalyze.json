@@ -284,8 +284,7 @@
           "range": "请填写大于0且小于等于1的数值",
           "integer-only-lt-1000": "请填写大于等于0的整数小于1000的整数",
           "postive-integer-only": "请填写大于0的整数",
-          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数",
-          "input-chars": "规则不能与其它重复"
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数"
         },
         "pre-value": "全部",
         "add-new-rule": "添加规则"
@@ -404,7 +403,6 @@
           "integer-only": "请填写大于等于0的整数",
           "postive-integer-only": "请填写大于0的整数",
           "positive-integer-or-negative-one-only": "请填写-1或大于0的整数",
-          "input-chars": "规则不能其它重复",
           "input-number": "请输入浮点数字"
         },
         "custom-weight": "自定义权重值",
@@ -606,8 +604,7 @@
           "alpha-range": "请填写大于0且小于等于1的数值",
           "depth-range": "请填写大于0且小于等于50的数值",
           "postive-integer-only": "请填写大于0的整数",
-          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数",
-          "input-chars": "规则不能其它重复"
+          "positive-integer-or-negative-one-only": "请填写-1或大于0的整数"
         },
         "pre-value": "全部",
         "add-new-rule": "添加规则"

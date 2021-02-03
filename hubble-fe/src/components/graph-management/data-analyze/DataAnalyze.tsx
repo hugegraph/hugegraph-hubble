@@ -69,9 +69,9 @@ const DataAnalyze: React.FC = observer(() => {
             返回首页
           </Button>
         ]}
-        visible={Object.values(dataAnalyzeStore.errorInfo)
-          .map(({ code }) => code)
-          .includes(401)}
+        visible={graphManagementStore.graphData.some(
+          ({ id, enabled }) => dataAnalyzeStore.currentId === id && !enabled
+        )}
         destroyOnClose
         needCloseIcon={false}
       >
