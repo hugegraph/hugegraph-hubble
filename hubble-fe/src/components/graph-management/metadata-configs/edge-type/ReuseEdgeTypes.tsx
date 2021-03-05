@@ -985,6 +985,14 @@ const ReuseEdgeTypes: React.FC = observer(() => {
                     selectedId as string,
                     selectedList
                   );
+
+                  if (edgeTypeStore.requestStatus.checkConflict === 'failed') {
+                    Message.error({
+                      content: edgeTypeStore.errorMessage,
+                      size: 'medium',
+                      showCloseIcon: false
+                    });
+                  }
                 }}
               >
                 下一步

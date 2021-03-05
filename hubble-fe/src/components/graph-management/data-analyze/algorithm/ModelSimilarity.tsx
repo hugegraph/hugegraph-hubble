@@ -6,15 +6,24 @@ import { useTranslation } from 'react-i18next';
 
 import { styles } from '../QueryAndAlgorithmLibrary';
 import { Tooltip as CustomTooltip } from '../../../common';
+import { GraphManagementStoreContext } from '../../../../stores';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
+import { calcAlgorithmFormWidth } from '../../../../utils';
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
 
 const ModelSimilarity = observer(() => {
-  const { t } = useTranslation();
+  const graphManagementStore = useContext(GraphManagementStoreContext);
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
+  const { t } = useTranslation();
+
+  const formWidth = calcAlgorithmFormWidth(
+    graphManagementStore.isExpanded,
+    340,
+    390
+  );
 
   const sourceType = algorithmAnalyzerStore.modelSimilarityParams.method;
 
@@ -110,7 +119,7 @@ const ModelSimilarity = observer(() => {
               </div>
 
               <Input
-                width={390}
+                width={formWidth}
                 size="medium"
                 disabled={
                   dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -172,7 +181,7 @@ const ModelSimilarity = observer(() => {
                   disabled={
                     dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
                   }
-                  width={390}
+                  width={formWidth}
                   onChange={(value: string) => {
                     // switch property selections from properties of index to certain properties
                     if (
@@ -469,7 +478,7 @@ const ModelSimilarity = observer(() => {
               />
             </div>
             <Input
-              width={390}
+              width={formWidth}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -544,7 +553,7 @@ const ModelSimilarity = observer(() => {
             </div>
 
             <Input
-              width={390}
+              width={formWidth}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -598,7 +607,7 @@ const ModelSimilarity = observer(() => {
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
               }
-              width={390}
+              width={formWidth}
               onChange={(value: string) => {
                 algorithmAnalyzerStore.mutateModelSimilarityParams(
                   'label',
@@ -654,7 +663,7 @@ const ModelSimilarity = observer(() => {
               />
             </div>
             <Input
-              width={390}
+              width={formWidth}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -699,7 +708,7 @@ const ModelSimilarity = observer(() => {
               </span>
             </div>
             <Input
-              width={390}
+              width={formWidth}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -797,7 +806,7 @@ const ModelSimilarity = observer(() => {
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
               }
-              width={390}
+              width={formWidth}
               onChange={(value: string) => {
                 algorithmAnalyzerStore.mutateModelSimilarityParams(
                   'property_filter',
@@ -850,7 +859,7 @@ const ModelSimilarity = observer(() => {
               />
             </div>
             <Input
-              width={390}
+              width={formWidth}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -924,7 +933,7 @@ const ModelSimilarity = observer(() => {
               />
             </div>
             <Input
-              width={390}
+              width={formWidth}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -969,7 +978,7 @@ const ModelSimilarity = observer(() => {
               </span>
             </div>
             <Input
-              width={390}
+              width={formWidth}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -1014,7 +1023,7 @@ const ModelSimilarity = observer(() => {
               </span>
             </div>
             <Input
-              width={390}
+              width={formWidth}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -1080,7 +1089,7 @@ const ModelSimilarity = observer(() => {
                 childrenWrapperElement="img"
               />
             </div>
-            <div style={{ width: 390 }}>
+            <div style={{ width: formWidth }}>
               <Switch
                 width={40}
                 size="medium"
@@ -1111,7 +1120,7 @@ const ModelSimilarity = observer(() => {
                 )}
               </span>
             </div>
-            <div style={{ width: 390 }}>
+            <div style={{ width: formWidth }}>
               <Switch
                 width={40}
                 size="medium"

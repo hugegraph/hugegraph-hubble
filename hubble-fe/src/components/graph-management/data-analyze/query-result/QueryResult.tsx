@@ -11,7 +11,7 @@ import {
   DataAnalyzeStoreContext,
   AsyncTasksStoreContext
 } from '../../../../stores';
-import {Algorithm} from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
+import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
 import EmptyIcon from '../../../../assets/imgs/ic_sousuo_empty.svg';
 import LoadingBackIcon from '../../../../assets/imgs/ic_loading_back.svg';
 import LoadingFrontIcon from '../../../../assets/imgs/ic_loading_front.svg';
@@ -56,9 +56,9 @@ const QueryResult: React.FC<QueryResultProps> = observer(
         dynHeightStyle.height = 'calc(100vh - 441px)';
       }
 
-      if (algorithmAnalyzerStore.currentAlgorithm === Algorithm.shortestPath) {
-        dynHeightStyle.height = 'calc(100vh - 555px)';
-      }
+      // if (algorithmAnalyzerStore.currentAlgorithm === Algorithm.shortestPath) {
+      //   dynHeightStyle.height = 'calc(100vh - 555px)';
+      // }
     }
 
     return (
@@ -194,7 +194,9 @@ const QueryResult: React.FC<QueryResultProps> = observer(
               {dataAnalyzeStore.requestStatus.createAsyncTask === 'failed' && (
                 <>
                   <img src={FailedIcon} alt="提交失败" />
-                  <span>任务提交失败</span>
+                  <span>
+                    {dataAnalyzeStore.errorInfo.createAsyncTask.message}
+                  </span>
                 </>
               )}
             </div>

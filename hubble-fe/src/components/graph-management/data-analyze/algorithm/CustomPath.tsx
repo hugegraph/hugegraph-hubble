@@ -9,18 +9,38 @@ import {
   cloneDeep,
   fromPairs
 } from 'lodash-es';
-import { useTranslation } from 'react-i18next';
-import { styles } from '../QueryAndAlgorithmLibrary';
 import { Button, Radio, Input, Select } from '@baidu/one-ui';
+import { useTranslation } from 'react-i18next';
 
+import { styles } from '../QueryAndAlgorithmLibrary';
+import { GraphManagementStoreContext } from '../../../../stores';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
 import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
-import { isDataTypeNumeric } from '../../../../utils';
+import { isDataTypeNumeric, calcAlgorithmFormWidth } from '../../../../utils';
 
 const CustomPath = observer(() => {
-  const { t } = useTranslation();
+  const graphManagementStore = useContext(GraphManagementStoreContext);
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
+  const { t } = useTranslation();
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
+
+  const formWidth = calcAlgorithmFormWidth(
+    graphManagementStore.isExpanded,
+    340,
+    390
+  );
+
+  const formWidthInStep = calcAlgorithmFormWidth(
+    graphManagementStore.isExpanded,
+    310,
+    380
+  );
+
+  const formSmallWidthInStep = calcAlgorithmFormWidth(
+    graphManagementStore.isExpanded,
+    150,
+    160
+  );
 
   const sourceType = algorithmAnalyzerStore.customPathParams.method;
 
@@ -145,7 +165,7 @@ const CustomPath = observer(() => {
               </div>
 
               <Input
-                width={390}
+                width={formWidth}
                 size="medium"
                 disabled={
                   dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -201,7 +221,7 @@ const CustomPath = observer(() => {
                   disabled={
                     dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
                   }
-                  width={390}
+                  width={formWidth}
                   onChange={(value: string) => {
                     // switch property selections from properties of index to certain properties
                     if (
@@ -491,7 +511,7 @@ const CustomPath = observer(() => {
               </span>
             </div>
             <Input
-              width={390}
+              width={formWidth}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -529,7 +549,7 @@ const CustomPath = observer(() => {
               </span>
             </div>
             <Input
-              width={390}
+              width={formWidth}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -683,7 +703,7 @@ const CustomPath = observer(() => {
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
                     }
-                    width={380}
+                    width={formWidthInStep}
                     onChange={(value: string[]) => {
                       algorithmAnalyzerStore.mutateCustomPathRuleParams(
                         'labels',
@@ -737,7 +757,7 @@ const CustomPath = observer(() => {
                                   dataAnalyzeStore.requestStatus.fetchGraphs ===
                                   'pending'
                                 }
-                                width={160}
+                                width={formSmallWidthInStep}
                                 onChange={(value: string) => {
                                   const clonedRuleProperties = cloneDeep(
                                     properties
@@ -781,7 +801,7 @@ const CustomPath = observer(() => {
 
                             <div style={{ marginRight: 8 }}>
                               <Input
-                                width={160}
+                                width={formSmallWidthInStep}
                                 size="medium"
                                 disabled={
                                   dataAnalyzeStore.requestStatus.fetchGraphs ===
@@ -898,7 +918,7 @@ const CustomPath = observer(() => {
                       disabled={
                         dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
                       }
-                      width={380}
+                      width={formWidthInStep}
                       onChange={(value: string) => {
                         algorithmAnalyzerStore.mutateCustomPathRuleParams(
                           'weight_by',
@@ -932,7 +952,7 @@ const CustomPath = observer(() => {
                       <span></span>
                     </div>
                     <Input
-                      width={380}
+                      width={formWidthInStep}
                       size="medium"
                       disabled={
                         dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -979,7 +999,7 @@ const CustomPath = observer(() => {
                     </span>
                   </div>
                   <Input
-                    width={380}
+                    width={formWidthInStep}
                     size="medium"
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -1025,7 +1045,7 @@ const CustomPath = observer(() => {
                     </span>
                   </div>
                   <Input
-                    width={380}
+                    width={formWidthInStep}
                     size="medium"
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'

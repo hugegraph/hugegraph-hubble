@@ -373,6 +373,17 @@ const ReuseProperties: React.FC = observer(() => {
                 onClick={() => {
                   setCurrentStatus(2);
                   metadataPropertyStore.checkConflict(selectedList);
+
+                  if (
+                    metadataPropertyStore.requestStatus.checkConflict ===
+                    'failed'
+                  ) {
+                    Message.error({
+                      content: metadataPropertyStore.errorMessage,
+                      size: 'medium',
+                      showCloseIcon: false
+                    });
+                  }
                 }}
               >
                 下一步

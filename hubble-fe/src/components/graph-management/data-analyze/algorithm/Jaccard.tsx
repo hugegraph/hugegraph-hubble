@@ -1,15 +1,19 @@
-import React, { useContext, createContext } from 'react';
+import React, { useContext } from 'react';
 import { observer } from 'mobx-react';
-import { Button, Radio, Input, Select, Switch } from '@baidu/one-ui';
+import { Button, Radio, Input, Select } from '@baidu/one-ui';
 import { useTranslation } from 'react-i18next';
+
 import { styles } from '../QueryAndAlgorithmLibrary';
 import { Tooltip as CustomTooltip } from '../../../common';
+import { GraphManagementStoreContext } from '../../../../stores';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
 import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
+import { calcAlgorithmFormWidth } from '../../../../utils';
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 
 const Jaccard = observer(() => {
+  const graphManagementStore = useContext(GraphManagementStoreContext);
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const { t } = useTranslation();
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
@@ -20,6 +24,12 @@ const Jaccard = observer(() => {
     ).every((value) => value === '') &&
     algorithmAnalyzerStore.jaccardParams.vertex !== '' &&
     algorithmAnalyzerStore.jaccardParams.other !== '';
+
+  const formWidth = calcAlgorithmFormWidth(
+    graphManagementStore.isExpanded,
+    340,
+    400
+  );
 
   return (
     <div className="query-tab-content-form">
@@ -32,7 +42,7 @@ const Jaccard = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -72,7 +82,7 @@ const Jaccard = observer(() => {
               'data-analyze.algorithm-forms.jaccard.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            width={400}
+            width={formWidth}
             onChange={(value: string) => {
               algorithmAnalyzerStore.mutateJaccardParams('label', value);
             }}
@@ -97,7 +107,7 @@ const Jaccard = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -156,7 +166,7 @@ const Jaccard = observer(() => {
             />
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(

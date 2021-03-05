@@ -81,7 +81,11 @@ import type {
   MetadataPropertyIndex
 } from '../../types/GraphManagementStore/metadataConfigsStore';
 import type { EdgeTypeListResponse } from '../../types/GraphManagementStore/metadataConfigsStore';
-import { AlgorithmInternalNameMapping } from '../../../utils';
+import {
+  AlgorithmInternalNameMapping,
+  removeLabelKey,
+  filterEmptyAlgorightmParams
+} from '../../../utils';
 
 const ruleMap: RuleMap = {
   大于: 'gt',
@@ -1438,106 +1442,72 @@ export class DataAnalyzeStore {
     this.requestStatus.fetchGraphs = 'pending';
     this.isLoadingGraph = true;
 
-    let params:
-      | LoopDetectionParams
-      | FocusDetectionParams
-      | ShortestPathAlgorithmParams
-      | ShortestPathAllAlgorithmParams
-      | AllPathAlgorithmParams
-      | ModelSimilarityParams
-      | NeighborRankParams
-      | KStepNeighbor
-      | KHop
-      | RadiographicInspection
-      | SameNeighbor
-      | WeightedShortestPath
-      | SingleSourceWeightedShortestPath
-      | Jaccard
-      | PersonalRank
-      | null = null;
+    // let params:
+    //   | LoopDetectionParams
+    //   | FocusDetectionParams
+    //   | ShortestPathAlgorithmParams
+    //   | ShortestPathAllAlgorithmParams
+    //   | AllPathAlgorithmParams
+    //   | ModelSimilarityParams
+    //   | NeighborRankParams
+    //   | KStepNeighbor
+    //   | KHop
+    //   | RadiographicInspection
+    //   | SameNeighbor
+    //   | WeightedShortestPath
+    //   | SingleSourceWeightedShortestPath
+    //   | Jaccard
+    //   | PersonalRank
+    //   | null = null;
+    let params: object | null = null;
 
     if (!isUndefined(algorithmConfigs)) {
       switch (algorithmConfigs.type) {
         case Algorithm.loopDetection: {
-          if (
-            this.algorithmAnalyzerStore.loopDetectionParams.label === '__all__'
-          ) {
-            const clonedParams: LoopDetectionParams = cloneDeep(
-              this.algorithmAnalyzerStore.loopDetectionParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.loopDetectionParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.loopDetectionParams,
+            ['max_degree', 'capacity', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
         case Algorithm.focusDetection: {
-          if (
-            this.algorithmAnalyzerStore.focusDetectionParams.label === '__all__'
-          ) {
-            const clonedParams: FocusDetectionParams = cloneDeep(
-              this.algorithmAnalyzerStore.focusDetectionParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.focusDetectionParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.focusDetectionParams,
+            ['max_degree', 'capacity', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
         case Algorithm.shortestPath: {
-          if (
-            this.algorithmAnalyzerStore.shortestPathAlgorithmParams.label ===
-            '__all__'
-          ) {
-            const clonedParams: ShortestPathAlgorithmParams = cloneDeep(
-              this.algorithmAnalyzerStore.shortestPathAlgorithmParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.shortestPathAlgorithmParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.shortestPathAlgorithmParams,
+            ['max_degree', 'capacity', 'skip_degree']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
         case Algorithm.shortestPathAll: {
-          if (
-            this.algorithmAnalyzerStore.shortestPathAllParams.label ===
-            '__all__'
-          ) {
-            const clonedParams: ShortestPathAllAlgorithmParams = cloneDeep(
-              this.algorithmAnalyzerStore.shortestPathAllParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.shortestPathAllParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.shortestPathAllParams,
+            ['max_degree', 'capacity', 'skip_degree']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
         case Algorithm.allPath: {
-          if (this.algorithmAnalyzerStore.allPathParams.label === '__all__') {
-            const clonedParams: AllPathAlgorithmParams = cloneDeep(
-              this.algorithmAnalyzerStore.allPathParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.allPathParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.allPathParams,
+            ['max_degree', 'capacity', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
@@ -1664,34 +1634,22 @@ export class DataAnalyzeStore {
         }
 
         case Algorithm.kStepNeighbor: {
-          if (
-            this.algorithmAnalyzerStore.kStepNeighborParams.label === '__all__'
-          ) {
-            const clonedKStepNeighborParams: KStepNeighbor = cloneDeep(
-              this.algorithmAnalyzerStore.kStepNeighborParams
-            );
-
-            delete clonedKStepNeighborParams.label;
-            params = clonedKStepNeighborParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.kStepNeighborParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.kStepNeighborParams,
+            ['max_degree', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
         case Algorithm.kHop: {
-          if (this.algorithmAnalyzerStore.kHopParams.label === '__all__') {
-            const clonedParams: KHop = cloneDeep(
-              this.algorithmAnalyzerStore.kHopParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.kHopParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.kHopParams,
+            ['max_degree', 'capacity', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
@@ -1782,110 +1740,62 @@ export class DataAnalyzeStore {
         }
 
         case Algorithm.radiographicInspection: {
-          if (
-            this.algorithmAnalyzerStore.radiographicInspectionParams.label ===
-            '__all__'
-          ) {
-            const clonedParams: RadiographicInspection = cloneDeep(
-              this.algorithmAnalyzerStore.radiographicInspectionParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.radiographicInspectionParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.radiographicInspectionParams,
+            ['max_degree', 'capacity', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
         case Algorithm.sameNeighbor: {
-          if (
-            this.algorithmAnalyzerStore.sameNeighborParams.label === '__all__'
-          ) {
-            const clonedParams: SameNeighbor = cloneDeep(
-              this.algorithmAnalyzerStore.sameNeighborParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.sameNeighborParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.sameNeighborParams,
+            ['max_degree', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
         case Algorithm.weightedShortestPath: {
-          if (
-            this.algorithmAnalyzerStore.weightedShortestPathParams.label ===
-            '__all__'
-          ) {
-            const clonedParams: WeightedShortestPath = cloneDeep(
-              this.algorithmAnalyzerStore.weightedShortestPathParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.weightedShortestPathParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.weightedShortestPathParams,
+            ['max_degree', 'capacity', 'skip_degree']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
         case Algorithm.singleSourceWeightedShortestPath: {
-          if (
-            this.algorithmAnalyzerStore.singleSourceWeightedShortestPathParams
-              .label === '__all__'
-          ) {
-            const clonedParams: SingleSourceWeightedShortestPath = cloneDeep(
-              this.algorithmAnalyzerStore.singleSourceWeightedShortestPathParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore
-            .singleSourceWeightedShortestPathParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.singleSourceWeightedShortestPathParams,
+            ['max_degree', 'capacity', 'skip_degree', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
         case Algorithm.jaccard: {
-          if (this.algorithmAnalyzerStore.jaccardParams.label === '__all__') {
-            const clonedParams: Jaccard = cloneDeep(
-              this.algorithmAnalyzerStore.jaccardParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.jaccardParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.jaccardParams,
+            ['max_degree']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
         case Algorithm.personalRankRecommendation: {
-          const clonedParams: PersonalRank = cloneDeep(
-            this.algorithmAnalyzerStore.personalRankParams
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.personalRankParams,
+            ['degree', 'limit']
           );
-
-          if (clonedParams.label === '__all__') {
-            delete clonedParams.label;
-          }
-
-          if (clonedParams.degree === '') {
-            clonedParams.degree = '10000';
-          }
-
-          if (clonedParams.limit === '') {
-            clonedParams.limit = '10000000';
-          }
-
-          params = clonedParams;
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
       }

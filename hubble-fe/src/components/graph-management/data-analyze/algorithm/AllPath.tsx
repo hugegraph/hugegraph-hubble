@@ -1,18 +1,28 @@
-import React, { useContext, createContext } from 'react';
+import React, { useContext } from 'react';
 import { observer } from 'mobx-react';
-import { Button, Radio, Input, Select, Switch } from '@baidu/one-ui';
+import { Button, Radio, Input, Select } from '@baidu/one-ui';
 import { useTranslation } from 'react-i18next';
+
 import { styles } from '../QueryAndAlgorithmLibrary';
 import { Tooltip as CustomTooltip } from '../../../common';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
+import { GraphManagementStoreContext } from '../../../../stores';
+import { calcAlgorithmFormWidth } from '../../../../utils';
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
 
 const AllPath = observer(() => {
-  const { t } = useTranslation();
+  const graphManagementStore = useContext(GraphManagementStoreContext);
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
+  const { t } = useTranslation();
+
+  const formWidth = calcAlgorithmFormWidth(
+    graphManagementStore.isExpanded,
+    340,
+    400
+  );
 
   const isValidExec =
     Object.values(
@@ -33,7 +43,7 @@ const AllPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -73,7 +83,7 @@ const AllPath = observer(() => {
               'data-analyze.algorithm-forms.all-path.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            width={400}
+            width={formWidth}
             onChange={(value: string) => {
               algorithmAnalyzerStore.mutateAllPathParams('label', value);
             }}
@@ -98,7 +108,7 @@ const AllPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -157,7 +167,7 @@ const AllPath = observer(() => {
             />
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -215,7 +225,7 @@ const AllPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -277,7 +287,7 @@ const AllPath = observer(() => {
             />
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -310,7 +320,7 @@ const AllPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(

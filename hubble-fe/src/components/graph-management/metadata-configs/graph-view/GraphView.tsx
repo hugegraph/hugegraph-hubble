@@ -239,6 +239,9 @@ const GraphDataView: React.FC = observer(() => {
         physics: {
           maxVelocity: 50,
           solver: 'forceAtlas2Based',
+          forceAtlas2Based: {
+            avoidOverlap: 0
+          },
           timestep: 0.3,
           stabilization: { iterations: 150 }
         }

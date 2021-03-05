@@ -124,7 +124,7 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
               });
             } else {
               Message.error({
-                content: `添加失败`,
+                content: dataAnalyzeStore.errorInfo.addGraphEdge.message,
                 size: 'medium',
                 showCloseIcon: false
               });

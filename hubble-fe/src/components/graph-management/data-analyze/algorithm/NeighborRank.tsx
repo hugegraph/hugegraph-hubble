@@ -6,15 +6,30 @@ import { styles } from '../QueryAndAlgorithmLibrary';
 import { Button, Radio, Input, Select } from '@baidu/one-ui';
 
 import { Tooltip as CustomTooltip } from '../../../common';
+import { GraphManagementStoreContext } from '../../../../stores';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
+import { calcAlgorithmFormWidth } from '../../../../utils';
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
 
 const NeighborRank = observer(() => {
-  const { t } = useTranslation();
+  const graphManagementStore = useContext(GraphManagementStoreContext);
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
+  const { t } = useTranslation();
+
+  const formWidth = calcAlgorithmFormWidth(
+    graphManagementStore.isExpanded,
+    340,
+    400
+  );
+
+  const formWidthInStep = calcAlgorithmFormWidth(
+    graphManagementStore.isExpanded,
+    310,
+    380
+  );
 
   const isValidExec =
     Object.values(
@@ -45,7 +60,7 @@ const NeighborRank = observer(() => {
               </span>
             </div>
             <Input
-              width={400}
+              width={formWidth}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -87,7 +102,7 @@ const NeighborRank = observer(() => {
               </span>
             </div>
             <Input
-              width={400}
+              width={formWidth}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -130,7 +145,7 @@ const NeighborRank = observer(() => {
               </span>
             </div>
             <Input
-              width={400}
+              width={formWidth}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -270,7 +285,7 @@ const NeighborRank = observer(() => {
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
                     }
-                    width={380}
+                    width={formWidthInStep}
                     onChange={(value: string) => {
                       algorithmAnalyzerStore.mutateNeighborRankRuleParams(
                         'labels',
@@ -326,7 +341,7 @@ const NeighborRank = observer(() => {
                     />
                   </div>
                   <Input
-                    width={380}
+                    width={formWidthInStep}
                     size="medium"
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -399,7 +414,7 @@ const NeighborRank = observer(() => {
                     />
                   </div>
                   <Input
-                    width={380}
+                    width={formWidthInStep}
                     size="medium"
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'

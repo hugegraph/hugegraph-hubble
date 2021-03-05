@@ -5,16 +5,24 @@ import { useTranslation } from 'react-i18next';
 import { styles } from '../QueryAndAlgorithmLibrary';
 import { Tooltip as CustomTooltip } from '../../../common';
 
+import { GraphManagementStoreContext } from '../../../../stores';
 import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
-import { isDataTypeNumeric } from '../../../../utils';
+import { isDataTypeNumeric, calcAlgorithmFormWidth } from '../../../../utils';
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 
 const SingleSourceWeightedShortestPath = observer(() => {
+  const graphManagementStore = useContext(GraphManagementStoreContext);
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
   const { t } = useTranslation();
+
+  const formWidth = calcAlgorithmFormWidth(
+    graphManagementStore.isExpanded,
+    340,
+    380
+  );
 
   const isValidExec =
     Object.values(
@@ -38,7 +46,7 @@ const SingleSourceWeightedShortestPath = observer(() => {
             </span>
           </div>
           <Input
-            width={380}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -92,7 +100,7 @@ const SingleSourceWeightedShortestPath = observer(() => {
               'data-analyze.algorithm-forms.single-source-weighted-shortest-path.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            width={380}
+            width={formWidth}
             onChange={(value: string) => {
               algorithmAnalyzerStore.mutateSingleSourceWeightedShortestPathParams(
                 'label',
@@ -179,7 +187,7 @@ const SingleSourceWeightedShortestPath = observer(() => {
             />
           </div>
           <Input
-            width={380}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -241,7 +249,7 @@ const SingleSourceWeightedShortestPath = observer(() => {
               'data-analyze.algorithm-forms.single-source-weighted-shortest-path.placeholder.no-property'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            width={380}
+            width={formWidth}
             onChange={(value: string) => {
               algorithmAnalyzerStore.mutateSingleSourceWeightedShortestPathParams(
                 'weight',
@@ -299,7 +307,7 @@ const SingleSourceWeightedShortestPath = observer(() => {
             />
           </div>
           <Input
-            width={380}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -348,7 +356,7 @@ const SingleSourceWeightedShortestPath = observer(() => {
             </span>
           </div>
           <Switch
-            width={380}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             checked={
@@ -372,7 +380,7 @@ const SingleSourceWeightedShortestPath = observer(() => {
             </span>
           </div>
           <Input
-            width={380}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -419,7 +427,7 @@ const SingleSourceWeightedShortestPath = observer(() => {
             </span>
           </div>
           <Input
-            width={380}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(

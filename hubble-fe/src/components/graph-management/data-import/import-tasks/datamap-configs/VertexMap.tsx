@@ -445,11 +445,20 @@ const VertexMap: React.FC<VertexMapProps> = observer(
                             );
                           }}
                         >
-                          {selectedVertex?.properties.map(({ name }) => (
-                            <Select.Option value={name} key={name}>
-                              {name}
-                            </Select.Option>
-                          ))}
+                          {selectedVertex?.properties
+                            .filter(
+                              ({ name }) =>
+                                !(
+                                  selectedVertex.id_strategy ===
+                                    'PRIMARY_KEY' &&
+                                  selectedVertex.primary_keys.includes(name)
+                                )
+                            )
+                            .map(({ name }) => (
+                              <Select.Option value={name} key={name}>
+                                {name}
+                              </Select.Option>
+                            ))}
                         </Select>
                       )}
                     </div>

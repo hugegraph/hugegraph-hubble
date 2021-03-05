@@ -818,6 +818,16 @@ const ReuseVertexTypes: React.FC = observer(() => {
                     selectedId as string,
                     selectedList
                   );
+
+                  if (
+                    vertexTypeStore.requestStatus.checkConflict === 'failed'
+                  ) {
+                    Message.error({
+                      content: vertexTypeStore.errorMessage,
+                      size: 'medium',
+                      showCloseIcon: false
+                    });
+                  }
                 }}
               >
                 下一步

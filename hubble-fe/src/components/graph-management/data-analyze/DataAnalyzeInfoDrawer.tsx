@@ -206,7 +206,13 @@ const DataAnalyzeInfoDrawer: React.FC = observer(() => {
         {[...dataAnalyzeStore.editedSelectedGraphDataProperties.primary].map(
           ([key, value], primaryKeyIndex) => (
             <div className={graphInfoItemClassName} key={key}>
-              <div>
+              <div
+                title={`${key}(${
+                  dataAnalyzeStore.graphInfoDataSet === 'node'
+                    ? '主键'
+                    : '区分键'
+                }${primaryKeyIndex + 1})`}
+              >
                 {key}(
                 {dataAnalyzeStore.graphInfoDataSet === 'node'
                   ? '主键'
@@ -228,7 +234,7 @@ const DataAnalyzeInfoDrawer: React.FC = observer(() => {
               marginTop: !isEdit ? 0 : nonNullableIndex === 0 ? 8 : 32
             }}
           >
-            <div>{key}: </div>
+            <div title={key}>{key}: </div>
             {!isEdit ? (
               <div>{convertArrayToString(value)}</div>
             ) : (
@@ -281,7 +287,7 @@ const DataAnalyzeInfoDrawer: React.FC = observer(() => {
                 marginTop: !isEdit ? 0 : nullableIndex === 0 ? 8 : 32
               }}
             >
-              <div>{key}: </div>
+              <div title={key}>{key}: </div>
               {!isEdit ? (
                 <div>{convertArrayToString(value)}</div>
               ) : (
