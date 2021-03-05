@@ -28,7 +28,7 @@ const DataMapConfigs: React.FC<DataMapConfigsProps> = observer(({ height }) => {
       <Menu
         mode="inline"
         needBorder={true}
-        style={{ width: 200, height: realHeight }}
+        style={{ width: 200, height: realHeight, flexShrink: 0 }}
         selectedKeys={[String(dataMapStore.selectedFileId)]}
         onClick={(e: any) => {
           // reset state from the previous file
