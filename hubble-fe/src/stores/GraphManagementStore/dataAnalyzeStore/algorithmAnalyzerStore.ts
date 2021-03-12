@@ -220,6 +220,9 @@ export class AlgorithmAnalyzerStore {
     }
   }
 
+  @observable isDuplicateCustomPathRule = false;
+  duplicateCustomPathRuleSet = new Set<string>();
+
   @action
   switchCollapse(flag: boolean) {
     this.isCollapse = flag;
@@ -593,6 +596,15 @@ export class AlgorithmAnalyzerStore {
         if (isEmpty(value)) {
           this.validateAllPathParamsErrorMessage[key] = i18next.t(
             'data-analyze.algorithm-forms.all-path.validations.no-empty'
+          );
+
+          return;
+        }
+        break;
+      case 'target':
+        if (isEmpty(value)) {
+          this.validateAllPathParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.shortest-path.validations.no-empty'
           );
 
           return;
@@ -992,78 +1004,6 @@ export class AlgorithmAnalyzerStore {
   }
 
   @action
-  resetNeighborRankParams() {
-    this.neighborRankParams = createNeighborRankDefaultParams();
-    this.validateNeighborRankParamsParamsErrorMessage = createValidateNeighborRankErrorMessage();
-  }
-
-  @action
-  mutateKStepNeighborParams<T extends keyof KStepNeighbor>(
-    key: T,
-    value: KStepNeighbor[T]
-  ) {
-    this.kStepNeighborParams[key] = value;
-  }
-
-  @action
-  validateKStepNeighborParams<T extends keyof KStepNeighbor>(key: T) {
-    const value = this.kStepNeighborParams[key];
-
-    switch (key) {
-      case 'source':
-        if (isEmpty(value)) {
-          this.validateKStepNeighborParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.k-step-neighbor.validations.no-empty'
-          );
-
-          return;
-        }
-
-        break;
-      case 'max_depth':
-        if (isEmpty(value)) {
-          this.validateKStepNeighborParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.k-step-neighbor.validations.no-empty'
-          );
-
-          return;
-        }
-
-        if (!isInt(value, { min: 1 })) {
-          this.validateKStepNeighborParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.k-step-neighbor.validations.postive-integer-only'
-          );
-
-          return;
-        }
-
-        break;
-      case 'max_degree':
-        if (!isGtNegativeOneButZero(value)) {
-          this.validateKStepNeighborParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.k-step-neighbor.validations.positive-integer-or-negative-one-only'
-          );
-
-          return;
-        }
-
-        break;
-      case 'limit':
-        if (!isGtNegativeOneButZero(value)) {
-          this.validateKStepNeighborParamsErrorMessage[key] = i18next.t(
-            'data-analyze.algorithm-forms.k-step-neighbor.validations.positive-integer-or-negative-one-only'
-          );
-
-          return;
-        }
-
-        break;
-    }
-
-    this.validateKStepNeighborParamsErrorMessage[key] = '';
-  }
-
-  @action
   resetKStepNeighborParams() {
     this.kStepNeighborParams = createKStepNeighborDefaultParams();
     this.validateKStepNeighborParamsErrorMessage = createValidateKStepNeighborParamsErrorMessage();
@@ -1138,7 +1078,54 @@ export class AlgorithmAnalyzerStore {
 
         break;
     }
+  }
 
+  @action
+  resetNeighborRankParams() {
+    this.neighborRankParams = createNeighborRankDefaultParams();
+    this.validateNeighborRankParamsParamsErrorMessage = createValidateNeighborRankErrorMessage();
+  }
+
+  @action
+  mutateKStepNeighborParams<T extends keyof KStepNeighbor>(
+    key: T,
+    value: KStepNeighbor[T]
+  ) {
+    this.kStepNeighborParams[key] = value;
+  }
+
+  @action
+  validateKStepNeighborParams<T extends keyof KStepNeighbor>(key: T) {
+    const value = this.kStepNeighborParams[key];
+
+    switch (key) {
+      case 'source':
+        if (isEmpty(value)) {
+          this.validateKStepNeighborParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.k-step-neighbor.validations.no-empty'
+          );
+
+          return;
+        }
+
+        break;
+      case 'max_depth':
+        if (isEmpty(value)) {
+          this.validateKStepNeighborParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.k-step-neighbor.validations.no-empty'
+          );
+
+          return;
+        }
+
+        if (!isInt(value, { min: 1 })) {
+          this.validateKStepNeighborParamsErrorMessage[key] = i18next.t(
+            'data-analyze.algorithm-forms.k-step-neighbor.validations.postive-integer-only'
+          );
+
+          return;
+        }
+    }
     this.validateKHopParamsErrorMessage[key] = '';
   }
 

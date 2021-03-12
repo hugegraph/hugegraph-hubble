@@ -278,6 +278,13 @@
           "top": "在结果中每一层只保留权重最高的N个结果",
           "max-degree": "查询过程中，单个顶点的最大边数目"
         },
+        "radio-value": {
+          "specific-id": "指定ID",
+          "filtered-type-property": "筛选类型属性",
+          "none": "不排序",
+          "ascend": "升序",
+          "descend": "降序"
+        },
         "validations": {
           "no-empty": "该项不能为空",
           "no-edge-typs": "无边类型",
