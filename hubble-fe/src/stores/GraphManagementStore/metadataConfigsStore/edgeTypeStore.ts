@@ -1329,7 +1329,7 @@ export class EdgeTypeStore {
     this.requestStatus.deleteEdgeType = 'pending';
 
     const combinedParams = selectedEdgeTypeNames
-      .map((name) => 'names=' + name)
+      .map((name) => 'names=' + encodeURIComponent(name))
       .join('&');
 
     try {

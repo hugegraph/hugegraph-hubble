@@ -13,6 +13,7 @@ import './i18n';
 import './index.less';
 
 axios.defaults.paramsSerializer = (params: any) => {
+  // auto encode param values
   return qs.stringify(params);
 };
 

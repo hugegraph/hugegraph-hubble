@@ -21,6 +21,7 @@ import ArrowIcon from '../../../../../assets/imgs/ic_arrow_16.svg';
 import BlueArrowIcon from '../../../../../assets/imgs/ic_arrow_blue.svg';
 import CloseIcon from '../../../../../assets/imgs/ic_close_16.svg';
 import MapIcon from '../../../../../assets/imgs/ic_yingshe_16.svg';
+import { toJS } from 'mobx';
 
 export interface VertexMapProps {
   checkOrEdit: 'check' | 'edit' | boolean;
@@ -293,15 +294,16 @@ const VertexMap: React.FC<VertexMapProps> = observer(
                   disabled={isUndefined(selectedVertex) || isStrategyAutomatic}
                   value={idField}
                   onChange={(value: string) => {
-                    const clonedIdField = cloneDeep(vertexMap.id_fields);
-                    clonedIdField[fieldIndex] = value;
+                    // const clonedIdField = cloneDeep(vertexMap.id_fields);
+                    // clonedIdField[fieldIndex] = value;
 
                     if (isEdit) {
-                      dataMapStore.editVertexMapConfig(
-                        'id_fields',
-                        clonedIdField,
-                        vertexMapIndex!
-                      );
+                      // dataMapStore.editVertexMapConfig(
+                      //   'id_fields',
+                      //   clonedIdField,
+                      //   vertexMapIndex!
+                      // );
+                      dataMapStore.setVertexIdColumn('edit', fieldIndex, value);
 
                       // remove selected field mappings after reselect column name
                       if (
@@ -314,10 +316,11 @@ const VertexMap: React.FC<VertexMapProps> = observer(
                         dataMapStore.removeVertexFieldMapping('edit', value);
                       }
                     } else {
-                      dataMapStore.setNewVertexConfig(
-                        'id_fields',
-                        clonedIdField
-                      );
+                      // dataMapStore.setNewVertexConfig(
+                      //   'id_fields',
+                      //   clonedIdField
+                      // );
+                      dataMapStore.setVertexIdColumn('new', fieldIndex, value);
 
                       if (
                         !isUndefined(
@@ -489,7 +492,13 @@ const VertexMap: React.FC<VertexMapProps> = observer(
               <>
                 <div
                   className="import-tasks-data-options-expand-value"
-                  style={{ marginBottom: 8, height: 32, width: 'fit-content' }}
+                  style={{
+                    marginBottom: 8,
+                    height: 32,
+                    width: 'fit-content',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
                   onClick={() => {
                     if (
                       size(filteredColumnNamesInSelection) === 0 ||

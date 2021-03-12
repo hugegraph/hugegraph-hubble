@@ -1077,7 +1077,7 @@ export class VertexTypeStore {
     this.requestStatus.deleteVertexType = 'pending';
 
     const combinedParams = selectedVertexTypeNames
-      .map((name) => 'names=' + name)
+      .map((name) => 'names=' + encodeURIComponent(name))
       .join('&');
 
     try {

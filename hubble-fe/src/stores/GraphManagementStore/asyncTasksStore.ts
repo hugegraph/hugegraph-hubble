@@ -113,7 +113,7 @@ export class AsyncTasksStore {
             this.filterOptions.type
           }&status=${this.filterOptions.status.toUpperCase()}` +
             (this.isSearched.status && this.searchWords !== ''
-              ? `&content=${this.searchWords}`
+              ? `&content=${encodeURIComponent(this.searchWords)}`
               : '')
         )
         .catch(checkIfLocalNetworkOffline);

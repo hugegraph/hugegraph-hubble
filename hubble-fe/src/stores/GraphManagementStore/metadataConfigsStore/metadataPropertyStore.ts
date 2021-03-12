@@ -451,7 +451,9 @@ export class MetadataPropertyStore {
       const result: AxiosResponse<responseData<null>> = yield axios
         .delete(
           `${baseUrl}/${this.metadataConfigsRootStore.currentId}/schema/propertykeys?` +
-            selectedPropertyNames.map((name) => 'names=' + name).join('&') +
+            selectedPropertyNames
+              .map((name) => 'names=' + encodeURIComponent(name))
+              .join('&') +
             `&skip_using=${String(selectedPropertyNames.length !== 1)}`
         )
         .catch(checkIfLocalNetworkOffline);

@@ -318,14 +318,20 @@ const EdgeMap: React.FC<EdgeMapProps> = observer(
                   disabled={isUndefined(selectedEdge) || isStrategyAutomatic}
                   value={idField}
                   onChange={(value: string) => {
-                    const clonedIdField = cloneDeep(edgeMap.source_fields);
-                    clonedIdField[fieldIndex] = value;
+                    // const clonedIdField = cloneDeep(edgeMap.source_fields);
+                    // clonedIdField[fieldIndex] = value;
 
                     if (isEdit) {
-                      dataMapStore.editEdgeMapConfig(
+                      // dataMapStore.editEdgeMapConfig(
+                      //   'source_fields',
+                      //   clonedIdField,
+                      //   edgeMapIndex!
+                      // );
+                      dataMapStore.setEdgeIdColumn(
+                        'edit',
                         'source_fields',
-                        clonedIdField,
-                        edgeMapIndex!
+                        fieldIndex,
+                        value
                       );
 
                       // remove selected field mappings after reselect column name
@@ -339,9 +345,16 @@ const EdgeMap: React.FC<EdgeMapProps> = observer(
                         dataMapStore.removeEdgeFieldMapping('edit', value);
                       }
                     } else {
-                      dataMapStore.setNewEdgeConfig(
+                      // dataMapStore.setNewEdgeConfig(
+                      //   'source_fields',
+                      //   clonedIdField
+                      // );
+
+                      dataMapStore.setEdgeIdColumn(
+                        'new',
                         'source_fields',
-                        clonedIdField
+                        fieldIndex,
+                        value
                       );
 
                       if (
@@ -428,14 +441,21 @@ const EdgeMap: React.FC<EdgeMapProps> = observer(
                   disabled={isUndefined(selectedEdge) || isStrategyAutomatic}
                   value={idField}
                   onChange={(value: string) => {
-                    const clonedIdField = cloneDeep(edgeMap.target_fields);
-                    clonedIdField[fieldIndex] = value;
+                    // const clonedIdField = cloneDeep(edgeMap.target_fields);
+                    // clonedIdField[fieldIndex] = value;
 
                     if (isEdit) {
-                      dataMapStore.editEdgeMapConfig(
+                      // dataMapStore.editEdgeMapConfig(
+                      //   'target_fields',
+                      //   clonedIdField,
+                      //   edgeMapIndex!
+                      // );
+
+                      dataMapStore.setEdgeIdColumn(
+                        'edit',
                         'target_fields',
-                        clonedIdField,
-                        edgeMapIndex!
+                        fieldIndex,
+                        value
                       );
 
                       // remove selected field mappings after reselect column name
@@ -449,9 +469,11 @@ const EdgeMap: React.FC<EdgeMapProps> = observer(
                         dataMapStore.removeEdgeFieldMapping('edit', value);
                       }
                     } else {
-                      dataMapStore.setNewEdgeConfig(
+                      dataMapStore.setEdgeIdColumn(
+                        'new',
                         'target_fields',
-                        clonedIdField
+                        fieldIndex,
+                        value
                       );
 
                       if (

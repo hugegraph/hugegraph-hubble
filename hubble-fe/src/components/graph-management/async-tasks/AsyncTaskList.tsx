@@ -9,7 +9,7 @@ import { observer } from 'mobx-react';
 import classnames from 'classnames';
 import { useRoute } from 'wouter';
 import { useTranslation } from 'react-i18next';
-import { isEmpty, size, intersection, without } from 'lodash-es';
+import { isEmpty, size, intersection, without, isUndefined } from 'lodash-es';
 import {
   Breadcrumb,
   Input,
@@ -30,7 +30,6 @@ import WhiteCloseIcon from '../../../assets/imgs/ic_close_white.svg';
 import type { AsyncTask } from '../../../stores/types/GraphManagementStore/asyncTasksStore';
 
 import './AsyncTaskList.less';
-import { isUndefined } from 'util';
 
 const AsyncTaskList: React.FC = observer(() => {
   const graphManagementStore = useContext(GraphManagementStoreContext);
@@ -97,7 +96,7 @@ const AsyncTaskList: React.FC = observer(() => {
   const handleOutSideClick = useCallback(
     (e: MouseEvent) => {
       if (
-        isShowBatchDeleteModal !== null &&
+        isShowBatchDeleteModal &&
         deleteWrapperRef &&
         deleteWrapperRef.current &&
         !deleteWrapperRef.current.contains(e.target as Element)
@@ -625,7 +624,7 @@ export const AsyncTaskListManipulation: React.FC<AsyncTaskListManipulationProps>
     const handleOutSideClick = useCallback(
       (e: MouseEvent) => {
         if (
-          isPopDeleteModal !== null &&
+          isPopDeleteModal &&
           deleteWrapperRef &&
           deleteWrapperRef.current &&
           !deleteWrapperRef.current.contains(e.target as Element)
