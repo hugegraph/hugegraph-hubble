@@ -1,19 +1,33 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Select, Steps, Transfer, Button, Table, Input } from '@baidu/one-ui';
-
-import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
-import PassIcon from '../../../../assets/imgs/ic_pass.svg';
-import './ReuseProperties.less';
+import {
+  Select,
+  Steps,
+  Transfer,
+  Button,
+  Table,
+  Input,
+  Message
+} from '@baidu/one-ui';
 import { cloneDeep } from 'lodash-es';
+import { useTranslation } from 'react-i18next';
+
+import { GraphManagementStoreContext } from '../../../../stores';
+import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
+
+import PassIcon from '../../../../assets/imgs/ic_pass.svg';
+
+import './ReuseProperties.less';
 
 const ReuseProperties: React.FC = observer(() => {
+  const graphManagementStore = useContext(GraphManagementStoreContext);
   const metadataConfigsRootStore = useContext(MetadataConfigsRootStore);
   const { metadataPropertyStore } = metadataConfigsRootStore;
   const [currentStatus, setCurrentStatus] = useState(1);
   // acutally the name, not id in database
   const [selectedId, mutateSelectedId] = useState<[] | string>([]);
   const [selectedList, mutateSelectedList] = useState<string[]>([]);
+  const { t } = useTranslation();
 
   // step 2
   const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -211,7 +225,7 @@ const ReuseProperties: React.FC = observer(() => {
                 // remove selected status of the property in <Transfer />
                 mutateSelectedList(
                   [...selectedList].filter(
-                    property =>
+                    (property) =>
                       property !==
                       metadataPropertyStore.editedCheckedReusableProperties!
                         .propertykey_conflicts[index].entity.name
@@ -276,7 +290,7 @@ const ReuseProperties: React.FC = observer(() => {
                 onChange={(selectedName: string) => {
                   mutateSelectedId(selectedName);
 
-                  const id = metadataConfigsRootStore.idList.find(
+                  const id = graphManagementStore.idList.find(
                     ({ name }) => name === selectedName
                   )!.id;
 
@@ -285,10 +299,22 @@ const ReuseProperties: React.FC = observer(() => {
                   metadataPropertyStore.fetchMetadataPropertyList({
                     reuseId: Number(id)
                   });
+
+                  const enable = graphManagementStore.graphData.find(
+                    ({ name }) => name === selectedName
+                  )?.enabled;
+
+                  if (!enable) {
+                    Message.error({
+                      content: t('data-analyze.hint.graph-disabled'),
+                      size: 'medium',
+                      showCloseIcon: false
+                    });
+                  }
                 }}
                 value={selectedId}
               >
-                {metadataConfigsRootStore.idList
+                {graphManagementStore.idList
                   .filter(
                     ({ id }) =>
                       Number(id) !== metadataConfigsRootStore.currentId
@@ -347,6 +373,17 @@ const ReuseProperties: React.FC = observer(() => {
                 onClick={() => {
                   setCurrentStatus(2);
                   metadataPropertyStore.checkConflict(selectedList);
+
+                  if (
+                    metadataPropertyStore.requestStatus.checkConflict ===
+                    'failed'
+                  ) {
+                    Message.error({
+                      content: metadataPropertyStore.errorMessage,
+                      size: 'medium',
+                      showCloseIcon: false
+                    });
+                  }
                 }}
               >
                 下一步

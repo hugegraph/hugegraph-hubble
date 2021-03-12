@@ -4,15 +4,25 @@ import { Button, Radio, Input, Select, Switch } from '@baidu/one-ui';
 import { useTranslation } from 'react-i18next';
 import { styles } from '../QueryAndAlgorithmLibrary';
 import { Tooltip as CustomTooltip } from '../../../common';
+
+import { GraphManagementStoreContext } from '../../../../stores';
+import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
+import { isDataTypeNumeric, calcAlgorithmFormWidth } from '../../../../utils';
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
-import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
 
 const SingleSourceWeightedShortestPath = observer(() => {
+  const graphManagementStore = useContext(GraphManagementStoreContext);
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
   const { t } = useTranslation();
+
+  const formWidth = calcAlgorithmFormWidth(
+    graphManagementStore.isExpanded,
+    340,
+    380
+  );
 
   const isValidExec =
     Object.values(
@@ -24,7 +34,10 @@ const SingleSourceWeightedShortestPath = observer(() => {
     <div className="query-tab-content-form">
       <div className="query-tab-content-form-row">
         <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
+          <div
+            className="query-tab-content-form-item-title"
+            style={{ minWidth: 118 }}
+          >
             <i>*</i>
             <span>
               {t(
@@ -33,7 +46,7 @@ const SingleSourceWeightedShortestPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -87,7 +100,7 @@ const SingleSourceWeightedShortestPath = observer(() => {
               'data-analyze.algorithm-forms.single-source-weighted-shortest-path.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            width={400}
+            width={formWidth}
             onChange={(value: string) => {
               algorithmAnalyzerStore.mutateSingleSourceWeightedShortestPathParams(
                 'label',
@@ -110,7 +123,10 @@ const SingleSourceWeightedShortestPath = observer(() => {
       </div>
       <div className="query-tab-content-form-row">
         <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
+          <div
+            className="query-tab-content-form-item-title"
+            style={{ minWidth: 118 }}
+          >
             <i>*</i>
             <span>
               {t(
@@ -171,11 +187,11 @@ const SingleSourceWeightedShortestPath = observer(() => {
             />
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.single-source-weighted-shortest-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.single-source-weighted-shortest-path.placeholder.input-positive-integer-or-negative-one-max-degree'
             )}
             errorLocation="layer"
             errorMessage={
@@ -209,10 +225,13 @@ const SingleSourceWeightedShortestPath = observer(() => {
       </div>
       <div className="query-tab-content-form-row">
         <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
+          <div
+            className="query-tab-content-form-item-title"
+            style={{ minWidth: 118 }}
+          >
             <span>
               {t(
-                'data-analyze.algorithm-forms.single-source-weighted-shortest-path.options.weighted'
+                'data-analyze.algorithm-forms.single-source-weighted-shortest-path.options.weight'
               )}
             </span>
           </div>
@@ -221,7 +240,7 @@ const SingleSourceWeightedShortestPath = observer(() => {
             trigger="click"
             value={
               algorithmAnalyzerStore.singleSourceWeightedShortestPathParams
-                .weighted
+                .weight
             }
             notFoundContent={t(
               'data-analyze.algorithm-forms.single-source-weighted-shortest-path.placeholder.no-edge-types'
@@ -230,19 +249,27 @@ const SingleSourceWeightedShortestPath = observer(() => {
               'data-analyze.algorithm-forms.single-source-weighted-shortest-path.placeholder.no-property'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            width={400}
+            width={formWidth}
             onChange={(value: string) => {
               algorithmAnalyzerStore.mutateSingleSourceWeightedShortestPathParams(
-                'weighted',
+                'weight',
                 value
               );
             }}
           >
-            {dataAnalyzeStore.properties.map(({ name }) => (
-              <Select.Option value={name} key={name}>
-                {name}
-              </Select.Option>
-            ))}
+            {dataAnalyzeStore.allPropertiesFromEdge
+              .filter((propertyName) =>
+                isDataTypeNumeric(
+                  dataAnalyzeStore.properties.find(
+                    ({ name }) => name === propertyName
+                  )?.data_type
+                )
+              )
+              .map((propertyName) => (
+                <Select.Option value={propertyName} key={propertyName}>
+                  {propertyName}
+                </Select.Option>
+              ))}
           </Select>
         </div>
         <div className="query-tab-content-form-item">
@@ -280,7 +307,7 @@ const SingleSourceWeightedShortestPath = observer(() => {
             />
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -318,7 +345,10 @@ const SingleSourceWeightedShortestPath = observer(() => {
       </div>
       <div className="query-tab-content-form-row">
         <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
+          <div
+            className="query-tab-content-form-item-title"
+            style={{ minWidth: 118 }}
+          >
             <span>
               {t(
                 'data-analyze.algorithm-forms.single-source-weighted-shortest-path.options.with_vertex'
@@ -326,13 +356,16 @@ const SingleSourceWeightedShortestPath = observer(() => {
             </span>
           </div>
           <Switch
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            checked={algorithmAnalyzerStore.loopDetectionParams.source_in_ring}
+            checked={
+              algorithmAnalyzerStore.singleSourceWeightedShortestPathParams
+                .with_vertex
+            }
             onChange={(checked: boolean) => {
-              algorithmAnalyzerStore.mutateLoopDetectionParams(
-                'source_in_ring',
+              algorithmAnalyzerStore.mutateSingleSourceWeightedShortestPathParams(
+                'with_vertex',
                 checked
               );
             }}
@@ -347,11 +380,11 @@ const SingleSourceWeightedShortestPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.single-source-weighted-shortest-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.single-source-weighted-shortest-path.placeholder.input-positive-integer-or-negative-one-capacity'
             )}
             errorLocation="layer"
             errorMessage={
@@ -394,11 +427,11 @@ const SingleSourceWeightedShortestPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.single-source-weighted-shortest-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.single-source-weighted-shortest-path.placeholder.input-positive-integer-or-negative-one-limit'
             )}
             errorLocation="layer"
             errorMessage={

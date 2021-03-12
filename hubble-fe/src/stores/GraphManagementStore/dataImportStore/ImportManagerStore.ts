@@ -242,7 +242,7 @@ export class ImportManagerStore {
         .get<responseData<JobResponse>>(
           `${baseUrl}/${this.currentId}/job-manager?page_no=${this.importJobListPageConfig.pageNumber}&page_size=10` +
             (this.isSearched.status && this.searchWords !== ''
-              ? `&content=${this.searchWords}`
+              ? `&content=${encodeURIComponent(this.searchWords)}`
               : '')
         )
         .catch(checkIfLocalNetworkOffline);

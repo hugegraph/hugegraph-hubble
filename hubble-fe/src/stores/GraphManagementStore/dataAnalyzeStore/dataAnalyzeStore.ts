@@ -1,7 +1,17 @@
 import { createContext } from 'react';
 import { observable, action, flow, computed, runInAction } from 'mobx';
 import axios, { AxiosResponse } from 'axios';
-import { isUndefined, cloneDeep, isEmpty, remove, size } from 'lodash-es';
+import {
+  isUndefined,
+  cloneDeep,
+  isEmpty,
+  remove,
+  size,
+  fromPairs,
+  invert,
+  flatten,
+  uniq
+} from 'lodash-es';
 import vis from 'vis-network';
 import isInt from 'validator/lib/isInt';
 import isUUID from 'validator/lib/isUUID';
@@ -61,14 +71,21 @@ import type {
   SingleSourceWeightedShortestPath,
   Jaccard,
   PersonalRank,
-  CustomPathRule
+  CustomPathRule,
+  KStepNeighbor
 } from '../../types/GraphManagementStore/dataAnalyzeStore';
 import type {
   VertexTypeListResponse,
   VertexType,
-  EdgeType
+  EdgeType,
+  MetadataPropertyIndex
 } from '../../types/GraphManagementStore/metadataConfigsStore';
 import type { EdgeTypeListResponse } from '../../types/GraphManagementStore/metadataConfigsStore';
+import {
+  AlgorithmInternalNameMapping,
+  removeLabelKey,
+  filterEmptyAlgorightmParams
+} from '../../../utils';
 
 const ruleMap: RuleMap = {
   大于: 'gt',
@@ -149,6 +166,7 @@ export class DataAnalyzeStore {
   @observable.ref valueTypes: Record<string, string> = {};
   @observable.ref vertexTypes: VertexType[] = [];
   @observable.ref edgeTypes: EdgeType[] = [];
+  @observable.ref propertyIndexes: MetadataPropertyIndex[] = [];
   @observable.ref colorSchemas: ColorSchemas = {};
   @observable.ref colorList: string[] = [];
   @observable.ref colorMappings: Record<string, string> = {};
@@ -224,6 +242,16 @@ export class DataAnalyzeStore {
 
   @observable.shallow requestStatus = initalizeRequestStatus();
   @observable errorInfo = initalizeErrorInfo();
+
+  @computed get allPropertiesFromEdge() {
+    return uniq(
+      flatten(
+        this.edgeTypes.map(({ properties }) =>
+          properties.map(({ name }) => name)
+        )
+      )
+    );
+  }
 
   @computed get graphNodes(): GraphNode[] {
     return this.originalGraphData.data.graph_view.vertices.map(
@@ -667,10 +695,23 @@ export class DataAnalyzeStore {
     const tempData: ExecutionLogs = {
       id: NaN,
       async_id: NaN,
-      algorithm_name: '',
+      algorithm_name:
+        this.currentTab === 'algorithm-analyze'
+          ? invert(AlgorithmInternalNameMapping)[
+              this.algorithmAnalyzerStore.currentAlgorithm
+            ]
+          : '',
       async_status: 'UNKNOWN',
-      type: 'GREMLIN',
-      content: this.codeEditorText,
+      type:
+        this.currentTab === 'algorithm-analyze'
+          ? 'ALGORITHM'
+          : this.queryMode === 'query'
+          ? 'GREMLIN'
+          : 'GREMLIN_ASYNC',
+      content:
+        this.currentTab === 'algorithm-analyze'
+          ? JSON.stringify(this.algorithmAnalyzerStore.currentAlgorithmParams)
+          : this.codeEditorText,
       status: 'RUNNING',
       duration: '0ms',
       create_time: timeString
@@ -1364,6 +1405,34 @@ export class DataAnalyzeStore {
     }
   });
 
+  fetchAllPropertyIndexes = flow(function* fetchAllPropertyIndexes(
+    this: DataAnalyzeStore,
+    indexType: 'vertex' | 'edge'
+  ) {
+    this.requestStatus.fetchAllPropertyIndexes = 'pending';
+
+    try {
+      const result = yield axios
+        .get(`${baseUrl}/${this.currentId}/schema/propertyindexes`, {
+          params: {
+            page_size: -1,
+            is_vertex_label: indexType === 'vertex'
+          }
+        })
+        .catch(checkIfLocalNetworkOffline);
+
+      if (result.data.status !== 200) {
+        throw new Error(result.data.message);
+      }
+
+      this.propertyIndexes = result.data.data.records;
+      this.requestStatus.fetchAllPropertyIndexes = 'success';
+    } catch (error) {
+      this.requestStatus.fetchAllPropertyIndexes = 'failed';
+      this.errorMessage = error.message;
+    }
+  });
+
   fetchGraphs = flow(function* fetchGraphs(
     this: DataAnalyzeStore,
     algorithmConfigs?: { url: string; type: string }
@@ -1373,105 +1442,72 @@ export class DataAnalyzeStore {
     this.requestStatus.fetchGraphs = 'pending';
     this.isLoadingGraph = true;
 
-    let params:
-      | LoopDetectionParams
-      | FocusDetectionParams
-      | ShortestPathAlgorithmParams
-      | ShortestPathAllAlgorithmParams
-      | AllPathAlgorithmParams
-      | ModelSimilarityParams
-      | NeighborRankParams
-      | KHop
-      | RadiographicInspection
-      | SameNeighbor
-      | WeightedShortestPath
-      | SingleSourceWeightedShortestPath
-      | Jaccard
-      | PersonalRank
-      | null = null;
+    // let params:
+    //   | LoopDetectionParams
+    //   | FocusDetectionParams
+    //   | ShortestPathAlgorithmParams
+    //   | ShortestPathAllAlgorithmParams
+    //   | AllPathAlgorithmParams
+    //   | ModelSimilarityParams
+    //   | NeighborRankParams
+    //   | KStepNeighbor
+    //   | KHop
+    //   | RadiographicInspection
+    //   | SameNeighbor
+    //   | WeightedShortestPath
+    //   | SingleSourceWeightedShortestPath
+    //   | Jaccard
+    //   | PersonalRank
+    //   | null = null;
+    let params: object | null = null;
 
     if (!isUndefined(algorithmConfigs)) {
       switch (algorithmConfigs.type) {
         case Algorithm.loopDetection: {
-          if (
-            this.algorithmAnalyzerStore.loopDetectionParams.label === '__all__'
-          ) {
-            const clonedParams: LoopDetectionParams = cloneDeep(
-              this.algorithmAnalyzerStore.loopDetectionParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.loopDetectionParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.loopDetectionParams,
+            ['max_degree', 'capacity', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
         case Algorithm.focusDetection: {
-          if (
-            this.algorithmAnalyzerStore.loopDetectionParams.label === '__all__'
-          ) {
-            const clonedParams: FocusDetectionParams = cloneDeep(
-              this.algorithmAnalyzerStore.focusDetectionParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.focusDetectionParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.focusDetectionParams,
+            ['max_degree', 'capacity', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
         case Algorithm.shortestPath: {
-          if (
-            this.algorithmAnalyzerStore.shortestPathAlgorithmParams.label ===
-            '__all__'
-          ) {
-            const clonedParams: ShortestPathAlgorithmParams = cloneDeep(
-              this.algorithmAnalyzerStore.shortestPathAlgorithmParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.shortestPathAlgorithmParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.shortestPathAlgorithmParams,
+            ['max_degree', 'capacity', 'skip_degree']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
         case Algorithm.shortestPathAll: {
-          if (
-            this.algorithmAnalyzerStore.shortestPathAllParams.label ===
-            '__all__'
-          ) {
-            const clonedParams: ShortestPathAllAlgorithmParams = cloneDeep(
-              this.algorithmAnalyzerStore.shortestPathAllParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.shortestPathAllParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.shortestPathAllParams,
+            ['max_degree', 'capacity', 'skip_degree']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
         case Algorithm.allPath: {
-          if (this.algorithmAnalyzerStore.allPathParams.label === '__all__') {
-            const clonedParams: AllPathAlgorithmParams = cloneDeep(
-              this.algorithmAnalyzerStore.allPathParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.allPathParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.allPathParams,
+            ['max_degree', 'capacity', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
@@ -1489,19 +1525,32 @@ export class DataAnalyzeStore {
             property_filter,
             least_property_number,
             max_degree,
-            skip_degree,
             capacity,
             limit,
             return_common_connection,
             return_complete_info
           } = this.algorithmAnalyzerStore.modelSimilarityParams;
 
+          const sources: Record<string, any> = {};
+
+          if (source !== '') {
+            sources.ids = source.split(',');
+          } else {
+            if (vertexType !== '') {
+              sources.label = vertexType;
+            }
+
+            if (vertexProperty[0][0] !== '') {
+              const convertedVertexProperty = vertexProperty.map(
+                ([key, value]) => [key, value.split(',')]
+              );
+
+              sources.properties = fromPairs(convertedVertexProperty);
+            }
+          }
+
           const convertedParams = {
-            sources: {
-              ids: [source],
-              label: vertexType,
-              properties: vertexProperty
-            },
+            sources,
             label,
             direction,
             min_neighbors: least_neighbor,
@@ -1521,22 +1570,61 @@ export class DataAnalyzeStore {
             delete convertedParams.label;
           }
 
+          if (max_degree === '') {
+            delete convertedParams.max_degree;
+          }
+
+          if (capacity === '') {
+            delete convertedParams.capacity;
+          }
+
+          if (limit === '') {
+            delete convertedParams.limit;
+          }
+
+          if (max_similar === '') {
+            delete convertedParams.top;
+          }
+
+          if (least_similar === '') {
+            delete convertedParams.min_similars;
+          }
+
+          if (convertedParams.group_property === '') {
+            delete convertedParams.group_property;
+            delete convertedParams.min_groups;
+          }
+
           // @ts-ignore
           params = convertedParams;
           break;
         }
 
-        case Algorithm.neighborRankRecommendation: {
+        case Algorithm.neighborRank: {
           const clonedNeighborRankParams = cloneDeep(
             this.algorithmAnalyzerStore.neighborRankParams
           );
 
+          if (clonedNeighborRankParams.capacity === '') {
+            clonedNeighborRankParams.capacity = '10000000';
+          }
+
           clonedNeighborRankParams.steps.forEach((step, index) => {
             delete step.uuid;
+            const clonedStep = cloneDeep(step);
 
-            if (step.label === '__all__') {
-              const clonedStep: NeighborRankRule = cloneDeep(step);
-              delete clonedStep.label;
+            if (step.labels[0] === '__all__') {
+              delete clonedStep.labels;
+              clonedNeighborRankParams.steps[index] = clonedStep;
+            }
+
+            if (step.degree === '') {
+              clonedStep.degree = '10000';
+              clonedNeighborRankParams.steps[index] = clonedStep;
+            }
+
+            if (step.top === '') {
+              clonedStep.top = '100';
               clonedNeighborRankParams.steps[index] = clonedStep;
             }
           });
@@ -1546,39 +1634,22 @@ export class DataAnalyzeStore {
         }
 
         case Algorithm.kStepNeighbor: {
-          const clonedKStepNeighborParams = cloneDeep(
-            this.algorithmAnalyzerStore.neighborRankParams
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.kStepNeighborParams,
+            ['max_degree', 'limit']
           );
-
-          clonedKStepNeighborParams.steps.forEach((step, index) => {
-            delete step.uuid;
-
-            if (step.label === '__all__') {
-              const clonedStep: NeighborRankRule = cloneDeep(step);
-              delete clonedStep.label;
-              clonedKStepNeighborParams.steps[index] = clonedStep;
-            }
-          });
-
-          params = clonedKStepNeighborParams;
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
         case Algorithm.kHop: {
-          if (
-            this.algorithmAnalyzerStore.shortestPathAllParams.label ===
-            '__all__'
-          ) {
-            const clonedParams: KHop = cloneDeep(
-              this.algorithmAnalyzerStore.kHopParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.kHopParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.kHopParams,
+            ['max_degree', 'capacity', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
@@ -1587,35 +1658,81 @@ export class DataAnalyzeStore {
             source,
             vertexType,
             vertexProperty,
-            default_weight,
+            sort_by,
             capacity,
             limit,
             steps
           } = this.algorithmAnalyzerStore.customPathParams;
+
+          const sources: Record<string, any> = {};
+
+          if (source !== '') {
+            sources.ids = source.split(',');
+          } else {
+            if (vertexType !== '') {
+              sources.label = vertexType;
+            }
+
+            if (vertexProperty[0][0] !== '') {
+              const convertedVertexProperty = vertexProperty.map(
+                ([key, value]) => [key, value.split(',')]
+              );
+
+              sources.properties = fromPairs(convertedVertexProperty);
+            }
+          }
 
           const clonedCustomPathRules = cloneDeep(steps);
 
           clonedCustomPathRules.forEach((step, index) => {
             delete step.uuid;
 
-            if (step.labels[0] === '__all__') {
-              const clonedStep: CustomPathRule = cloneDeep(step);
-              delete clonedStep.labels;
-              clonedCustomPathRules[index] = clonedStep;
+            if (isEmpty(step.labels)) {
+              delete step.labels;
+            }
+
+            if (step.properties[0][0] !== '') {
+              // omit property types here
+              // @ts-ignore
+              step.properties = fromPairs(
+                step.properties.map(([key, value]) => [key, value.split(',')])
+              );
+            } else {
+              delete step.properties;
+            }
+
+            if (isEmpty(step.degree)) {
+              delete step.degree;
+            }
+
+            if (isEmpty(step.sample)) {
+              delete step.sample;
+            }
+
+            if (step.weight_by === '__CUSTOM_WEIGHT__') {
+              delete step.weight_by;
+            } else {
+              delete step.default_weight;
+            }
+
+            if (step.weight_by === '') {
+              delete step.weight_by;
             }
           });
 
-          const convertedParams = {
-            sources: {
-              ids: [source],
-              label: vertexType,
-              properties: vertexProperty
-            },
-            default_weight,
-            capacity,
-            limit,
+          const convertedParams: Record<string, any> = {
+            sources,
+            sort_by,
             steps: clonedCustomPathRules
           };
+
+          if (!isEmpty(capacity)) {
+            convertedParams.capactiy = capacity;
+          }
+
+          if (!isEmpty(limit)) {
+            convertedParams.limit = limit;
+          }
 
           // @ts-ignore
           params = convertedParams;
@@ -1623,106 +1740,62 @@ export class DataAnalyzeStore {
         }
 
         case Algorithm.radiographicInspection: {
-          if (
-            this.algorithmAnalyzerStore.radiographicInspectionParams.label ===
-            '__all__'
-          ) {
-            const clonedParams: RadiographicInspection = cloneDeep(
-              this.algorithmAnalyzerStore.radiographicInspectionParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.radiographicInspectionParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.radiographicInspectionParams,
+            ['max_degree', 'capacity', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
         case Algorithm.sameNeighbor: {
-          if (
-            this.algorithmAnalyzerStore.sameNeighborParams.label === '__all__'
-          ) {
-            const clonedParams: SameNeighbor = cloneDeep(
-              this.algorithmAnalyzerStore.sameNeighborParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.sameNeighborParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.sameNeighborParams,
+            ['max_degree', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
         case Algorithm.weightedShortestPath: {
-          if (
-            this.algorithmAnalyzerStore.weightedShortestPathParams.label ===
-            '__all__'
-          ) {
-            const clonedParams: WeightedShortestPath = cloneDeep(
-              this.algorithmAnalyzerStore.weightedShortestPathParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.weightedShortestPathParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.weightedShortestPathParams,
+            ['max_degree', 'capacity', 'skip_degree']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
         case Algorithm.singleSourceWeightedShortestPath: {
-          if (
-            this.algorithmAnalyzerStore.singleSourceWeightedShortestPathParams
-              .label === '__all__'
-          ) {
-            const clonedParams: SingleSourceWeightedShortestPath = cloneDeep(
-              this.algorithmAnalyzerStore.singleSourceWeightedShortestPathParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore
-            .singleSourceWeightedShortestPathParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.singleSourceWeightedShortestPathParams,
+            ['max_degree', 'capacity', 'skip_degree', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
-        case Algorithm.jaccardSimilarity: {
-          if (this.algorithmAnalyzerStore.jaccardParams.label === '__all__') {
-            const clonedParams: Jaccard = cloneDeep(
-              this.algorithmAnalyzerStore.jaccardParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.jaccardParams;
+        case Algorithm.jaccard: {
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.jaccardParams,
+            ['max_degree']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
 
         case Algorithm.personalRankRecommendation: {
-          if (
-            this.algorithmAnalyzerStore.personalRankParams.label === '__all__'
-          ) {
-            const clonedParams: PersonalRank = cloneDeep(
-              this.algorithmAnalyzerStore.personalRankParams
-            );
-
-            delete clonedParams.label;
-            params = clonedParams;
-            break;
-          }
-
-          params = this.algorithmAnalyzerStore.personalRankParams;
+          const filterdObject = filterEmptyAlgorightmParams(
+            this.algorithmAnalyzerStore.personalRankParams,
+            ['degree', 'limit']
+          );
+          removeLabelKey(filterdObject);
+          params = filterdObject;
           break;
         }
       }

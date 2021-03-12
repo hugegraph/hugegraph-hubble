@@ -87,7 +87,7 @@ const QueryFilterOptions: React.FC = observer(() => {
             placeholder="请输入数字"
             value={value}
             onChange={(e: any) => {
-              handlePropertyChange('value', e.value, index);
+              handlePropertyChange('value', Number(e.value), index);
             }}
             disabled={shouldDisabled}
           />

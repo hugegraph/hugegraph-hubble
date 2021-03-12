@@ -4,15 +4,25 @@ import { Button, Radio, Input, Select } from '@baidu/one-ui';
 import { useTranslation } from 'react-i18next';
 import { styles } from '../QueryAndAlgorithmLibrary';
 import { Tooltip as CustomTooltip } from '../../../common';
+
+import { GraphManagementStoreContext } from '../../../../stores';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
+import { calcAlgorithmFormWidth } from '../../../../utils';
 
 const ShortestPath = observer(() => {
+  const graphManagementStore = useContext(GraphManagementStoreContext);
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
   const { t } = useTranslation();
+
+  const formWidth = calcAlgorithmFormWidth(
+    graphManagementStore.isExpanded,
+    340,
+    400
+  );
 
   const isValidExec =
     Object.values(
@@ -33,7 +43,7 @@ const ShortestPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -74,7 +84,7 @@ const ShortestPath = observer(() => {
               'data-analyze.algorithm-forms.shortest-path.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            width={400}
+            width={formWidth}
             onChange={(value: string) => {
               algorithmAnalyzerStore.mutateShortestPathParams('label', value);
             }}
@@ -99,7 +109,7 @@ const ShortestPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -161,11 +171,11 @@ const ShortestPath = observer(() => {
             />
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.shortest-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.shortest-path.placeholder.input-positive-integer-or-negative-one-max-degree'
             )}
             errorLocation="layer"
             errorMessage={
@@ -251,7 +261,7 @@ const ShortestPath = observer(() => {
             />
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -320,7 +330,7 @@ const ShortestPath = observer(() => {
             />
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -354,11 +364,11 @@ const ShortestPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.shortest-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.shortest-path.placeholder.input-positive-integer-or-negative-one-capacity'
             )}
             errorLocation="layer"
             errorMessage={

@@ -10,15 +10,7 @@ import { observer } from 'mobx-react';
 import CodeMirror from 'codemirror';
 import { useTranslation } from 'react-i18next';
 import classnames from 'classnames';
-import {
-  Button,
-  Tooltip,
-  Alert,
-  Dropdown,
-  Input,
-  Radio,
-  Select
-} from '@baidu/one-ui';
+import { Button, Tooltip, Alert, Dropdown } from '@baidu/one-ui';
 
 import 'codemirror/lib/codemirror.css';
 import 'react-popper-tooltip/dist/styles.css';
@@ -71,12 +63,23 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
     dataAnalyzeStore.resetSwitchTabState();
 
     if (tab !== dataAnalyzeStore.currentTab) {
+      // reset codeEditor value
       dataAnalyzeStore.mutateCodeEditorText('');
+
+      // reset default selection of edge labels
+      algorithmAnalyzerStore.mutateCustomPathRuleParams(
+        'labels',
+        dataAnalyzeStore.edgeTypes.map(({ name }) => name),
+        0
+      );
     }
 
     dataAnalyzeStore.setCurrentTab(tab);
+    // need manually set codeMirror text value to empty here
+    dataAnalyzeStore.codeEditorInstance?.setValue('');
     // reset algorithm tab to list
     algorithmAnalyzerStore.changeCurrentAlgorithm('');
+    algorithmAnalyzerStore.switchCollapse(false);
   };
 
   return (
@@ -92,8 +95,21 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
         >
           {t('data-analyze.category.gremlin-analyze')}
         </div>
+        {/* <div
+          onClick={handleTabChange('algorithm-analyze')}
+          className={
+            dataAnalyzeStore.currentTab === 'algorithm-analyze'
+              ? 'query-tab-index active'
+              : 'query-tab-index'
+          }
+        >
+          {t('data-analyze.category.algorithm-analyze')}
+        </div> */}
       </div>
       {dataAnalyzeStore.currentTab === 'gremlin-analyze' && <GremlinQuery />}
+      {/* {dataAnalyzeStore.currentTab === 'algorithm-analyze' && (
+        <AlgorithmQuery />
+      )} */}
     </>
   );
 });
@@ -192,21 +208,13 @@ export const GremlinQuery: React.FC = observer(() => {
         );
       };
 
+      dataAnalyzeStore.assignCodeEditorInstance(codeEditor.current);
       codeEditor.current.on('change', handleCodeEditorChange);
 
       reaction(
         () => dataAnalyzeStore.currentId,
         () => {
           (codeEditor.current as CodeMirror.Editor).setValue('');
-        }
-      );
-
-      reaction(
-        () => dataAnalyzeStore.pulse,
-        () => {
-          (codeEditor.current as CodeMirror.Editor).setValue(
-            dataAnalyzeStore.codeEditorText
-          );
         }
       );
 
@@ -218,6 +226,17 @@ export const GremlinQuery: React.FC = observer(() => {
       };
     }
   }, [dataAnalyzeStore]);
+
+  // weird, mobx@reaction is not working when puluse changed, setValue()
+  // has no influence
+  useEffect(() => {
+    if (codeEditor?.current && dataAnalyzeStore.codeEditorText !== '') {
+      (codeEditor.current as CodeMirror.Editor).setValue(
+        dataAnalyzeStore.codeEditorText
+      );
+    }
+  }, [dataAnalyzeStore.pulse]);
+  // }, [dataAnalyzeStore.pulse, codeEditor?.current]);
 
   useEffect(() => {
     if (
@@ -440,7 +459,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
         return <AllPath />;
       case Algorithm.modelSimilarity:
         return <ModelSimilarity />;
-      case Algorithm.neighborRankRecommendation:
+      case Algorithm.neighborRank:
         return <NeighborRank />;
       case Algorithm.kStepNeighbor:
         return <KStepNeighbor />;
@@ -456,7 +475,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
         return <WeightedShortestPath />;
       case Algorithm.singleSourceWeightedShortestPath:
         return <SingleSourceWeightedShortestPath />;
-      case Algorithm.jaccardSimilarity:
+      case Algorithm.jaccard:
         return <Jaccard />;
       case Algorithm.personalRankRecommendation:
         return <PersonalRank />;
@@ -484,6 +503,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
                 marginRight: 12
               }}
               onClick={() => {
+                algorithmAnalyzerStore.switchCollapse(false);
                 algorithmAnalyzerStore.changeCurrentAlgorithm('');
               }}
             />
@@ -520,7 +540,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
               Algorithm.shortestPathAll,
               Algorithm.allPath
             ].map((algorithm) => (
-              <span onClick={handleChangeAlgorithm(algorithm)}>
+              <span onClick={handleChangeAlgorithm(algorithm)} key={algorithm}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}
@@ -528,12 +548,12 @@ export const AlgorithmQuery: React.FC = observer(() => {
           <div className="query-tab-content-menu">
             {[
               Algorithm.modelSimilarity,
-              Algorithm.neighborRankRecommendation,
+              Algorithm.neighborRank,
               Algorithm.kStepNeighbor,
               Algorithm.kHop,
               Algorithm.customPath
             ].map((algorithm) => (
-              <span onClick={handleChangeAlgorithm(algorithm)}>
+              <span onClick={handleChangeAlgorithm(algorithm)} key={algorithm}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}
@@ -544,16 +564,16 @@ export const AlgorithmQuery: React.FC = observer(() => {
               Algorithm.sameNeighbor,
               Algorithm.weightedShortestPath,
               Algorithm.singleSourceWeightedShortestPath,
-              Algorithm.jaccardSimilarity
+              Algorithm.jaccard
             ].map((algorithm) => (
-              <span onClick={handleChangeAlgorithm(algorithm)}>
+              <span onClick={handleChangeAlgorithm(algorithm)} key={algorithm}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}
           </div>
           <div className="query-tab-content-menu">
             {[Algorithm.personalRankRecommendation].map((algorithm) => (
-              <span onClick={handleChangeAlgorithm(algorithm)}>
+              <span onClick={handleChangeAlgorithm(algorithm)} key={algorithm}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}

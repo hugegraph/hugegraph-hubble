@@ -204,6 +204,16 @@
     overflow: auto;
   }
 
+  .query-tab-algorithm-hint {
+    width: fit-content;
+    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.15);
+    line-height: 18px;
+    padding: 16px;
+    color: #e64552;
+    font-size: 14px;
+    text-align: center;
+  }
+
   .query-tab-content {
     display: flex;
   }
@@ -300,10 +310,6 @@
     padding: 16px 8px;
     margin-bottom: 16px;
 
-    &-invalid {
-      border: 1px solid #e64552;
-    }
-
     &:last-child {
       margin-bottom: 0;
     }
@@ -316,6 +322,40 @@
 
     &:last-child {
       margin-bottom: 0;
+    }
+  }
+
+  .query-tab-content-internal-expand-row {
+    width: 390px;
+    display: flex;
+    // justify-content: space-between;
+    height: 32px;
+    margin-bottom: 16px;
+  }
+
+  .query-tab-content-internal-expand-input {
+    margin: 0 14px 0 16px;
+  }
+
+  .query-tab-content-internal-expand-manipulation {
+    &-enable,
+    &-disabled {
+      font-size: 14px;
+      line-height: 20px;
+      margin-bottom: 32px;
+      padding-left: 172px;
+
+      & span {
+        cursor: pointer;
+      }
+    }
+
+    &-enable {
+      color: #2b65ff;
+    }
+
+    &-disabled {
+      color: #999;
     }
   }
 
@@ -836,8 +876,12 @@
       }
 
       & > div {
-        flex-basis: 50%;
+        // flex-basis: 50%;
         line-height: 32px;
+
+        &:first-child {
+          width: 162px;
+        }
       }
     }
   }
@@ -1067,7 +1111,8 @@
 }
 
 .new-fc-one-table {
-  font-size: 14px;
+  // IE11 compatible issue
+  font-size: 14px !important;
   line-height: 22px;
 }
 
@@ -1136,4 +1181,13 @@ div.vis-tooltip {
   border-radius: 0;
   pointer-events: none;
   z-index: 5;
+}
+
+// refer to index.less, this should be fixed in the future version
+.data-analyze-dynamic-add-options .new-fc-one-input-all-container {
+  position: relative;
+}
+
+.data-analyze-graph-node-info .new-fc-one-input-all-container {
+  position: relative;
 }

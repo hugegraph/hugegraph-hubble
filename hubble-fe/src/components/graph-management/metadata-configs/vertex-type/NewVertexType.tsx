@@ -393,7 +393,7 @@ const NewVertexType: React.FC = observer(() => {
             <Select
               width={420}
               mode="multiple"
-              placeholder="请选择主键属性"
+              placeholder="请选择非空主键属性"
               selectorName="请先选择关联属性"
               size="medium"
               showSearch={false}

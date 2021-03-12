@@ -1,24 +1,106 @@
 import React, { useContext } from 'react';
 import { observer } from 'mobx-react';
-import { size, last } from 'lodash-es';
-import { useTranslation } from 'react-i18next';
-import classnames from 'classnames';
-import { styles } from '../QueryAndAlgorithmLibrary';
+import {
+  size,
+  flatten,
+  flattenDeep,
+  uniq,
+  isEmpty,
+  cloneDeep,
+  fromPairs
+} from 'lodash-es';
 import { Button, Radio, Input, Select } from '@baidu/one-ui';
+import { useTranslation } from 'react-i18next';
 
-import { Tooltip as CustomTooltip } from '../../../common';
+import { styles } from '../QueryAndAlgorithmLibrary';
+import { GraphManagementStoreContext } from '../../../../stores';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
-
-import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
-import { CustomPathRule } from '../../../../stores/types/GraphManagementStore/dataAnalyzeStore';
+import { isDataTypeNumeric, calcAlgorithmFormWidth } from '../../../../utils';
 
 const CustomPath = observer(() => {
-  const { t } = useTranslation();
+  const graphManagementStore = useContext(GraphManagementStoreContext);
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
+  const { t } = useTranslation();
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
 
+  const formWidth = calcAlgorithmFormWidth(
+    graphManagementStore.isExpanded,
+    340,
+    390
+  );
+
+  const formWidthInStep = calcAlgorithmFormWidth(
+    graphManagementStore.isExpanded,
+    310,
+    380
+  );
+
+  const formSmallWidthInStep = calcAlgorithmFormWidth(
+    graphManagementStore.isExpanded,
+    150,
+    160
+  );
+
   const sourceType = algorithmAnalyzerStore.customPathParams.method;
+
+  const allowAddNewProperty = !flatten(
+    algorithmAnalyzerStore.customPathParams.vertexProperty
+  ).some((value) => value === '');
+
+  const addNewPropertyClassName =
+    allowAddNewProperty &&
+    dataAnalyzeStore.requestStatus.fetchGraphs !== 'pending'
+      ? 'query-tab-content-internal-expand-manipulation-enable'
+      : 'query-tab-content-internal-expand-manipulation-disabled';
+
+  const allowAddNewRuleProperty = !flattenDeep(
+    algorithmAnalyzerStore.customPathParams.steps.map(
+      ({ properties }) => properties
+    )
+  ).some((value) => value === '');
+
+  const addNewRulePropertyClassName =
+    allowAddNewRuleProperty &&
+    dataAnalyzeStore.requestStatus.fetchGraphs !== 'pending'
+      ? 'query-tab-content-internal-expand-manipulation-enable'
+      : 'query-tab-content-internal-expand-manipulation-disabled';
+
+  const isValidSourceId =
+    algorithmAnalyzerStore.customPathParams.method === 'id' &&
+    algorithmAnalyzerStore.customPathParams.source !== '';
+
+  const isValidProperty =
+    algorithmAnalyzerStore.customPathParams.method === 'property' &&
+    !(
+      isEmpty(algorithmAnalyzerStore.customPathParams.vertexType) &&
+      flatten(
+        algorithmAnalyzerStore.customPathParams.vertexProperty
+      ).every((value) => isEmpty(value))
+    ) &&
+    algorithmAnalyzerStore.customPathParams.vertexProperty.every(
+      ([key, value]) => (!isEmpty(key) ? !isEmpty(value) : true)
+    );
+
+  const isValidateRuleProperties = algorithmAnalyzerStore.customPathParams.steps.every(
+    ({ properties }) => {
+      if (size(properties) === 1) {
+        return (
+          (isEmpty(properties[0][0]) && isEmpty(properties[0][1])) ||
+          (!isEmpty(properties[0][0]) && !isEmpty(properties[0][1]))
+        );
+      } else {
+        return properties.every(([, value]) => !isEmpty(value));
+      }
+    }
+  );
+
+  const isValidRuleWeight = algorithmAnalyzerStore.customPathParams.steps.every(
+    ({ weight_by, default_weight }) =>
+      algorithmAnalyzerStore.customPathParams.sort_by === 'NONE' ||
+      (weight_by === '__CUSTOM_WEIGHT__' && default_weight !== '') ||
+      (weight_by !== '__CUSTOM_WEIGHT__' && !isEmpty(weight_by))
+  );
 
   const isValidExec =
     Object.values(
@@ -29,19 +111,14 @@ const CustomPath = observer(() => {
     ) &&
     (algorithmAnalyzerStore.customPathParams.method === 'id'
       ? algorithmAnalyzerStore.customPathParams.source !== ''
-      : true);
+      : true) &&
+    (isValidSourceId || isValidProperty) &&
+    isValidateRuleProperties &&
+    isValidRuleWeight;
 
-  const isValidAddRule =
-    algorithmAnalyzerStore.validateCustomPathParmasErrorMessage.steps.every(
-      (step) => Object.values(step).every((value) => value === '')
-    ) && algorithmAnalyzerStore.duplicateCustomPathRuleSet.size === 0;
-
-  const invalidExtendFormClassname = (flag: boolean) => {
-    return classnames({
-      'query-tab-content-form-expand-items': true,
-      'query-tab-content-form-expand-items-invalid': flag
-    });
-  };
+  const isValidAddRule = algorithmAnalyzerStore.validateCustomPathParmasErrorMessage.steps.every(
+    (step) => Object.values(step).every((value) => value === '')
+  );
 
   return (
     <div style={{ display: 'flex' }}>
@@ -76,21 +153,19 @@ const CustomPath = observer(() => {
             </Radio.Group>
           </div>
         </div>
-        <div className="query-tab-content-form-row">
-          <div className="query-tab-content-form-item">
-            <div className="query-tab-content-form-item-title large">
-              {sourceType === 'id' && <i>*</i>}
-              <span>
-                {sourceType === 'id'
-                  ? t('data-analyze.algorithm-forms.custom-path.options.source')
-                  : t(
-                      'data-analyze.algorithm-forms.custom-path.options.vertex-type'
-                    )}
-              </span>
-            </div>
-            {sourceType === 'id' ? (
+
+        {sourceType === 'id' && (
+          <div className="query-tab-content-form-row">
+            <div className="query-tab-content-form-item">
+              <div className="query-tab-content-form-item-title large">
+                <i>*</i>
+                <span>
+                  {t('data-analyze.algorithm-forms.custom-path.options.source')}
+                </span>
+              </div>
+
               <Input
-                width={390}
+                width={formWidth}
                 size="medium"
                 disabled={
                   dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -118,97 +193,298 @@ const CustomPath = observer(() => {
                   }
                 }}
               />
-            ) : (
-              <Select
-                size="medium"
-                trigger="click"
-                selectorName={t(
-                  'data-analyze.algorithm-forms.custom-path.placeholder.input-vertex-type'
-                )}
-                value={algorithmAnalyzerStore.customPathParams.vertexType}
-                notFoundContent={t(
-                  'data-analyze.algorithm-forms.custom-path.placeholder.no-vertex-type'
-                )}
-                disabled={
-                  dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                }
-                width={390}
-                onChange={(value: string) => {
-                  algorithmAnalyzerStore.mutateCustomPathParams(
-                    'vertexType',
-                    value
-                  );
-                }}
-              >
-                {dataAnalyzeStore.vertexTypes.map(({ name }) => (
-                  <Select.Option value={name} key={name}>
-                    {name}
-                  </Select.Option>
-                ))}
-              </Select>
-            )}
-          </div>
-        </div>
-        {sourceType !== 'id' && (
-          <div className="query-tab-content-form-row">
-            <div className="query-tab-content-form-item">
-              <div className="query-tab-content-form-item-title large">
-                <span>
-                  {t(
-                    'data-analyze.algorithm-forms.custom-path.options.vertex-property'
-                  )}
-                </span>
-              </div>
-              <Select
-                size="medium"
-                trigger="click"
-                selectorName={t(
-                  'data-analyze.algorithm-forms.custom-path.placeholder.input-vertex-property'
-                )}
-                value={algorithmAnalyzerStore.customPathParams.vertexType}
-                notFoundContent={t(
-                  'data-analyze.algorithm-forms.custom-path.placeholder.no-vertex-property'
-                )}
-                disabled={
-                  dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                }
-                width={390}
-                onChange={(value: string) => {
-                  algorithmAnalyzerStore.mutateCustomPathParams(
-                    'vertexProperty',
-                    [value]
-                  );
-                }}
-              >
-                {dataAnalyzeStore.vertexTypes.map(({ name }) => (
-                  <Select.Option value={name} key={name}>
-                    {name}
-                  </Select.Option>
-                ))}
-              </Select>
             </div>
           </div>
         )}
+
+        {sourceType !== 'id' && (
+          <>
+            <div className="query-tab-content-form-row">
+              <div className="query-tab-content-form-item">
+                <div className="query-tab-content-form-item-title large">
+                  <span>
+                    {t(
+                      'data-analyze.algorithm-forms.custom-path.options.vertex-type'
+                    )}
+                  </span>
+                </div>
+                <Select
+                  size="medium"
+                  trigger="click"
+                  selectorName={t(
+                    'data-analyze.algorithm-forms.custom-path.placeholder.select-vertex-type'
+                  )}
+                  value={algorithmAnalyzerStore.customPathParams.vertexType}
+                  notFoundContent={t(
+                    'data-analyze.algorithm-forms.custom-path.placeholder.no-vertex-type'
+                  )}
+                  disabled={
+                    dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
+                  }
+                  width={formWidth}
+                  onChange={(value: string) => {
+                    // switch property selections from properties of index to certain properties
+                    if (
+                      isEmpty(
+                        algorithmAnalyzerStore.customPathParams.vertexType
+                      )
+                    ) {
+                      algorithmAnalyzerStore.mutateCustomPathParams(
+                        'vertexProperty',
+                        [['', '']]
+                      );
+                    }
+
+                    algorithmAnalyzerStore.mutateCustomPathParams(
+                      'vertexType',
+                      value
+                    );
+                  }}
+                >
+                  {dataAnalyzeStore.vertexTypes.map(({ name }) => (
+                    <Select.Option value={name} key={name}>
+                      {name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </div>
+            </div>
+
+            <div
+              className="query-tab-content-form-row"
+              style={{ marginBottom: 0 }}
+            >
+              <div
+                className="query-tab-content-form-item"
+                style={{ alignItems: 'start' }}
+              >
+                <div
+                  className="query-tab-content-form-item-title large"
+                  style={{ lineHeight: '32px' }}
+                >
+                  <span>
+                    {t(
+                      'data-analyze.algorithm-forms.custom-path.options.vertex-property'
+                    )}
+                  </span>
+                </div>
+
+                <div>
+                  {algorithmAnalyzerStore.customPathParams.vertexProperty.map(
+                    ([key, value], propertyIndex) => {
+                      const currentVertexType = dataAnalyzeStore.vertexTypes.find(
+                        ({ name }) =>
+                          name ===
+                          algorithmAnalyzerStore.customPathParams.vertexType
+                      );
+
+                      return (
+                        <div className="query-tab-content-internal-expand-row">
+                          <Select
+                            width={161}
+                            size="medium"
+                            trigger="click"
+                            selectorName={t(
+                              'data-analyze.algorithm-forms.custom-path.placeholder.select-vertex-property'
+                            )}
+                            value={key}
+                            notFoundContent={t(
+                              'data-analyze.algorithm-forms.custom-path.placeholder.no-properties'
+                            )}
+                            disabled={
+                              dataAnalyzeStore.requestStatus.fetchGraphs ===
+                              'pending'
+                            }
+                            onChange={(value: string) => {
+                              const vertexProperty = cloneDeep(
+                                algorithmAnalyzerStore.customPathParams
+                                  .vertexProperty
+                              );
+
+                              vertexProperty[propertyIndex][0] = value;
+
+                              algorithmAnalyzerStore.mutateCustomPathParams(
+                                'vertexProperty',
+                                vertexProperty
+                              );
+                            }}
+                          >
+                            {!isEmpty(
+                              algorithmAnalyzerStore.customPathParams.vertexType
+                            )
+                              ? flatten(
+                                  currentVertexType?.property_indexes.map(
+                                    ({ fields }) => fields
+                                  )
+                                )
+                                  .concat(currentVertexType!.primary_keys)
+                                  .filter(
+                                    (property) =>
+                                      !algorithmAnalyzerStore.customPathParams.vertexProperty
+                                        .map(([key]) => key)
+                                        .includes(property)
+                                  )
+                                  .map((property) => (
+                                    <Select.Option
+                                      value={property}
+                                      key={property}
+                                    >
+                                      {property}
+                                    </Select.Option>
+                                  ))
+                              : algorithmAnalyzerStore.allPropertyIndexProperty.map(
+                                  (property) => (
+                                    <Select.Option
+                                      value={property}
+                                      key={property}
+                                    >
+                                      {property}
+                                    </Select.Option>
+                                  )
+                                )}
+                          </Select>
+                          <div className="query-tab-content-internal-expand-input">
+                            <Input
+                              width={161}
+                              size="medium"
+                              disabled={
+                                dataAnalyzeStore.requestStatus.fetchGraphs ===
+                                'pending'
+                              }
+                              placeholder={t(
+                                'data-analyze.algorithm-forms.custom-path.placeholder.input-multiple-properties'
+                              )}
+                              errorLocation="layer"
+                              errorMessage={
+                                algorithmAnalyzerStore
+                                  .validateCustomPathParmasErrorMessage
+                                  .vertexProperty
+                              }
+                              value={value}
+                              onChange={(e: any) => {
+                                const vertexProperty = cloneDeep(
+                                  algorithmAnalyzerStore.customPathParams
+                                    .vertexProperty
+                                );
+
+                                vertexProperty[propertyIndex][1] = e.value;
+
+                                algorithmAnalyzerStore.mutateCustomPathParams(
+                                  'vertexProperty',
+                                  vertexProperty
+                                );
+
+                                algorithmAnalyzerStore.validateCustomPathParams(
+                                  'vertexProperty'
+                                );
+                              }}
+                              originInputProps={{
+                                onBlur() {
+                                  algorithmAnalyzerStore.validateCustomPathParams(
+                                    'vertexProperty'
+                                  );
+                                }
+                              }}
+                            />
+                          </div>
+                          {size(
+                            algorithmAnalyzerStore.customPathParams
+                              .vertexProperty
+                          ) > 1 && (
+                            <div
+                              style={{
+                                fontSize: 14,
+                                lineHeight: '32px',
+                                color: '#2b65ff',
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => {
+                                algorithmAnalyzerStore.removeCustomPathVertexProperty(
+                                  propertyIndex
+                                );
+                              }}
+                            >
+                              {t(
+                                'data-analyze.algorithm-forms.custom-path.delete'
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              </div>
+            </div>
+            {algorithmAnalyzerStore.customPathParams.vertexType === '' &&
+            !allowAddNewProperty &&
+            size(algorithmAnalyzerStore.customPathParams.vertexProperty) ===
+              1 ? (
+              <div
+                className="query-tab-algorithm-hint"
+                style={{ margin: '0 0 16px 172px' }}
+              >
+                <span>
+                  {t(
+                    'data-analyze.algorithm-forms.custom-path.hint.vertex_type_or_property'
+                  )}
+                </span>
+              </div>
+            ) : (
+              <div className={addNewPropertyClassName}>
+                <span
+                  onClick={() => {
+                    if (
+                      allowAddNewProperty &&
+                      dataAnalyzeStore.requestStatus.fetchGraphs !== 'pending'
+                    ) {
+                      algorithmAnalyzerStore.addCustomPathVertexProperty();
+                    }
+                  }}
+                >
+                  {t('data-analyze.algorithm-forms.custom-path.add')}
+                </span>
+              </div>
+            )}
+          </>
+        )}
+
         <div className="query-tab-content-form-row">
           <div className="query-tab-content-form-item">
             <div className="query-tab-content-form-item-title large">
               <i>*</i>
               <span>
-                {t(
-                  'data-analyze.algorithm-forms.custom-path.options.default_weight'
-                )}
+                {t('data-analyze.algorithm-forms.custom-path.options.sort_by')}
               </span>
             </div>
             <Radio.Group
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
               }
-              value={algorithmAnalyzerStore.customPathParams.default_weight}
+              value={algorithmAnalyzerStore.customPathParams.sort_by}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                 algorithmAnalyzerStore.mutateCustomPathParams(
-                  'default_weight',
+                  'sort_by',
                   e.target.value
                 );
+
+                if (e.target.value === 'NONE') {
+                  algorithmAnalyzerStore.customPathParams.steps.forEach(
+                    (_, ruleIndex) => {
+                      algorithmAnalyzerStore.mutateCustomPathRuleParams(
+                        'weight_by',
+                        '',
+                        ruleIndex
+                      );
+
+                      algorithmAnalyzerStore.mutateCustomPathRuleParams(
+                        'default_weight',
+                        '',
+                        ruleIndex
+                      );
+                    }
+                  );
+                }
               }}
             >
               <Radio value="NONE">
@@ -235,13 +511,13 @@ const CustomPath = observer(() => {
               </span>
             </div>
             <Input
-              width={390}
+              width={formWidth}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
               }
               placeholder={t(
-                'data-analyze.algorithm-forms.custom-path.placeholder.input-positive-integer'
+                'data-analyze.algorithm-forms.custom-path.placeholder.input-positive-integer-or-negative-one-capacity'
               )}
               errorLocation="layer"
               errorMessage={
@@ -273,13 +549,13 @@ const CustomPath = observer(() => {
               </span>
             </div>
             <Input
-              width={390}
+              width={formWidth}
               size="medium"
               disabled={
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
               }
               placeholder={t(
-                'data-analyze.algorithm-forms.custom-path.placeholder.input-integer'
+                'data-analyze.algorithm-forms.custom-path.placeholder.input-positive-integer-or-negative-one-limit'
               )}
               errorLocation="layer"
               errorMessage={
@@ -347,15 +623,20 @@ const CustomPath = observer(() => {
       >
         {algorithmAnalyzerStore.customPathParams.steps.map(
           (
-            { uuid, direction, labels, degree, sample, properties, weight_by },
+            {
+              uuid,
+              direction,
+              labels,
+              degree,
+              sample,
+              properties,
+              weight_by,
+              default_weight
+            },
             ruleIndex
           ) => {
             return (
-              <div
-                className={invalidExtendFormClassname(
-                  algorithmAnalyzerStore.duplicateCustomPathRuleSet.has(uuid)
-                )}
-              >
+              <div className="query-tab-content-form-expand-items" key={uuid}>
                 <div className="query-tab-content-form-expand-item">
                   <div className="query-tab-content-form-item-title query-tab-content-form-expand-title">
                     <i>*</i>
@@ -376,10 +657,6 @@ const CustomPath = observer(() => {
                         e.target.value,
                         ruleIndex
                       );
-
-                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                        uuid
-                      );
                     }}
                   >
                     <Radio value="BOTH">both</Radio>
@@ -389,7 +666,7 @@ const CustomPath = observer(() => {
                   {size(algorithmAnalyzerStore.customPathParams.steps) > 1 && (
                     <div
                       style={{
-                        marginLeft: 198,
+                        marginLeft: 175,
                         fontSize: 14,
                         color: '#2b65ff',
                         cursor: 'pointer',
@@ -397,10 +674,6 @@ const CustomPath = observer(() => {
                       }}
                       onClick={() => {
                         algorithmAnalyzerStore.removeCustomPathRule(ruleIndex);
-
-                        algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                          uuid
-                        );
                       }}
                     >
                       删除
@@ -411,36 +684,34 @@ const CustomPath = observer(() => {
                   <div className="query-tab-content-form-item-title query-tab-content-form-expand-title">
                     <span>
                       {t(
-                        'data-analyze.algorithm-forms.custom-path.options.label'
+                        'data-analyze.algorithm-forms.custom-path.options.labels'
                       )}
                     </span>
                   </div>
                   <Select
                     size="medium"
                     trigger="click"
-                    value={labels[0]}
+                    value={labels}
+                    mode="multiple"
+                    showSearch={false}
+                    placeholder={t(
+                      'data-analyze.algorithm-forms.custom-path.placeholder.select-edge-type'
+                    )}
                     notFoundContent={t(
-                      'data-analyze.algorithm-forms.custom-path.placeholder.no-edge-types'
+                      'data-analyze.algorithm-forms.custom-path.placeholder.no-edge-type'
                     )}
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
                     }
-                    width={380}
-                    onChange={(value: string) => {
+                    width={formWidthInStep}
+                    onChange={(value: string[]) => {
                       algorithmAnalyzerStore.mutateCustomPathRuleParams(
                         'labels',
-                        [value],
+                        value,
                         ruleIndex
-                      );
-
-                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                        uuid
                       );
                     }}
                   >
-                    <Select.Option value="__all__" key="__all__">
-                      {t('data-analyze.algorithm-forms.custom-path.pre-value')}
-                    </Select.Option>
                     {dataAnalyzeStore.edgeTypes.map(({ name }) => (
                       <Select.Option value={name} key={name}>
                         {name}
@@ -448,97 +719,277 @@ const CustomPath = observer(() => {
                     ))}
                   </Select>
                 </div>
-                <div className="query-tab-content-form-expand-item">
-                  <div className="query-tab-content-form-item-title query-tab-content-form-expand-title">
+
+                <div
+                  className="query-tab-content-form-expand-item"
+                  style={{ alignItems: 'start', marginBottom: 16 }}
+                >
+                  <div
+                    className="query-tab-content-form-item-title query-tab-content-form-expand-title"
+                    style={{ lineHeight: '32px' }}
+                  >
                     <span>
                       {t(
                         'data-analyze.algorithm-forms.custom-path.options.properties'
                       )}
                     </span>
                   </div>
-                  <Input
-                    width={380}
-                    size="medium"
-                    disabled={
-                      dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                    }
-                    placeholder={t(
-                      'data-analyze.algorithm-forms.custom-path.placeholder.input-property'
-                    )}
-                    errorLocation="layer"
-                    errorMessage={
-                      algorithmAnalyzerStore
-                        .validateCustomPathParmasErrorMessage.steps[ruleIndex]
-                        .properties
-                    }
-                    value={properties}
-                    onChange={(e: any) => {
-                      algorithmAnalyzerStore.mutateCustomPathRuleParams(
-                        'properties',
-                        e.value as string,
-                        ruleIndex
-                      );
+                  <div>
+                    <>
+                      {properties.map(([key, value], propertyIndex) => {
+                        return (
+                          <div
+                            style={{ display: 'flex', marginBottom: 16 }}
+                            key={key}
+                          >
+                            <div style={{ marginRight: 8 }}>
+                              <Select
+                                size="medium"
+                                trigger="click"
+                                value={key}
+                                selectorName={t(
+                                  'data-analyze.algorithm-forms.custom-path.placeholder.select-edge-property'
+                                )}
+                                notFoundContent={t(
+                                  'data-analyze.algorithm-forms.custom-path.placeholder.no-edge-property'
+                                )}
+                                disabled={
+                                  dataAnalyzeStore.requestStatus.fetchGraphs ===
+                                  'pending'
+                                }
+                                width={formSmallWidthInStep}
+                                onChange={(value: string) => {
+                                  const clonedRuleProperties = cloneDeep(
+                                    properties
+                                  );
 
-                      algorithmAnalyzerStore.validateCustomPathRules(
-                        'properties',
-                        ruleIndex
-                      );
+                                  clonedRuleProperties[
+                                    propertyIndex
+                                  ][0] = value;
 
-                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                        uuid
-                      );
-                    }}
-                    originInputProps={{
-                      onBlur() {
-                        algorithmAnalyzerStore.validateCustomPathRules(
-                          'properties',
+                                  algorithmAnalyzerStore.mutateCustomPathRuleParams(
+                                    'properties',
+                                    clonedRuleProperties,
+                                    ruleIndex
+                                  );
+                                }}
+                              >
+                                {uniq(
+                                  flatten(
+                                    dataAnalyzeStore.edgeTypes
+                                      .filter(({ name }) =>
+                                        labels.includes(name)
+                                      )
+                                      .map(({ properties }) =>
+                                        properties.map(({ name }) => name)
+                                      )
+                                  )
+                                )
+                                  .filter(
+                                    (name) =>
+                                      !Object.keys(
+                                        fromPairs(properties)
+                                      ).includes(name)
+                                  )
+                                  .map((name) => (
+                                    <Select.Option value={name} key={name}>
+                                      {name}
+                                    </Select.Option>
+                                  ))}
+                              </Select>
+                            </div>
+
+                            <div style={{ marginRight: 8 }}>
+                              <Input
+                                width={formSmallWidthInStep}
+                                size="medium"
+                                disabled={
+                                  dataAnalyzeStore.requestStatus.fetchGraphs ===
+                                  'pending'
+                                }
+                                placeholder={t(
+                                  'data-analyze.algorithm-forms.custom-path.placeholder.input-multiple-properties'
+                                )}
+                                // errorLocation="layer"
+                                // errorMessage={
+                                //   algorithmAnalyzerStore
+                                //     .validateCustomPathParmasErrorMessage.steps[
+                                //     ruleIndex
+                                //   ].default_weight
+                                // }
+                                value={value}
+                                onChange={(e: any) => {
+                                  const clonedRuleProperties = cloneDeep(
+                                    properties
+                                  );
+
+                                  clonedRuleProperties[propertyIndex][1] =
+                                    e.value;
+
+                                  algorithmAnalyzerStore.mutateCustomPathRuleParams(
+                                    'properties',
+                                    clonedRuleProperties,
+                                    ruleIndex
+                                  );
+                                }}
+                                // originInputProps={{
+                                //   onBlur() {
+                                //     algorithmAnalyzerStore.validateCustomPathRules(
+                                //       'default_weight',
+                                //       ruleIndex
+                                //     );
+                                //   }
+                                // }}
+                              />
+                            </div>
+
+                            {size(properties) > 1 && (
+                              <div
+                                style={{
+                                  fontSize: 14,
+                                  lineHeight: '32px',
+                                  color: '#2b65ff',
+                                  cursor: 'pointer'
+                                }}
+                                onClick={() => {
+                                  algorithmAnalyzerStore.removeCustomPathRuleProperty(
+                                    ruleIndex,
+                                    propertyIndex
+                                  );
+                                }}
+                              >
+                                {t(
+                                  'data-analyze.algorithm-forms.custom-path.delete'
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      <div
+                        className={addNewRulePropertyClassName}
+                        style={{
+                          marginTop: 8,
+                          marginBottom: 0,
+                          paddingLeft: 0
+                        }}
+                      >
+                        <span
+                          onClick={() => {
+                            if (
+                              allowAddNewRuleProperty &&
+                              dataAnalyzeStore.requestStatus.fetchGraphs !==
+                                'pending'
+                            ) {
+                              algorithmAnalyzerStore.addCustomPathRuleProperty(
+                                ruleIndex
+                              );
+                            }
+                          }}
+                        >
+                          {t('data-analyze.algorithm-forms.custom-path.add')}
+                        </span>
+                      </div>
+                    </>
+                  </div>
+                </div>
+
+                {algorithmAnalyzerStore.customPathParams.sort_by !== 'NONE' && (
+                  <div className="query-tab-content-form-expand-item">
+                    <div className="query-tab-content-form-item-title query-tab-content-form-expand-title">
+                      <i>*</i>
+                      <span>
+                        {t(
+                          'data-analyze.algorithm-forms.custom-path.options.weight_by'
+                        )}
+                      </span>
+                    </div>
+                    <Select
+                      size="medium"
+                      trigger="click"
+                      value={weight_by}
+                      selectorName={t(
+                        'data-analyze.algorithm-forms.custom-path.placeholder.select-property'
+                      )}
+                      notFoundContent={t(
+                        'data-analyze.algorithm-forms.custom-path.placeholder.no-property'
+                      )}
+                      disabled={
+                        dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
+                      }
+                      width={formWidthInStep}
+                      onChange={(value: string) => {
+                        algorithmAnalyzerStore.mutateCustomPathRuleParams(
+                          'weight_by',
+                          value,
                           ruleIndex
                         );
-                      }
-                    }}
-                  />
-                </div>
-                <div className="query-tab-content-form-expand-item">
-                  <div className="query-tab-content-form-item-title query-tab-content-form-expand-title">
-                    <span>
-                      {t(
-                        'data-analyze.algorithm-forms.custom-path.options.weight_by'
-                      )}
-                    </span>
-                  </div>
-                  <Select
-                    size="medium"
-                    trigger="click"
-                    value={weight_by}
-                    selectorName={t(
-                      'data-analyze.algorithm-forms.custom-path.placeholder.select-property'
-                    )}
-                    notFoundContent={t(
-                      'data-analyze.algorithm-forms.custom-path.placeholder.no-property'
-                    )}
-                    disabled={
-                      dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                    }
-                    width={380}
-                    onChange={(value: string) => {
-                      algorithmAnalyzerStore.mutateCustomPathRuleParams(
-                        'weight_by',
-                        value,
-                        ruleIndex
-                      );
-
-                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                        uuid
-                      );
-                    }}
-                  >
-                    {dataAnalyzeStore.edgeTypes.map(({ name }) => (
-                      <Select.Option value={name} key={name}>
-                        {name}
+                      }}
+                    >
+                      <Select.Option
+                        value="__CUSTOM_WEIGHT__"
+                        key="__CUSTOM_WEIGHT__"
+                      >
+                        {t(
+                          'data-analyze.algorithm-forms.custom-path.custom-weight'
+                        )}
                       </Select.Option>
-                    ))}
-                  </Select>
-                </div>
+                      {dataAnalyzeStore.allPropertiesFromEdge.map(
+                        (property) => (
+                          <Select.Option value={property} property={property}>
+                            {property}
+                          </Select.Option>
+                        )
+                      )}
+                    </Select>
+                  </div>
+                )}
+                {algorithmAnalyzerStore.customPathParams.steps[ruleIndex]
+                  .weight_by === '__CUSTOM_WEIGHT__' && (
+                  <div className="query-tab-content-form-expand-item">
+                    <div className="query-tab-content-form-item-title query-tab-content-form-expand-title">
+                      <span></span>
+                    </div>
+                    <Input
+                      width={formWidthInStep}
+                      size="medium"
+                      disabled={
+                        dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
+                      }
+                      placeholder={t(
+                        'data-analyze.algorithm-forms.custom-path.placeholder.input-number'
+                      )}
+                      errorLocation="layer"
+                      errorMessage={
+                        algorithmAnalyzerStore
+                          .validateCustomPathParmasErrorMessage.steps[ruleIndex]
+                          .default_weight
+                      }
+                      value={default_weight}
+                      onChange={(e: any) => {
+                        algorithmAnalyzerStore.mutateCustomPathRuleParams(
+                          'default_weight',
+                          e.value as string,
+                          ruleIndex
+                        );
+
+                        algorithmAnalyzerStore.validateCustomPathRules(
+                          'default_weight',
+                          ruleIndex
+                        );
+                      }}
+                      originInputProps={{
+                        onBlur() {
+                          algorithmAnalyzerStore.validateCustomPathRules(
+                            'default_weight',
+                            ruleIndex
+                          );
+                        }
+                      }}
+                    />
+                  </div>
+                )}
                 <div className="query-tab-content-form-expand-item">
                   <div className="query-tab-content-form-item-title query-tab-content-form-expand-title">
                     <span>
@@ -548,13 +999,13 @@ const CustomPath = observer(() => {
                     </span>
                   </div>
                   <Input
-                    width={380}
+                    width={formWidthInStep}
                     size="medium"
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
                     }
                     placeholder={t(
-                      'data-analyze.algorithm-forms.custom-path.placeholder.input-integer'
+                      'data-analyze.algorithm-forms.custom-path.placeholder.input-positive-integer-or-negative-one-degree'
                     )}
                     errorLocation="layer"
                     errorMessage={
@@ -573,10 +1024,6 @@ const CustomPath = observer(() => {
                       algorithmAnalyzerStore.validateCustomPathRules(
                         'degree',
                         ruleIndex
-                      );
-
-                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                        uuid
                       );
                     }}
                     originInputProps={{
@@ -598,7 +1045,7 @@ const CustomPath = observer(() => {
                     </span>
                   </div>
                   <Input
-                    width={380}
+                    width={formWidthInStep}
                     size="medium"
                     disabled={
                       dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
@@ -624,10 +1071,6 @@ const CustomPath = observer(() => {
                         'sample',
                         ruleIndex
                       );
-
-                      algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                        uuid
-                      );
                     }}
                     originInputProps={{
                       onBlur() {
@@ -651,40 +1094,16 @@ const CustomPath = observer(() => {
             marginTop: 8
           }}
         >
-          {algorithmAnalyzerStore.duplicateCustomPathRuleSet.size === 0 ? (
-            <span
-              style={{ cursor: 'pointer' }}
-              onClick={() => {
-                if (isValidAddRule) {
-                  algorithmAnalyzerStore.addCustomPathRule();
-
-                  algorithmAnalyzerStore.validateDuplicateCustomPathRules(
-                    (last(
-                      algorithmAnalyzerStore.customPathParams.steps
-                    ) as CustomPathRule).uuid
-                  );
-                }
-              }}
-            >
-              {t('data-analyze.algorithm-forms.custom-path.add-new-rule')}
-            </span>
-          ) : (
-            <div
-              style={{
-                width: 150,
-                boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.15)',
-                lineHeight: '18px',
-                padding: '16px',
-                color: '#e64552',
-                fontSize: 14,
-                textAlign: 'center'
-              }}
-            >
-              {t(
-                'data-analyze.algorithm-forms.custom-path.validations.input-chars'
-              )}
-            </div>
-          )}
+          <span
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              if (isValidAddRule) {
+                algorithmAnalyzerStore.addCustomPathRule();
+              }
+            }}
+          >
+            {t('data-analyze.algorithm-forms.custom-path.add-new-rule')}
+          </span>
         </div>
       </div>
     </div>

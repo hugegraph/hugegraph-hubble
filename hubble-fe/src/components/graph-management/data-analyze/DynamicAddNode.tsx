@@ -128,7 +128,7 @@ const DataAnalyzeAddNode: React.FC = observer(() => {
               });
             } else {
               Message.error({
-                content: '添加失败',
+                content: dataAnalyzeStore.errorInfo.addGraphNode.message,
                 size: 'medium',
                 showCloseIcon: false
               });

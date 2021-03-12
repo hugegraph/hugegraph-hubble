@@ -9,19 +9,25 @@ import {
   Input,
   Message
 } from '@baidu/one-ui';
-
-import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
-import PassIcon from '../../../../assets/imgs/ic_pass.svg';
-import './ReuseEdgeTypes.less';
 import { cloneDeep } from 'lodash-es';
+import { useTranslation } from 'react-i18next';
+
+import { GraphManagementStoreContext } from '../../../../stores';
+import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
+
+import PassIcon from '../../../../assets/imgs/ic_pass.svg';
+
+import './ReuseEdgeTypes.less';
 
 const ReuseEdgeTypes: React.FC = observer(() => {
+  const graphManagementStore = useContext(GraphManagementStoreContext);
   const metadataConfigsRootStore = useContext(MetadataConfigsRootStore);
   const { edgeTypeStore } = metadataConfigsRootStore;
   const [currentStatus, setCurrentStatus] = useState(1);
   // acutally the name, not id in database
   const [selectedId, mutateSelectedId] = useState<[] | string>([]);
   const [selectedList, mutateSelectedList] = useState<string[]>([]);
+  const { t } = useTranslation();
 
   // step 2
   const [edgeTypeEditIndex, setEdgeTypeEditIndex] = useState<number | null>(
@@ -235,7 +241,7 @@ const ReuseEdgeTypes: React.FC = observer(() => {
 
                 // remove selected status of the property in <Transfer />
                 const newSelectedList = [...selectedList].filter(
-                  property =>
+                  (property) =>
                     property !==
                     edgeTypeStore.editedCheckedReusableData!
                       .edgelabel_conflicts[index].entity.name
@@ -893,7 +899,7 @@ const ReuseEdgeTypes: React.FC = observer(() => {
                 onChange={(selectedName: string) => {
                   mutateSelectedId(selectedName);
 
-                  const id = metadataConfigsRootStore.idList.find(
+                  const id = graphManagementStore.idList.find(
                     ({ name }) => name === selectedName
                   )!.id;
 
@@ -902,10 +908,22 @@ const ReuseEdgeTypes: React.FC = observer(() => {
                   edgeTypeStore.fetchEdgeTypeList({
                     reuseId: Number(id)
                   });
+
+                  const enable = graphManagementStore.graphData.find(
+                    ({ name }) => name === selectedName
+                  )?.enabled;
+
+                  if (!enable) {
+                    Message.error({
+                      content: t('data-analyze.hint.graph-disabled'),
+                      size: 'medium',
+                      showCloseIcon: false
+                    });
+                  }
                 }}
                 value={selectedId}
               >
-                {metadataConfigsRootStore.idList
+                {graphManagementStore.idList
                   .filter(
                     ({ id }) =>
                       Number(id) !== metadataConfigsRootStore.currentId
@@ -967,6 +985,14 @@ const ReuseEdgeTypes: React.FC = observer(() => {
                     selectedId as string,
                     selectedList
                   );
+
+                  if (edgeTypeStore.requestStatus.checkConflict === 'failed') {
+                    Message.error({
+                      content: edgeTypeStore.errorMessage,
+                      size: 'medium',
+                      showCloseIcon: false
+                    });
+                  }
                 }}
               >
                 下一步

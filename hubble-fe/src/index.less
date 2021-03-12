@@ -70,9 +70,10 @@ body {
       url(./assets/imgs/ic_biaoge_hover.svg)
       url(./assets/imgs/ic_biaoge_pressed.svg)
       url(./assets/imgs/ic_json_normal.svg) url(./assets/imgs/ic_json_hover.svg)
-      url(./assets/imgs/ic_json_pressed.svg)
-      url(./assets/imgs/ic_close_16.svg)
-      url(./assets/imgs/ic_refresh.svg);
+      url(./assets/imgs/ic_json_pressed.svg) url(./assets/imgs/ic_close_16.svg)
+      url(./assets/imgs/ic_refresh.svg) url(./assets/imgs/ic_loading_back.svg)
+      url(./assets/imgs/ic_loading_front.svg)
+      url(./assets/imgs/ic_question_mark.svg);
   }
 }
 
@@ -292,6 +293,23 @@ code {
 }
 
 // <Modal />
+.new-fc-one-modal-content {
+  overflow: hidden;
+}
+
 .new-fc-one-modal-body {
   overflow-y: auto !important;
+  max-height: calc(100vh - 140px);
+}
+
+// <Select />
+.new-fc-one-select-another-dropdown-menu-container .new-fc-one-select-another-dropdown-menu.new-fc-one-select-another-dropdown-menu-root.new-fc-one-select-another-dropdown-menu-vertical {
+  overflow: visible;
+}
+
+input::-ms-clear,
+input::-ms-reveal {
+  display: none;
+  height: 0;
+  width: 0;
 }

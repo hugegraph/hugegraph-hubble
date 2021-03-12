@@ -12,6 +12,7 @@ import { Tooltip } from '../../../common';
 import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
 
 import type { MetadataProperty } from '../../../../stores/types/GraphManagementStore/metadataConfigsStore';
+import { signal } from 'codemirror';
 
 const CheckProperty: React.FC = observer(() => {
   const { metadataPropertyStore, graphViewStore } = useContext(
@@ -122,7 +123,9 @@ const CheckProperty: React.FC = observer(() => {
                   </p>
                 ) : (
                   <>
-                    <p>确认删除此属性？</p>
+                    <p className="metadata-graph-tooltips-title">
+                      确认删除此属性？
+                    </p>
                     <p>删除后无法恢复，请谨慎操作。</p>
                     <div
                       style={{

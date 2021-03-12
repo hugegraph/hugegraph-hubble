@@ -1077,7 +1077,7 @@ export class VertexTypeStore {
     this.requestStatus.deleteVertexType = 'pending';
 
     const combinedParams = selectedVertexTypeNames
-      .map((name) => 'names=' + name)
+      .map((name) => 'names=' + encodeURIComponent(name))
       .join('&');
 
     try {
@@ -1130,7 +1130,7 @@ export class VertexTypeStore {
           },
           {
             params: {
-              reused_conn_id: this.metadataConfigsRootStore.idList.find(
+              reused_conn_id: this.metadataConfigsRootStore.graphManagementStore.idList.find(
                 ({ name }) => name === reuseId
               )!.id
             }

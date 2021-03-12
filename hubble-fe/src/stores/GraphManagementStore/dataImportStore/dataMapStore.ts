@@ -233,6 +233,16 @@ export class DataMapStore {
     this.editedEdgeMap![key] = value;
   }
 
+  // ie11 compatibility (mobx 4)
+  @action
+  setVertexIdColumn(type: 'new' | 'edit', fieldIndex: number, value: string) {
+    if (type === 'new') {
+      this.newVertexType.id_fields[fieldIndex] = value;
+    } else {
+      this.editedVertexMap!.id_fields[fieldIndex] = value;
+    }
+  }
+
   @action
   setVertexFieldMappingKey(type: 'new' | 'edit', key: string, value?: string) {
     if (type === 'new') {
@@ -245,6 +255,21 @@ export class DataMapStore {
         column_name: key,
         mapped_name: isUndefined(value) ? '' : value
       });
+    }
+  }
+
+  // ie11 compatibility (mobx 4)
+  @action
+  setEdgeIdColumn(
+    type: 'new' | 'edit',
+    direction: 'source_fields' | 'target_fields',
+    fieldIndex: number,
+    value: string
+  ) {
+    if (type === 'new') {
+      this.newEdgeType[direction][fieldIndex] = value;
+    } else {
+      this.editedEdgeMap![direction][fieldIndex] = value;
     }
   }
 
@@ -1104,7 +1129,8 @@ export class DataMapStore {
 
       switch (method) {
         case 'add': {
-          const newVertexType = cloneDeep(this.newVertexType);
+          // mobx 4 compatibility, no includes method in mobx#array
+          const newVertexType = cloneDeep(toJS(this.newVertexType));
 
           if (
             newVertexType.null_values.checked.includes('NULL') &&
@@ -1122,7 +1148,7 @@ export class DataMapStore {
           break;
         }
         case 'upgrade': {
-          const editedVertexMap = cloneDeep(this.editedVertexMap);
+          const editedVertexMap = cloneDeep(toJS(this.editedVertexMap));
 
           if (
             editedVertexMap!.null_values.checked.includes('NULL') &&
@@ -1174,7 +1200,7 @@ export class DataMapStore {
 
       switch (method) {
         case 'add': {
-          const newEdgeType = cloneDeep(this.newEdgeType);
+          const newEdgeType = cloneDeep(toJS(this.newEdgeType));
 
           if (
             newEdgeType.null_values.checked.includes('NULL') &&
@@ -1192,7 +1218,7 @@ export class DataMapStore {
           break;
         }
         case 'upgrade': {
-          const editedEdgeMap = cloneDeep(this.editedEdgeMap);
+          const editedEdgeMap = cloneDeep(toJS(this.editedEdgeMap));
 
           if (
             editedEdgeMap!.null_values.checked.includes('NULL') &&
