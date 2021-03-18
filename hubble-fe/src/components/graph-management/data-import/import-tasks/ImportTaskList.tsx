@@ -65,7 +65,7 @@ const ImportTaskList: React.FC = observer(() => {
     {
       title: t('import-manager.list-column-title.job-name'),
       dataIndex: 'job_name',
-      width: '20%',
+      width: '30%',
       render(name: string, rowData: any) {
         const readyToJump =
           rowData.job_status === 'SUCCESS' || rowData.job_status === 'FAILED';
@@ -202,13 +202,14 @@ const ImportTaskList: React.FC = observer(() => {
         );
       }
     },
-    {
-      title: t('import-manager.list-column-title.time-consuming'),
-      dataIndex: 'job_duration',
-      render(text: string) {
-        return <div className="no-line-break">{text}</div>;
-      }
-    },
+    // forbid duartions
+    // {
+    //   title: t('import-manager.list-column-title.time-consuming'),
+    //   dataIndex: 'job_duration',
+    //   render(text: string) {
+    //     return <div className="no-line-break">{text}</div>;
+    //   }
+    // },
     {
       title: t('import-manager.list-column-title.manipulation'),
       render(_: any, rowData: any) {

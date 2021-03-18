@@ -305,7 +305,12 @@ const NewVertexType: React.FC = observer(() => {
               </div>
             )}
             <div
-              style={{ display: 'flex', color: '#2b65ff', cursor: 'pointer' }}
+              style={{
+                display: 'flex',
+                color: '#2b65ff',
+                cursor: 'pointer',
+                alignItems: 'center'
+              }}
               onClick={() => {
                 switchIsAddNewProperty(!isAddNewProperty);
               }}
@@ -595,6 +600,7 @@ const NewVertexType: React.FC = observer(() => {
                   style={{
                     display: 'flex',
                     justifyContent: 'center',
+                    alignItems: 'center',
                     marginBottom: 9
                   }}
                 >

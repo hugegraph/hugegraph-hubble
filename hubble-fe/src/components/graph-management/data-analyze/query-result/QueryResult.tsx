@@ -64,7 +64,7 @@ const QueryResult: React.FC<QueryResultProps> = observer(
     return (
       <div className={queryResutlClassName} style={{ ...dynHeightStyle }}>
         {!dataAnalyzeStore.isFullScreenReuslt && (
-          <div className="query-result-sidebar">
+          <div className="query-result-sidebar" style={{ overflowX: 'hidden' }}>
             {dataAnalyzeContentSidebarOptions.map((text, index) => (
               <div className="query-result-sidebar-options" key={text}>
                 <div
