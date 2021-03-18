@@ -307,9 +307,35 @@ code {
   overflow: visible;
 }
 
+// <Pagination />
+.new-fc-one-pagination-pager-list {
+  display: flex;
+}
+
+.new-fc-one-pagination .new-fc-one-pagination-pager-item > span {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.one-ui-icon-svg.icon-angle-left,
+.one-ui-icon-svg.icon-angle-right {
+  position: static;
+  top: 0;
+  left: 0;
+  transform: translate(0, 0);
+}
+
+// <Input />
 input::-ms-clear,
 input::-ms-reveal {
   display: none;
   height: 0;
   width: 0;
+}
+
+// ie11
+:-ms-input-placeholder.new-fc-one-input-search,
+:-ms-input-placeholder.new-fc-one-input {
+  color: #999 !important;
 }

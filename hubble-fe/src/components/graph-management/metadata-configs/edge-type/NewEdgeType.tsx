@@ -413,6 +413,7 @@ const NewVertexType: React.FC = observer(() => {
             <div
               style={{
                 display: 'flex',
+                alignItems: 'center',
                 color: '#2b65ff',
                 fontSize: 14,
                 cursor: 'pointer'
@@ -709,6 +710,7 @@ const NewVertexType: React.FC = observer(() => {
                   style={{
                     display: 'flex',
                     justifyContent: 'center',
+                    alignItems: 'center',
                     marginBottom: 9
                   }}
                 >
