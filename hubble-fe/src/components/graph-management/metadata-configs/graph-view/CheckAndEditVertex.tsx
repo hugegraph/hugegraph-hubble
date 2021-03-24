@@ -78,7 +78,7 @@ const CheckAndEditVertex: React.FC = observer(() => {
   const handleOutSideClick = useCallback(
     (e: MouseEvent) => {
       const drawerWrapper = document.querySelector(
-        '.new-fc-one-drawer-content-wrapper'
+        '.metadata-graph-drawer-vertex .new-fc-one-drawer-content-wrapper'
       );
 
       if (
@@ -192,6 +192,7 @@ const CheckAndEditVertex: React.FC = observer(() => {
       title={!isEditVertex ? '顶点类型详情' : '编辑顶点类型'}
       width={580}
       destroyOnClose
+      className="metadata-graph-drawer-vertex"
       visible={['check-vertex', 'edit-vertex'].includes(
         graphViewStore.currentDrawer
       )}
@@ -943,11 +944,11 @@ const CheckAndEditVertex: React.FC = observer(() => {
                     className="metadata-drawer-options-list-row metadata-drawer-options-list-row-normal"
                     style={{
                       display: 'flex',
-                      alignItems: 'start',
+                      alignItems: 'flex-start',
                       position: 'relative'
                     }}
                   >
-                    <div>
+                    <div className="disable-input-absolute">
                       <Input
                         size="medium"
                         width={100}

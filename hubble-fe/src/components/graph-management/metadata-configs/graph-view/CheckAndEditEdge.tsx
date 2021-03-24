@@ -72,7 +72,7 @@ const CheckAndEditEdge: React.FC = observer(() => {
   const handleOutSideClick = useCallback(
     (e: MouseEvent) => {
       const drawerWrapper = document.querySelector(
-        '.new-fc-one-drawer-content-wrapper'
+        '.metadata-graph-drawer-edge .new-fc-one-drawer-content-wrapper'
       );
 
       if (
@@ -177,6 +177,7 @@ const CheckAndEditEdge: React.FC = observer(() => {
       title={!isEditEdge ? '边类型详情' : '编辑边类型'}
       width={580}
       destroyOnClose
+      className="metadata-graph-drawer-edge"
       visible={['check-edge', 'edit-edge'].includes(
         graphViewStore.currentDrawer
       )}
@@ -1047,12 +1048,12 @@ const CheckAndEditEdge: React.FC = observer(() => {
                       className="metadata-drawer-options-list-row metadata-drawer-options-list-row-normal"
                       style={{
                         display: 'flex',
-                        alignItems: 'start',
+                        alignItems: 'flex-start',
                         position: 'relative'
                       }}
                       // cannot set key prop with name here, weired
                     >
-                      <div>
+                      <div className="disable-input-absolute">
                         <Input
                           size="medium"
                           width={100}

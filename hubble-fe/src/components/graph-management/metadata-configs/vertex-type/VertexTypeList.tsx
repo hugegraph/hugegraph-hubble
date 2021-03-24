@@ -1273,11 +1273,11 @@ const VertexTypeList: React.FC = observer(() => {
                           className="metadata-drawer-options-list-row metadata-drawer-options-list-row-normal"
                           style={{
                             display: 'flex',
-                            alignItems: 'start',
+                            alignItems: 'flex-start',
                             position: 'relative'
                           }}
                         >
-                          <div>
+                          <div className="disable-input-absolute">
                             <Input
                               size="medium"
                               width={100}
