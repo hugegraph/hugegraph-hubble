@@ -252,7 +252,7 @@ const CreateVertex: React.FC = observer(() => {
             >
               基础信息
             </div>
-            <div className="metadata-graph-drawer-options">
+            <div className="metadata-graph-drawer-options disable-input-absolute">
               <div
                 className="metadata-graph-drawer-options-name"
                 style={{ width: 95, marginRight: 14 }}
@@ -483,7 +483,8 @@ const CreateVertex: React.FC = observer(() => {
                   style={{
                     display: 'flex',
                     color: '#2b65ff',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    alignItems: 'center'
                   }}
                   onClick={() => {
                     switchIsAddNewProperty(!isAddNewProperty);
@@ -749,7 +750,7 @@ const CreateVertex: React.FC = observer(() => {
 
             <div
               className="metadata-graph-drawer-options"
-              style={{ marginBottom: 12, alignItems: 'start' }}
+              style={{ marginBottom: 12, alignItems: 'flex-start' }}
             >
               <div
                 className="metadata-graph-drawer-options-name"
@@ -781,7 +782,10 @@ const CreateVertex: React.FC = observer(() => {
                         marginBottom: 9
                       }}
                     >
-                      <div style={{ marginRight: 12 }}>
+                      <div
+                        className="disable-input-absolute"
+                        style={{ marginRight: 12 }}
+                      >
                         <Input
                           size="medium"
                           width={110}
@@ -1034,7 +1038,9 @@ const CreateVertex: React.FC = observer(() => {
                         childrenProps={{
                           src: closeIcon,
                           alt: 'close',
-                          style: { cursor: 'pointer' },
+                          width: 16,
+                          height: 16,
+                          style: { cursor: 'pointer', marginTop: 8 },
                           onClick() {
                             setDeletePopIndex(index);
                           }

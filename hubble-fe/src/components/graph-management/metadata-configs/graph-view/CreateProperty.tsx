@@ -91,7 +91,7 @@ const CreateProperty: React.FC = observer(() => {
       <div className="metadata-configs-drawer">
         <div className="metadata-graph-drawer-wrapper">
           <div className="metadata-graph-drawer">
-            <div className="metadata-graph-drawer-options">
+            <div className="metadata-graph-drawer-options disable-input-absolute">
               <div
                 className="metadata-graph-drawer-options-name"
                 style={{ width: 67, marginRight: 14 }}
