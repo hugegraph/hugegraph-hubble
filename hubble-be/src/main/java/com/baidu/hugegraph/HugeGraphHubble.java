@@ -24,6 +24,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -32,6 +33,7 @@ import com.baidu.hugegraph.util.Ex;
 @SpringBootApplication
 @EnableScheduling
 @MapperScan("com.baidu.hugegraph.mapper")
+@ServletComponentScan(basePackages = "com.baidu.hugegraph.filter")
 public class HugeGraphHubble extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
