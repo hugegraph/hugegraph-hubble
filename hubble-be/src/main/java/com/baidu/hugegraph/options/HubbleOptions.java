@@ -228,4 +228,22 @@ public class HubbleOptions extends OptionHolder {
                     null,
                     "hugegraph"
             );
+
+    public static final ConfigOption<String> AUTH_REMOTE_URL =
+            new ConfigOption<>(
+                    "auth.remote_url",
+                    "The name of graph used to store authentication " +
+                    "information, like users, only for " +
+                    "com.baidu.hugegraph.auth.StandardAuthenticator.",
+                    disallowEmpty(),
+                    "localhost"
+            );
+
+    public static final ConfigOption<String> AUTH_GRAPH_STORE =
+            new ConfigOption<>(
+                    "auth.graph_store",
+                    "The graph name of auth-server.",
+                    disallowEmpty(),
+                    "hugegraph"
+            );
 }
