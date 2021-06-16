@@ -48,6 +48,9 @@ public class HubbleUser extends AuthElement {
     @JsonProperty("user_email")
     private String email;
 
+    @JsonProperty("user_description")
+    private String description;
+
     @JsonProperty("user_groups")
     private List<Group> groups;
 }

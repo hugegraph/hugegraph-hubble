@@ -34,8 +34,7 @@ import com.baidu.hugegraph.controller.BaseController;
 import com.baidu.hugegraph.entity.login.LoginBody;
 import com.baidu.hugegraph.entity.login.LoginResult;
 import com.baidu.hugegraph.entity.user.HubbleUser;
-import com.baidu.hugegraph.service.system.LoginService;
-import com.baidu.hugegraph.service.system.TokenService;
+import com.baidu.hugegraph.service.system.AuthService;
 import com.baidu.hugegraph.util.E;
 
 @RestController
@@ -43,18 +42,16 @@ import com.baidu.hugegraph.util.E;
 public class LoginController extends BaseController {
 
     @Autowired
-    private LoginService loginService;
-    @Autowired
-    private TokenService tokenService;
+    private AuthService authService;
 
     @PostMapping
     public LoginResult login(@RequestBody LoginBody loginBody) {
-        return this.loginService.login(loginBody);
+        return this.authService.login(loginBody);
     }
 
     @DeleteMapping
     public void logout() {
-        this.loginService.logout();
+        this.authService.logout();
     }
 
     @GetMapping("/user")
@@ -62,6 +59,6 @@ public class LoginController extends BaseController {
                                   String token) {
         E.checkArgumentNotNull(token,
                                "Request header Authorization must not be null");
-        return this.tokenService.getUser();
+        return this.authService.getCurrentUser();
     }
 }
