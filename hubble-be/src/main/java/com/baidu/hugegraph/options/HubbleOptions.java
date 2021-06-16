@@ -232,16 +232,15 @@ public class HubbleOptions extends OptionHolder {
     public static final ConfigOption<String> AUTH_REMOTE_URL =
             new ConfigOption<>(
                     "auth.remote_url",
-                    "The name of graph used to store authentication " +
-                    "information, like users, only for " +
-                    "com.baidu.hugegraph.auth.StandardAuthenticator.",
+                    "The remote url of auth-server, use this url to create a " +
+                    "client to do auth operations.",
                     disallowEmpty(),
-                    "localhost"
+                    "http://127.0.0.1:8080"
             );
 
     public static final ConfigOption<String> AUTH_GRAPH_STORE =
             new ConfigOption<>(
-                    "auth.graph_store",
+                    "auth.graph",
                     "The graph name of auth-server.",
                     disallowEmpty(),
                     "hugegraph"

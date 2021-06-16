@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.handler;
 
+import javax.ws.rs.NotAuthorizedException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -91,6 +93,17 @@ public class ExceptionAdvisor {
         String message = this.handleMessage(e.getMessage(), e.args());
         return Response.builder()
                        .status(Constant.STATUS_ILLEGAL_GREMLIN)
+                       .message(message)
+                       .cause(e.getCause())
+                       .build();
+    }
+
+    @ExceptionHandler(NotAuthorizedException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public Response exceptionHandler(NotAuthorizedException e) {
+        String message = this.handleMessage(e.getMessage(), null);
+        return Response.builder()
+                       .status(Constant.STATUS_UNAUTHORIZED)
                        .message(message)
                        .cause(e.getCause())
                        .build();
