@@ -36,7 +36,7 @@ public class AuthClientConfiguration {
     @Bean(AUTH_CLIENT_NAME)
     public HugeClient authClient(HugeConfig config) {
         String authUrl = config.get(HubbleOptions.AUTH_REMOTE_URL);
-        String authGraph = config.get(HubbleOptions.AUTH_GRAPH_STORE);
+        String authGraph = config.get(HubbleOptions.AUTH_GRAPH);
         return HugeClient.builder(authUrl, authGraph).build();
     }
 }

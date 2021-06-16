@@ -238,7 +238,7 @@ public class HubbleOptions extends OptionHolder {
                     "http://127.0.0.1:8080"
             );
 
-    public static final ConfigOption<String> AUTH_GRAPH_STORE =
+    public static final ConfigOption<String> AUTH_GRAPH =
             new ConfigOption<>(
                     "auth.graph",
                     "The graph name of auth-server.",

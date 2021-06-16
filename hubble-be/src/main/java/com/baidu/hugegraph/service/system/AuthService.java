@@ -19,18 +19,25 @@
 
 package com.baidu.hugegraph.service.system;
 
+import java.util.Map;
+
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
 
+import com.baidu.hugegraph.config.AuthClientConfiguration;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.entity.login.LoginBody;
-import com.baidu.hugegraph.config.AuthClientConfiguration;
 import com.baidu.hugegraph.entity.login.LoginResult;
+import com.baidu.hugegraph.entity.user.HubbleUser;
 import com.baidu.hugegraph.structure.auth.Login;
+import com.baidu.hugegraph.structure.auth.User;
 
 @Service
-public class LoginService {
+public class AuthService {
+
+    private static final String TOKEN_USER_NAME = "user_name";
+    private static final String TOKEN_USER_ID = "user_id";
 
     @Resource(name = AuthClientConfiguration.AUTH_CLIENT_NAME)
     private HugeClient authClient;
@@ -48,5 +55,20 @@ public class LoginService {
 
     public void logout() {
         this.authClient.auth().logout();
+    }
+
+    public HubbleUser getCurrentUser() {
+        Map<String, Object> payload = this.authClient.auth().verifyToken();
+        String userId = (String) payload.get(TOKEN_USER_ID);
+        User user = this.authClient.auth().getUser(userId);
+
+        // TODO Set user auth info
+        return HubbleUser.builder()
+                         .username(user.name())
+                         .password(user.password())
+                         .phone(user.phone())
+                         .email(user.email())
+                         .description(user.description())
+                         .build();
     }
 }
