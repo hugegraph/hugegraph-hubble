@@ -120,7 +120,7 @@
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
             <artifactId>hugegraph-client</artifactId>
-            <version>1.9.4</version>
+            <version>1.9.5</version>
         </dependency>
 
         <dependency>
