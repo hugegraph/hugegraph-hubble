@@ -19,8 +19,6 @@
 
 package com.baidu.hugegraph.service.system;
 
-import java.util.Map;
-
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;

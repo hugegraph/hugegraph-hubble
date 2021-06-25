@@ -40,8 +40,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.common.Response;
-import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.config.AuthClientConfiguration;
+import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.util.JsonUtil;
 import com.google.common.collect.ImmutableSet;
 
