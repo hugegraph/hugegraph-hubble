@@ -17,37 +17,33 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity.schema;
+package com.baidu.hugegraph.entity.user;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.io.Serializable;
+import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public abstract class LabelUpdateEntity implements Typifiable {
+@NoArgsConstructor
+@AllArgsConstructor
+public abstract class AuthElement implements Serializable {
 
-    @JsonProperty("append_properties")
-    private Set<Property> appendProperties;
+    private static final long serialVersionUID = -2330255923178206308L;
 
-    @JsonProperty("append_property_indexes")
-    private List<PropertyIndex> appendPropertyIndexes;
+    @JsonProperty("id")
+    protected String id;
 
-    @JsonProperty("remove_property_indexes")
-    private List<String> removePropertyIndexes;
+    @JsonProperty("create")
+    protected Date create;
 
-    private transient String name;
+    @JsonProperty("update")
+    protected Date update;
 
-    public List<String> getAppendPropertyIndexNames() {
-        if (this.appendPropertyIndexes == null) {
-            return Collections.emptyList();
-        }
-        return this.appendPropertyIndexes.stream()
-                                         .map(PropertyIndex::getName)
-                                         .collect(Collectors.toList());
-    }
+    @JsonProperty("creator")
+    protected String creator;
 }

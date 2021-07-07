@@ -17,37 +17,40 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity.schema;
+package com.baidu.hugegraph.entity.user;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public abstract class LabelUpdateEntity implements Typifiable {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class HubbleUser extends AuthElement {
 
-    @JsonProperty("append_properties")
-    private Set<Property> appendProperties;
+    private static final long serialVersionUID = 3121398441504040737L;
 
-    @JsonProperty("append_property_indexes")
-    private List<PropertyIndex> appendPropertyIndexes;
+    @JsonProperty("user_name")
+    private String username;
 
-    @JsonProperty("remove_property_indexes")
-    private List<String> removePropertyIndexes;
+    @JsonProperty("user_password")
+    private String password;
 
-    private transient String name;
+    @JsonProperty("user_phone")
+    private String phone;
 
-    public List<String> getAppendPropertyIndexNames() {
-        if (this.appendPropertyIndexes == null) {
-            return Collections.emptyList();
-        }
-        return this.appendPropertyIndexes.stream()
-                                         .map(PropertyIndex::getName)
-                                         .collect(Collectors.toList());
-    }
+    @JsonProperty("user_email")
+    private String email;
+
+    @JsonProperty("user_description")
+    private String description;
+
+    @JsonProperty("user_groups")
+    private List<Group> groups;
 }
