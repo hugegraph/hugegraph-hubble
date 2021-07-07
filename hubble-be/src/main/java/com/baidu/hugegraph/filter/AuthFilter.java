@@ -125,7 +125,7 @@ public class AuthFilter implements Filter {
         try (PrintWriter writer = servletResponse.getWriter()) {
             writer.print(JsonUtil.toJson(response));
         } catch (IOException e) {
-            log.error("Response error",e);
+            log.error("Response error", e);
         }
     }
 }
