@@ -17,26 +17,26 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity.user;
+package com.baidu.hugegraph.mapper;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.springframework.stereotype.Component;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Group extends AuthElement {
+@Mapper
+@Component
+public interface UserResourcesMapper {
 
-    private static final long serialVersionUID = 3848451889435904990L;
-
-    @JsonProperty("group_name")
-    private String name;
-
-    @JsonProperty("group_description")
-    private String description;
+    @Select("<script>" +
+            "select r.`path`" +
+            "from `resources` r inner join `resources_role_rel` rrr " +
+            "on r.`id` = rrr.`resources_id`" +
+            "where rrr.`role_type` in " +
+            "<foreach collection='roles' item='role' open='(' separator=',' " +
+            "close=')'> #{role} </foreach>" +
+            "</script>")
+    List<String> userResourcesList(@Param("roles") List<Integer> roles);
 }

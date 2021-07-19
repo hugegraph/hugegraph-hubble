@@ -245,4 +245,12 @@ public class HubbleOptions extends OptionHolder {
                     disallowEmpty(),
                     "hugegraph"
             );
+
+    public static final ConfigOption<String> ADMIN_PASSWORD =
+            new ConfigOption<>(
+                    "auth.admin_password",
+                    "The password of admin user in auth-server.",
+                    disallowEmpty(),
+                    "pa"
+            );
 }

@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.entity.login;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -34,4 +36,7 @@ public class LoginResult {
 
     @JsonProperty("token")
     private String token;
+
+    @JsonProperty("allowed_menus")
+    private List<String> allowedMenus;
 }

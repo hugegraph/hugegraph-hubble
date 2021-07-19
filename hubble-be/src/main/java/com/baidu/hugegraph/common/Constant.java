@@ -74,4 +74,6 @@ public final class Constant {
     );
 
     public static final String[] LIKE_WILDCARDS = {"%", "_", "^", "[", "]"};
+
+    public static final String BEARER_TOKEN_PREFIX = "Bearer ";
 }

@@ -17,10 +17,13 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity.user;
+package com.baidu.hugegraph.entity.project;
 
 import java.util.List;
+import java.util.Set;
 
+import com.baidu.hugegraph.entity.user.AuthElement;
+import com.baidu.hugegraph.structure.auth.Project;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -32,25 +35,30 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class HubbleUser extends AuthElement {
+public class ProjectEntity extends AuthElement {
 
-    private static final long serialVersionUID = 3121398441504040737L;
+    private static final long serialVersionUID = 6004765261545877970L;
 
-    @JsonProperty("user_name")
-    private String username;
+    @JsonProperty("project_name")
+    private String name;
 
-    @JsonProperty("user_password")
-    private String password;
+    @JsonProperty("project_graphs")
+    private Set<String> graphs;
 
-    @JsonProperty("user_phone")
-    private String phone;
+    @JsonProperty("admin_users")
+    private List<String> adminUsers;
 
-    @JsonProperty("user_email")
-    private String email;
+    @JsonProperty("op_users")
+    private List<String> opUsers;
 
-    @JsonProperty("user_description")
+    @JsonProperty("description")
     private String description;
 
-    @JsonProperty("user_groups")
-    private List<Group> groups;
+    public static Project convertToProject(ProjectEntity entity) {
+        Project project = new Project();
+        project.description(entity.description);
+        project.name(entity.name);
+        project.graphs(entity.graphs);
+        return project;
+    }
 }

@@ -40,9 +40,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.common.Response;
-import com.baidu.hugegraph.config.AuthClientConfiguration;
+import com.baidu.hugegraph.config.ClientConfiguration;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.util.JsonUtil;
+import com.baidu.hugegraph.util.SessionUtil;
 import com.google.common.collect.ImmutableSet;
 
 import lombok.extern.log4j.Log4j2;
@@ -51,27 +52,29 @@ import lombok.extern.log4j.Log4j2;
 @WebFilter(filterName = "authFilter", urlPatterns = "/*")
 public class AuthFilter implements Filter {
 
-    private static final String BEARER_TOKEN_PREFIX = "Bearer ";
-
     private static final Set<String> WHITE_API = ImmutableSet.of(
             buildPath(RequestMethod.POST,
                       Constant.API_VERSION + "graph-connections/login")
     );
 
-    @Resource(name = AuthClientConfiguration.AUTH_CLIENT_NAME)
-    private HugeClient client;
+    @Resource(name = ClientConfiguration.AUTH_CLIENT_NAME)
+    private HugeClient authClient;
 
     @Override
     public void doFilter(ServletRequest servletRequest,
                          ServletResponse servletResponse,
                          FilterChain filterChain)
                          throws IOException, ServletException {
-        try {
-            HttpServletRequest request = (HttpServletRequest) servletRequest;
-            String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
+        if (isWhiteAPI(request)) {
+            filterChain.doFilter(servletRequest, servletResponse);
+            return;
+        }
 
+        try {
+            String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
             // Missed token and request uri not in white list
-            if (StringUtils.isEmpty(authorization) && !isWhiteAPI(request)) {
+            if (StringUtils.isEmpty(authorization)) {
                 String msg = "Missed authorization token";
                 writeResponse(servletResponse, () -> {
                     return Response.builder()
@@ -83,7 +86,7 @@ public class AuthFilter implements Filter {
             }
             // Illegal token format
             if (StringUtils.isNotEmpty(authorization) &&
-                !authorization.startsWith(BEARER_TOKEN_PREFIX)) {
+                !authorization.startsWith(Constant.BEARER_TOKEN_PREFIX)) {
                 String msg = "Only HTTP Bearer authentication is supported";
                 writeResponse(servletResponse, () -> {
                     return Response.builder()
@@ -94,11 +97,12 @@ public class AuthFilter implements Filter {
                 return;
             }
 
-            this.client.setAuthContext(authorization);
+            this.authClient.setAuthContext(authorization);
 
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
-            this.client.resetAuthContext();
+            this.authClient.resetAuthContext();
+            SessionUtil.reset();
         }
     }
 

@@ -19,24 +19,37 @@
 
 package com.baidu.hugegraph.service.system;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.annotation.Resource;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.baidu.hugegraph.config.AuthClientConfiguration;
+import com.baidu.hugegraph.common.Constant;
+import com.baidu.hugegraph.config.ClientConfiguration;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.entity.login.LoginBody;
 import com.baidu.hugegraph.entity.login.LoginResult;
-import com.baidu.hugegraph.entity.user.HubbleUser;
+import com.baidu.hugegraph.entity.user.UserEntity;
+import com.baidu.hugegraph.mapper.UserResourcesMapper;
+import com.baidu.hugegraph.service.user.UserService;
+import com.baidu.hugegraph.structure.auth.Group;
 import com.baidu.hugegraph.structure.auth.Login;
 import com.baidu.hugegraph.structure.auth.TokenPayload;
-import com.baidu.hugegraph.structure.auth.User;
+import com.baidu.hugegraph.util.SessionUtil;
 
 @Service
 public class AuthService {
 
-    @Resource(name = AuthClientConfiguration.AUTH_CLIENT_NAME)
+    @Resource(name = ClientConfiguration.AUTH_CLIENT_NAME)
     private HugeClient authClient;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private UserResourcesMapper userResourcesMapper;
 
     public LoginResult login(LoginBody loginEntity) {
         Login login = new Login();
@@ -44,8 +57,28 @@ public class AuthService {
         login.password(loginEntity.getPassword());
 
         String token = this.authClient.auth().login(login).token();
+
+        List<String> allowedMenus = null;
+        try {
+            this.authClient.setAuthContext(Constant.BEARER_TOKEN_PREFIX + token);
+            TokenPayload payload = this.authClient.auth().verifyToken();
+
+            List<Group> groups = this.userService.listGroupByUser(payload.userId());
+            List<Integer> roleTypes = groups.stream()
+                                            .filter(group -> group.tag() != null)
+                                            .map(group -> (int) group.tag().code())
+                                            .distinct()
+                                            .collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(roleTypes)) {
+                allowedMenus = userResourcesMapper.userResourcesList(roleTypes);
+            }
+        } finally {
+            this.authClient.resetAuthContext();
+        }
+
         return LoginResult.builder()
                           .token(token)
+                          .allowedMenus(allowedMenus)
                           .build();
     }
 
@@ -53,18 +86,7 @@ public class AuthService {
         this.authClient.auth().logout();
     }
 
-    public HubbleUser getCurrentUser() {
-        TokenPayload payload = this.authClient.auth().verifyToken();
-        String userId = payload.userId();
-        User user = this.authClient.auth().getUser(userId);
-
-        // TODO Set user auth info
-        return HubbleUser.builder()
-                         .username(user.name())
-                         .password(user.password())
-                         .phone(user.phone())
-                         .email(user.email())
-                         .description(user.description())
-                         .build();
+    public UserEntity getCurrentUser() {
+        return SessionUtil.currentUser();
     }
 }

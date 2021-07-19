@@ -33,7 +33,7 @@ import com.baidu.hugegraph.common.Constant;
 import com.baidu.hugegraph.controller.BaseController;
 import com.baidu.hugegraph.entity.login.LoginBody;
 import com.baidu.hugegraph.entity.login.LoginResult;
-import com.baidu.hugegraph.entity.user.HubbleUser;
+import com.baidu.hugegraph.entity.user.UserEntity;
 import com.baidu.hugegraph.service.system.AuthService;
 import com.baidu.hugegraph.util.E;
 
@@ -55,7 +55,7 @@ public class LoginController extends BaseController {
     }
 
     @GetMapping("/user")
-    public HubbleUser currentUser(@RequestHeader(HttpHeaders.AUTHORIZATION)
+    public UserEntity currentUser(@RequestHeader(HttpHeaders.AUTHORIZATION)
                                   String token) {
         E.checkArgumentNotNull(token,
                                "Request header Authorization must not be null");
