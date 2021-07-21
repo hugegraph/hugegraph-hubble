@@ -251,6 +251,6 @@ public class HubbleOptions extends OptionHolder {
                     "auth.admin_password",
                     "The password of admin user in auth-server.",
                     disallowEmpty(),
-                    "pa"
+                    "hugegraph"
             );
 }
