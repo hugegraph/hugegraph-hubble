@@ -228,4 +228,29 @@ public class HubbleOptions extends OptionHolder {
                     null,
                     "hugegraph"
             );
+
+    public static final ConfigOption<String> AUTH_REMOTE_URL =
+            new ConfigOption<>(
+                    "auth.remote_url",
+                    "The remote url of auth-server, use this url to create a " +
+                    "client to do auth operations.",
+                    disallowEmpty(),
+                    "http://127.0.0.1:8080"
+            );
+
+    public static final ConfigOption<String> AUTH_GRAPH =
+            new ConfigOption<>(
+                    "auth.graph",
+                    "The graph name of auth-server.",
+                    disallowEmpty(),
+                    "hugegraph"
+            );
+
+    public static final ConfigOption<String> ADMIN_PASSWORD =
+            new ConfigOption<>(
+                    "auth.admin_password",
+                    "The password of admin user in auth-server.",
+                    disallowEmpty(),
+                    "hugegraph"
+            );
 }

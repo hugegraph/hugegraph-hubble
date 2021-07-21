@@ -17,37 +17,26 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.entity.schema;
+package com.baidu.hugegraph.entity.login;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public abstract class LabelUpdateEntity implements Typifiable {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class LoginResult {
 
-    @JsonProperty("append_properties")
-    private Set<Property> appendProperties;
+    @JsonProperty("token")
+    private String token;
 
-    @JsonProperty("append_property_indexes")
-    private List<PropertyIndex> appendPropertyIndexes;
-
-    @JsonProperty("remove_property_indexes")
-    private List<String> removePropertyIndexes;
-
-    private transient String name;
-
-    public List<String> getAppendPropertyIndexNames() {
-        if (this.appendPropertyIndexes == null) {
-            return Collections.emptyList();
-        }
-        return this.appendPropertyIndexes.stream()
-                                         .map(PropertyIndex::getName)
-                                         .collect(Collectors.toList());
-    }
+    @JsonProperty("allowed_menus")
+    private List<String> allowedMenus;
 }

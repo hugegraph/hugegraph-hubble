@@ -48,7 +48,7 @@ public class JacksonConfig {
         return mapper;
     }
 
-    public static class ResponseSerailizer extends JsonSerializer<Response> {
+    public static class ResponseSerializer extends JsonSerializer<Response> {
 
         @Override
         public void serialize(Response response, JsonGenerator generator,

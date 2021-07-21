@@ -117,3 +117,17 @@ CREATE TABLE IF NOT EXISTS `async_task` (
 
 CREATE INDEX IF NOT EXISTS `load_task_conn_id` ON `load_task`(`conn_id`);
 CREATE INDEX IF NOT EXISTS `load_task_file_id` ON `load_task`(`file_id`);
+
+CREATE TABLE IF NOT EXISTS `resources` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `path` VARCHAR(100) NOT NULL DEFAULT '',
+    `type` TINYINT NOT NULL DEFAULT -1,
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE IF NOT EXISTS `resources_role_rel` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `resources_id` INT NOT NULL DEFAULT -1,
+    `role_type` INT NOT NULL DEFAULT -1,
+    PRIMARY KEY (`id`)
+);
