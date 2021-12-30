@@ -364,8 +364,7 @@ public class LoadTaskService {
         options.token = connection.getPassword();
         options.protocol = connection.getProtocol();
         options.trustStoreFile = connection.getTrustStoreFile();
-        // TODO: we need change it to token?
-        //options.trustStorePassword = connection.getTrustStorePassword();
+        options.trustStoreToken = connection.getTrustStorePassword();
         // Fill with load parameters
         LoadParameter parameter = fileMapping.getLoadParameter();
         options.checkVertex = parameter.isCheckVertex();
