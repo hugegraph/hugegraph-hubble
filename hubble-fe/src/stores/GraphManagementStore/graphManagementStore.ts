@@ -324,7 +324,7 @@ export class GraphManagementStore {
 
     try {
       const result: AxiosResponse<responseData<LincenseInfo>> = yield axios.get(
-        '/wjApi/about'
+        '/about'
       );
 
       if (result.data.status !== 200) {

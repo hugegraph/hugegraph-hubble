@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-# HugeGraph-Hubble
-
-Front-end implementation of HugeGraph
-=======
-# hugeGraph
-
->>>>>>> 6436e94d8bdaecd2556bc92d55ce041fe0b72520
+1: add UI/index.tsx file and replace @baidu-ui to @ui
+2: GraphManagementList.tsx QueryAndAlgorithmLibrary.tsx 的 dropdown 重写
+3：Embedded 组件的 的修改

@@ -2,11 +2,14 @@ const { override, addLessLoader, addWebpackAlias, overrideDevServer,watchAll } =
 
 const addProxy = () => (configFunction) => {
   configFunction.proxy = {
-    '/wjApi/': {
-      target: 'http://172.31.164.8:9898/',
-      changeOrigin: true,
-      pathRewrite: { '^/wjApi/': '/' },
+    '/about': {
+      target: 'http://172.31.164.8:9898',
+      changeOrigin: true
     },
+    '/api': {
+      target: 'http://172.31.164.8:9898',
+      changeOrigin: true
+    }
   }
 
   return configFunction
