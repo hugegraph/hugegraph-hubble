@@ -68,7 +68,26 @@ const NewGraphConfig: React.FC = observer(() => {
     <Embedded
       title="创建图"
       className="graph-management-list-data-config"
-      onClose={handleCancel}
+      onCancel={handleCancel}
+      footer={[<Button
+        type="primary"
+        size="medium"
+        style={{ width: 78 }}
+        onClick={handleCreate}
+      >
+        创建
+      </Button>,
+      <Button
+        size="medium"
+        style={{
+          marginLeft: 12,
+          width: 78
+        }}
+        onClick={handleCancel}
+      >
+        取消
+      </Button>]}
+      width={900}
       visible={graphManagementStore.showCreateNewGraph}
     >
       <div className="graph-management-list-create-content">
@@ -200,28 +219,6 @@ const NewGraphConfig: React.FC = observer(() => {
                 'new'
               )}
             />
-          </div>
-          <div>
-            <div style={{ width: 420 }}>
-              <Button
-                type="primary"
-                size="medium"
-                style={{ width: 78 }}
-                onClick={handleCreate}
-              >
-                创建
-              </Button>
-              <Button
-                size="medium"
-                style={{
-                  marginLeft: 12,
-                  width: 78
-                }}
-                onClick={handleCancel}
-              >
-                取消
-              </Button>
-            </div>
           </div>
         </div>
       </div>
