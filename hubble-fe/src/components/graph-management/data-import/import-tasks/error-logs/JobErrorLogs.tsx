@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useRoute } from 'wouter';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
-import { Menu } from '@baidu/one-ui';
+import { Menu } from '@ui';
 
 import { ImportManagerStoreContext } from '../../../../../stores';
 

@@ -169,15 +169,14 @@ export class GraphManagementStore {
 
   @action
   mutateGraphDataConfig(key: string, type: 'new' | 'edit') {
-    return (eventTarget: HTMLInputElement) => {
+    return (eventTarget: any) => {
       this.isValidated = false;
-
       if (type === 'new') {
-        this.newGraphData[key] = eventTarget.value;
+        this.newGraphData[key] = eventTarget.currentTarget.value;
       }
 
       if (type === 'edit') {
-        this.editGraphData[key] = eventTarget.value;
+        this.editGraphData[key] = eventTarget.currentTarget.value;
       }
     };
   }
@@ -325,7 +324,7 @@ export class GraphManagementStore {
 
     try {
       const result: AxiosResponse<responseData<LincenseInfo>> = yield axios.get(
-        '/about'
+        '/wjApi/about'
       );
 
       if (result.data.status !== 200) {
@@ -384,8 +383,7 @@ export class GraphManagementStore {
       `${baseUrl}?page_no=${this.graphDataPageConfig.pageNumber}&page_size=${this.graphDataPageConfig.pageSize}` +
       (this.isSearched.status && this.searchWords !== ''
         ? `&content=${this.searchWords}`
-        : '');
-
+        : '');    
     this.requestStatus.fetchGraphData = 'pending';
 
     try {

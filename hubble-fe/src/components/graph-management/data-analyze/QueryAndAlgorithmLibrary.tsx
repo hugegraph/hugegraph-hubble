@@ -10,6 +10,7 @@ import { observer } from 'mobx-react';
 import CodeMirror from 'codemirror';
 import { useTranslation } from 'react-i18next';
 import classnames from 'classnames';
+import { Menu } from 'antd';
 import {
   Button,
   Tooltip,
@@ -18,7 +19,7 @@ import {
   Input,
   Radio,
   Select
-} from '@baidu/one-ui';
+} from '@ui';
 
 import 'codemirror/lib/codemirror.css';
 import 'react-popper-tooltip/dist/styles.css';
@@ -321,21 +322,17 @@ export const GremlinQuery: React.FC = observer(() => {
             }
           >
             <Dropdown.Button
-              options={[
-                { label: '执行查询', value: 'query' },
-                { label: '执行任务', value: 'task' }
-              ]}
-              trigger={['click']}
-              title={
-                dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
-                  ? '执行中　'
-                  : dataAnalyzeStore.queryMode === 'query'
-                  ? '执行查询'
-                  : '执行任务'
-              }
-              onHandleMenuClick={(e: any) => {
+              options={(<Menu onClick={(e: any) => {
                 dataAnalyzeStore.setQueryMode(e.key);
-              }}
+              }}>
+              <Menu.Item key="query">执行查询</Menu.Item>
+              <Menu.Item key="task">执行任务</Menu.Item>
+            </Menu>)}
+              trigger={['click']}
+
+              // onHandleMenuClick={(e: any) => {
+              //   dataAnalyzeStore.setQueryMode(e.key);
+              // }}
               overlayClassName="improve-zindex"
               onClickButton={handleQueryExecution}
               size="small"
@@ -345,7 +342,13 @@ export const GremlinQuery: React.FC = observer(() => {
                 !codeRegexp.test(dataAnalyzeStore.codeEditorText) ||
                 dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
               }
-            />
+            >{
+              dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'
+                ? '执行中　'
+                : dataAnalyzeStore.queryMode === 'query'
+                ? '执行查询'
+                : '执行任务'
+            }</Dropdown.Button>
           </CustomTooltip>
           <Tooltip
             placement="bottomLeft"

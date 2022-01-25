@@ -16,7 +16,7 @@ import {
   Switch,
   Checkbox,
   Message
-} from '@baidu/one-ui';
+} from '@ui';
 
 import { Tooltip } from '../../../common';
 import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';

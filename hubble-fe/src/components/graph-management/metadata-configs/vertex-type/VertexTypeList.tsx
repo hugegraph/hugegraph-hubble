@@ -29,7 +29,7 @@ import {
   Checkbox,
   Message,
   Loading
-} from '@baidu/one-ui';
+} from '@ui';
 
 import { Tooltip, LoadingDataView } from '../../../common';
 import NewVertexType from './NewVertexType';

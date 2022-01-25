@@ -1,4 +1,4 @@
-export const baseUrl = '/api/v1.2/graph-connections';
+export const baseUrl = '/wjApi/api/v1.2/graph-connections';
 
 export type dict<T> = Record<string, T>;
 

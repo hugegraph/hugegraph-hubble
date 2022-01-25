@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { isEmpty } from 'lodash-es';
-import { Menu } from '@baidu/one-ui';
+import { Menu } from '@ui';
 
 import {
   DataImportRootStoreContext,

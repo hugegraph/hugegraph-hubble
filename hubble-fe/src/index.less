@@ -1,5 +1,3 @@
-@import '~@baidu/one-ui/src/index.less';
-
 @primary-color: #2b65ff;
 @primary-hover-color: #527dff;
 @primary-active-color: #184bcc;
@@ -50,8 +48,7 @@ body {
     overflow: hidden;
     left: -20000px;
     // preload images which in hover state to solve blink issue
-    content:
-      url(./assets/imgs/ic_topback.svg)
+    content: url(./assets/imgs/ic_topback.svg)
       url(./assets/imgs/ic_arrow_white.svg)
       url(./assets/imgs/ic_shuju_normal.svg)
       url(./assets/imgs/ic_shuju_pressed.svg)
@@ -70,8 +67,7 @@ body {
       url(./assets/imgs/ic_biaoge_hover.svg)
       url(./assets/imgs/ic_biaoge_pressed.svg)
       url(./assets/imgs/ic_json_normal.svg) url(./assets/imgs/ic_json_hover.svg)
-      url(./assets/imgs/ic_json_pressed.svg)
-      url(./assets/imgs/ic_close_16.svg)
+      url(./assets/imgs/ic_json_pressed.svg) url(./assets/imgs/ic_close_16.svg)
       url(./assets/imgs/ic_refresh.svg);
   }
 }
@@ -250,7 +246,9 @@ code {
   height: 8px;
 }
 
-.new-fc-one-checkbox-wrapper .new-fc-one-checkbox-checked .new-fc-one-checkbox-inner {
+.new-fc-one-checkbox-wrapper
+  .new-fc-one-checkbox-checked
+  .new-fc-one-checkbox-inner {
   background-color: @primary-color;
 
   &::after {
@@ -268,7 +266,9 @@ code {
 }
 
 // <Table /> th checkbox color
-.new-fc-one-checkbox-wrapper .new-fc-one-checkbox-indeterminate .new-fc-one-checkbox-inner {
+.new-fc-one-checkbox-wrapper
+  .new-fc-one-checkbox-indeterminate
+  .new-fc-one-checkbox-inner {
   background-color: #2b65ff;
 }
 

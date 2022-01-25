@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@baidu/one-ui';
+import { Button } from '@ui';
 
 interface TypeConfigManipulationsProps {
   type: 'vertex' | 'edge';

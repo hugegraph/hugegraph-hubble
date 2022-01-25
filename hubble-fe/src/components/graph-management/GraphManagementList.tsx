@@ -6,6 +6,7 @@ import React, {
   useLayoutEffect
 } from 'react';
 import { observer } from 'mobx-react';
+import { Menu } from 'antd';
 import {
   Embedded,
   Input,
@@ -15,7 +16,7 @@ import {
   Modal,
   Message,
   Tooltip
-} from '@baidu/one-ui';
+} from '@ui';
 import { useLocation } from 'wouter';
 import { isNull } from 'lodash-es';
 import { motion } from 'framer-motion';
@@ -24,29 +25,6 @@ import Highlighter from 'react-highlight-words';
 import { GraphManagementStoreContext } from '../../stores';
 import HintIcon from '../../assets/imgs/ic_question_mark.svg';
 import { GraphData } from '../../stores/types/GraphManagementStore/graphManagementStore';
-
-const dropdownList = [
-  {
-    label: '编辑',
-    value: 'edit'
-  },
-  {
-    label: '删除',
-    value: 'delete'
-  }
-];
-
-const disabledDropdownList = [
-  {
-    label: '编辑',
-    value: 'edit',
-    disabled: true
-  },
-  {
-    label: '删除',
-    value: 'delete'
-  }
-];
 
 const commonInputProps = {
   size: 'medium',
@@ -188,7 +166,6 @@ const GraphManagementListItem: React.FC<
   const handleDropdownClick = useCallback(
     (index: number) => (e: { key: string; item: object }) => {
       const { name } = graphManagementStore.graphData[index];
-
       if (e.key === 'edit') {
         setEditingState(true);
         graphManagementStore.fillInGraphDataConfig(index);
@@ -246,7 +223,27 @@ const GraphManagementListItem: React.FC<
     <Embedded
       title="编辑图"
       className="graph-management-list-data-config"
-      onClose={handleCancel}
+      onCancel={handleCancel}
+      width={570}
+      footer={[    <Button
+        type="primary"
+        size="medium"
+        style={{ width: 78 }}
+        onClick={handleSave}
+      >
+        保存
+      </Button>,  <Button
+      size="medium"
+      style={{
+        marginLeft: 12,
+        width: 78
+      }}
+      onClick={handleCancel}
+    >
+      取消
+    </Button>]
+
+      }
       visible={isEditing}
     >
       <div className="graph-management-list-create-content">
@@ -336,28 +333,6 @@ const GraphManagementListItem: React.FC<
               )}
             />
           </div>
-          <div>
-            <div style={{ width: 420 }}>
-              <Button
-                type="primary"
-                size="medium"
-                style={{ width: 78 }}
-                onClick={handleSave}
-              >
-                保存
-              </Button>
-              <Button
-                size="medium"
-                style={{
-                  marginLeft: 12,
-                  width: 78
-                }}
-                onClick={handleCancel}
-              >
-                取消
-              </Button>
-            </div>
-          </div>
         </div>
       </div>
     </Embedded>
@@ -422,18 +397,26 @@ const GraphManagementListItem: React.FC<
           访问
         </Button>
         <Dropdown.Button
-          options={enabled ? dropdownList : disabledDropdownList}
+          overlay={enabled ? (
+            <Menu onClick={handleDropdownClick(index)}>
+              <Menu.Item key="edit" >编辑</Menu.Item>
+              <Menu.Item key="delete">删除</Menu.Item>
+            </Menu>
+          ) : ( <Menu onClick={handleDropdownClick(index)}>
+          <Menu.Item key="edit" disabled>编辑</Menu.Item>
+          <Menu.Item key="delete">删除</Menu.Item>
+        </Menu>)}
           title="更多"
           size="medium"
           trigger={['click']}
           width={78}
-          onHandleMenuClick={handleDropdownClick(index)}
+          // onClick={handleDropdownClick(index)}
           disabled={
             graphManagementStore.showCreateNewGraph === true ||
             (graphManagementStore.selectedEditIndex !== null &&
               graphManagementStore.selectedEditIndex !== index)
           }
-        />
+        >更多</Dropdown.Button>
       </div>
     </div>
   );
