@@ -1,4 +1,10 @@
-const { override, addLessLoader, addWebpackAlias, overrideDevServer,watchAll } = require('customize-cra')
+const {
+  override,
+  addLessLoader,
+  addWebpackAlias,
+  overrideDevServer,
+  watchAll
+} = require('customize-cra');
 
 const addProxy = () => (configFunction) => {
   configFunction.proxy = {
@@ -10,22 +16,19 @@ const addProxy = () => (configFunction) => {
       target: 'http://172.31.164.8:9898',
       changeOrigin: true
     }
-  }
+  };
 
-  return configFunction
-}
+  return configFunction;
+};
 
 module.exports = {
   webpack: override(
     addLessLoader({
-      javascriptEnabled: true,
+      javascriptEnabled: true
     }),
     addWebpackAlias({
-      '@ui': require('path').resolve(__dirname, './src/components/common/UI'),
+      '@ui': require('path').resolve(__dirname, './src/components/common/UI')
     })
   ),
-  devServer: overrideDevServer(
-    addProxy(),
-    watchAll()
-)
-}
+  devServer: overrideDevServer(addProxy(), watchAll())
+};

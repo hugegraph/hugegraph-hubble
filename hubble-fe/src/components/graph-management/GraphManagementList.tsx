@@ -410,7 +410,6 @@ const GraphManagementListItem: React.FC<
           size="medium"
           trigger={['click']}
           width={78}
-          // onClick={handleDropdownClick(index)}
           disabled={
             graphManagementStore.showCreateNewGraph === true ||
             (graphManagementStore.selectedEditIndex !== null &&

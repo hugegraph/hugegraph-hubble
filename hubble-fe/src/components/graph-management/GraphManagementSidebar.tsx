@@ -177,7 +177,7 @@ const GraphManagementSidebar: React.FC = observer(() => {
             <div className={sidebarGraphSelectionIconClassName}>G</div>
             <div>
               <Select
-                options={graphManagementStore.idList.map(({ name }) => name)}
+                // options={graphManagementStore.idList.map(({ name }) => name)}
                 size="medium"
                 trigger="click"
                 value={
