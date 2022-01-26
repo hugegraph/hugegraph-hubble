@@ -9,11 +9,11 @@ const {
 const addProxy = () => (configFunction) => {
   configFunction.proxy = {
     '/about': {
-      target: 'http://172.31.164.8:9898',
+      target: 'http://127:0.0.1:8088',
       changeOrigin: true
     },
     '/api': {
-      target: 'http://172.31.164.8:9898',
+      target: 'http://127:0.0.1:8088',
       changeOrigin: true
     }
   };
