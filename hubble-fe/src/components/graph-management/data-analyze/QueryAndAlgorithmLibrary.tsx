@@ -322,7 +322,7 @@ export const GremlinQuery: React.FC = observer(() => {
             }
           >
             <Dropdown.Button
-              options={(<Menu onClick={(e: any) => {
+              overlay={(<Menu onClick={(e: any) => {
                 dataAnalyzeStore.setQueryMode(e.key);
               }}>
               <Menu.Item key="query">执行查询</Menu.Item>
@@ -334,7 +334,8 @@ export const GremlinQuery: React.FC = observer(() => {
               //   dataAnalyzeStore.setQueryMode(e.key);
               // }}
               overlayClassName="improve-zindex"
-              onClickButton={handleQueryExecution}
+              // onClickButton={handleQueryExecution}
+              onClick={handleQueryExecution}
               size="small"
               type="primary"
               disabled={

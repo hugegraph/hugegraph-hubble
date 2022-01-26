@@ -145,7 +145,7 @@ const GraphManagementSidebar: React.FC = observer(() => {
       <li className={sidebarGraphSelectionClassName}>
         {!graphManagementStore.isExpanded ? (
           <PopLayer
-            overlay={
+            title={
               <GraphSelectMenu
                 routeId={Number(params && params.id)}
                 isShowNamePop={isShowNamePop}
