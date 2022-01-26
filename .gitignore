@@ -5,7 +5,6 @@ target/
 !**/src/test/**
 **.db
 logs/
-ui
 node_modules
 upload-files/
 
