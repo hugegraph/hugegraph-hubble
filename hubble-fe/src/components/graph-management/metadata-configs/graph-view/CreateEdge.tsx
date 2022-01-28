@@ -17,7 +17,7 @@ import {
   Checkbox,
   Tooltip,
   Message
-} from '@baidu/one-ui';
+} from 'hubble-ui';
 
 import { Tooltip as CustomTooltip } from '../../../common';
 import MetadataConfigsRootStore from '../../../../stores/GraphManagementStore/metadataConfigsStore/metadataConfigsStore';
