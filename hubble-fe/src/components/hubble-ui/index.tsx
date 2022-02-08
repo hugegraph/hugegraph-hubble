@@ -25,7 +25,7 @@ import {
   Dropdown as DropdownAntd
 } from 'antd';
 import * as React from 'react';
-// size 的组件太多
+
 const changeSize = (props: any): any => {
   let _size = props.size;
   if (_size === 'medium') {
@@ -39,7 +39,7 @@ const changeSize = (props: any): any => {
     size: _size
   };
 };
-// TODO
+
 export const Alert = (props: any) => {
   return <AlertAntD {...props} message={props.content} />;
 };
@@ -48,7 +48,6 @@ export const Button = (props: any) => {
   return <ButtonAntD {...changeSize(props)}>{props.children}</ButtonAntD>;
 };
 
-// todo: closable={props.needCloseIcon}
 export const Modal = ModalAntD;
 
 export const Drawer = (props: any) => {
@@ -161,10 +160,8 @@ export const Dropdown: any = {
     );
   }
 };
-// todo
 export const Radio: any = RadioAntD;
 
-// todo
 export const Table: any = (props: any) => {
   let pagination = {};
   let pageChangerTag = false;
@@ -235,7 +232,6 @@ export const Progress: any = ProgressAntD;
 
 export const Steps: any = StepsAntD;
 
-// 先用找个代替
 export const Embedded: any = (props: any) => {
   return (
     <ModalAntD
@@ -263,7 +259,6 @@ export const PopLayer: any = (props: any) => {
   );
 };
 
-// todo
 export const Transfer: any = (props: any) => {
   const _treeName = props.treeName;
   const dataSource = props.dataSource || [];
