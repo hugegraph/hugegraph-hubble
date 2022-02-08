@@ -325,7 +325,7 @@ const CreateEdge: React.FC = observer(() => {
                       ...edgeTypeStore.newEdgeType,
                       style: {
                         ...edgeTypeStore.newEdgeType.style,
-                        with_arrow: e[0] && e[1] === 'solid'
+                        with_arrow: e && e[0] && e[1] === 'solid'
                       }
                     });
                   }}
