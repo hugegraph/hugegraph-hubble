@@ -27,7 +27,11 @@ import {
 import * as React from 'react';
 
 // In order to make the project run, let the components of antd replace baiduUI
-// Special Note: All check boxes can be selected, but some check boxes cannot see the selection content, but it does not affect the submission. If you need to see the selection, you need to modify the value property of the corresponding Select component. There is no uniform modification here
+// Special Note: All check boxes can be selected, but some check boxes cannot see 
+// the selection content, but it does not affect the submission. If you need to see
+// the selection, you need to modify the value property of the corresponding Select
+// component. There is no uniform modification here
+
 const changeSize = (props: any): any => {
   let _size = props.size;
   if (_size === 'medium') {
