@@ -39,7 +39,7 @@ const changeSize = (props: any): any => {
     size: _size
   };
 };
-// 为了快速展示， 让antd 的组件替换 baiduUI
+// TODO
 export const Alert = (props: any) => {
   return <AlertAntD {...props} message={props.content} />;
 };
@@ -48,13 +48,8 @@ export const Button = (props: any) => {
   return <ButtonAntD {...changeSize(props)}>{props.children}</ButtonAntD>;
 };
 
+// todo: closable={props.needCloseIcon}
 export const Modal = ModalAntD;
-//   return (
-//     <ModalAntD {...props} closable={props.needCloseIcon}>
-//       {props.children}
-//     </ModalAntD>
-//   );
-// };
 
 export const Drawer = (props: any) => {
   return <DrawerAntD {...props}>{props.children}</DrawerAntD>;
@@ -124,10 +119,9 @@ export const Message = {
 };
 
 export const Select: any = (props: any) => {
-  // width dropdownClassName
   return (
     <SelectAntD
-      {...{...props, options: null}}
+      {...{ ...props, options: null }}
       placeholder={props.selectorName}
       style={{ width: props.width ? props.width : 'auto' }}
     >
@@ -167,10 +161,10 @@ export const Dropdown: any = {
     );
   }
 };
-// 具体页面实现再说
+// todo
 export const Radio: any = RadioAntD;
 
-// 东西太多后面再看
+// todo
 export const Table: any = (props: any) => {
   let pagination = {};
   let pageChangerTag = false;
@@ -202,7 +196,16 @@ export const Table: any = (props: any) => {
       }
     };
   }
-  return <TableAntD {...{ ...props, pagination }}>{props.children}</TableAntD>;
+  let _handleChange: any = props.onChange || (() => {});
+  // able to sort
+  if (!props.onChange && props.onSortClick) {
+    _handleChange = props.onSortClick;
+  }
+  return (
+    <TableAntD {...{ ...props, pagination, onChange: _handleChange }}>
+      {props.children}
+    </TableAntD>
+  );
 };
 
 export const Switch: any = (props: any) => {
@@ -260,5 +263,31 @@ export const PopLayer: any = (props: any) => {
   );
 };
 
-// 先简单
-export const Transfer: any = TransferAntD;
+// todo
+export const Transfer: any = (props: any) => {
+  const _treeName = props.treeName;
+  const dataSource = props.dataSource || [];
+  const allDataMap = props.allDataMap;
+  if (allDataMap) {
+    for (const key in allDataMap) {
+      dataSource.push(allDataMap[key]);
+    }
+  }
+  return (
+    <TransferAntD
+      {...{
+        ...props,
+        dataSource,
+        oneWay: true,
+        targetKeys:props.selectedList,
+        onChange: (targetKeys) => {
+          props.handleSelect(targetKeys)
+        },
+        titles: [`可选${_treeName}`, `已选${_treeName}`],
+        render: (item) => `${item.title}`
+      }}
+    >
+      {props.children}
+    </TransferAntD>
+  );
+};
