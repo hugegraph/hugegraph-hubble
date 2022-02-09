@@ -21,7 +21,7 @@ ls ./$SERVER_DIR/conf
 
 
 cd "${SERVER_DIR}" && pwd
-ls ./graphs
+ls ./*
 
 bin/init-store.sh || exit 1
 bin/start-hugegraph.sh || exit 1
