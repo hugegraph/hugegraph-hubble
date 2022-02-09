@@ -28,7 +28,7 @@ jobs:
           java-version: '8'
           distribution: 'adopt'
 
-      # we also should cache python & downloads to avoid useless work
+      # we also should cache python & yarn & downloads to avoid useless work
       - name: Cache Maven packages
         uses: actions/cache@v2
         with:
