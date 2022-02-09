@@ -92,6 +92,10 @@
                     <artifactId>javassist</artifactId>
                     <groupId>org.javassist</groupId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-runner</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
