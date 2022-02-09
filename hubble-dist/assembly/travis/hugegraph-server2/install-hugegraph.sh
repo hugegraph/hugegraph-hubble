@@ -4,7 +4,7 @@ set -ev
 
 SERVER_CONFIG_DIR=$(dirname "$0")
 SERVER_PARENT_DIR="hugegraph-server2"
-SERVER_DIR=${SERVER_PARENT_DIR}/hugegraph-*
+SERVER_DIR="${SERVER_PARENT_DIR}"/hugegraph-"$1"
 
 mkdir ${SERVER_PARENT_DIR}
 tar -zxvf hugegraph-*.tar.gz -C "${SERVER_PARENT_DIR}" >/dev/null 2>&1

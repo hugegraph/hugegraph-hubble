@@ -19,7 +19,7 @@ env:
   SERVER_VERSION: 0.12.0
 
 jobs:
-  computer-ci:
+  hubble-ci:
     runs-on: ubuntu-20.04
     steps:
       - name: Install JDK 8
@@ -49,8 +49,8 @@ jobs:
       - name: Prepare env and service
         run: |
           $TRAVIS_DIR/download-hugegraph.sh $SERVER_VERSION
-          $TRAVIS_DIR/hugegraph-server1/install-hugegraph.sh
-          $TRAVIS_DIR/hugegraph-server2/install-hugegraph.sh
+          $TRAVIS_DIR/hugegraph-server1/install-hugegraph.sh $SERVER_VERSION
+          $TRAVIS_DIR/hugegraph-server2/install-hugegraph.sh $SERVER_VERSION
           $TRAVIS_DIR/install-hugegraph-hubble.sh
           jps
 
