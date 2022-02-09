@@ -6,6 +6,10 @@ SERVER_CONFIG_DIR=$(dirname "$0")
 SERVER_PARENT_DIR="hugegraph-server1"
 SERVER_DIR=${SERVER_PARENT_DIR}/hugegraph-*
 
+echo $SERVER_CONFIG_DIR
+echo $SERVER_PARENT_DIR
+echo $SERVER_DIR
+
 mkdir ${SERVER_PARENT_DIR}
 tar -zxvf hugegraph-*.tar.gz -C ${SERVER_PARENT_DIR} >/dev/null 2>&1
 
