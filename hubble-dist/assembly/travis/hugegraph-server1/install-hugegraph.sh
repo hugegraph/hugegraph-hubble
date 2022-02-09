@@ -13,15 +13,15 @@ echo $SERVER_DIR
 mkdir ${SERVER_PARENT_DIR}
 tar -zxvf hugegraph-*.tar.gz -C "${SERVER_PARENT_DIR}" >/dev/null 2>&1
 
-ls . && echo "###"
-ls ./$SERVER_DIR/conf
-
 cp "${SERVER_CONFIG_DIR}"/gremlin-server.yaml "${SERVER_DIR}"/conf
 cp "${SERVER_CONFIG_DIR}"/rest-server.properties "${SERVER_DIR}"/conf
 cp "${SERVER_CONFIG_DIR}"/graphs/hugegraph1.properties "${SERVER_DIR}"/conf/graphs/
 cp "${SERVER_CONFIG_DIR}"/graphs/hugegraph2.properties "${SERVER_DIR}"/conf/graphs/
+ls ./$SERVER_DIR/conf
 
-cd "${SERVER_DIR}"
+
+cd "${SERVER_DIR}" && pwd
+ls ./graphs
 
 bin/init-store.sh || exit 1
 bin/start-hugegraph.sh || exit 1
