@@ -17,11 +17,9 @@ cp "${SERVER_CONFIG_DIR}"/gremlin-server.yaml "${SERVER_DIR}"/conf
 cp "${SERVER_CONFIG_DIR}"/rest-server.properties "${SERVER_DIR}"/conf
 cp "${SERVER_CONFIG_DIR}"/graphs/hugegraph1.properties "${SERVER_DIR}"/conf/graphs/
 cp "${SERVER_CONFIG_DIR}"/graphs/hugegraph2.properties "${SERVER_DIR}"/conf/graphs/
-ls ./$SERVER_DIR/conf
-
 
 cd "${SERVER_DIR}" && pwd
-ls ./*
+ls ./
 
 bin/init-store.sh || exit 1
 bin/start-hugegraph.sh || exit 1
