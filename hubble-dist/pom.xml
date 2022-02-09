@@ -66,7 +66,7 @@
                                 <echo file="${top.level.dir}/dist.sh">
                                     cd ${hubble-fe.dir} || exit 1
                                     yarn install &amp;&amp; yarn build || exit 1
-                                    echo "Hubble-FE build successfully."
+                                    echo -n "Hubble-FE build successfully."
 
                                     cd ..
                                     rm -rf ${final.name}/ui
