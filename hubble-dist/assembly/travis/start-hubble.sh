@@ -58,12 +58,14 @@ if [[ -f ${PID_FILE} ]] ; then
     fi
 fi
 
+# for collecting codecov
+agent_opts="-javaagent:${LIB_PATH}/jacocoagent.jar=includes=*,port=36320,destfile=jacoco-it.exec,output=tcpserver"
 main_class="com.baidu.hugegraph.HugeGraphHubble"
 args=${CONF_PATH}/hugegraph-hubble.properties
 log=${LOG_PATH}/hugegraph-hubble.log
 
 echo -n "starting HugeGraphHubble "
-nohup nice -n 0 java -server "${java_opts}" -Dhubble.home.path="${HOME_PATH}" -cp "${class_path}" ${main_class} "${args}" > "${log}" 2>&1 < /dev/null &
+nohup nice -n 0 java -server "${java_opts}" "${agent_opts}" -cp "${class_path}" ${main_class} "${args}" > "${log}" 2>&1 < /dev/null &
 pid=$!
 echo ${pid} > "${PID_FILE}"
 
