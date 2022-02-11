@@ -65,12 +65,12 @@ args=${CONF_PATH}/hugegraph-hubble.properties
 log=${LOG_PATH}/hugegraph-hubble.log
 
 echo -n "starting HugeGraphHubble "
-nohup nice -n 0 java -server "${java_opts}" "${agent_opts}" -cp "${class_path}" ${main_class} "${args}" > "${log}" 2>&1 < /dev/null &
+nohup nice -n 0 java -server "${java_opts}" "${agent_opts}" -Dhubble.home.path="${HOME_PATH}" -cp "${class_path}" ${main_class} "${args}" > "${log}" 2>&1 < /dev/null &
 pid=$!
 echo ${pid} > "${PID_FILE}"
 
-# wait hubble start
-timeout_s=30
+# wait 1min to avoid ci failed
+timeout_s=60
 server_host=$(read_property "${CONF_PATH}"/hugegraph-hubble.properties server.host)
 server_port=$(read_property "${CONF_PATH}"/hugegraph-hubble.properties server.port)
 server_url="http://${server_host}:${server_port}/actuator/health"
