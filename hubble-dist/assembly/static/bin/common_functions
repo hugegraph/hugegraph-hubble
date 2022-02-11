@@ -29,6 +29,7 @@ function wait_for_startup() {
     while [[ ${now_s} -le ${stop_s} ]]; do
         echo -n .
         status=$(curl -o /dev/null -s -w %{http_code} "${server_url}")
+        echo "st="$status
         if [[ ${status} -eq 200 ]]; then
             echo "OK"
             return 0

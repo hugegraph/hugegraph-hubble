@@ -83,7 +83,7 @@ jobs:
         run: mvn test -P unit-test
 
       - name: API test
-        run: $TRAVIS_DIR/run-api-test.sh
+#        run: $TRAVIS_DIR/run-api-test.sh
 
       # Do we need it?
       - name: Build Report
