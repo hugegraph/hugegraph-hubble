@@ -77,6 +77,6 @@ server_url="http://${server_host}:${server_port}/actuator/health"
 
 wait_for_startup "${server_url}" ${timeout_s} || {
     cat "${log}"
-    exit 1
+#    exit 1
 }
 echo "logging to ${log}"
