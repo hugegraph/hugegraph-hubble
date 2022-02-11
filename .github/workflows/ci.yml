@@ -82,7 +82,7 @@ jobs:
       - name: Unit test
         run: mvn test -P unit-test
 
-      - name: API test
+#      - name: API test
 #        run: $TRAVIS_DIR/run-api-test.sh
 
       # Do we need it?
