@@ -69,12 +69,12 @@ echo ${pid} > "${PID_FILE}"
 
 # wait hubble start
 timeout_s=30
-server_host=$(read_property "${CONF_PATH}"/hugegraph-hubble.properties server.host)
-server_port=$(read_property "${CONF_PATH}"/hugegraph-hubble.properties server.port)
+server_host=$(read_property "${CONF_PATH}"/hugegraph-hubble.properties hubble.host)
+server_port=$(read_property "${CONF_PATH}"/hugegraph-hubble.properties hubble.port)
 server_url="http://${server_host}:${server_port}/actuator/health"
 
 wait_for_startup "${server_url}" ${timeout_s} || {
     cat "${log}"
-#    exit 1
+    exit 1
 }
 echo "logging to ${log}, please check it"
