@@ -9,7 +9,6 @@ from assertpy import assert_that
 from behave import *
 
 reload(sys)
-sys.setdefaultencoding('utf8')
 use_step_matcher("re")
 
 
