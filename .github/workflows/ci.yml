@@ -82,8 +82,8 @@ jobs:
       - name: Unit test
         run: mvn test -P unit-test
 
-#      - name: API test
-#        run: $TRAVIS_DIR/run-api-test.sh
+      - name: API test
+        run: $TRAVIS_DIR/run-api-test.sh
 
       # Do we need it?
       - name: Build Report
@@ -92,4 +92,4 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
-          file: target/site/jacoco/jacoco.xml
+          file: target/site/jacoco/*.xml

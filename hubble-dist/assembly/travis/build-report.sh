@@ -2,7 +2,7 @@
 
 set -ev
 
-TRAVIS_DIR=$(dirname $0)
+TRAVIS_DIR=$(dirname "$0")
 
 cd hubble-be
 mvn jacoco:dump@pull-test-data -Dapp.host=localhost -Dapp.port=36320 -Dskip.dump=false
