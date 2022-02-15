@@ -25,6 +25,7 @@ function wait_for_startup() {
     local timeout_s=$2
     local now_s=$(date '+%s')
     local stop_s=$(( now_s + timeout_s ))
+    local status=0
 
     while [[ ${now_s} -le ${stop_s} ]]; do
         echo -n .
@@ -33,10 +34,10 @@ function wait_for_startup() {
             echo "OK"
             return 0
         fi
-        sleep 2 && echo "server status code is $status"
+        sleep 2
         now_s=$(date '+%s')
     done
 
-    echo "timed out" >&2
+    echo "timed out with http status $status" >&2
     return 1
 }

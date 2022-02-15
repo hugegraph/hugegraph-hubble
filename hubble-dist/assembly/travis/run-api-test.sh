@@ -2,10 +2,8 @@
 
 set -ev
 
-"$1"/install-hugegraph-hubble.sh
-jps
+"$TRAVIS_DIR"/install-hugegraph-hubble.sh
 
-pip install behave
 behave hubble-be/src/test/python
 
-"$1"/build-report.sh
+"$TRAVIS_DIR"/build-report.sh
