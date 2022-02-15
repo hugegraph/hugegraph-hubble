@@ -4,6 +4,7 @@ import json
 import sys
 
 import requests
+from imp import reload
 from assertpy import assert_that
 from behave import *
 
