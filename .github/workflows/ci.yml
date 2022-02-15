@@ -76,18 +76,13 @@ jobs:
           $TRAVIS_DIR/download-hugegraph.sh $SERVER_VERSION
           $TRAVIS_DIR/hugegraph-server1/install-hugegraph.sh $SERVER_VERSION
           $TRAVIS_DIR/hugegraph-server2/install-hugegraph.sh $SERVER_VERSION
-          $TRAVIS_DIR/install-hugegraph-hubble.sh
-          jps
 
       - name: Unit test
         run: mvn test -P unit-test
 
       - name: API test
-        run: $TRAVIS_DIR/run-api-test.sh
-
-      # Do we need it?
-      - name: Build Report
-        run: $TRAVIS_DIR/build-report.sh
+        run: |
+          $TRAVIS_DIR/run-api-test.sh $TRAVIS_DIR
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
