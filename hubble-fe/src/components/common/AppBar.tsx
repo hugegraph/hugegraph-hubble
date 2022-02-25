@@ -10,7 +10,7 @@ const AppBar: React.FC = observer(() => {
   const [_, setLocation] = useLocation();
   // init select language
   const [languageType, setLanguageType] = useState(localStorage.getItem('languageType') || 'zh-CN')
-  const { i18n } = useTranslation()
+  const { t } = useTranslation()
   const setRoute = useCallback(
     (route: string) => () => {
       setLocation(route);
@@ -21,7 +21,6 @@ const AppBar: React.FC = observer(() => {
   * switch language
   */
   const i18Change = (e: string) => {
-    i18n.changeLanguage(e)
     localStorage.setItem('languageType', e)
     setLanguageType(e)
     // Refresh directly or through react.createcontext implements no refresh switching
@@ -35,7 +34,7 @@ const AppBar: React.FC = observer(() => {
           className="navigator-item active"
           onClick={setRoute('/graph-management')}
         >
-          <span>图管理</span>
+          <span>{t('addition.appbar.graph-manager')}</span>
         </div>
       </div>
       <div className="navigator-additions">

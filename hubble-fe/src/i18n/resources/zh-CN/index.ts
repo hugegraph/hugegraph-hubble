@@ -4,7 +4,8 @@ import {
   DataAnalyzeResources,
   GraphManagementSideBarResources,
   DataImportResources,
-  AsyncTasksResources
+  AsyncTasksResources,
+  Addition
 } from './graph-managment';
 
 const translation = {
@@ -13,7 +14,8 @@ const translation = {
     DataAnalyzeResources,
     GraphManagementSideBarResources,
     DataImportResources,
-    AsyncTasksResources
+    AsyncTasksResources,
+    Addition
   )
 };
 
