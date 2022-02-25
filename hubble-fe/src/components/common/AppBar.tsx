@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { observer } from 'mobx-react';
 import { useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next'
@@ -8,6 +8,8 @@ const { Option } = Select;
 
 const AppBar: React.FC = observer(() => {
   const [_, setLocation] = useLocation();
+  // init select language
+  const [languageType, setLanguageType] = useState(localStorage.getItem('languageType') || 'zh-CN')
   const { i18n } = useTranslation()
   const setRoute = useCallback(
     (route: string) => () => {
@@ -20,6 +22,10 @@ const AppBar: React.FC = observer(() => {
   */
   const i18Change = (e: string) => {
     i18n.changeLanguage(e)
+    localStorage.setItem('languageType', e)
+    setLanguageType(e)
+    // Refresh directly or through react.createcontext implements no refresh switching
+    window.location.reload()
   }
   return (
     <nav className="navigator">
@@ -38,7 +44,7 @@ const AppBar: React.FC = observer(() => {
       {/* i18n */}
       <div className="i18n-box">
         <Select
-          defaultValue="zh-CN"
+          defaultValue={languageType}
           style={{ width: 120 }}
           size="small"
           onChange={i18Change}

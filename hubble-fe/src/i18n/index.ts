@@ -4,7 +4,7 @@ import { initReactI18next } from 'react-i18next';
 import { zhCNResources, enUSResources } from './resources';
 
 i18n.use(initReactI18next).init({
-  lng: 'zh-CN',
+  lng: localStorage.getItem('languageType') || 'zh-CN',
   fallbackLng: 'zh-CN',
 
   resources: {
