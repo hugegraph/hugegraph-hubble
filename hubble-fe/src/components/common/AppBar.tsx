@@ -17,9 +17,9 @@ const AppBar: React.FC = observer(() => {
     },
     [setLocation]
   );
-  /*
-  * switch language
-  */
+  /**
+   * switch language and update localStorage
+   */
   const i18Change = (e: string) => {
     localStorage.setItem('languageType', e)
     setLanguageType(e)
