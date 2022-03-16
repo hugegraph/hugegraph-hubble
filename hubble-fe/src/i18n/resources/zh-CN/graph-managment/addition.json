@@ -1,15 +1,45 @@
 {
   "addition": {
+    "operate": {
+      "detail": "详情",
+      "favorite": "收藏",
+      "load-statement": "加载语句",
+      "time": "时间",
+      "name": "名称",
+      "favorite-statement": "收藏语句",
+      "operate": "操作",
+      "modify-name": "修改名称",
+      "execution-record": "执行记录",
+      "favorite-queries": "收藏的查询",
+      "favorite-search-desc": "搜索收藏名称或语句",
+      "expand-collapse": "展开/收起",
+      "favorite-del-desc": "是否确认删除该条收藏语句？"
+    },
     "common": {
+      "in-edge": "入边",
+      "out-edge": "出边",
+      "add": "添加",
+      "id-strategy": "ID策略",
+      "id-value": "ID值",
+      "id-input-desc": "请输入ID值",
+      "please-input": "请输入",
+      "add-success": "添加成功",
+      "add-fail": "添加失败",
       "vertex-type": "顶点类型",
       "vertex-id": "顶点ID",
+      "add-vertex": "添加顶点",
+      "vertex-type-select-desc": "请选择顶点类型",
       "edge-type": "边类型",
+      "edge-type-select-desc": "请选择边类型",
       "edge-id": "边ID",
       "origin": "起点",
       "end": "终点",
+      "attribute": "属性",
+      "attribute-value": "属性值",
       "required-attribute": "不可空属性",
       "nullable-attribute": "可空属性",
       "primary-key": "主键",
+      "primary-key-attribute": "主键属性",
       "distinguishing-key": "区分键",
       "property-input-desc": "请输入属性值",
       "del-comfirm": "确认删除",
@@ -27,7 +57,9 @@
       "open": "展开",
       "close": "关闭",
       "required": "必填项",
-      "format-error-desc": "必须以字母开头，允许出现英文、数字、下划线"
+      "format-error-desc": "必须以字母开头，允许出现英文、数字、下划线",
+      "no-matching-results": "无匹配结果",
+      "no-data": "暂无数据"
     },
     "appbar": {
       "graph-manager": "图管理"

@@ -5,6 +5,7 @@ import { Drawer, Select, Input, Button, Message } from 'hubble-ui';
 import { DataAnalyzeStoreContext } from '../../../stores';
 import { addGraphNodes, addGraphEdges } from '../../../stores/utils';
 import { isUndefined, isEmpty } from 'lodash-es';
+import { useTranslation } from 'react-i18next';
 
 const IDStrategyMappings: Record<string, string> = {
   PRIMARY_KEY: '主键ID',
@@ -16,9 +17,12 @@ const IDStrategyMappings: Record<string, string> = {
 
 const DataAnalyzeAddEdge: React.FC = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
+  const { t } = useTranslation();
 
   const title =
-    dataAnalyzeStore.dynamicAddGraphDataStatus === 'inEdge' ? '入边' : '出边';
+    dataAnalyzeStore.dynamicAddGraphDataStatus === 'inEdge'
+      ? t('addition.common.in-edge')
+      : t('addition.common.out-edge');
 
   const selectedEdgeLabel = dataAnalyzeStore.edgeTypes.find(
     ({ name }) => name === dataAnalyzeStore.newGraphEdgeConfigs.label
@@ -76,7 +80,7 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
   return (
     <Drawer
       width={580}
-      title={`添加${title}`}
+      title={`${t('addition.common.add')}${title}`}
       visible={dataAnalyzeStore.dynamicAddGraphDataStatus.includes('Edge')}
       onClose={handleDrawerClose}
       maskClosable={false}
@@ -118,13 +122,13 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
               );
 
               Message.success({
-                content: `添加成功`,
+                content: t('addition.common.add-success'),
                 size: 'medium',
                 showCloseIcon: false
               });
             } else {
               Message.error({
-                content: `添加失败`,
+                content: t('addition.common.add-fail'),
                 size: 'medium',
                 showCloseIcon: false
               });
@@ -133,10 +137,10 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
             handleDrawerClose();
           }}
         >
-          添加
+          {t('addition.common.add')}
         </Button>,
         <Button size="medium" style={{ width: 60 }} onClick={handleDrawerClose}>
-          取消
+          {t('addition.common.cancel')}
         </Button>
       ]}
     >
@@ -145,15 +149,20 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
           className="data-analyze-dynamic-add-option"
           style={{ marginBottom: 24 }}
         >
-          <div>{title === '出边' ? '起点' : '终点'}：</div>
+          <div>
+            {title === t('addition.common.out-edge')
+              ? t('addition.common.origin')
+              : t('addition.common.end')}
+            ：
+          </div>
           <span>{dataAnalyzeStore.rightClickedGraphData.id}</span>
         </div>
         <div className="data-analyze-dynamic-add-option">
-          <div>边类型：</div>
+          <div>{t('addition.common.edge-type')}：</div>
           <Select
             size="medium"
             trigger="click"
-            selectorName="请选择边类型"
+            selectorName={t('addition.common.edge-type-select-desc')}
             value={dataAnalyzeStore.newGraphEdgeConfigs.label}
             width={420}
             onChange={(value: string) => {
@@ -179,13 +188,20 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
               style={{ alignItems: 'normal' }}
             >
               <div style={{ lineHeight: '32px' }}>
-                {title === '出边' ? '终点' : '起点'}：
+                {title === t('addition.common.out-edge')
+                  ? t('addition.common.end')
+                  : t('addition.common.origin')}
+                ：
               </div>
               <div>
                 <Input
                   size="medium"
                   width={420}
-                  placeholder={`请输入${title === '出边' ? '终点' : '起点'}ID`}
+                  placeholder={`${t('addition.common.please-input')}${
+                    title === t('addition.common.out-edge')
+                      ? t('addition.common.end')
+                      : t('addition.common.origin')
+                  }ID`}
                   errorLocation="layer"
                   errorMessage={
                     dataAnalyzeStore.validateAddGraphEdgeErrorMessage!.id
@@ -210,11 +226,11 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
             {dataAnalyzeStore.newGraphEdgeConfigs.properties.nonNullable
               .size !== 0 && (
               <div className="data-analyze-dynamic-add-option data-analyze-dynamic-add-option-with-expand">
-                <div>不可空属性：</div>
+                <div>{t('addition.common.required-attribute')}：</div>
                 <div className="data-analyze-dynamic-add-option-expands">
                   <div className="data-analyze-dynamic-add-option-expand">
-                    <div>属性</div>
-                    <div>属性值</div>
+                    <div>{t('addition.common.attribute')}</div>
+                    <div>{t('addition.common.attribute-value')}</div>
                   </div>
                   {nonNullableProperties.map((property) => (
                     <div
@@ -226,7 +242,7 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
                         <Input
                           size="medium"
                           width={190}
-                          placeholder="请输入属性值"
+                          placeholder={t('addition.common.property-input-desc')}
                           errorLocation="layer"
                           errorMessage={dataAnalyzeStore.validateAddGraphEdgeErrorMessage?.properties.nonNullable.get(
                             property
@@ -266,11 +282,11 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
             {dataAnalyzeStore.newGraphEdgeConfigs.properties.nullable.size !==
               0 && (
               <div className="data-analyze-dynamic-add-option data-analyze-dynamic-add-option-with-expand">
-                <div>可空属性：</div>
+                <div>{t('addition.common.nullable-attribute')}：</div>
                 <div className="data-analyze-dynamic-add-option-expands">
                   <div className="data-analyze-dynamic-add-option-expand">
-                    <div>属性</div>
-                    <div>属性值</div>
+                    <div>{t('addition.common.attribute')}</div>
+                    <div>{t('addition.common.attribute-value')}</div>
                   </div>
                   {nullableProperties.map((property) => (
                     <div
@@ -282,7 +298,7 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
                         <Input
                           size="medium"
                           width={190}
-                          placeholder="请输入属性值"
+                          placeholder={t('addition.common.property-input-desc')}
                           errorLocation="layer"
                           errorMessage={dataAnalyzeStore.validateAddGraphEdgeErrorMessage!.properties.nullable.get(
                             property
