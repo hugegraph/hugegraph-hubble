@@ -13,7 +13,16 @@
       "favorite-queries": "收藏的查询",
       "favorite-search-desc": "搜索收藏名称或语句",
       "expand-collapse": "展开/收起",
-      "favorite-del-desc": "是否确认删除该条收藏语句？"
+      "expand": "展开",
+      "collapse": "收起",
+      "favorite-del-desc": "是否确认删除该条收藏语句？",
+      "input-query-statement": "请输入查询语句",
+      "query-statement-required": "查询语句不能为空",
+      "execute-query": "执行查询",
+      "execute-task": "执行任务",
+      "execute-ing": "执行中",
+      "clean": "清空",
+      "query-result-desc": "查询模式适合30秒内可返回结果的小规模分析；任务模式适合较长时间返回结果的大规模分析，任务详情可在任务管理中查看"
     },
     "common": {
       "in-edge": "入边",
