@@ -151,8 +151,8 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
         >
           <div>
             {title === t('addition.common.out-edge')
-              ? t('addition.common.origin')
-              : t('addition.common.end')}
+              ? t('addition.common.source')
+              : t('addition.common.target')}
             ：
           </div>
           <span>{dataAnalyzeStore.rightClickedGraphData.id}</span>
@@ -189,8 +189,8 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
             >
               <div style={{ lineHeight: '32px' }}>
                 {title === t('addition.common.out-edge')
-                  ? t('addition.common.end')
-                  : t('addition.common.origin')}
+                  ? t('addition.common.target')
+                  : t('addition.common.source')}
                 ：
               </div>
               <div>
@@ -199,8 +199,8 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
                   width={420}
                   placeholder={`${t('addition.common.please-input')}${
                     title === t('addition.common.out-edge')
-                      ? t('addition.common.end')
-                      : t('addition.common.origin')
+                      ? t('addition.common.target')
+                      : t('addition.common.source')
                   }ID`}
                   errorLocation="layer"
                   errorMessage={
@@ -226,11 +226,11 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
             {dataAnalyzeStore.newGraphEdgeConfigs.properties.nonNullable
               .size !== 0 && (
               <div className="data-analyze-dynamic-add-option data-analyze-dynamic-add-option-with-expand">
-                <div>{t('addition.common.required-attribute')}：</div>
+                <div>{t('addition.common.required-property')}：</div>
                 <div className="data-analyze-dynamic-add-option-expands">
                   <div className="data-analyze-dynamic-add-option-expand">
-                    <div>{t('addition.common.attribute')}</div>
-                    <div>{t('addition.common.attribute-value')}</div>
+                    <div>{t('addition.common.property')}</div>
+                    <div>{t('addition.common.property-value')}</div>
                   </div>
                   {nonNullableProperties.map((property) => (
                     <div
@@ -282,11 +282,11 @@ const DataAnalyzeAddEdge: React.FC = observer(() => {
             {dataAnalyzeStore.newGraphEdgeConfigs.properties.nullable.size !==
               0 && (
               <div className="data-analyze-dynamic-add-option data-analyze-dynamic-add-option-with-expand">
-                <div>{t('addition.common.nullable-attribute')}：</div>
+                <div>{t('addition.common.nullable-property')}：</div>
                 <div className="data-analyze-dynamic-add-option-expands">
                   <div className="data-analyze-dynamic-add-option-expand">
-                    <div>{t('addition.common.attribute')}</div>
-                    <div>{t('addition.common.attribute-value')}</div>
+                    <div>{t('addition.common.property')}</div>
+                    <div>{t('addition.common.property-value')}</div>
                   </div>
                   {nullableProperties.map((property) => (
                     <div

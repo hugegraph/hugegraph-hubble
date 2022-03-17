@@ -5,6 +5,7 @@ import { Message } from 'hubble-ui';
 
 import { DataAnalyzeStoreContext } from '../../../../stores';
 import { addGraphNodes, addGraphEdges } from '../../../../stores/utils';
+import { useTranslation } from 'react-i18next';
 
 const getRuleOptions = (ruleType: string = '') => {
   switch (ruleType.toLowerCase()) {
@@ -29,6 +30,7 @@ const getRuleOptions = (ruleType: string = '') => {
 
 const QueryFilterOptions: React.FC = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
+  const { t } = useTranslation();
   const line = dataAnalyzeStore.filteredGraphQueryOptions.line;
   const properties = dataAnalyzeStore.filteredGraphQueryOptions.properties;
   const lastProperty = properties[properties.length - 1];
@@ -84,7 +86,7 @@ const QueryFilterOptions: React.FC = observer(() => {
           <Input
             size="large"
             width={180}
-            placeholder="请输入数字"
+            placeholder={t('addition.message.please-enter-number')}
             value={value}
             onChange={(e: any) => {
               handlePropertyChange('value', e.value, index);
@@ -126,7 +128,7 @@ const QueryFilterOptions: React.FC = observer(() => {
           <Input
             size="large"
             width={180}
-            placeholder="请输入字符串"
+            placeholder={t('addition.message.please-enter-string')}
             value={value}
             onChange={(e: any) => {
               handlePropertyChange('value', e.value, index);
@@ -141,7 +143,7 @@ const QueryFilterOptions: React.FC = observer(() => {
           <Input
             size="large"
             width={180}
-            placeholder="请输入"
+            placeholder={t('addition.message.please-enter')}
             disabled={true}
           />
         );
@@ -153,7 +155,7 @@ const QueryFilterOptions: React.FC = observer(() => {
       <div className="query-result-filter-options-edge-filter">
         <div>
           <span style={{ display: 'block', width: 56, marginRight: 8 }}>
-            边类型：
+            {t('addition.common.edge-type')}：
           </span>
           <Select
             size="medium"
@@ -172,7 +174,7 @@ const QueryFilterOptions: React.FC = observer(() => {
         </div>
         <div>
           <span style={{ display: 'block', width: 56, marginRight: 8 }}>
-            边方向：
+            {t('addition.common.edge-direction')}：
           </span>
           <Select
             size="medium"
@@ -242,7 +244,7 @@ const QueryFilterOptions: React.FC = observer(() => {
               }
             }}
           >
-            筛选
+            {t('addition.operate.filter')}
           </span>
           <span
             onClick={() => {
@@ -254,7 +256,7 @@ const QueryFilterOptions: React.FC = observer(() => {
               }
             }}
           >
-            取消
+            {t('addition.common.cancel')}
           </span>
         </div>
       </div>
@@ -269,7 +271,7 @@ const QueryFilterOptions: React.FC = observer(() => {
               key={property}
             >
               <div>
-                <span>属性：</span>
+                <span>{t('addition.common.property')}：</span>
                 <Select
                   size="medium"
                   trigger="click"
@@ -308,13 +310,13 @@ const QueryFilterOptions: React.FC = observer(() => {
                 </Select>
               </div>
               <div>
-                <span>规则：</span>
+                <span>{t('addition.common.rule')}：</span>
                 <Select
                   size="medium"
                   trigger="click"
                   value={rule}
                   width={180}
-                  placeholder="请输入"
+                  placeholder={t('addition.message.please-enter')}
                   onChange={(value: string) => {
                     handlePropertyChange('rule', value, index);
                   }}
@@ -334,7 +336,7 @@ const QueryFilterOptions: React.FC = observer(() => {
                 </Select>
               </div>
               <div>
-                <span>值：</span>
+                <span>{t('addition.common.value')}：</span>
                 {renderPropertyValue(
                   // the real type of value
                   dataAnalyzeStore.valueTypes[property],
@@ -349,7 +351,7 @@ const QueryFilterOptions: React.FC = observer(() => {
                     dataAnalyzeStore.deletePropertyFilterOption(index);
                   }}
                 >
-                  删除
+                  {t('addition.common.del')}
                 </span>
               </div>
             </div>
@@ -369,7 +371,7 @@ const QueryFilterOptions: React.FC = observer(() => {
             color: allowAddProperties ? '#2b65ff' : '#ccc'
           }}
         >
-          添加属性筛选
+          {t('addition.operate.add-filter-item')}
         </span>
       </div>
     </div>

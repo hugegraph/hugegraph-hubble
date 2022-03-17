@@ -177,7 +177,7 @@ const DataAnalyzeAddNode: React.FC = observer(() => {
               <span>
                 {selectedVertexLabel.id_strategy === 'PRIMARY_KEY'
                   ? `${t(
-                      'addition.common.primary-key-attribute'
+                      'addition.common.primary-key-property'
                     )}-${selectedVertexLabel.primary_keys.join('，')}`
                   : IDStrategyMappings[selectedVertexLabel.id_strategy]}
               </span>
@@ -229,11 +229,11 @@ const DataAnalyzeAddNode: React.FC = observer(() => {
             {dataAnalyzeStore.newGraphNodeConfigs.properties.nonNullable
               .size !== 0 && (
               <div className="data-analyze-dynamic-add-option data-analyze-dynamic-add-option-with-expand">
-                <div>{t('addition.common.required-attribute')}：</div>
+                <div>{t('addition.common.required-property')}：</div>
                 <div className="data-analyze-dynamic-add-option-expands">
                   <div className="data-analyze-dynamic-add-option-expand">
-                    <div>{t('addition.common.attribute')}</div>
-                    <div>{t('addition.common.attribute-value')}</div>
+                    <div>{t('addition.common.property')}</div>
+                    <div>{t('addition.common.property-value')}</div>
                   </div>
                   {nonNullableProperties.map((property) => (
                     <div
@@ -287,11 +287,11 @@ const DataAnalyzeAddNode: React.FC = observer(() => {
             {dataAnalyzeStore.newGraphNodeConfigs.properties.nullable.size !==
               0 && (
               <div className="data-analyze-dynamic-add-option data-analyze-dynamic-add-option-with-expand">
-                <div>{t('addition.common.nullable-attribute')}：</div>
+                <div>{t('addition.common.nullable-property')}：</div>
                 <div className="data-analyze-dynamic-add-option-expands">
                   <div className="data-analyze-dynamic-add-option-expand">
-                    <div>{t('addition.common.attribute')}</div>
-                    <div>{t('addition.common.attribute-value')}</div>
+                    <div>{t('addition.common.property')}</div>
+                    <div>{t('addition.common.property-value')}</div>
                   </div>
                   {nullableProperties.map((property) => (
                     <div
