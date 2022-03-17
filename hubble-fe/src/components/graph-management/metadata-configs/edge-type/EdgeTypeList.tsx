@@ -1069,7 +1069,7 @@ const EdgeTypeList: React.FC = observer(() => {
                             display_fields: value.map((field) =>
                               formatVertexIdText(
                                 field,
-                                t('addition.common.edge-type'),
+                                t('addition.function-parameter.edge-type'),
                                 true
                               )
                             )
@@ -1080,7 +1080,7 @@ const EdgeTypeList: React.FC = observer(() => {
                         (field) =>
                           formatVertexIdText(
                             field,
-                            t('addition.common.edge-type')
+                            t('addition.function-parameter.edge-type')
                           )
                       )}
                     >
@@ -1106,7 +1106,7 @@ const EdgeTypeList: React.FC = observer(() => {
                             <Select.Option
                               value={formatVertexIdText(
                                 item.name,
-                                t('addition.common.edge-type')
+                                t('addition.function-parameter.edge-type')
                               )}
                               key={item.name}
                             >
@@ -1132,7 +1132,7 @@ const EdgeTypeList: React.FC = observer(() => {
                                 <div style={{ color: '#333' }}>
                                   {formatVertexIdText(
                                     item.name,
-                                    t('addition.common.edge-type')
+                                    t('addition.function-parameter.edge-type')
                                   )}
                                 </div>
                               </div>
@@ -1146,7 +1146,7 @@ const EdgeTypeList: React.FC = observer(() => {
                         .map((field) =>
                           formatVertexIdText(
                             field,
-                            t('addition.common.edge-type')
+                            t('addition.function-parameter.edge-type')
                           )
                         )
                         .join('-')}
@@ -1904,7 +1904,7 @@ const EmptyEdgeTypeHints: React.FC = observer(() => {
             edgeTypeStore.changeCurrentTabStatus('reuse');
           }}
         >
-          {t('addition.edge.multiplexing-edge')}
+          {t('addition.edge.multiplexing-existing-type')}
         </Button>
       </div>
     </div>
