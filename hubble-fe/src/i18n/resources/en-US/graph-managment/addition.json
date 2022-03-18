@@ -1,7 +1,15 @@
 {
   "addition": {
     "function-parameter": {
-      "edge-type": "边类型"
+      "edge-type": "边类型",
+      "vertex-id": "顶点ID"
+    },
+    "constant": {
+      "primary-key-id": "主键ID",
+      "automatic-generation": "自动生成",
+      "custom-string": "自定义字符串",
+      "custom-number": "自定义数字",
+      "custom-uuid": "自定义UUID"
     },
     "menu": {
       "chart": "图",
@@ -18,12 +26,25 @@
       "confirm-reuse-item": "确认复用项",
       "complete-reuse": "完成复用"
     },
+    "vertex": {
+      "type-detail": "顶点类型详情",
+      "edit-type": "编辑顶点类型",
+      "using-cannot-delete": "当前顶点类型正在使用中，不可删除。",
+      "del-vertex-confirm": "确认删除此顶点类型？",
+      "vertex-type-name": "顶点类型名称",
+      "vertex-style": "顶点样式",
+      "vertex-display-content": "顶点展示内容",
+      "select-vertex-display-content-placeholder": "请选择顶点展示内容",
+      "create-vertex-type": "创建顶点类型",
+      "vertex-index": "顶点索引"
+    },
     "edge": {
       "display-content": "边展示内容",
       "display-content-select-desc": "请选择边展示内容",
       "index-info": "索引信息",
       "index-name": "索引名称",
       "index-type": "索引类型",
+      "edge-index": "边索引",
       "index-type-select-desc": "请选择索引类型",
       "property-select-desc": "请选择属性",
       "add-group": "新增一组",
@@ -40,6 +61,13 @@
       "verified-again": "重新校验"
     },
     "message": {
+      "no-index-notice": "您暂时还没有任何索引",
+      "property-create-desc": "您暂时还没有任何属性，立即创建",
+      "del-unused-property-notice": "使用中属性不可删除，确认删除以下未使用属性？",
+      "please-enter-keywords": "请输入搜索关键字",
+      "no-property-can-delete": "无可删除属性",
+      "no-metadata-notice": "您暂时还没有任何元数据",
+      "no-vertex-or-edge-notice": "您还未设置顶点类型或边类型",
       "no-adjacency-points": "不存在邻接点",
       "no-more-points": "不存在更多邻接点",
       "please-enter-number": "请输入数字",
@@ -59,6 +87,7 @@
       "long-time-notice": "删除元数据耗时较久，详情可在任务管理中查看。",
       "index-long-time-notice": "创建索引可能耗时较久，详情可在任务管理中查看",
       "property-del-confirm": "确认删除此属性？",
+      "property-del-confirm-again": "确认删除此属性？删除后无法恢复，请谨慎操作",
       "index-del-confirm": "删除索引后，无法根据此属性索引进行查询，请谨慎操作。",
       "edge-name-rule": "允许出现中英文、数字、下划线",
       "source-type-select-placeholder": "请选择起点类型",
@@ -72,9 +101,14 @@
       "pass": "通过",
       "select-reuse-graph-placeholder": "请选择要复用的图",
       "reuse-complete": "复用完成",
-      "vertex-type-reuse-success": "已成功复用顶点类型"
+      "vertex-type-reuse-success": "已成功复用顶点类型",
+      "property-using-cannot-delete": "当前属性数据正在使用中，不可删除。",
+      "reuse-property-success": "已成功复用属性"
     },
     "operate": {
+      "reuse-existing-property": "复用已有属性",
+      "reuse-property": "复用属性",
+      "create-property": "创建属性",
       "continue-reuse": "继续复用",
       "back-to-view": "返回查看",
       "complete": "完成",
@@ -89,6 +123,7 @@
       "open": "开",
       "close": "关",
       "look": "查看",
+      "view-property": "查看属性",
       "filter": "筛选",
       "add-filter-item": "添加属性筛选",
       "enlarge": "放大",
@@ -129,6 +164,11 @@
       "query-result-desc": "查询模式适合30秒内可返回结果的小规模分析；任务模式适合较长时间返回结果的大规模分析，任务详情可在任务管理中查看"
     },
     "common": {
+      "in-use": "使用中",
+      "not-used": "未使用",
+      "status": "状态",
+      "no-result": "无结果",
+      "cardinal-number": "基数",
       "allow-null": "允许为空",
       "allow-multiple-connections": "允许多次连接",
       "multiple-connections-notice": "开启后两顶点间允许存在多条该类型的边",
@@ -182,6 +222,7 @@
       "nullable-property": "可空属性",
       "primary-key": "主键",
       "primary-key-property": "主键属性",
+      "select-primary-key-property-placeholder": "请选择主键属性",
       "distinguishing-key": "区分键",
       "distinguishing-key-property": "区分键属性",
       "property-input-desc": "请输入属性值",
