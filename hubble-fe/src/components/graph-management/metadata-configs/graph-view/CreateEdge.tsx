@@ -456,7 +456,7 @@ const CreateEdge: React.FC = observer(() => {
                 }}
               >
                 <span className="metdata-essential-form-options">*</span>
-                <span>{t('addition.common.allow-multiple-connection')}：</span>
+                <span>{t('addition.common.allow-multiple-connections')}：</span>
                 <Tooltip
                   placement="right"
                   title={t('addition.common.multiple-connections-notice')}
