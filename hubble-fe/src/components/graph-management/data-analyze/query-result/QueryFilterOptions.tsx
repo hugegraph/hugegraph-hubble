@@ -6,6 +6,7 @@ import { Message } from 'hubble-ui';
 import { DataAnalyzeStoreContext } from '../../../../stores';
 import { addGraphNodes, addGraphEdges } from '../../../../stores/utils';
 import { useTranslation } from 'react-i18next';
+import i18next from '../../../../i18n';
 
 const getRuleOptions = (ruleType: string = '') => {
   switch (ruleType.toLowerCase()) {
@@ -15,12 +16,18 @@ const getRuleOptions = (ruleType: string = '') => {
     case 'int':
     case 'long':
     case 'date':
-      return ['大于', '大于等于', '小于', '小于等于', '等于'];
+      return [
+        i18next.t('addition.constant.greater-than'),
+        i18next.t('addition.constant.greater-than-or-equal'),
+        i18next.t('addition.constant.less-than'),
+        i18next.t('addition.constant.less-than-or-equal'),
+        i18next.t('addition.constant.equal')
+      ];
     case 'object':
     case 'text':
     case 'blob':
     case 'uuid':
-      return ['等于'];
+      return [i18next.t('addition.constant.equal')];
     case 'boolean':
       return ['True', 'False'];
     default:

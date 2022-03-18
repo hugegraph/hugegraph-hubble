@@ -6,13 +6,14 @@ import { DataAnalyzeStoreContext } from '../../../stores';
 import { addGraphNodes } from '../../../stores/utils';
 import { isUndefined, isEmpty } from 'lodash-es';
 import { useTranslation } from 'react-i18next';
+import i18next from '../../../i18n';
 
 const IDStrategyMappings: Record<string, string> = {
-  PRIMARY_KEY: '主键ID',
-  AUTOMATIC: '自动生成',
-  CUSTOMIZE_STRING: '自定义字符串',
-  CUSTOMIZE_NUMBER: '自定义数字',
-  CUSTOMIZE_UUID: '自定义UUID'
+  PRIMARY_KEY: i18next.t('addition.constant.primary-key-id'),
+  AUTOMATIC: i18next.t('addition.constant.automatic-generation'),
+  CUSTOMIZE_STRING: i18next.t('addition.constant.custom-string'),
+  CUSTOMIZE_NUMBER: i18next.t('addition.constant.custom-number'),
+  CUSTOMIZE_UUID: i18next.t('addition.constant.custom-uuid')
 };
 
 const DataAnalyzeAddNode: React.FC = observer(() => {

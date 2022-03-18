@@ -4,12 +4,35 @@
       "edge-type": "边类型",
       "vertex-id": "顶点ID"
     },
+    "store": {
+      "required": "必填项",
+      "item-is-required": "此项为必填项",
+      "no-match-input-requirements": "不符合输入要求",
+      "rule1": "请输入字母、数字或特殊字符",
+      "rule2": "请输入范围在 1-65535 的数字",
+      "rule3": "必须同时填写用户名和密码",
+      "rule4": "必须为中英文，数字和下划线",
+      "illegal-data-format": "非法的数据格式",
+      "incorrect-time-format": "时间格式不正确",
+      "cannot-be-empty": "此项不能为空",
+      "cannot-be-empty1": "该项不能为空",
+      "same-edge-name-notice": "存在同名边，请输入其它名称",
+      "same-vertex-name-notice": "存在同名顶点，请输入其它名称",
+      "same-property-name-notice": "存在同名属性，请输入其它名称",
+      "same-index-name-notice": "存在同名属性索引，请输入其它名称",
+      "network-error": "网络异常，请稍后重试"
+    },
     "constant": {
       "primary-key-id": "主键ID",
       "automatic-generation": "自动生成",
       "custom-string": "自定义字符串",
       "custom-number": "自定义数字",
-      "custom-uuid": "自定义UUID"
+      "custom-uuid": "自定义UUID",
+      "greater-than": "大于",
+      "greater-than-or-equal": "大于等于",
+      "less-than": "小于",
+      "less-than-or-equal": "小于等于",
+      "equal": "等于"
     },
     "menu": {
       "chart": "图",
@@ -30,13 +53,17 @@
       "type-detail": "顶点类型详情",
       "edit-type": "编辑顶点类型",
       "using-cannot-delete": "当前顶点类型正在使用中，不可删除。",
+      "using-cannot-delete-confirm": "使用中顶点类型不可删除，确认删除以下未使用顶点类型？",
       "del-vertex-confirm": "确认删除此顶点类型？",
+      "del-vertex-confirm-again": "确认删除此顶点类型？删除后无法恢复，请谨慎操作",
       "vertex-type-name": "顶点类型名称",
       "vertex-style": "顶点样式",
       "vertex-display-content": "顶点展示内容",
       "select-vertex-display-content-placeholder": "请选择顶点展示内容",
       "create-vertex-type": "创建顶点类型",
-      "vertex-index": "顶点索引"
+      "vertex-index": "顶点索引",
+      "corresponding-vertex-type": "对应顶点类型",
+      "no-vertex-type-desc": "您暂时还没有任何顶点类型，立即创建"
     },
     "edge": {
       "display-content": "边展示内容",
@@ -61,6 +88,7 @@
       "verified-again": "重新校验"
     },
     "message": {
+      "no-can-delete-vertex-type": "无可删除顶点类型",
       "no-index-notice": "您暂时还没有任何索引",
       "property-create-desc": "您暂时还没有任何属性，立即创建",
       "del-unused-property-notice": "使用中属性不可删除，确认删除以下未使用属性？",
@@ -103,9 +131,11 @@
       "reuse-complete": "复用完成",
       "vertex-type-reuse-success": "已成功复用顶点类型",
       "property-using-cannot-delete": "当前属性数据正在使用中，不可删除。",
-      "reuse-property-success": "已成功复用属性"
+      "reuse-property-success": "已成功复用属性",
+      "reuse-vertex-type-notice": "顶点类型关联的属性和属性索引将一同复用"
     },
     "operate": {
+      "reuse-vertex-type": "复用顶点类型",
       "reuse-existing-property": "复用已有属性",
       "reuse-property": "复用属性",
       "create-property": "创建属性",
