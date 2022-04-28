@@ -12,24 +12,24 @@ import { calcAlgorithmFormWidth } from '../../../../utils';
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 
-const KStepNeighbor = observer(() => {
+const Jaccard = observer(() => {
   const graphManagementStore = useContext(GraphManagementStoreContext);
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
-  const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
   const { t } = useTranslation();
+  const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
+
+  const isValidExec =
+    Object.values(
+      algorithmAnalyzerStore.validateJaccardParamsErrorMessage
+    ).every((value) => value === '') &&
+    algorithmAnalyzerStore.jaccardParams.vertex !== '' &&
+    algorithmAnalyzerStore.jaccardParams.other !== '';
 
   const formWidth = calcAlgorithmFormWidth(
     graphManagementStore.isExpanded,
     340,
     400
   );
-
-  const isValidExec =
-    Object.values(
-      algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-    ).every((value) => value === '') &&
-    algorithmAnalyzerStore.kStepNeighborParams.source !== '' &&
-    algorithmAnalyzerStore.kStepNeighborParams.max_depth !== '';
 
   return (
     <div className="query-tab-content-form">
@@ -38,7 +38,7 @@ const KStepNeighbor = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t('data-analyze.algorithm-forms.k-step-neighbor.options.source')}
+              {t('data-analyze.algorithm-forms.jaccard.options.vertex')}
             </span>
           </div>
           <Input
@@ -46,25 +46,24 @@ const KStepNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-source-id'
+              'data-analyze.algorithm-forms.jaccard.placeholder.input-source-id'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-                .source
+              algorithmAnalyzerStore.validateJaccardParamsErrorMessage.vertex
             }
-            value={algorithmAnalyzerStore.kStepNeighborParams.source}
+            value={algorithmAnalyzerStore.jaccardParams.vertex}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
-                'source',
+              algorithmAnalyzerStore.mutateJaccardParams(
+                'vertex',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKStepNeighborParams('source');
+              algorithmAnalyzerStore.validateJaccardParams('vertex');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams('source');
+                algorithmAnalyzerStore.validateJaccardParams('vertex');
               }
             }}
           />
@@ -72,24 +71,24 @@ const KStepNeighbor = observer(() => {
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t('data-analyze.algorithm-forms.k-step-neighbor.options.label')}
+              {t('data-analyze.algorithm-forms.jaccard.options.label')}
             </span>
           </div>
           <Select
             size="medium"
             trigger="click"
-            value={algorithmAnalyzerStore.kStepNeighborParams.label}
+            value={algorithmAnalyzerStore.jaccardParams.label}
             notFoundContent={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.no-edge-types'
+              'data-analyze.algorithm-forms.jaccard.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             width={formWidth}
             onChange={(value: string) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams('label', value);
+              algorithmAnalyzerStore.mutateJaccardParams('label', value);
             }}
           >
             <Select.Option value="__all__" key="__all__">
-              {t('data-analyze.algorithm-forms.k-step-neighbor.pre-value')}
+              {t('data-analyze.algorithm-forms.jaccard.pre-value')}
             </Select.Option>
             {dataAnalyzeStore.edgeTypes.map(({ name }) => (
               <Select.Option value={name} key={name}>
@@ -104,32 +103,40 @@ const KStepNeighbor = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t(
-                'data-analyze.algorithm-forms.k-step-neighbor.options.direction'
-              )}
+              {t('data-analyze.algorithm-forms.jaccard.options.other')}
             </span>
           </div>
-          <Radio.Group
+          <Input
+            width={formWidth}
+            size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            value={algorithmAnalyzerStore.kStepNeighborParams.direction}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
-                'direction',
-                e.target.value
+            placeholder={t(
+              'data-analyze.algorithm-forms.jaccard.placeholder.input-other-id'
+            )}
+            errorLocation="layer"
+            errorMessage={
+              algorithmAnalyzerStore.validateJaccardParamsErrorMessage.other
+            }
+            value={algorithmAnalyzerStore.jaccardParams.other}
+            onChange={(e: any) => {
+              algorithmAnalyzerStore.mutateJaccardParams(
+                'other',
+                e.value as string
               );
+
+              algorithmAnalyzerStore.validateJaccardParams('other');
             }}
-          >
-            <Radio value="BOTH">both</Radio>
-            <Radio value="OUT">out</Radio>
-            <Radio value="IN">in</Radio>
-          </Radio.Group>
+            originInputProps={{
+              onBlur() {
+                algorithmAnalyzerStore.validateJaccardParams('other');
+              }
+            }}
+          />
         </div>
         <div className="query-tab-content-form-item">
           <div className="query-tab-content-form-item-title">
             <span>
-              {t(
-                'data-analyze.algorithm-forms.k-step-neighbor.options.max_degree'
-              )}
+              {t('data-analyze.algorithm-forms.jaccard.options.max_degree')}
             </span>
             <CustomTooltip
               trigger="hover"
@@ -146,7 +153,7 @@ const KStepNeighbor = observer(() => {
                 }
               }}
               tooltipWrapper={t(
-                'data-analyze.algorithm-forms.k-step-neighbor.hint.max-degree'
+                'data-analyze.algorithm-forms.jaccard.hint.max-degree'
               )}
               childrenProps={{
                 src: QuestionMarkIcon,
@@ -163,27 +170,25 @@ const KStepNeighbor = observer(() => {
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-positive-integer-or-negative-one-max-degree'
+              'data-analyze.algorithm-forms.jaccard.placeholder.input-positive-integer-or-negative-one-max-degree'
             )}
             errorLocation="layer"
             errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
+              algorithmAnalyzerStore.validateJaccardParamsErrorMessage
                 .max_degree
             }
-            value={algorithmAnalyzerStore.kStepNeighborParams.max_degree}
+            value={algorithmAnalyzerStore.jaccardParams.max_degree}
             onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
+              algorithmAnalyzerStore.mutateJaccardParams(
                 'max_degree',
                 e.value as string
               );
 
-              algorithmAnalyzerStore.validateKStepNeighborParams('max_degree');
+              algorithmAnalyzerStore.validateJaccardParams('max_degree');
             }}
             originInputProps={{
               onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams(
-                  'max_degree'
-                );
+                algorithmAnalyzerStore.validateJaccardParams('max_degree');
               }
             }}
           />
@@ -194,98 +199,23 @@ const KStepNeighbor = observer(() => {
           <div className="query-tab-content-form-item-title">
             <i>*</i>
             <span>
-              {t(
-                'data-analyze.algorithm-forms.k-step-neighbor.options.max_depth'
-              )}
-            </span>
-            <CustomTooltip
-              trigger="hover"
-              placement="bottom-start"
-              modifiers={{
-                offset: {
-                  offset: '0, 8'
-                }
-              }}
-              tooltipWrapperProps={{
-                className: 'tooltips-dark',
-                style: {
-                  zIndex: 7
-                }
-              }}
-              tooltipWrapper={t(
-                'data-analyze.algorithm-forms.k-step-neighbor.hint.max-depth'
-              )}
-              childrenProps={{
-                src: QuestionMarkIcon,
-                alt: 'hint',
-                style: {
-                  marginLeft: 5
-                }
-              }}
-              childrenWrapperElement="img"
-            />
-          </div>
-          <Input
-            width={formWidth}
-            size="medium"
-            disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-positive-integer'
-            )}
-            errorLocation="layer"
-            errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-                .max_depth
-            }
-            value={algorithmAnalyzerStore.kStepNeighborParams.max_depth}
-            onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
-                'max_depth',
-                e.value as string
-              );
-
-              algorithmAnalyzerStore.validateKStepNeighborParams('max_depth');
-            }}
-            originInputProps={{
-              onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams('max_depth');
-              }
-            }}
-          />
-        </div>
-        <div className="query-tab-content-form-item">
-          <div className="query-tab-content-form-item-title">
-            <span>
-              {t('data-analyze.algorithm-forms.k-step-neighbor.options.limit')}
+              {t('data-analyze.algorithm-forms.jaccard.options.direction')}
             </span>
           </div>
-          <Input
-            width={formWidth}
-            size="medium"
+          <Radio.Group
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            placeholder={t(
-              'data-analyze.algorithm-forms.k-step-neighbor.placeholder.input-positive-integer-or-negative-one-limit'
-            )}
-            errorLocation="layer"
-            errorMessage={
-              algorithmAnalyzerStore.validateKStepNeighborParamsErrorMessage
-                .limit
-            }
-            value={algorithmAnalyzerStore.kStepNeighborParams.limit}
-            onChange={(e: any) => {
-              algorithmAnalyzerStore.mutateKStepNeighborParams(
-                'limit',
-                e.value as string
+            value={algorithmAnalyzerStore.jaccardParams.direction}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              algorithmAnalyzerStore.mutateJaccardParams(
+                'direction',
+                e.target.value
               );
-
-              algorithmAnalyzerStore.validateKStepNeighborParams('limit');
             }}
-            originInputProps={{
-              onBlur() {
-                algorithmAnalyzerStore.validateKStepNeighborParams('limit');
-              }
-            }}
-          />
+          >
+            <Radio value="BOTH">both</Radio>
+            <Radio value="OUT">out</Radio>
+            <Radio value="IN">in</Radio>
+          </Radio.Group>
         </div>
       </div>
       <div
@@ -305,8 +235,8 @@ const KStepNeighbor = observer(() => {
 
             const timerId = dataAnalyzeStore.addTempExecLog();
             await dataAnalyzeStore.fetchGraphs({
-              url: 'kneighbor',
-              type: Algorithm.kStepNeighbor
+              url: 'jaccardsimilarity',
+              type: Algorithm.jaccard
             });
             await dataAnalyzeStore.fetchExecutionLogs();
             window.clearTimeout(timerId);
@@ -318,7 +248,7 @@ const KStepNeighbor = observer(() => {
           style={styles.primaryButton}
           disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
           onClick={() => {
-            algorithmAnalyzerStore.resetKStepNeighborParams();
+            algorithmAnalyzerStore.resetJaccardParams();
           }}
         >
           {t('data-analyze.manipulations.reset')}
@@ -328,4 +258,4 @@ const KStepNeighbor = observer(() => {
   );
 });
 
-export default KStepNeighbor;
+export default Jaccard;

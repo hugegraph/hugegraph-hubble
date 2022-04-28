@@ -63,9 +63,9 @@ const QueryResult: React.FC<QueryResultProps> = observer(
         dynHeightStyle.height = 'calc(100vh - 441px)';
       }
 
-      if (algorithmAnalyzerStore.currentAlgorithm === Algorithm.shortestPath) {
-        dynHeightStyle.height = 'calc(100vh - 555px)';
-      }
+      // if (algorithmAnalyzerStore.currentAlgorithm === Algorithm.shortestPath) {
+      //   dynHeightStyle.height = 'calc(100vh - 555px)';
+      // }
     }
 
     return (

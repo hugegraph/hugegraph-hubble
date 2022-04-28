@@ -1,22 +1,36 @@
-import React, { useContext, createContext } from 'react';
+import React, { useContext } from 'react';
 import { observer } from 'mobx-react';
-import { Button, Radio, Input, Select, Switch } from 'hubble-ui';
+import { Button, Radio, Input, Select } from 'hubble-ui';
 import { useTranslation } from 'react-i18next';
+
 import { styles } from '../QueryAndAlgorithmLibrary';
 import { Tooltip as CustomTooltip } from '../../../common';
 import DataAnalyzeStore from '../../../../stores/GraphManagementStore/dataAnalyzeStore/dataAnalyzeStore';
+import { GraphManagementStoreContext } from '../../../../stores';
+import { calcAlgorithmFormWidth } from '../../../../utils';
 
 import QuestionMarkIcon from '../../../../assets/imgs/ic_question_mark.svg';
 import { Algorithm } from '../../../../stores/factory/dataAnalyzeStore/algorithmStore';
 
 const AllPath = observer(() => {
-  const { t } = useTranslation();
+  const graphManagementStore = useContext(GraphManagementStoreContext);
   const dataAnalyzeStore = useContext(DataAnalyzeStore);
   const algorithmAnalyzerStore = dataAnalyzeStore.algorithmAnalyzerStore;
+  const { t } = useTranslation();
 
-  const isValidExec = !Object.values(algorithmAnalyzerStore.allPathParams).some(
-    (value) => value === ''
+  const formWidth = calcAlgorithmFormWidth(
+    graphManagementStore.isExpanded,
+    340,
+    400
   );
+
+  const isValidExec =
+    Object.values(
+      algorithmAnalyzerStore.validateAllPathParamsErrorMessage
+    ).every((value) => value === '') &&
+    algorithmAnalyzerStore.allPathParams.source !== '' &&
+    algorithmAnalyzerStore.allPathParams.target !== '' &&
+    algorithmAnalyzerStore.allPathParams.max_depth !== '';
 
   return (
     <div className="query-tab-content-form">
@@ -29,7 +43,7 @@ const AllPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -69,7 +83,7 @@ const AllPath = observer(() => {
               'data-analyze.algorithm-forms.all-path.placeholder.no-edge-types'
             )}
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
-            width={400}
+            width={formWidth}
             onChange={(value: string) => {
               algorithmAnalyzerStore.mutateAllPathParams('label', value);
             }}
@@ -94,7 +108,7 @@ const AllPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -125,13 +139,39 @@ const AllPath = observer(() => {
             <span>
               {t('data-analyze.algorithm-forms.all-path.options.max_degree')}
             </span>
+            <CustomTooltip
+              trigger="hover"
+              placement="bottom-start"
+              modifiers={{
+                offset: {
+                  offset: '0, 8'
+                }
+              }}
+              tooltipWrapperProps={{
+                className: 'tooltips-dark',
+                style: {
+                  zIndex: 7
+                }
+              }}
+              tooltipWrapper={t(
+                'data-analyze.algorithm-forms.all-path.hint.max-degree'
+              )}
+              childrenProps={{
+                src: QuestionMarkIcon,
+                alt: 'hint',
+                style: {
+                  marginLeft: 5
+                }
+              }}
+              childrenWrapperElement="img"
+            />
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-integer'
+              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer-or-negative-one-max-degree'
             )}
             errorLocation="layer"
             errorMessage={
@@ -185,11 +225,11 @@ const AllPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer-or-negative-one-capacity'
             )}
             errorLocation="layer"
             errorMessage={
@@ -247,7 +287,7 @@ const AllPath = observer(() => {
             />
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
@@ -280,11 +320,11 @@ const AllPath = observer(() => {
             </span>
           </div>
           <Input
-            width={400}
+            width={formWidth}
             size="medium"
             disabled={dataAnalyzeStore.requestStatus.fetchGraphs === 'pending'}
             placeholder={t(
-              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer'
+              'data-analyze.algorithm-forms.all-path.placeholder.input-positive-integer-or-negative-one-limit'
             )}
             errorLocation="layer"
             errorMessage={

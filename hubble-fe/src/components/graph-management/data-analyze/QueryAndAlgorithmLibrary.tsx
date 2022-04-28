@@ -10,15 +10,7 @@ import { observer } from 'mobx-react';
 import CodeMirror from 'codemirror';
 import { useTranslation } from 'react-i18next';
 import classnames from 'classnames';
-import {
-  Button,
-  Tooltip,
-  Alert,
-  Dropdown,
-  Input,
-  Radio,
-  Select
-} from 'hubble-ui';
+import { Button, Tooltip, Alert, Dropdown } from 'hubble-ui';
 
 import 'codemirror/lib/codemirror.css';
 import 'react-popper-tooltip/dist/styles.css';
@@ -37,6 +29,14 @@ import AllPath from './algorithm/AllPath';
 import ModelSimilarity from './algorithm/ModelSimilarity';
 import NeighborRank from './algorithm/NeighborRank';
 import KStepNeighbor from './algorithm/KStepNeighbor';
+import KHop from './algorithm/KHop';
+import CustomPath from './algorithm/CustomPath';
+import RadiographicInspection from './algorithm/RadiographicInspection';
+import SameNeighbor from './algorithm/SameNeighbor';
+import WeightedShortestPath from './algorithm/WeightedShortestPath';
+import SingleSourceWeightedShortestPath from './algorithm/SingleSourceWeightedShortestPath';
+import Jaccard from './algorithm/Jaccard';
+import PersonalRank from './algorithm/PersonalRank';
 
 import ArrowIcon from '../../../assets/imgs/ic_arrow_16.svg';
 import QuestionMarkIcon from '../../../assets/imgs/ic_question_mark.svg';
@@ -54,18 +54,6 @@ export const styles = {
 
 const codeRegexp = /[A-Za-z0-9]+/;
 
-const algorithmWhiteList: string[] = [
-  Algorithm.shortestPath,
-  Algorithm.loopDetection,
-  Algorithm.focusDetection,
-  Algorithm.shortestPathAll,
-  Algorithm.allPath,
-  Algorithm.modelSimilarity,
-  Algorithm.neighborRankRecommendation
-  // Algorithm.kStepNeighbor,
-  // Algorithm.kHop
-];
-
 const QueryAndAlgorithmLibrary: React.FC = observer(() => {
   const dataAnalyzeStore = useContext(DataAnalyzeStoreContext);
   const { algorithmAnalyzerStore } = dataAnalyzeStore;
@@ -75,12 +63,23 @@ const QueryAndAlgorithmLibrary: React.FC = observer(() => {
     dataAnalyzeStore.resetSwitchTabState();
 
     if (tab !== dataAnalyzeStore.currentTab) {
+      // reset codeEditor value
       dataAnalyzeStore.mutateCodeEditorText('');
+
+      // reset default selection of edge labels
+      algorithmAnalyzerStore.mutateCustomPathRuleParams(
+        'labels',
+        dataAnalyzeStore.edgeTypes.map(({ name }) => name),
+        0
+      );
     }
 
     dataAnalyzeStore.setCurrentTab(tab);
+    // need manually set codeMirror text value to empty here
+    dataAnalyzeStore.codeEditorInstance?.setValue('');
     // reset algorithm tab to list
     algorithmAnalyzerStore.changeCurrentAlgorithm('');
+    algorithmAnalyzerStore.switchCollapse(false);
   };
 
   return (
@@ -209,6 +208,7 @@ export const GremlinQuery: React.FC = observer(() => {
         );
       };
 
+      dataAnalyzeStore.assignCodeEditorInstance(codeEditor.current);
       codeEditor.current.on('change', handleCodeEditorChange);
 
       reaction(
@@ -235,7 +235,8 @@ export const GremlinQuery: React.FC = observer(() => {
         dataAnalyzeStore.codeEditorText
       );
     }
-  }, [dataAnalyzeStore.pulse, codeEditor?.current]);
+  }, [dataAnalyzeStore.pulse]);
+  // }, [dataAnalyzeStore.pulse, codeEditor?.current]);
 
   useEffect(() => {
     if (
@@ -437,10 +438,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
     algorithmAnalyzerStore.shortestPathAlgorithmParams.max_depth !== '';
 
   const handleChangeAlgorithm = (algorithm: string) => () => {
-    // disable other algorithm now
-    if (algorithmWhiteList.includes(algorithm)) {
-      algorithmAnalyzerStore.changeCurrentAlgorithm(algorithm);
-    }
+    algorithmAnalyzerStore.changeCurrentAlgorithm(algorithm);
   };
 
   const handleExpandClick = () => {
@@ -461,10 +459,26 @@ export const AlgorithmQuery: React.FC = observer(() => {
         return <AllPath />;
       case Algorithm.modelSimilarity:
         return <ModelSimilarity />;
-      case Algorithm.neighborRankRecommendation:
+      case Algorithm.neighborRank:
         return <NeighborRank />;
       case Algorithm.kStepNeighbor:
         return <KStepNeighbor />;
+      case Algorithm.kHop:
+        return <KHop />;
+      case Algorithm.customPath:
+        return <CustomPath />;
+      case Algorithm.radiographicInspection:
+        return <RadiographicInspection />;
+      case Algorithm.sameNeighbor:
+        return <SameNeighbor />;
+      case Algorithm.weightedShortestPath:
+        return <WeightedShortestPath />;
+      case Algorithm.singleSourceWeightedShortestPath:
+        return <SingleSourceWeightedShortestPath />;
+      case Algorithm.jaccard:
+        return <Jaccard />;
+      case Algorithm.personalRankRecommendation:
+        return <PersonalRank />;
     }
   };
 
@@ -489,6 +503,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
                 marginRight: 12
               }}
               onClick={() => {
+                algorithmAnalyzerStore.switchCollapse(false);
                 algorithmAnalyzerStore.changeCurrentAlgorithm('');
               }}
             />
@@ -525,14 +540,7 @@ export const AlgorithmQuery: React.FC = observer(() => {
               Algorithm.shortestPathAll,
               Algorithm.allPath
             ].map((algorithm) => (
-              <span
-                className={
-                  algorithmWhiteList.includes(algorithm)
-                    ? ''
-                    : 'query-tab-content-menu-item-disabled'
-                }
-                onClick={handleChangeAlgorithm(algorithm)}
-              >
+              <span onClick={handleChangeAlgorithm(algorithm)} key={algorithm}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}
@@ -540,19 +548,12 @@ export const AlgorithmQuery: React.FC = observer(() => {
           <div className="query-tab-content-menu">
             {[
               Algorithm.modelSimilarity,
-              Algorithm.neighborRankRecommendation,
+              Algorithm.neighborRank,
               Algorithm.kStepNeighbor,
               Algorithm.kHop,
               Algorithm.customPath
             ].map((algorithm) => (
-              <span
-                className={
-                  algorithmWhiteList.includes(algorithm)
-                    ? ''
-                    : 'query-tab-content-menu-item-disabled'
-                }
-                onClick={handleChangeAlgorithm(algorithm)}
-              >
+              <span onClick={handleChangeAlgorithm(algorithm)} key={algorithm}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}
@@ -560,33 +561,19 @@ export const AlgorithmQuery: React.FC = observer(() => {
           <div className="query-tab-content-menu">
             {[
               Algorithm.radiographicInspection,
-              Algorithm.commonNeighbor,
+              Algorithm.sameNeighbor,
               Algorithm.weightedShortestPath,
-              Algorithm.singleSourceWeightedPath,
-              Algorithm.jaccardSimilarity
+              Algorithm.singleSourceWeightedShortestPath,
+              Algorithm.jaccard
             ].map((algorithm) => (
-              <span
-                className={
-                  algorithmWhiteList.includes(algorithm)
-                    ? ''
-                    : 'query-tab-content-menu-item-disabled'
-                }
-                onClick={handleChangeAlgorithm(algorithm)}
-              >
+              <span onClick={handleChangeAlgorithm(algorithm)} key={algorithm}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}
           </div>
           <div className="query-tab-content-menu">
             {[Algorithm.personalRankRecommendation].map((algorithm) => (
-              <span
-                className={
-                  algorithmWhiteList.includes(algorithm)
-                    ? ''
-                    : 'query-tab-content-menu-item-disabled'
-                }
-                onClick={() => {}}
-              >
+              <span onClick={handleChangeAlgorithm(algorithm)} key={algorithm}>
                 {t(`data-analyze.algorithm-list.${algorithm}`)}
               </span>
             ))}
