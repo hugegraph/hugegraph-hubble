@@ -1443,23 +1443,6 @@ export class DataAnalyzeStore {
     this.requestStatus.fetchGraphs = 'pending';
     this.isLoadingGraph = true;
 
-    // let params:
-    //   | LoopDetectionParams
-    //   | FocusDetectionParams
-    //   | ShortestPathAlgorithmParams
-    //   | ShortestPathAllAlgorithmParams
-    //   | AllPathAlgorithmParams
-    //   | ModelSimilarityParams
-    //   | NeighborRankParams
-    //   | KStepNeighbor
-    //   | KHop
-    //   | RadiographicInspection
-    //   | SameNeighbor
-    //   | WeightedShortestPath
-    //   | SingleSourceWeightedShortestPath
-    //   | Jaccard
-    //   | PersonalRank
-    //   | null = null;
     let params: object | null = null;
 
     if (!isUndefined(algorithmConfigs)) {

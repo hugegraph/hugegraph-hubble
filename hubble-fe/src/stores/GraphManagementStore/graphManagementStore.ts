@@ -535,9 +535,6 @@ function filterParams(originParams: GraphDataConfig): GraphDataConfig {
     if (typeof value !== 'undefined') {
       newParams[key] = originParams[key];
     }
-    // if (value !== null && value !== '' && typeof value !== 'undefined') {
-    //   newParams[key] = originParams[key];
-    // }
   });
 
   return newParams;

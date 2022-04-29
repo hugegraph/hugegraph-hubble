@@ -78,7 +78,7 @@ const GraphPopOver: React.FC<GraphPopOverProps> = observer(
 
                 if (node.label === '~undefined') {
                   Message.info({
-                    content: '该顶点是非法顶点，可能是由悬空边导致',
+                    content: t('addition.message.illegal-vertex'),
                     size: 'medium',
                     showCloseIcon: false,
                     duration: 1
@@ -113,14 +113,14 @@ const GraphPopOver: React.FC<GraphPopOverProps> = observer(
                       )
                     ) {
                       Message.info({
-                        content: '不存在邻接点',
+                        content: t('addition.message.no-adjacency-points'),
                         size: 'medium',
                         showCloseIcon: false,
                         duration: 1
                       });
                     } else {
                       Message.info({
-                        content: '不存在更多邻接点',
+                        content: t('addition.message.no-more-points'),
                         size: 'medium',
                         showCloseIcon: false,
                         duration: 1

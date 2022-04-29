@@ -810,13 +810,6 @@ const CustomPath = observer(() => {
                                 placeholder={t(
                                   'data-analyze.algorithm-forms.custom-path.placeholder.input-multiple-properties'
                                 )}
-                                // errorLocation="layer"
-                                // errorMessage={
-                                //   algorithmAnalyzerStore
-                                //     .validateCustomPathParmasErrorMessage.steps[
-                                //     ruleIndex
-                                //   ].default_weight
-                                // }
                                 value={value}
                                 onChange={(e: any) => {
                                   const clonedRuleProperties = cloneDeep(
@@ -832,14 +825,6 @@ const CustomPath = observer(() => {
                                     ruleIndex
                                   );
                                 }}
-                                // originInputProps={{
-                                //   onBlur() {
-                                //     algorithmAnalyzerStore.validateCustomPathRules(
-                                //       'default_weight',
-                                //       ruleIndex
-                                //     );
-                                //   }
-                                // }}
                               />
                             </div>
 
